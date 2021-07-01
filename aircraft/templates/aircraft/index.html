@@ -1,0 +1,22 @@
+{% extends "aircraft/base.html" %}
+
+{% block header %}
+  <div class='jumbotron'>
+      <h1>Aircraft</h1>        
+  </div>
+{% endblock %}
+
+{% block content %}
+  <h2>
+    <li><a href="{% url 'aircraft:airimages' %}">Aircraft Images</a></li> 
+
+    <li><a href="{% url 'aircraft:aircraft_classes' %}">Aircraft Classes (from Wikipedia)</a></li>
+   
+    <li><a href="{% url 'maps:heritage_sites' %}">Museums and Sites</a></li>
+     
+    <li><a href="{% url 'maps:visits' %}">Visits</a></li>
+  </h2>
+  <h2>
+    <!--<a href="{% url 'users:register' %}">Register an account</a> to view the archive and add records of your own-->
+  </h2>
+{% endblock %}

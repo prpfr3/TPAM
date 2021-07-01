@@ -1,0 +1,25 @@
+﻿{% extends "locos/base.html" %}
+{% load bootstrap3 %}
+
+{% block header %}
+  <h2>{{ image }}</h2>
+{% endblock header %}
+
+{% block content %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+      </div>
+      <div class="panel-body">
+        <!--
+        {{ image.loco_class }}
+        {{ image.location }}
+        {{ image.notes|linebreaks }}
+        {{ image.date_added }}
+        -->
+        <h2><img src="{{ image.image.url }}" ></h2>
+      </div>
+ 
+      <a href="{% url 'locos:edit_image' image.id %}"  class="btn btn-primary">Edit</a>
+
+    </div> <!-- panel -->
+{% endblock content %}

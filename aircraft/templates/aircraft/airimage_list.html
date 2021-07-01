@@ -1,0 +1,41 @@
+﻿{% extends "aircraft/base.html" %}
+
+{% block header %}
+  <h1>Aircraft Images</h1>
+{% endblock %}
+
+{% block content %}
+  <p>
+    <a href="{% url 'aircraft:new_airimage'%}" class="btn btn-primary" >Add a New Image</a>
+  </p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">Name(filename as default)</th>
+      <th scope="col">Location</th>
+      <th scope="col">Date Loaded</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for airimage in airimages %}
+    <tr>
+
+      <td>{% load thumbnail %}
+          {% thumbnail airimage.image "100" as im %}
+              <a href="{% url 'aircraft:airimage' airimage.id %}">
+                <img src="{{ im.url }}" class="image-detail"></a>
+          {% endthumbnail %}</td>
+      <td><a href="{% url 'aircraft:airimage' airimage.id %}">{{airimage.image_name}}</a></td>
+      <td>{{airimage.location}}</td>
+      <td>{{airimage.visit.date}}</td>
+
+      {% empty %}
+      <h2>No aircraft images have been added yet.</h2>
+      {% endfor %}
+    </tr>
+  </tbody>
+</table>
+      {% include "aircraft/pagination.html" with page=airimages %}
+{% endblock content %}

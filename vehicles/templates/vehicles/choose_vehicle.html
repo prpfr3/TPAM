@@ -1,0 +1,15 @@
+{% extends "vehicles/base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}Choose a vehicle{% endblock %}
+
+{% block content %}
+  <form method='POST' action="" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ selection_criteria.media.js }}
+      {{ selection_criteria.as_p }}
+      {% buttons %}
+      <button name="submit" class="btn btn-primary">Get Vehicle Data</button>
+      {% endbuttons %}
+  </form>
+{% endblock content %}

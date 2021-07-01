@@ -1,0 +1,14 @@
+﻿{% extends "maps/base.html" %}
+
+{% block header %}
+  <h2>London Tube map generated using the Altair python packages and Vega-datasets for the data</h2>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
+{% endblock header %}
+
+{% block content %}
+  <div id="viz"></div>
+  <script type="text/javascript">vegaEmbed('#viz', '{% url 'maps:tube_map_chart' %}');
+  </script>
+{% endblock content %}

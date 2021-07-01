@@ -1,0 +1,23 @@
+﻿{% extends "locos/base.html" %}
+
+{% block header %}
+  <h2>{{ engineer }}</h2>
+{% endblock header %}
+
+{% block content %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <small>
+        <a href="{% url 'locos:edit_engineer' engineer.id %}">
+          Edit</a>
+      </small>
+    </div>
+    <div class="panel-body">
+      <ul>
+      <li>{{ engineer.wikislug }}</li>
+      <li>{{ engineer.url }}</li>
+      <li>{{ engineer.notes|linebreaks }}<li/>
+      </ul>
+    </div>
+  </div> <!-- panel -->
+{% endblock content %}

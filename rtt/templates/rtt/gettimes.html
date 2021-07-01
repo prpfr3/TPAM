@@ -1,0 +1,33 @@
+﻿{% extends "rtt/base.html" %}
+{% block header %}
+<h1>{{ departures.station_name }} timetabled departures @   {{ departures.time_of_day }} </h1>
+{% endblock %}
+
+{% block content %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Dep.</th>
+      <th scope="col">Plat.</th>
+      <th scope="col">From</th>
+      <th scope="col">Destination</th>
+      <th scope="col">Operated By</th>
+    </tr>
+  </thead>
+  <tbody>
+      {% for d in departures.departures.all %}
+    <tr>
+      <td>{{d.aimed_departure_time }}</td>
+      <td>{{d.platform}}</td>
+      <td>{{d.origin_name}}</td>
+      <td>{{d.destination_name}}</td>
+      <td>{{d.operator_name}}</td>
+      {% empty %}
+      <li>No Departure Times available.</li>
+      {% endfor %}
+    </tr>
+  </tbody>
+</table>
+
+{% endblock content %}

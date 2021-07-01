@@ -1,0 +1,34 @@
+﻿{% extends "locos/base.html" %}
+
+{% block header %}
+  <h1>Post Steam Loco Classes</h1>
+{% endblock %}
+
+{% block content %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <!--<th scope="col">Id.</th>-->
+      <th scope="col">Class</th>
+      <th scope="col">Alternative Name</th>
+      <th scope="col">Manufacturer</th>
+      <th scope="col">Wheel Id.</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for modern_class in modern_classes %}
+    <tr>
+        <!--<td><a href="{% url 'locos:modern_class' modern_class.id %}">{{ modern_class.id }}</a></td>-->
+        <!--<td><a href="https://www.brdatabase.info/{{modern_class.grouping_class_slug}}">{{ modern_class.modern_class}}</a></td>-->
+        <td><a href="{% url 'locos:modern_class' modern_class.id %}">{{ modern_class.modern_class}}</a></td>
+        <td>{{ modern_class.aka_class}}</td>
+        <td>{{ modern_class.manufacturer}}</td>
+        <td>{{ modern_class.wheel_id}}</td>
+
+    {% empty %}
+      <h2>No classes have been loaded in the database</h2>
+    {% endfor %}
+  </ul>
+
+{% endblock content %}

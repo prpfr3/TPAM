@@ -1,0 +1,23 @@
+﻿{% extends "mvs/base.html" %}
+{% load bootstrap3 %}
+
+{% block header %}
+  <h2>Edit:
+  <a href="{% url 'mvs:mvimage' mvimage.id %} ">{{ mvimage }}</a></h2>
+{% endblock header %}
+
+{% block content %}
+    
+  <form action="{% url 'mvs:edit_mvimage' mvimage.id %}" method='post'
+      class="form">
+      
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    
+    {% buttons %}
+      <button name="submit" class="btn btn-primary">Submit</button>
+    {% endbuttons %}
+    
+  </form>
+    
+{% endblock content %}

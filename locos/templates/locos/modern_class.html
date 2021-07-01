@@ -1,0 +1,30 @@
+﻿{% extends "locos/base.html" %}
+{% block header %}
+  <h2>{{ modern_class }}</h2>
+{% endblock header %}
+
+{% block content %}
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <small>
+        </small>
+      </div>
+      <div class="panel-body">
+        {{ modern_class.modern_class }}
+        {{ modern_class.aka_class }}
+        {{ modern_class.year_introduced }}
+        {{ modern_class.manufacturer }}
+        {{ modern_class.power_unit }}
+        {{ modern_class.horse_power }}
+        {{ modern_class.current }}
+        {{ modern_class.wheel_id }}
+        {{ modern_class.transmission }}
+        {{ modern_class.number_range }}
+        {{ modern_class.number_built }}
+        {{ modern_class.multiple }}
+
+      </div>
+    </div> <!-- panel -->
+
+{% endblock content %}

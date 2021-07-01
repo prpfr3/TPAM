@@ -1,0 +1,22 @@
+﻿{% extends "maps/base.html" %}
+
+{% block header %}
+  <h1>Visits</h1>
+{% endblock %}
+
+{% block content %}
+
+  <ul>
+    {% for visit in object_list %}
+      <li>
+        <h3>
+          <a href="{% url 'maps:visit' visit.id %}"> {{ visit.date }}</a>
+           {{ visit.location }}
+        </h3>
+              </li>
+    {% empty %}
+      <li>No Visits have been added yet.</li>
+    {% endfor %}
+  </ul>
+
+{% endblock content %}

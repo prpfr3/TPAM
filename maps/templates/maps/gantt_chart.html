@@ -1,0 +1,12 @@
+﻿{% extends "maps/base.html" %}
+
+{% block header %}
+  <h2>A Gantt chart timeline built using the Python package Bokeh</h2>
+  <script src="http://cdn.bokeh.org/bokeh/release/bokeh-2.3.0.min.js"></script>
+  <link rel="stylesheet" href="http://cdn.bokeh.org/bokeh/release/bokeh-2.3.0.min.css">
+{% endblock header %}
+
+{% block content %}
+  {{ bokeh_div|safe }}
+  {{ bokeh_script|safe }}
+{% endblock content %}

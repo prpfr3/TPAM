@@ -1,0 +1,31 @@
+﻿{% extends "rtt/base.html" %}
+{% block header %}
+<h1> {{location.stationname}} </h1>
+<a href="{% url 'rtt:gettimes' location.crscode %}" class="btn btn-primary">Current Timetable</a>
+<a href="{% url 'rtt:getlivetimes' location.crscode %}" class="btn btn-primary">Current Freight Movements</a>
+<a href="{% url 'rtt:getlivetimes' location.crscode %}" class="btn btn-primary">Current Passenger Movements</a>
+{% endblock %}
+
+{% block content %}
+
+<form action="{% url 'rtt:getlivetimes' location.crscode %}" method="post">
+  {% csrf_token %}
+
+  <ul>
+  <li>Tiploc code: {{location.tiploccode}} </li>
+  <li>CRS code: {{location.crscode}} </li>
+  <li>ATCO (National Public Transport) code: {{location.atcocode}} </li>
+  <li>OS Map Easting: {{location.easting}} </li>
+  <li>OS Map Northing: {{location.northing}} </li>
+    </ul>
+  <label for="train_status">Train Type for Live Movements: </label>
+  <select id="train_status" name="Train Type">
+    <option value="freight">Freight</option>
+    <option value="passenger">Passenger</option>
+  </select>
+  <input type="submit" value="Get LiveTimes">
+
+
+</form>
+
+{% endblock content %}

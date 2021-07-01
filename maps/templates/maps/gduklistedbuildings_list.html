@@ -1,0 +1,26 @@
+﻿{% extends "maps/base.html" %}
+
+{% block header %}
+<h2>Nearby Listed Buildings</h2>
+{% endblock header %}
+
+{% block content %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Distance(m)</th>
+          <th scope="col">Listed Building</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for point in object_list %}
+        <tr>
+          <td>{{point.distance.m|floatformat:"0" }}</td>
+          <td>{{point.name}} </td>
+        </tr>
+        {% empty %}
+        <h3>No Service Details Available for the Service</h3>
+        {% endfor %}
+      </tbody>
+    </table>
+{% endblock %}

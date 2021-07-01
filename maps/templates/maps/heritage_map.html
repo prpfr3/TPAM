@@ -1,0 +1,12 @@
+﻿{% extends "maps/base.html" %}
+
+{% block header %}
+  <h2>{{map.header.render|safe}}</h2>
+{% endblock header %}
+
+{% block content %}
+  <div><h1>Monuments and Buildings Map for {{county}}</h1></div>
+
+  {{map.html.render|safe}}
+  <script>{{map.script.render|safe}}</script>
+{% endblock %}

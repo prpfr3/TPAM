@@ -1,0 +1,37 @@
+{% extends "vehicles/base.html" %}
+{% load bootstrap3 %}
+
+{% block header %}
+<div class='jumbotron'>
+  <h2>UK Licensed Vehicles at end 2020</h2>
+  <h3>
+  Type:{{type}}  ;
+  Make:{{make}}  ;  
+  Model:{{model}}  ;  
+  Variant:{{variant}}</h3>
+</div>
+{% endblock %}
+
+{% block content %}
+{% if uklicensedvehicles_list %}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Year Licensed</th>
+        <th>Number Licensed</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in uklicensedvehicles_list %}
+      <tr>
+        <td>{{ row.year_licensed }}</td>
+        <td>{{ row.number_licensed }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    </table>
+{% else %}
+   <p>No entries found for the selected vehicles</p>
+{% endif %}
+{% include "vehicles/pagination.html" with page=rvlicensed_list %}
+{% endblock %}

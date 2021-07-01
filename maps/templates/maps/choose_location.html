@@ -1,0 +1,14 @@
+{% extends "maps/base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}Choose a location{% endblock %}
+
+{% block content %}
+  <form  method='POST' action="">
+      {% csrf_token %}
+      {{location_list}}
+      {% buttons %}
+      <button name="submit" class="btn btn-primary">Generate Map</button>
+      {% endbuttons %}
+  </form>
+{% endblock content %}

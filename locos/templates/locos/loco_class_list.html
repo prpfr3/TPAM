@@ -1,0 +1,42 @@
+﻿{% extends "locos/base.html" %}
+{% load bootstrap3 %}
+
+{% block header %}
+  <h1>Loco Classes</h1>
+{% endblock %}
+
+{% block content %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <!--<th scope="col">Id.</th>-->
+      <th scope="col">Big-4 Company</th>
+      <th scope="col">Pre-Grouping Company</th>
+      <th scope="col">Big-4 Class</th>
+      <th scope="col">Pre-Grouping Class</th>
+      <th scope="col">BR Power Class</th>
+      <th scope="col">Designer</th>
+      <th scope="col">Wheel Id.</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for loco_class in loco_classes %}
+    <tr>
+        <!--<td><a href="{% url 'locos:loco_class' loco_class.id %}">{{ loco_class.id }}</a></td>-->
+        <td>{{ loco_class.grouping_company}}</td>
+        <td>{{ loco_class.pre_grouping_company }}</td>
+        <!--<td><a href="https://www.brdatabase.info/{{loco_class.grouping_class_slug}}">{{ loco_class.grouping_class}}</a></td>-->
+        <td><a href="{% url 'locos:loco_class' loco_class.id %}">{{ loco_class.grouping_class}}</a></td>
+        <td>{{ loco_class.pre_grouping_class}}</td>
+        <td>{{ loco_class.br_power_class}}</td>
+        <td>{{ loco_class.designer}}</td>
+        <td>{{ loco_class.wheel_id}}</td>
+
+
+    {% empty %}
+      <h2>No classes have been loaded in the database</h2>
+    {% endfor %}
+  </ul>
+</table>
+{% endblock content %}

@@ -1,0 +1,28 @@
+﻿{% extends "maps/base.html" %}
+
+<head>
+  <title>Maps and Charts</title>
+
+  <div class='jumbotron'>
+      <h1>Maps and Charts - Examples</h1>        
+  </div>
+
+</head>
+
+{% block content %}
+  
+  The maps and charts area provides examples generated using different web development packages and tools, based on the Python programming language and Django Python web development framework.
+
+  <h2>
+    <ul>
+      <li><a href="{% url 'maps:tube_map' %}">London Tube Map</a></li> 
+      <li><a href="{% url 'maps:gantt_chart' %}">Gantt Chart</a></li> 
+      <li><a href="{% url 'maps:shareprice_chart' %}">Share Price Chart</a></li>
+      <li><a href="{% url 'maps:choose_location' %}">Heritage Map</a></li>
+      <li><a href="{% url 'maps:nearby_listed_buildings' %}">Nearby Listed Buildings (to Matlock)</a></li>
+      <li><a href="{% url 'maps:topics' %}">Blog Articles</a></li>
+      <li><a href="{% url 'maps:visits' %}">Visits</a></li>
+    </ul>
+  </h2>
+
+{% endblock %}

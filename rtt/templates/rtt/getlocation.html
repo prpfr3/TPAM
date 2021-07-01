@@ -1,0 +1,18 @@
+﻿{% extends "rtt/base.html" %}
+{% load bootstrap3 %}
+
+{% block content %}
+
+<form action="{% url 'rtt:gettimes' location.id %}" method="post">
+
+  {% csrf_token %}
+  {% bootstrap_form form %}
+
+  {% buttons %}
+  <a href="{% url 'rtt:gettimes' location.crscode %}" class="btn btn-primary">Current Timetable</a>
+  <a href="{% url 'rtt:getlivefreight' location.crscode %}" class="btn btn-primary">Current Freight Movements</a>
+  <a href="{% url 'rtt:getlivepassenger' location.crscode %}" class="btn btn-primary">Current Passenger Movements</a>
+  {% endbuttons %}
+</form>
+
+{% endblock content %}

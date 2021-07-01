@@ -1,0 +1,18 @@
+﻿{% extends "maps/base.html" %}
+{% block header %}
+  <h2>{{ visit }}</h2>
+{% endblock header %}
+
+{% block content %}
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+      </div>
+      <div class="panel-body">
+        {{ visit.location }}
+        {{ visit.date }}
+        {{ visit.notes|linebreaks }}
+      </div>
+    </div> <!-- panel -->
+
+{% endblock content %}

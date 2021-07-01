@@ -1,0 +1,21 @@
+﻿{% extends "locos/base.html" %}
+{% load bootstrap3 %}
+
+{% block header %}
+  <h2>{{ loco_class }}</h2>
+{% endblock header %}
+
+{% block content %}
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <small>
+        </small>
+      </div>
+      <div class="panel-body">
+        {{ loco_class.wheel_id }}
+        {{ loco_class.designer }}
+      </div>
+    </div> <!-- panel -->
+
+{% endblock content %}

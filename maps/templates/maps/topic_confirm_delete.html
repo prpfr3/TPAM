@@ -1,0 +1,13 @@
+﻿{% extends 'maps/base.html' %}
+{% load bootstrap3 %}
+
+{% block content %}
+<h1>Delete Topic</h1>
+
+<p>Are you sure you want to delete the topic: {{ topic }}?</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="submit" value="Yes, delete.">
+</form>
+{% endblock %}

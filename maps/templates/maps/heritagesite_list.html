@@ -1,0 +1,25 @@
+﻿{% extends "maps/base.html" %}
+
+{% block header %}
+  <h1>Museums and Sites</h1>
+{% endblock %}
+
+{% block content %}
+
+  <ul>
+    {% for heritage_site in object_list %}
+      <li>
+        <h3>
+          <a href="{% url 'maps:heritage_site' heritage_site.id %}"> {{ heritage_site }}</a> 
+           - 
+          <a href="https://en.wikipedia.org/wiki/{{heritage_site.wikislug}}"  class="btn btn-primary">Wikipedia</a>
+
+          <a href="{{heritage_site.url}}"  class="btn btn-primary">Location Website</a>
+        </h3>
+              </li>
+    {% empty %}
+      <li>No Sites have been added yet.</li>
+    {% endfor %}
+  </ul>
+
+{% endblock content %}

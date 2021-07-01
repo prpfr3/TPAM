@@ -1,0 +1,22 @@
+﻿{% extends "locos/base.html" %}
+{% load bootstrap3 %}
+
+{% block header %}
+  <h2>Add a New Engineer:</h2>
+{% endblock header %}
+
+{% block content %}
+    
+  <form action="{% url 'locos:new_engineer' %}" method='post'
+      class="form">
+      
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    
+    {% buttons %}
+      <button name="submit" class="btn btn-primary">Submit</button>
+    {% endbuttons %}
+    
+  </form>
+    
+{% endblock content %}

@@ -1,0 +1,20 @@
+﻿{% extends "aircraft/base.html" %}
+{% load bootstrap3 %}
+
+{% block title %}Bookmark an image{% endblock %}
+
+{% block header %}
+<h2>Bookmark an aircraft image from the web:</h2>
+{% endblock header %}
+
+{% block content %}
+
+<img src="{{ request.GET.url }}" class="image-preview">
+<form action="." method="post">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+
+  <input type="submit" value="Bookmark it!">
+</form>
+
+{% endblock content %}

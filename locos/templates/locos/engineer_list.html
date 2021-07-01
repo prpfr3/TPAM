@@ -1,0 +1,27 @@
+﻿{% extends "locos/base.html" %}
+{% load bootstrap3 %}
+
+{% block header %}
+  <h1>Engineers</h1>
+{% endblock %}
+
+{% block content %}
+  <p>
+    <a href="{% url 'locos:new_engineer'%}">Add new engineer</a>
+  </p>
+
+  <ul>
+    {% for engineer in engineers %}
+      <li>
+        <h3>
+          <a href="{% url 'locos:engineer' engineer.id %}"> {{ engineer }}</a> 
+           - 
+          <a href="https://en.wikipedia.org/wiki/{{engineer.wikislug}}"  class="btn btn-primary">Wikipedia</a> 
+        </h3>
+              </li>
+    {% empty %}
+      <li>No engineers have been added yet.</li>
+    {% endfor %}
+  </ul>
+
+{% endblock content %}
