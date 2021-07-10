@@ -133,7 +133,7 @@ Rtree==0.9.7
 scikit-image==0.18.1
 scipy==1.6.3
 seaborn==0.11.1
-setuptools==49.6.0.post20210108
+setuptools==57.1.0
 Shapely==1.7.1
 six==1.15.0
 sniffio==1.2.0
