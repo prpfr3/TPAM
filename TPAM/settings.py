@@ -1,4 +1,4 @@
-"""
+ """
 Django settings for TPAM solution.
 
 More info on settings:-
@@ -193,6 +193,45 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   STATICFILES_STORAGE = 'custom_storages.StaticStorage'
   MEDIAFILES_LOCATION = 'media'
   DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage' #ideally this would be called mediafiles_storage in django but it isn't !
+
+  LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': ('%(asctime)s [%(process)d] [%(levelname)s] '
+                        'pathname=%(pathname)s lineno=%(lineno)s '
+                        'funcname=%(funcName)s %(message)s'),
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        }
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    }
+    }
 
 else:
   print('Using development/local settings from settings.py.\nStatic directory is {} given a base directory of {}'.format(STATIC_ROOT, BASE_DIR))
