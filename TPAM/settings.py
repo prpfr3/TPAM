@@ -1,4 +1,4 @@
- """
+"""
 Django settings for TPAM solution.
 
 More info on settings:-
