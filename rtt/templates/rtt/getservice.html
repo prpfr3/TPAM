@@ -1,12 +1,8 @@
-﻿{% extends "rtt/base.html" %}
-{% block header %}
+﻿{% extends "../mainmenu/base.html" %}
 
-<h1>
-  Service {{ service.service }} 
-  {{service.train_uid}} @  {{ service.date}} Time: {{service.time_of_day }} 
-  from {{service.origin_name}} to {{service.destination_name}}
-</h1>
-{% endblock %}
+{% block content_title %}Service {{ service.service }}{% endblock %}
+{% block content_desc %}{{service.train_uid}} @  {{ service.date}} Time: {{service.time_of_day }}
+  from {{service.origin_name}} to {{service.destination_name}}{% endblock %}
 
 {% block content %}
 

@@ -6,12 +6,7 @@ from . import views
 app_name = 'mainmenu'
 
 urlpatterns = [
-
     re_path(r'^$', views.index, name='index'),
-    
-
-
-    #re_path(r'^motorvehicles/$', views.motorvehicles, name='motorvehicles'),  
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

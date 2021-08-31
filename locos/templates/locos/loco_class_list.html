@@ -1,9 +1,7 @@
-﻿{% extends "locos/base.html" %}
-{% load bootstrap3 %}
+﻿{% extends "../mainmenu/base.html" %}
 
-{% block header %}
-  <h1>Loco Classes</h1>
-{% endblock %}
+{% block content_title %}Loco Classes{% endblock %}
+{% block content_desc %}{% endblock %}
 
 {% block content %}
 
@@ -35,8 +33,7 @@
 
 
     {% empty %}
-      <h2>No classes have been loaded in the database</h2>
+      No classes have been loaded in the database
     {% endfor %}
-  </ul>
 </table>
 {% endblock content %}

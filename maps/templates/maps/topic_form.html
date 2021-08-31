@@ -1,6 +1,7 @@
-﻿{% extends "maps/base.html" %}
+﻿{% extends "../mainmenu/base.html" %}
 {% load crispy_forms_tags %}
-{% load bootstrap3 %}
+{% load django_bootstrap5 %}
+
 {% block content %}
   <form action="" method="post">
     {% csrf_token %}

@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from .models import Engineer, Image, ModernClass
+from .models import Engineer, Image, ModernClass, LocoClass
 from .forms import EngineerForm, ImageForm
 
 def index(request):

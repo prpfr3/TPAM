@@ -1,22 +1,15 @@
-{% extends "mvs/base.html" %}
+{% extends "../mainmenu/base.html" %}
 
-{% block header %}
-  <div class='jumbotron'>
-      <h1>Military Vehicles</h1>        
-  </div>
-{% endblock %}
+{% block content_title %}Military Vehicles{% endblock %}
+{% block content_desc %}{% endblock %}
 
 {% block content %}
-  <h2>
-    <li><a href="{% url 'mvs:mvimages' %}">Military Vehicle Images</a></li> 
 
-    <li><a href="{% url 'mvs:military_vehicle_classes' %}">Military Vehicles Classes (from Wikipedia)</a></li>
-   
-    <li><a href="{% url 'maps:heritage_sites' %}">Museums and Sites</a></li>
-   
-    <!--<li><a href="{% url 'maps:visits' %}">Visits</a></li>
-  </h2>
-  <h2>
-    <!--<a href="{% url 'users:register' %}">Register an account</a> to view the archive and add records of your own-->
-  </h2>
-{% endblock %}
+  <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'mvs:mvimages' %}">Military Vehicle Images</a> 
+  <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'mvs:military_vehicle_classes' %}">Military Vehicles Classes (from Wikipedia)</a>
+  <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:heritage_sites' %}">Museums and Sites</a> 
+  <!--<a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:visits' %}">Visits</a>
+
+  <!--<a href="#">Register an account</a> to view the archive and add records of your own-->
+
+{% endblock content %}

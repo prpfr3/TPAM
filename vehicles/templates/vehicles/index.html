@@ -1,21 +1,10 @@
-{% extends "vehicles/base.html" %}
-{% load bootstrap3 %}
+{% extends "../mainmenu/base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Motor Vehicles</title>
-</head>
-
-{% block header %}
-  <div class='jumbotron'>
-      <h1>Motor Vehicles</h1>        
-  </div>
-{% endblock %}
+{% block content_title %}UK Licensed Vehicles{% endblock %}
+{% block content_desc %}{% endblock %}
 
 {% block content %}
-  <h2>
-    <ul style="list-style-type:none;">
-    <li><a href="{% url 'vehicles:choose_vehicle' %}">Database of UK Licensed Vehicles</a></li>
-    </ul>
-  </h2>
+  <ul style="list-style-type:none;">
+  <li><a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'vehicles:choose_vehicle' %}">Database of UK Licensed Vehicles</a></li>
+  </ul>
 {% endblock %}

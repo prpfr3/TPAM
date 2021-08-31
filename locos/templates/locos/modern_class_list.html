@@ -1,8 +1,7 @@
-﻿{% extends "locos/base.html" %}
+﻿{% extends "../mainmenu/base.html" %}
 
-{% block header %}
-  <h1>Post Steam Loco Classes</h1>
-{% endblock %}
+{% block content_title %}Modern Loco Classes{% endblock %}
+{% block content_desc %}{% endblock %}
 
 {% block content %}
 
@@ -25,10 +24,10 @@
         <td>{{ modern_class.aka_class}}</td>
         <td>{{ modern_class.manufacturer}}</td>
         <td>{{ modern_class.wheel_id}}</td>
-
+    </tr>
+  </tbody>
+</table>
     {% empty %}
       <h2>No classes have been loaded in the database</h2>
     {% endfor %}
-  </ul>
-
 {% endblock content %}

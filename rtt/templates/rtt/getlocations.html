@@ -1,22 +1,22 @@
-﻿{% extends "rtt/base.html" %}
+﻿{% extends "../mainmenu/base.html" %}
 
-{% block header %}
-  <h1>Select Station</h1>
-  <h3>(Ctrl-F in your browser to search the list)</h3>
-{% endblock %}
+{% block content_title %}Choose a Location{% endblock %}
+{% block content_desc %}(Ctrl-F in your browser to search the list){% endblock %}
 
 {% block content %}
 
-<ul>
-    {% for location in locations %}
-      <li>
-        <h3>
-          <a href="{% url 'rtt:getlocation' location.id %}"> {{location.crscode}}</a> 
-           - {{location.stationname}}
-        </h3>
-      </li>
-    {% empty %}
-      <li>No Sites have been added yet.</li>
-    {% endfor %}
-</ul>
+<!--<div class="bg-light container">-->
+<div>
+  <ul style="list-style-type:none;">
+      {% for location in locations %}
+        <li>
+            <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'rtt:getlocation' location.id %}"> <b>{{location.crscode}}</b>
+             - {{location.stationname}}</a> 
+        </li>
+      {% empty %}
+        <li>No Sites have been added yet.</li>
+      {% endfor %}
+  </ul>
+</div>
+
 {% endblock content %}

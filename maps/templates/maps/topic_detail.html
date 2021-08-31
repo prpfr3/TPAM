@@ -1,6 +1,10 @@
-﻿{% extends 'maps/base.html' %}
-{% load bootstrap3 %}
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}{{ topic.type}} - {{ topic.text }}{% endblock %}
+{% block content_desc %}{% endblock %}
+
 {% block content %}
+
 
   <span style="float: right;">
   {% if topic.owner == user %}
@@ -10,7 +14,20 @@
   
   {% endif %}
   </span>
-  <h2>{{ topic.type}} - {{ topic.text }}</h2>
+
+  <!--- For future search feature
+  <div style="float:right">
+    https://www.w3schools.com/howto/howto_css_search_button.asp 
+    <form>
+      <input type="text" placeholder="Search.." name="search"
+      {% if search %} value="{{ search }}" {% endif %}
+      >
+      <button type="submit"><i class="fa fa-search"></i></button>
+    <a href="{% url 'maps:topic_detail' topic.id %}"><i class="fa fa-undo"></i></a>
+    </form>
+    </div>
+  -->
+
   <p><a href="{% url 'maps:post_create' topic.id %}">Add new post</a></p>
 
   {% for post in posts %}
@@ -20,17 +37,17 @@
           {{ post.title }}
           {{ post.publish|date:'M d, Y H:i' }} 
           <small>
-            <a href="{% url 'maps:post_update' post.id %}">
-              Update</a>
-            <a href="{% url 'maps:post_delete' post.id %}">
-              Delete</a>
+            <a href="{% url 'maps:post_update' post.id %}">Update</a>
+            <a href="{% url 'maps:post_delete' post.id %}">Delete</a>
           </small>
         </h3>
-      </div>
+      </div> <!-- panel-heading -->
+
       <div class="panel-body">
-        <p>{{ post.url }}</p>
-        {{ post.body|linebreaks }}
-      </div>
+        <div>{{ post.body|linebreaks }}</div>
+        <div><cite>Reference:- {{ post.url }}</cite></div>
+      </div> <!-- panel body -->
+
     </div> <!-- panel -->
   {% empty %}
     There are no posts for this topic yet.

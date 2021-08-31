@@ -1,9 +1,51 @@
 {% extends "mainmenu/base.html" %}
 
 {% block header %}
-
 {% endblock %}
 
 {% block content %}
+<body>
+  <main>
+    <section class="py-3 text-center container">
+      <div class="row py-lg-3">
+        <div class="col-lg-6 col-md-8 mx-auto">
+          <h1 class="text-primary">Trains, Planes and Automobiles</h1>
 
-{% endblock content %}
+          <p class="text-primary">A website dedicated to all things relating to vehicles and transport.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="album py-4 bg-light">
+      <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+          {% for mydjangoapp in mydjangoapps.all  %}
+          <div class="col">
+            <div class="card shadow-sm">
+              <img src="{{ mydjangoapp.image.url }}">
+              <div class="card-body">
+                <p class="card-text">{{ mydjangoapp.summary }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><a href="{{ mydjangoapp.url }}">View</a></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!--col-->
+          {% endfor %}
+        </div><!--row-->
+      </div><!--container-->
+    </div><!--album-->
+  </main>
+
+  <footer class="text-muted py-5">
+    <div class="container">
+      Planes, Trains and Automobiles is a hobby website.  Live Trains pages are under development and information provided may be inaccurate. Test sample data is sourced via <a href="https:\\www.transportapi.com">TransportAPI.com</a> which in turn sources the data as referenced <a href="https:\\www.transportapi.com/credits">here</a>.
+      <p class="float-end mb-2">
+        <a href="#">Back to top</a>
+      </p>
+    </div>
+  </footer>
+</body>
+{% endblock %}

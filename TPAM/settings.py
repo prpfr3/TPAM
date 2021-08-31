@@ -35,9 +35,11 @@ INSTALLED_APPS = [
 
     #Third Party Apps
     'bootstrap3',
+    'django_bootstrap5',
     'tinymce',
     'sorl.thumbnail',
     'crispy_forms',
+    'crispy_bootstrap5',
 
     #Myapps
     'TPAM',
@@ -86,6 +88,7 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'TPAM.wsgi.application'
 
 # Database
@@ -120,8 +123,8 @@ MEDIA_URL = '/media/'
 
 #Setting for django-bootstrap3 to include a required Javascript library
 
-BOOTSTRAP3 = {
-  'include_jquery': True,}
+#BOOTSTRAP3 = {
+#  'include_jquery': True,}
 
 TINYMCE_DEFAULT_CONFIG = {
     'height': 360,
@@ -150,6 +153,10 @@ TINYMCE_DEFAULT_CONFIG = {
     'statusbar': True,
     }
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
 # Establish the current working directory to determine whether settings should be for a production or local server.
 cwd = os.getcwd()
 if cwd == '/app' or cwd[:4] == '/tmp':
@@ -158,7 +165,6 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
   DEBUG = False #Always runs as False in Production
   ALLOWED_HOSTS = ['tpam.herokuapp.com']
-
  
   DATABASES = {
       #'default': dj_database_url.config(default='postgres://localhost')
@@ -168,16 +174,11 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   # Honor the 'X-Forwarded-Proto' header for request.is_secure().
   SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-  # Static asset configuration
-  #STATICFILES_DIRS = (
-  #    os.path.join(BASE_DIR, 'static'),
-  #)
-
   # Get Other API Keys
   app_id = os.environ['OTAPI_APP_ID']
   api_key = os.environ['OTAPI_API_KEY']
 
-    #aws s3 settings
+  #AWS S3 settings
   AWS_STORAGE_BUCKET_NAME = 'django-tpam-paulf'
   AWS_S3_REGION_NAME = 'eu-west-2'  # e.g. us-east-2
   AWS_DEFAULT_ACL = None

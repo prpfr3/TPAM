@@ -1,5 +1,5 @@
-﻿{% extends "rtt/base.html" %}
-{% load bootstrap3 %}
+﻿{% extends "../mainmenu/base.html" %}
+{% load django_bootstrap5 %}
 
 {% block content %}
 
@@ -8,11 +8,14 @@
   {% csrf_token %}
   {% bootstrap_form form %}
 
-  {% buttons %}
-  <a href="{% url 'rtt:gettimes' location.crscode %}" class="btn btn-primary">Current Timetable</a>
-  <a href="{% url 'rtt:getlivefreight' location.crscode %}" class="btn btn-primary">Current Freight Movements</a>
-  <a href="{% url 'rtt:getlivepassenger' location.crscode %}" class="btn btn-primary">Current Passenger Movements</a>
-  {% endbuttons %}
+  {% url 'rtt:getlivefreight' location.crscode as button_url %}
+  {% bootstrap_button "Current Freight Movements" button_type="link" href=button_url button_class="btn-primary" %}
+
+  {% url 'rtt:gettimes' location.crscode as button_url %}
+  {% bootstrap_button "Current Timetable" button_type="link" href=button_url  button_class="btn-primary" %}
+
+  {% url 'rtt:getlivepassenger' location.crscode as button_url %}
+  {% bootstrap_button "Current Passenger Movements" button_type="link" href=button_url button_class="btn-primary" %}
 </form>
 
 {% endblock content %}

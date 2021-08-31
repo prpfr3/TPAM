@@ -1,7 +1,7 @@
-﻿{% extends "rtt/base.html" %}
-{% block header %}
-<h1>{{ livefreight.station_name }} Upcoming Freight Movements @   {{ livefreight.time_of_day }} </h1>
-{% endblock %}
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}{{ livefreight.station_name }}{% endblock %}
+{% block content_desc %}Upcoming Freight Movements @   {{ livefreight.time_of_day }}{% endblock %}
 
 {% block content %}
 

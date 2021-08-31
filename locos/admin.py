@@ -1,5 +1,5 @@
 from django.contrib import admin
-from locos.models import Depots, Engineer, Image, ModernClass, Locomotive, Manufacturers, WheelArrangement
+from locos.models import Depots, Engineer, Image, ModernClass, Locomotive, Manufacturers, WheelArrangement, LocoClass
 from datetime import datetime
 from tinymce.widgets import TinyMCE
 from django.db import models
@@ -29,12 +29,12 @@ class ImageAdmin(admin.ModelAdmin):
     ordering = ('image_name',)
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
-#class LocoClassAdmin(admin.ModelAdmin):
-#    list_display = ["grouping_company", "pre_grouping_company", "grouping_class", "pre_grouping_class", "br_power_class", "designer", "wheel_body_type"]
-#    list_filter = ['grouping_company', 'pre_grouping_company', 'br_power_class', 'wheel_body_type', 'designer']
-#    search_fields = ('grouping_class', 'pre_grouping_class')
-#    ordering = ['grouping_company', 'pre_grouping_company', 'grouping_class']
-#    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
+class LocoClassAdmin(admin.ModelAdmin):
+    list_display = ["grouping_company", "pre_grouping_company", "grouping_class", "pre_grouping_class", "br_power_class", "designer", "wheel_body_type", "year_built", "year_first_built", "year_last_built"]
+    list_filter = ['grouping_company', 'pre_grouping_company', 'br_power_class', 'wheel_body_type', 'designer']
+    search_fields = ('grouping_class', 'pre_grouping_class')
+    ordering = ['grouping_company', 'pre_grouping_company', 'grouping_class']
+    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
  
 class ModernClassAdmin(admin.ModelAdmin):
     list_display = ["modern_class", "aka_class", "wheel_id"]
@@ -61,7 +61,7 @@ class WheelArrangementAdmin(admin.ModelAdmin):
 admin.site.register(Depots, DepotsAdmin)
 admin.site.register(Engineer,EngineerAdmin)
 admin.site.register(Image, ImageAdmin)
-#admin.site.register(LocoClass, LocoClassAdmin)
+admin.site.register(LocoClass, LocoClassAdmin)
 admin.site.register(ModernClass, ModernClassAdmin)
 admin.site.register(Locomotive, LocomotiveAdmin)
 admin.site.register(Manufacturers, ManufacturersAdmin)

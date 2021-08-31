@@ -1,30 +1,20 @@
-{% extends "locos/base.html" %}
-{% load bootstrap3 %}
+{% extends "../mainmenu/base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Experiment with Bokeh</title>
-    <script src="http://cdn.bokeh.org/bokeh/release/bokeh-2.3.0.min.js"></script>
-    <link rel="stylesheet" href="http://cdn.bokeh.org/bokeh/release/bokeh-2.3.0.min.css">
-</head>
-
-{% block header %}
-  <div class='jumbotron'>
-      <h1>Railway Heritage</h1>        
-  </div>
-
-{% endblock %}
+{% block content_title %}Railway Heritage{% endblock %}
+{% block content_desc %}{% endblock %}
 
 {% block content %}
-  <h2>
-    <ul style="list-style-type:none;">
-    <li><a href="{% url 'locos:images' %}">Photos</a></li> 
-    <li><a href="{% url 'locos:loco_classes' %}">Steam Loco Classes </a></li>
-    <li><a href="{% url 'locos:modern_classes' %}">Modern Loco Classes </a></li>   
-    <li><a href="{% url 'maps:heritage_sites' %}">Museums and Sites</a></li>
-    <li><a href="{% url 'locos:engineers' %}">Famous Engineers</a></li>
+
+  <div class="bd-example">
+    <ul class="list-group">
+      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'locos:images' %}">Photos</a></li>
+      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'locos:loco_classes' %}">Steam Loco Classes </a></li>
+      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'locos:modern_classes' %}">Modern Loco Classes </a></li>
+      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'maps:heritage_sites' %}">Museums and Sites</a></li>
+      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'locos:engineers' %}">Famous Engineers</a></li>
     </ul>
-  </h2>
+  </div>
+
   <!--
   {% with total_references_created=request.owner.references_data_added.count %}
     <p>You have bookmarked {{ total_references_created }} image {{ total_references_created|pluralize }}.</p>
@@ -36,5 +26,5 @@
 
     <!--  <p>You can also <a href="{% url "edit" %}">edit your profile</a> or <a href="{% url "password_change" %}">change your password</a>.</p>
    
-    <!--<li><a href="{% url 'locos:visits' %}">Visits</a></li>
+    <!--<li><a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locos:visits' %}">Visits</a></li>
       <a href="{% url 'users:register' %}">Register an account</a> to view the archive and add records of your own-->

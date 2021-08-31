@@ -1,10 +1,8 @@
-﻿{% extends "mvs/base.html" %}
-{% load bootstrap3 %}
+﻿{% extends "../mainmenu/base.html" %}
 
-{% block header %}
-  <h2>Edit:
-  <a href="{% url 'mvs:mvimage' mvimage.id %} ">{{ mvimage }}</a></h2>
-{% endblock header %}
+{% block content_title %}Edit:
+  <a href="{% url 'mvs:mvimage' mvimage.id %} ">{{ mvimage }}</a>{% endblock %}
+{% block content_desc %}{% endblock %}
 
 {% block content %}
     

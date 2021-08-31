@@ -1,6 +1,9 @@
-﻿{% extends "rtt/base.html" %}
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}{{location.stationame}}{% endblock %}
+{% block content_desc %}Upcoming Passenger Movements @   {{ livepassenger.time_of_day }}{% endblock %}
+
 {% block header %}
-<h1> {{location.stationname}} </h1>
 <a href="{% url 'rtt:gettimes' location.crscode %}" class="btn btn-primary">Current Timetable</a>
 <a href="{% url 'rtt:getlivetimes' location.crscode %}" class="btn btn-primary">Current Freight Movements</a>
 <a href="{% url 'rtt:getlivetimes' location.crscode %}" class="btn btn-primary">Current Passenger Movements</a>
