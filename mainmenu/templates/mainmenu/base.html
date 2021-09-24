@@ -12,6 +12,10 @@
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="shortcut icon" href="{%  static 'favicon.ico' %}">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/v4-shims.css">
 
     {% block head %}{% endblock %}
   </head>
@@ -83,6 +87,8 @@
               <b>A</b>utomobiles</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <a class="dropdown-item nav-link" href="{% url 'vehicles:choose_vehicle' %}">Database of UK Licensed Vehicles</a>
+              <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_models_selection' %}">UK Most Popular Models</a>
+              <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_makes' %}">UK Most Popular Makes</a>
               </div>
             </div><!--Vehicle Licensing-->
 
@@ -139,10 +145,11 @@
       </div>
     </div>
 
-  <!-- Note if you load these dropdowns might not work.
-        {#<script src={% static "jquery-3.6.0.slim.min.js" %}></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-        <script src={% static "\js\bootstrap.min.js" %}></script>#}  
-  -->
+
+      <script src={% static "jquery-3.6.0.min.js" %}></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <!-- Loading bootstrap stops the navbars from working.
+      <script src={% static "\js\bootstrap.min.js" %}></script>-->
+
   </body>
 </html>

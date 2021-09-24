@@ -124,7 +124,10 @@ class Command(BaseCommand):
             l.make = make_fk
             l.model = model_fk
             l.variant = variant_fk
-            l.year_licensed = vals['year_licensed']
+            if vals['year_licensed'] == 'Unknown age':
+                l.year_licensed = 'Age unknown' #Ensures Age Unknown appears before Totals
+            else:
+                l.year_licensed = vals['year_licensed']
             l.number_licensed = vals['number_licensed']
             #Code for a short test
             #print(l)

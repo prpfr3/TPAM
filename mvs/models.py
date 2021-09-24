@@ -25,12 +25,24 @@ class MilitaryVehicleClass(models.Model):
   wikislug = models.SlugField(max_length=250, default=None, blank=True, null=True)
   description = models.CharField(max_length=500, default=None, blank=True, null=True)
   notes = models.TextField(default=None, blank=True, null=True)
+  favorites = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Fav',
+    related_name='favorite_things')
   date_added = models.DateTimeField(auto_now_add=True)
   def __str__(self):
     return self.description
   class Meta:
     verbose_name_plural = 'Military Vehicle Classes'
     managed = True
+
+class Fav(models.Model) :
+    thing = models.ForeignKey(MilitaryVehicleClass, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='favs_users')
+    # https://docs.djangoproject.com/en/3.0/ref/models/options/#unique-together
+    class Meta:
+        unique_together = ('thing', 'user')
+    def __str__(self) :
+        return '%s likes %s'%(self.user.username, self.thing.mvclass[:10])
 
 class MVImage(models.Model): #Military Vehicle Images
   image_name = models.CharField(max_length=100, default=None)

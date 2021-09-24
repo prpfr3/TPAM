@@ -1,12 +1,13 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.core.paginator import Paginator, EmptyPage,\
-PageNotAnInteger
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import View
 
-from .models import HeritageSite, MilitaryVehicleClass, MVImage, Visit, MVBMImage
+from .models import HeritageSite, MilitaryVehicleClass, MVImage, Visit, MVBMImage, Fav
 from .forms import MVImageForm, MVBMImageCreateForm
 
 def index(request):
@@ -35,8 +36,48 @@ def MVBMimage_create(request):
 
 def military_vehicle_classes(request):
   military_vehicle_classes = MilitaryVehicleClass.objects.order_by('id')
-  context = {'military_vehicle_classes': military_vehicle_classes}
+  favorites = list()
+  if request.user.is_authenticated:
+      # rows = [{'id': 2}, {'id': 4} ... ]  (A list of rows)
+      rows = request.user.favorite_things.values('id')
+      # favorites = [2, 4, ...] using list comprehension
+      favorites = [ row['id'] for row in rows ]
+  context = {'military_vehicle_classes': military_vehicle_classes, 'favorites': favorites}
   return render(request, 'mvs/military_vehicle_class_list.html', context)
+
+# csrf exemption in class based views
+# https://stackoverflow.com/questions/16458166/how-to-disable-djangos-csrf-validation
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.db.utils import IntegrityError
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AddFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, pk) :
+        print("Add PK",pk)
+        t = get_object_or_404(MilitaryVehicleClass, id=pk)
+        fav = Fav(user=request.user, thing=t)
+        try:
+            fav.save()  # In case of duplicate key
+        except IntegrityError as e:
+            pass
+        return HttpResponse()
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DeleteFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, pk) :
+        print("Delete PK",pk)
+        t = get_object_or_404(MilitaryVehicleClass, id=pk)
+        try:
+            fav = Fav.objects.get(user=request.user, thing=t).delete()
+        except Fav.DoesNotExist as e:
+            pass
+
+        return HttpResponse()
+
+
+
+
 
 def military_vehicle_class(request, military_vehicle_class_id):
   military_vehicle_class = MilitaryVehicleClass.objects.get(id=military_vehicle_class_id)

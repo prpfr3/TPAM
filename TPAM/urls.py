@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+import debug_toolbar
 
 urlpatterns = [
   path('admin/', admin.site.urls),
@@ -17,3 +18,5 @@ urlpatterns = [
   re_path(r'^maps/', include('maps.urls', namespace="maps")),
   re_path(r'^vehicles/', include('vehicles.urls', namespace="vehicles")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+urlpatterns = [path('__debug__/', include(debug_toolbar.urls)),] + urlpatterns

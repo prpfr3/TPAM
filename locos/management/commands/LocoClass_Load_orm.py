@@ -3,7 +3,9 @@ from django.core.management import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from locos.models import LocoClass, WheelArrangement
 
-ALREADY_LOADED_ERROR_MESSAGE = "To reload the data from the CSV file,first either (a) delete and recreate the database table to reset keys to start at zero or (b) drop all the table records in which cases the keys will be initialised starting at the last unused value"
+ALREADY_LOADED_ERROR_MESSAGE = "To reload the data from the CSV file,first either \
+drop all the table records in which cases the keys will be initialised starting at \
+  the last unused value"
 
 class Command(BaseCommand):
     # Show this when the user types help

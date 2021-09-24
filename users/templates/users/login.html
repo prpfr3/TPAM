@@ -14,7 +14,7 @@
       <button name="submit" class="btn btn-primary">log in</button>
     {% endbuttons %}
     
-    <input type="hidden" name="next" value="{% url 'locos:index' %}" />
+    <input type="hidden" name="next" value="{{ next }}" />
   </form>
     
 {% endblock content %}

@@ -1,0 +1,17 @@
+{% extends "../mainmenu/base.html" %}
+
+{% block title %}Vehicle most_popular_models_selection{% endblock %}
+
+{% block content_title %}Choose a Vehicle Type and Year{% endblock %}
+{% block content_desc %}{% endblock %}
+
+{% block content %}
+  <form method='POST' action="" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ selection_criteria.media.js }}
+      {{ selection_criteria.as_p }}
+
+      <button name="submit" class="btn btn-primary">Get Vehicle Data</button>
+
+  </form>
+{% endblock content %}

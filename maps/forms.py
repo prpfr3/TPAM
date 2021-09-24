@@ -24,11 +24,12 @@ class EmailPostForm(forms.Form):
 """
 
 class PostForm(forms.ModelForm):
+
   class Meta:
     model = Post
     fields = ['title', 'body', 'status', 'url']
     labels = {'title':'', 'body':'', 'status':'', 'url':'url'}
-    widgets = {#'body': TinyMCE(attrs={'cols': 40}), #Overridden by bootstrap class
+    widgets = {#'body': TinyMCE(attrs={'cols': 80, 'rows': 30}), #Overridden by bootstrap class
                'title': forms.TextInput(attrs={'class': 'form-control', "placeholder" : ".form-control-lg"}),
                'body': forms.Textarea(attrs={'class': 'form-control', "placeholder" : ".form-control-md"}),
                'status': forms.Select(attrs={'class': 'form-control', "placeholder" : ".form-control-sm"}),

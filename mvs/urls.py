@@ -17,6 +17,11 @@ urlpatterns = [
     re_path(r'^new_mvimage/$', views.new_mvimage, name='new_mvimage'),
     re_path(r'^edit_mvimage/(?P<mvimage_id>\d+)/$', views.edit_mvimage, name='edit_mvimage'),
 
+    path('thing/<int:pk>/favorite', views.AddFavoriteView.as_view(), name='mvclass_favorite'),
+    path('thing/<int:pk>/unfavorite', views.DeleteFavoriteView.as_view(), name='mvclass_unfavorite'),
+
+
+
 # Possible future design pattern
     #path('', views.xyz_list),
     #path('xyz/<slug:slug>/', include([

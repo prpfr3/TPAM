@@ -10,6 +10,7 @@ import os
 import posixpath
 import configparser
 import dj_database_url
+from configurations import Configuration, values
 
 # My Settings
 LOGIN_URL = '/users/login'
@@ -20,6 +21,8 @@ DATAIO_DIR = os.path.join("D:\\MLDatasets", "TPAM_DATAIO")
 DEFAULT_AUTO_FIELD='django.db.models.AutoField' #Required as from Django 3.2
 
 # Info on INSTALLED_APPS @ https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
+
+
 
 INSTALLED_APPS = [
 
@@ -40,6 +43,7 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'crispy_forms',
     'crispy_bootstrap5',
+    'debug_toolbar',
 
     #Myapps
     'TPAM',
@@ -57,6 +61,7 @@ INSTALLED_APPS = [
 # Middleware framework
 # https://docs.djangoproject.com/en/2.1/topics/http/middleware/
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -241,8 +246,11 @@ else:
   KEYS_DIR = os.path.join("D:\\MLDatasets", "API_Keys")
   config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
   SECRET_KEY = config['Django']['tpam_secret_key']  
-  DEBUG = True #Always runs as False in Production
-  ALLOWED_HOSTS = []
+  DEBUG = values.BooleanValue(True)
+  ALLOWED_HOSTS = values.ListValue([])
+  INTERNAL_IPS = ["127.0.0.1"] #Required for Django Debug
+
+
   db_pswd = config['MySQL']['p']
 
   # E-mail

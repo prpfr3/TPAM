@@ -65,6 +65,7 @@ class UKLicensedVehicles(models.Model):
       VehicleModel,
       default=None,
       null=True,
+      blank=True, #Allows field to be blank on form selection screen
       chained_field="make",
       chained_model_field="make",
       show_all=False,
@@ -74,6 +75,7 @@ class UKLicensedVehicles(models.Model):
       VehicleVariant, 
       default=None,
       null=True,
+      blank=True, #Allows field to be blank on form selection screen
       chained_field="model",
       chained_model_field="model",
       show_all=False,

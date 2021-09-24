@@ -1,3 +1,6 @@
 {
-    "python.condaPath": "C:\\Users\\paulf\\anaconda3"
-}
+    "python.condaPath": "C:\\Users\\paulf\\anaconda3",
+    "python.pythonPath":"C:\\Users\\paulf\\anaconda3\\envs\\GeoDjango\\python.exe",
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.shellArgs.windows": ["/K", "conda activate GeoDjango"]
+    }

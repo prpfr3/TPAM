@@ -1,11 +1,7 @@
 {% extends "../mainmenu/base.html" %}
 
-{% block content_title %}UK Licensed Vehicles at end 2020{% endblock %}
+{% block content_title %}Most Popular {{type}} of {{year_licensed}}{% endblock %}
 {% block content_desc %}
-  Type:{{type}}<br />
-  Make:{{make}}<br />
-  Model:{{model}}<br />  
-  Variant:{{variant}}<br />
 {% endblock %}
 
 {% block content %}
@@ -13,21 +9,21 @@
   <table class="table table-bordered">
     <thead>
       <tr>
-        <th>Year Licensed</th>
+        <th>Model</th>
         <th>Number Licensed</th>
       </tr>
     </thead>
     <tbody>
       {% for row in uklicensedvehicles_list %}
       <tr>
-        <td>{{ row.year_licensed }}</td>
+        <td>{{ row.model__model }}</td>
         <td>{{ row.total_licensed }}</td>
       </tr>
       {% endfor %}
     </tbody>
     </table>
 {% else %}
-   <p>No entries found for the selected vehicles</p>
+   <p>No entries found</p>
 {% endif %}
 {% include "vehicles/pagination.html" with page=rvlicensed_list %}
 {% endblock %}

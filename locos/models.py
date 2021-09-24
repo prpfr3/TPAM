@@ -41,7 +41,6 @@ class HeritageSite(models.Model):
     return self.site_name
 
 
-
 class ModernClass(models.Model):
   class_type = models.CharField(max_length=1, blank=True, default='')  
   modern_class = models.CharField(max_length=100, blank=True, default='')
