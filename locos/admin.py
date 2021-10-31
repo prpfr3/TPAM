@@ -1,5 +1,5 @@
 from django.contrib import admin
-from locos.models import Depots, Engineer, Image, ModernClass, Locomotive, Manufacturers, WheelArrangement, LocoClass
+from locos.models import PersonRole, Role, Depots, Person, Image, ModernClass, Locomotive, Manufacturers, WheelArrangement, LocoClass
 from datetime import datetime
 from tinymce.widgets import TinyMCE
 from django.db import models
@@ -19,9 +19,20 @@ class DepotsAdmin(admin.ModelAdmin):
     #("Timestamp", {"fields": ["datefield"]})
     #]
 
-class EngineerAdmin(admin.ModelAdmin):
-    list_display = ["id", "eng_name", "wikislug", "url",]
-    ordering = ('eng_name',)
+class PersonAdmin(admin.ModelAdmin):
+    list_display = ["id", "name", "wikislug",]
+    ordering = ('name',)
+    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
+
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ["id", "role",]
+    ordering = ('role',)
+    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
+
+class PersonRoleAdmin(admin.ModelAdmin):
+    list_display = ["person", "role",]
+    ordering = ('person',)
+    list_filter = ["role", "person",]
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
 class ImageAdmin(admin.ModelAdmin):
@@ -59,7 +70,9 @@ class WheelArrangementAdmin(admin.ModelAdmin):
     ordering = ('whyte_notation', )
 
 admin.site.register(Depots, DepotsAdmin)
-admin.site.register(Engineer,EngineerAdmin)
+admin.site.register(Person,PersonAdmin)
+admin.site.register(Role,RoleAdmin)
+admin.site.register(PersonRole,PersonRoleAdmin)
 admin.site.register(Image, ImageAdmin)
 admin.site.register(LocoClass, LocoClassAdmin)
 admin.site.register(ModernClass, ModernClassAdmin)

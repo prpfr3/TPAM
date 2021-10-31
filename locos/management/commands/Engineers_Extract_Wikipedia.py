@@ -4,27 +4,36 @@ import requests, csv, os, re
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
-res = requests.get("https://en.wikipedia.org/wiki/Category:English_railway_mechanical_engineers")
-#res = open(os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "English_railway_mechanical_engineers.html"))
-output_file = os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "ETL_Wiki_English_railway_mechanical_engineers")
+output_file = os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "ETL_Wiki_Persons.csv")
+Categories = ["Locomotive_builders_and_designers", 
+                "English_railway_mechanical_persons",
+                "Scottish_railway_mechanical_persons",
+                "British_railway_civil_persons",
+                "British_railway_pioneers"]
 
-try:
-    res.raise_for_status()
-    print(res)
-except Exception as exc:
-    print('Unable to get the file: %s' % (exc))
-
-soup = BeautifulSoup(res.text, 'html.parser') 
 csvFile = open(output_file, 'wt+', newline='', encoding='utf-8')
-output = csv.writer(csvFile)
 
-try:
-  for link in soup.find_all(title=True):
-    csvrow = []
-    csvrow.append(link.get('href'))
-    #csvrow.append(link.get('title'))
-    csvrow.append(link.get_text())
-    print(csvrow)
-    output.writerow(csvrow)
-finally:
-    csvFile.close()
+for Category in Categories:
+    url = "https://en.wikipedia.org/wiki/Category:" + Category
+    res = requests.get(url).text
+    soup = BeautifulSoup(res, 'html.parser') 
+
+    output = csv.writer(csvFile)
+
+    try:
+        for link in soup.find_all(title=True):
+            href = str(link.get('href'))
+            if '/wiki' in href and \
+                ':' not in href and \
+                'List_of' not in href and \
+                'Biographical' not in href and \
+                'Main_Page' not in href:
+                csvrow = []
+                csvrow.append(Category)
+                csvrow.append(href)
+                csvrow.append(link.get('title'))
+                output.writerow(csvrow)
+    finally:
+        pass
+
+csvFile.close()

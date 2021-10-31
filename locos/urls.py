@@ -13,10 +13,10 @@ urlpatterns = [
     re_path(r'^modern_classes/$', views.modern_classes, name='modern_classes'),
     re_path(r'^modern_classes/(?P<modern_class_id>\d+)/$', views.modern_class, name='modern_class'),
 
-    re_path(r'^engineers/$', views.engineers, name='engineers'),
-    re_path(r'^engineers/(?P<engineer_id>\d+)/$', views.engineer, name='engineer'),
-    re_path(r'^new_engineer/$', views.new_engineer, name='new_engineer'),
-    re_path(r'^edit_engineer/(?P<engineer_id>\d+)/$', views.edit_engineer, name='edit_engineer'),
+    re_path(r'^persons/$', views.persons, name='persons'),
+    re_path(r'^persons/(?P<person_id>\d+)/$', views.person, name='person'),
+    re_path(r'^new_person/$', views.new_person, name='new_person'),
+    re_path(r'^edit_person/(?P<person_id>\d+)/$', views.edit_person, name='edit_person'),
 
     re_path(r'^images/$', views.images, name='images'),
     re_path(r'^image/(?P<image_id>\d+)/$', views.image, name='image'),

@@ -12,4 +12,5 @@ urlpatterns = [
     re_path(r'^getservice/(?P<uid>\w+)/$', views.getservice, name='getservice'),
     re_path(r'^getlocations/$', views.getlocations, name='getlocations'),
     re_path(r'^getlocation/(?P<location_id>\d+)$', views.getlocation, name='getlocation'),
+    re_path(r'^chooselocation$', views.chooselocation, name='chooselocation'),
 ]

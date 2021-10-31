@@ -1,0 +1,34 @@
+{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}UK Licensed Vehicles at end 2020{% endblock %}
+
+{% block content %}
+  <form method='POST' action="" enctype="multipart/form-data">
+    <p>{% csrf_token %}
+      {{ selection_criteria.media.js }}
+    {{ selection_criteria.as_p }}
+    <input type="submit" name="submit_input" value="Submit">
+    </p>
+
+  {% if licensed_vehicles_list %}
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Year Licensed</th>
+          <th>Number Licensed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in licensed_vehicles_list %}
+        <tr>
+          <td>{{ row.year_licensed }}</td>
+          <td>{{ row.total_licensed }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      </table>
+  {% else %}
+    <p>No entries found for the selected vehicles</p>
+  {% endif %}
+</form>
+{% endblock %}

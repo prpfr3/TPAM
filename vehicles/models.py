@@ -4,7 +4,11 @@ from django.conf import settings
 from django.urls import reverse
 from smart_selects.db_fields import ChainedForeignKey
 
-#Class definitions to use smart_selects ChainedForeignKey were based on code submitted as an issue @ https://github.com/jazzband/django-smart-selects/issues/292 
+"""
+Class definitions to use smart_selects ChainedForeignKey were based on code submitted as an issue
+  @ https://github.com/jazzband/django-smart-selects/issues/292
+
+"""
 
 class VehicleType(models.Model): 
   type = models.CharField(max_length=25, null=True)

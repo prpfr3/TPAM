@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             name='WheelArrangement',
         ),
         migrations.DeleteModel(
-            name='LocosEngineer',
+            name='LocosPerson',
         ),
         migrations.DeleteModel(
             name='LocosEntry',

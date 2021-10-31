@@ -20,16 +20,30 @@ class Depots(models.Model):
     class Meta:
       verbose_name_plural = 'Depots'
 
-class Engineer(models.Model): 
-  """Railway Engineers"""
-  eng_name = models.CharField(max_length=100, default=None)
+class Person(models.Model): 
+  """Railway Engineers etc"""
+  name = models.CharField(max_length=100, default=None)
   wikislug = models.SlugField(default=None)
   url = models.URLField(default=None)
   notes = models.TextField(default=None)
   date_added = models.DateTimeField(auto_now_add=True)
   def __str__(self):
     """Return a string representation of the model"""
-    return self.eng_name
+    return self.name
+
+class Role(models.Model): 
+  role = models.CharField(max_length=100, null=True)
+  def __str__(self):
+    return self.role
+  class Meta:
+    managed = True
+
+class PersonRole(models.Model): 
+  role = models.ForeignKey(Role, on_delete=models.CASCADE)
+  person = models.ForeignKey(Person, on_delete=models.CASCADE)
+
+  def __str__(self):
+    return "{} {}".format(self.person.name, self.role.role)
 
 class HeritageSite(models.Model): 
   site_name = models.CharField(max_length=100, default=None)
@@ -93,7 +107,7 @@ class WheelArrangement(models.Model):
 class LocoClass(models.Model):
   grouping_company = models.CharField(max_length=10, blank=True, default='')
   pre_grouping_company = models.CharField(max_length=20, blank=True, default='')
-  #designer = models.ForeignKey(Engineer, default=1, verbose_name="Designer", on_delete=models.SET_DEFAULT)
+  #designer = models.ForeignKey(Person, default=1, verbose_name="Designer", on_delete=models.SET_DEFAULT)
   designer = models.CharField(max_length=100, blank=True, default='')
   designer_slug = models.SlugField(null=True, max_length=255)
   grouping_class = models.CharField(max_length=100, blank=True, default='')

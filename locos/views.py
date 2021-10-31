@@ -5,52 +5,62 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from .models import Engineer, Image, ModernClass, LocoClass
-from .forms import EngineerForm, ImageForm
+from .models import Person, Image, ModernClass, LocoClass
+from .forms import PersonForm, ImageForm
 
 def index(request):
   return render(request, 'locos/index.html')
 
-def engineers(request):
-  engineers = Engineer.objects.order_by('eng_name')
-  context = {'engineers': engineers}
-  return render(request, 'locos/engineer_list.html', context)
+def persons(request):
+  persons = Person.objects.order_by('name')
+  # Needs a Serializer writing. See Bookr
+  persons_with_roles = []
+  for person in persons:
+    personroles = person.personrole_set.all()
+    for personrole in personroles:
+      persons_with_roles.append({"person": person})
+      print(person)
+      print(personrole, '\n')
+
+  context = {'persons': persons_with_roles}
+  print(context)
+  return render(request, 'locos/person_list.html', context)
 
 
-def engineer(request, engineer_id):
-  engineer = Engineer.objects.get(id=engineer_id)
-  context = {'engineer': engineer}
-  return render(request, 'locos/engineer.html', context)
+def person(request, person_id):
+  person = Person.objects.get(id=person_id)
+  context = {'person': person}
+  return render(request, 'locos/person.html', context)
 
 
 @login_required
-def new_engineer(request):
+def new_person(request):
   if request.method != 'POST':
-    form = EngineerForm()
+    form = PersonForm()
   else:
-    form = EngineerForm(request.POST)
+    form = PersonForm(request.POST)
     if form.is_valid():
       form.save()
-      return HttpResponseRedirect(reverse('locos:engineers'))
+      return HttpResponseRedirect(reverse('locos:persons'))
 
   context = {'form': form}
-  return render(request, 'locos/engineer_new.html', context)
+  return render(request, 'locos/person_new.html', context)
 
 
 @login_required
-def edit_engineer(request, engineer_id):
-  engineer = Engineer.objects.get(id=engineer_id)
+def edit_person(request, person_id):
+  person = Person.objects.get(id=person_id)
 
   if request.method != 'POST':
-    form = EngineerForm(instance=engineer)
+    form = PersonForm(instance=person)
   else:
-    form = EngineerForm(instance=engineer, data=request.POST)
+    form = PersonForm(instance=person, data=request.POST)
     if form.is_valid():
       form.save()
-      return HttpResponseRedirect(reverse('locos:engineer', args=[engineer_id]))
+      return HttpResponseRedirect(reverse('locos:person', args=[person_id]))
 
-  context = {'engineer': engineer,'form': form}
-  return render(request, 'locos/engineer_edit.html', context)
+  context = {'person': person,'form': form}
+  return render(request, 'locos/person_edit.html', context)
 
 def loco_classes(request):
   loco_classes = LocoClass.objects.order_by('grouping_company', 'pre_grouping_company', 'grouping_class')

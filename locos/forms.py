@@ -4,14 +4,14 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.files.base import ContentFile
 from tinymce.widgets import TinyMCE
 
-from .models import Engineer, Image
+from .models import Person, Image
 from urllib import request
 
-class EngineerForm(forms.ModelForm):
+class PersonForm(forms.ModelForm):
   class Meta:
-    model = Engineer
-    fields = ['eng_name', 'wikislug', 'url', 'notes']
-    labels = {'eng_name':'', 'wikislug':'wikipedia slug', 'url':'additional url', 'notes':''}
+    model = Person
+    fields = ['name', 'wikislug', 'url', 'notes']
+    labels = {'name':'', 'wikislug':'wikipedia slug', 'url':'additional url', 'notes':''}
     widgets = {'text': forms.Textarea(attrs={'cols':80})}
 
 class ImageForm(forms.ModelForm):

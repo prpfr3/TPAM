@@ -2,12 +2,12 @@
 
 {% block header %}
   <h2>Edit:
-  <a href="{% url 'locos:engineer' engineer.id %} ">{{ engineer }}</a></h2>
+  <a href="{% url 'locos:person' person.id %} ">{{ person }}</a></h2>
 {% endblock header %}
 
 {% block content %}
     
-  <form action="{% url 'locos:edit_engineer' engineer.id %}" method='post'
+  <form action="{% url 'locos:edit_person' person.id %}" method='post'
       class="form">
       
     {% csrf_token %}

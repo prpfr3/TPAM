@@ -137,7 +137,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='LocosEngineer',
+            name='LocosPerson',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('eng_name', models.CharField(max_length=50)),
@@ -145,7 +145,7 @@ class Migration(migrations.Migration):
                 ('date_added', models.DateTimeField()),
             ],
             options={
-                'db_table': 'locos_engineer',
+                'db_table': 'locos_person',
                 'managed': False,
             },
         ),

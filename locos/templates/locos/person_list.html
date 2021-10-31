@@ -1,0 +1,19 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}Famous People{% endblock %}
+{% block content_desc %}{% endblock %}
+
+{% block content %}
+  <ul>
+    {% for person in persons %}
+      <li>
+        <h3>
+          <a href="https://en.wikipedia.org/{{person.wikislug}}"> {{ person.person }}</a> 
+        </h3>
+              </li>
+    {% empty %}
+      <li>No persons have been added yet.</li>
+    {% endfor %}
+  </ul>
+
+{% endblock content %}
