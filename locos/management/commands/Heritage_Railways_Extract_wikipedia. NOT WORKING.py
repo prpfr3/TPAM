@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
 #res = requests.get("https://en.wikipedia.org/wiki/List_of_British_heritage_and_private_railways")
-res = open(os.path.join('D:\MLDatasets\TPAM_DATAIO', 'Heritage Railway List utf8.htm'))
-output_file = os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "ETL_Wiki_List_of_British_heritage_and_private_railways.csv")
+res = open(os.path.join('D:\Data\TPAM', 'Heritage Railway List utf8.htm'))
+output_file = os.path.join("D:\\Data", "TPAM", "ETL_Wiki_List_of_British_heritage_and_private_railways.csv")
 
 #try:
 #    res.raise_for_status()

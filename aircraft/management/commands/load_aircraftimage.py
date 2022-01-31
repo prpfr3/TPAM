@@ -9,7 +9,7 @@ from pathlib import Path
 # !!! WARNING - Running this may change the ids of records that are referred to with foreign keys in other tables
 
 #Set up a CSV file and write a Header Row
-csv_file = os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "ETL_Wiki_AircraftImages.csv")
+csv_file = os.path.join("D:\\Data", "TPAM", "ETL_Wiki_AircraftImages.csv")
 csvFile = open(csv_file, 'wt+', newline='', encoding='utf-8')
 output = csv.writer(csvFile)
 output.writerow(['image_name', 'image', 'aircraft_class_id', 'location_id', 'visit_id', 'notes'])

@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
 res = requests.get("https://www.brdatabase.info/preservation.php")
-res = open(os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "BRD Preserved_Locos.html")) # utf-8 parameter
-output_file = os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "BRD Preserved_Locos.csv")
+res = open(os.path.join("D:\\Data", "TPAM", "BRD Preserved_Locos.html")) # utf-8 parameter
+output_file = os.path.join("D:\\Data", "TPAM", "BRD Preserved_Locos.csv")
 
 try:
     res.raise_for_status()

@@ -18,31 +18,33 @@ class Command(BaseCommand):
             return
         print("Creating classes")
         import os
-        DATAIO_DIR = os.path.join("D:\\MLDatasets", "TPAM_DATAIO")
         for csv in [
-'BRD_List_of_British_Rail_modern_diesel_locomotive_classes.csv',
-'BRD_List_of_British_Rail_modern_electric_locomotive_classes.csv'
+            'BRD_List_of_British_Rail_modern_diesel_locomotive_classes.csv',
+            'BRD_List_of_British_Rail_modern_electric_locomotive_classes.csv'
           ]:
-          for row in DictReader(open(os.path.join(DATAIO_DIR, csv), encoding='utf-8')):
-              c = ModernClass()
-              c.class_type = row['Class Type'] 
-              c.modern_class = row['Class']
-              c.modern_class_slug = row['Class_url']
-              c.year_introduced = row['Introduced']
-              c.manufacturer = row['Manufacturer'] 
-              if c.class_type == 'D':
-                c.power_unit = row['Power Unit']
-                c.horse_power = row['Horse Power']
-                c.transmission = row['Transmission'] 
-              elif c.class_type == 'E':
-                c.current = row['Current']
-                c.aka_class = row['AKA']
-                c.aka_class_slug = row['AKA_url']
-              c.wheel_id = row['Wheels']
-              c.wheel_id_slug = row['Wheels_url']
-              c.number_range = row['Number Range']
-              c.number_range_slug = row['Number Range_url']
-              c.number_built = row['Number']
-              c.multiple = row['Multiple']
-              c.img_slug = row['Thumbnail_img']
-              c.save()
+
+          with open(os.path.join("D:\\Data", "TPAM", csv), encoding="utf-8") as file:   
+              for row in DictReader(file):
+
+                c = ModernClass()
+                c.class_type = row['Class Type'] 
+                c.modern_class = row['Class']
+                c.modern_class_slug = row['Class_url']
+                c.year_introduced = row['Introduced']
+                c.builder = row['Builder'] 
+                if c.class_type == 'D':
+                  c.power_unit = row['Power Unit']
+                  c.horse_power = row['Horse Power']
+                  c.transmission = row['Transmission'] 
+                elif c.class_type == 'E':
+                  c.current = row['Current']
+                  c.aka_class = row['AKA']
+                  c.aka_class_slug = row['AKA_url']
+                c.wheel_id = row['Wheels']
+                c.wheel_id_slug = row['Wheels_url']
+                c.number_range = row['Number Range']
+                c.number_range_slug = row['Number Range_url']
+                c.number_built = row['Number']
+                c.multiple = row['Multiple']
+                c.img_slug = row['Thumbnail_img']
+                c.save()

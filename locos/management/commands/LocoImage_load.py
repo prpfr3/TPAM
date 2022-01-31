@@ -11,7 +11,7 @@ import csv, os
 from pathlib import Path
 
 #Open the csv input file and write a header record
-input_file = os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "RailwayPhotos.csv")
+input_file = os.path.join("D:\\Data", "TPAM", "RailwayPhotos.csv")
 csvFile = open(input_file, 'wt+', newline='', encoding='utf-8')
 output = csv.writer(csvFile)
 output.writerow(['image_name', 'image', 'loco_class_id', 'location_id', 'visit_id', 'notes'])

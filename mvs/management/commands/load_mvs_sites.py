@@ -9,7 +9,7 @@ from pathlib import Path
 # !!! WARNING - Running this may change the ids of records that are referred to with foreign keys in other tables
 
 #Set up a CSV file and write a Header Row
-csv_file = os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "mvs_heritagesite.csv")
+csv_file = os.path.join("D:\\Data", "TPAM", "mvs_heritagesite.csv")
 
 class Command(BaseCommand):
     def handle(self, *args, **options):

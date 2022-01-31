@@ -59,7 +59,7 @@
     <Compile Include="locos\management\commands\Loco_Classes_load_Wikipedia_midland_sql.py" />
     <Compile Include="locos\management\commands\Heritage_Locos_Extract_BRD.py" />
     <Compile Include="locos\management\commands\Depots_ETL_BRD2MYSQL.py" />
-    <Compile Include="locos\management\commands\Manufacturers_ETL_BRD2MYSQL.py" />
+    <Compile Include="locos\management\commands\Builder_ETL_BRD2MYSQL.py" />
     <Compile Include="locos\management\commands\Loco_Classes_ETL_BRD2MYSQL_Midland.py" />
     <Compile Include="locos\management\commands\Depots_ETL_Wiki2MYSQL_BS.py" />
     <Compile Include="locos\management\commands\Loco_Classes_Extract_Wikipedia_Midland_BS.py" />

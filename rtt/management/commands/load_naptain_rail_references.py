@@ -16,7 +16,7 @@ class Command(BaseCommand):
             print(ALREADY_LOADED_ERROR_MESSAGE)
             return
         print("Creating NaPTANRailReferences")
-        for row in DictReader(open('D://MLDatasets/TPAM_DATAIO/NaPTANRailReferences.csv')):
+        for row in DictReader(open('D://Data/TPAM/NaPTANRailReferences.csv')):
             c = NaPTANRailReferences()
             c.atcocode = row['AtcoCode'] 
             c.tiploccode = row['TiplocCode']

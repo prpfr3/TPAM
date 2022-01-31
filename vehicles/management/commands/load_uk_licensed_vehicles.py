@@ -26,7 +26,7 @@ def veh0124_import(veh0124_file, year):
     pd.set_option('display.max_columns', None)
     
     try: 
-        new_working_directory = Path("D:\MLDatasets\govuk_vehicle_stats")
+        new_working_directory = Path("D:\Data\govuk_vehicle_stats")
         os.chdir(new_working_directory)
         print("Working directory is:-", os.getcwd()) 
     except: 
@@ -90,7 +90,7 @@ veh0124_import(f"veh0124_end_{latest_year}.ods", latest_year)
 veh0124_melted = pd.read_pickle(f"veh0124_melted_{year}.pkl")
 """
 
-new_working_directory = Path("D:\MLDatasets\govuk_vehicle_stats")
+new_working_directory = Path("D:\Data\govuk_vehicle_stats")
 os.chdir(new_working_directory)
 veh0124_melted = pd.read_pickle(f"veh0124_melted_2020.pkl")
 

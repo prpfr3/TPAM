@@ -8,7 +8,7 @@
     {% for person in persons %}
       <li>
         <h3>
-          <a href="https://en.wikipedia.org/{{person.wikislug}}"> {{ person.person }}</a> 
+          <a href="https://en.wikipedia.org/{{person.wikitextslug}}"> {{ person.name }}</a> 
         </h3>
               </li>
     {% empty %}

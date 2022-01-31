@@ -4,13 +4,11 @@
 import configparser, requests, sys, json, os 
  
 def otapi_location(location):
- 
     url = "http://transportapi.com/v3/uk/places.json?query={}&type={}&app_id={}&app_key={}".format(location, location_type, app_id, api_key)
     r = requests.get(url)
     return r.json()
  
 def otapi_timetable(station_code):
- 
     url = "http://transportapi.com/v3//uk/train/station/{}/{}/{}/timetable.json?app_id={}&app_key={}".format(station_code, live_date, live_time, app_id, api_key)
     r = requests.get(url)
     return r.json()
@@ -49,7 +47,7 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   app_id = os.environ['OTAPI_APP_ID']
   api_key = os.environ['OTAPI_API_KEY']
 else:
-  KEYS_DIR = os.path.join("D:\\MLDatasets", "API_Keys")
+  KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
   config = configparser.ConfigParser()
   config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
   app_id = config['opentransport']['app_id']

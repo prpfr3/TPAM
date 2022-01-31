@@ -10,10 +10,59 @@
         <small>
         </small>
       </div>
+
       <div class="panel-body">
-        {{ loco_class.wheel_id }}
-        {{ loco_class.designer }}
-      </div>
+
+
+      <!-- Template tags https://docs.djangoproject.com/en/2.0/howto/custom-template-tags/ -->
+      <!-- Template tags https://stackoverflow.com/questions/2217478/django-templates-loop-through-and-print-all-available-properties-of-an-object -->     
+      {% load my_tags %}
+      <ul>
+      {% for key, val in loco_class|get_fields %}
+        {% if val %}
+          <li>{{ key }}: {{ val }}</li>
+        {% endif %}
+      {% endfor %}
+      </ul>
+    </div>
+
+      <h2>Owners/Operators</h2>
+      {% for operator in operators %}
+        <li>{{operator.name}} {{operator.wikislug}}</li>
+      {% empty %}
+        <li>None recorded for this class.</li>
+      {% endfor %} 
+
+      <h2>Designer(s)</h2>
+      {% for designer in designers1 %}
+        <li>{{designer.name}}</li>
+      {% endfor %}
+      {% for designer in designers2 %}
+        <li>{{designer.name}}</li>
+      {% endfor %}
+      {% for designer in designers3 %}
+        <li>{{designer.name}}</li>
+      {% endfor %}
+
+
+      <h2>Builder(s)</h2>
+      {% for builder in builders1 %}
+        <li>{{builder.name}}</li>
+      {% endfor %}
+      {% for builder in builders2 %}
+        <li>{{builder.name}}</li>
+      {% endfor %}
+      {% for builder in builders3 %}
+        <li>{{builder.name}}</li>
+      {% endfor %}
+
+      <h2>Sightings</h2>
+      {% for sighting in sightings %}
+        <li>{{sighting.location_description}} on {{sighting.DD}}/{{sighting.MM}}/{{sighting.YD}}{{sighting.YY}}</li>
+      {% empty %}
+        <li>None recorded for this class.</li>
+      {% endfor %}
+
     </div> <!-- panel -->
 
 {% endblock content %}

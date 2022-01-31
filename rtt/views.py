@@ -11,21 +11,28 @@ def index(request):
   return render(request, 'rtt/index.html')
 
 def chooselocation(request):
+  print(request.method)
   if request.method == 'POST':
-      selection_criteria = ChooseLocationForm(request.POST)
-      if selection_criteria.is_valid():     
+      form = ChooseLocationForm(request.POST)
+      if form.is_valid():     
           errors = None
-          print(selection_criteria.cleaned_data['crscode'])            
-          context = {'selection_criteria': selection_criteria, 
-                      'errors': errors, 
-                      'livefreight': otapi_livefreight(selection_criteria.cleaned_data['crscode'])}
-          return render(request, 'rtt/getlivefreight2.html', context)
+          if form.cleaned_data['timetable_choice'] == "Timetable":
+            times = otapi_timetable(form.cleaned_data['crscode'])
+          elif form.cleaned_data['timetable_choice'] == "RealTime Passenger":
+            times = otapi_livepassenger(form.cleaned_data['crscode'])
+          elif form.cleaned_data['timetable_choice'] == "RealTime Freight":
+            times = otapi_livefreight(form.cleaned_data['crscode'])
+          context = {'form': form, 'errors': errors, 'times': times,}
+          print(context)
+          # return render(request, 'rtt/timings.html', context)
+      else:
+        print(form.errors)
   else:
-      locations = NaPTANRailReferences.objects.order_by('crscode')
-      selection_criteria = ChooseLocationForm()
-      errors = selection_criteria.errors or None
-      context = {'selection_criteria':selection_criteria, 'locations': locations, 'errors': errors,}
-      return render(request, 'rtt/getlivefreight2.html', context)
+      form = ChooseLocationForm()
+      errors = form.errors or None
+      context = {'form':form, 'errors': errors,}
+      print(context)
+  return render(request, 'rtt/timings.html', context)
 
 def gettimes(request, crscode):
   context = {'departures': otapi_timetable(crscode)}

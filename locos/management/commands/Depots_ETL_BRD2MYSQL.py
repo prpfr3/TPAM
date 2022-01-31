@@ -1,4 +1,4 @@
-# Extracts BR Builders from TPAM_DATAIO website saved html page and loads into Oracle
+# Extracts BR Builders from TPAM website saved html page and loads into Oracle
 # Still under development at 24/01/21
 
 import requests, csv
@@ -11,7 +11,7 @@ from getpass import getpass #getpass is built-in
 from mysql.connector import connect, Error
 
 webpage = os.path.join(DATAIO_DIR, "BRD List_of_Depots.html")
-DATAIO_DIR = "D:\MLDatasets\TPAM_DATAIO"
+DATAIO_DIR = "D:\Data\TPAM"
 
 try:
     #res.raise_for_status()

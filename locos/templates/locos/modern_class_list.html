@@ -11,7 +11,7 @@
       <!--<th scope="col">Id.</th>-->
       <th scope="col">Class</th>
       <th scope="col">Alternative Name</th>
-      <th scope="col">Manufacturer</th>
+      <th scope="col">Builder</th>
       <th scope="col">Wheel Id.</th>
     </tr>
   </thead>
@@ -22,7 +22,7 @@
         <!--<td><a href="https://www.brdatabase.info/{{modern_class.grouping_class_slug}}">{{ modern_class.modern_class}}</a></td>-->
         <td><a href="{% url 'locos:modern_class' modern_class.id %}">{{ modern_class.modern_class}}</a></td>
         <td>{{ modern_class.aka_class}}</td>
-        <td>{{ modern_class.manufacturer}}</td>
+        <td>{{ modern_class.builder}}</td>
         <td>{{ modern_class.wheel_id}}</td>
     </tr>
   </tbody>

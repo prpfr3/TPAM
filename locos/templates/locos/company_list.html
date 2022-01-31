@@ -1,0 +1,20 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}Railway Companies{% endblock %}
+{% block content_desc %}{% endblock %}
+
+{% block content %}
+  <ul>
+    {% for company in companies %}
+      <li>
+        <h3>
+          <td><a href="{% url 'locos:company' company.id %}">{{ company.id}}</a></td>
+          <a href="https://en.wikipedia.org/{{company.wikislug}}"> {{ company.name }}</a> 
+        </h3>
+              </li>
+    {% empty %}
+      <li>No companies have been loaded yet.</li>
+    {% endfor %}
+  </ul>
+
+{% endblock content %}

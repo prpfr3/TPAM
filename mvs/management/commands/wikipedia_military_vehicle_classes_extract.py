@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
 res = requests.get("https://en.wikipedia.org/wiki/List_of_military_vehicles")
-output_file = os.path.join("D:\\MLDatasets", "TPAM_DATAIO", "ETL_Wiki_List_of_military_vehicles.csv")
+output_file = os.path.join("D:\\Data", "TPAM", "ETL_Wiki_List_of_military_vehicles.csv")
 
 try:
     res.raise_for_status()

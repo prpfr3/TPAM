@@ -1,11 +1,6 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.urls import reverse
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
-from django.db.models import Count, Sum
+from django.db.models import Sum
 
 from .models import UKLicensedVehicles
 from .forms import MostPopularModelsSelectionForm, VehicleSelectionForm
@@ -82,26 +77,4 @@ class MostPopularMakesListView(ListView):
                 .values('make__make')\
                 .annotate(total_licensed=Sum('number_licensed'))\
                 .order_by('-total_licensed')
-        print(f'{queryset=}')
         return queryset
-
-# class MostPopularModelsListView(ListView):
-#     model = UKLicensedVehicles
-#     template_name = 'vehicles/most_popular_models_list.html'
-#     paginate_by = 50
-
-#     def get_queryset(self, **kwargs):
-#         queryset = UKLicensedVehicles.objects\
-#                 .filter(year_licensed=self.kwargs['year'], type__type=self.kwargs['type'])\
-#                 .values('model__model')\
-#                 .annotate(total_licensed=Sum('number_licensed'))\
-#                 .order_by('-total_licensed')
-#         print(f'{queryset=}')
-#         return queryset
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['year_licensed'] = self.kwargs['year']
-#         context['type'] = self.kwargs['type']
-#         return context
-

@@ -16,17 +16,17 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if HeritageSite.objects.exists():
-            print('Loco class data already loaded...exiting.')
+            print('Heritage Sites already loaded...exiting.')
             print(ALREADY_LOADED_ERROR_MESSAGE)
             return
         print("Creating Heritage Sites")
         import os
-        DATAIO_DIR = os.path.join("D:\\MLDatasets", "TPAM_DATAIO")
         for csv in [
           'ETL_Wiki_List_of_British_heritage_and_private_railways.csv'
           ]:
-          for row in DictReader(open(os.path.join(DATAIO_DIR, csv), encoding='utf-8')):
-              c = HeritageSite()
-              c.site_name = row['location'] 
-              c.wikislug = row['url']
-              c.save()
+            with open(os.path.join("D:\\Data", "TPAM", csv), encoding="utf-8") as file:   
+                for row in DictReader(file):
+                    c = HeritageSite()
+                    c.site_name = row['location'] 
+                    c.wikislug = row['url']
+                    c.save()

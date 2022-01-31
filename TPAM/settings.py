@@ -7,56 +7,63 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
-import posixpath
 import configparser
 import dj_database_url
-from configurations import Configuration, values
+from configurations import values
 
 # My Settings
 LOGIN_URL = '/users/login'
 #Note that the use of dirname twice has the effect of making the Base Directory one level up from that in which settings.py resides
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #__file__ is the current path of imports
 print('BASE_DIR = ', BASE_DIR)
-DATAIO_DIR = os.path.join("D:\\MLDatasets", "TPAM_DATAIO")
+DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 DEFAULT_AUTO_FIELD='django.db.models.AutoField' #Required as from Django 3.2
 
-# Info on INSTALLED_APPS @ https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
-
-
-
+# https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 INSTALLED_APPS = [
 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    'django.contrib.gis',
     'django.contrib.messages',
+    'django.contrib.sessions',
     'django.contrib.staticfiles',
     'django_extensions',
-    'django.contrib.gis',
     'smart_selects',
 
     #Third Party Apps
     'bootstrap3',
-    'django_bootstrap5',
-    'tinymce',
-    'sorl.thumbnail',
     'crispy_forms',
     'crispy_bootstrap5',
     'debug_toolbar',
+    'django_bootstrap5',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'sorl.thumbnail',
+    'tinymce',
 
     #Myapps
-    'TPAM',
-    'mainmenu',
-    'users',
-    'locos',
-    'rtt',
-    'mvs',
     'aircraft',
-    'storages',
+    'api',
+    'locos',
+    'mainmenu',
     'maps',
+    'mvs',
+    'rtt',
+    'storages',
+    'TPAM',
+    'users',
     'vehicles'
 ]
+
+#The following ensures that token authentication is used for REST APIs
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication', #To enforce token based authentication
+        'rest_framework.authentication.SessionAuthentication', #Needed if browser sessions also used in parallel to token based authentication
+        ]
+}
 
 # Middleware framework
 # https://docs.djangoproject.com/en/2.1/topics/http/middleware/
@@ -96,7 +103,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'TPAM.wsgi.application'
 
-# Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 # Password validation
@@ -159,11 +165,11 @@ TINYMCE_DEFAULT_CONFIG = {
     }
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Establish the current working directory to determine whether settings should be for a production or local server.
 cwd = os.getcwd()
+print(f'{cwd=}')
 if cwd == '/app' or cwd[:4] == '/tmp':
   print('Using production settings from settings.py')
 
@@ -243,23 +249,22 @@ else:
   print('Using development/local settings from settings.py.\nStatic directory is {} given a base directory of {}'.format(STATIC_ROOT, BASE_DIR))
 
   config = configparser.ConfigParser()
-  KEYS_DIR = os.path.join("D:\\MLDatasets", "API_Keys")
+  KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
   config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
   SECRET_KEY = config['Django']['tpam_secret_key']  
   DEBUG = values.BooleanValue(True)
   ALLOWED_HOSTS = values.ListValue([])
   INTERNAL_IPS = ["127.0.0.1"] #Required for Django Debug
 
-
   db_pswd = config['MySQL']['p']
 
   # E-mail
   # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-  EMAIL_HOST = 'smtp.gmail.com'
-  EMAIL_HOST_USER = config['Email']['address']
-  EMAIL_HOST_PASSWORD = config['Email']['password']
-  EMAIL_PORT = 587
-  EMAIL_USE_TLS = True
+#   EMAIL_HOST = 'smtp.gmail.com'
+#   EMAIL_HOST_USER = config['Email']['address']
+#   EMAIL_HOST_PASSWORD = config['Email']['password']
+#   EMAIL_PORT = 587
+#   EMAIL_USE_TLS = True
  
   #Get Other API keys
   OTAPI_APP_ID = config['opentransport']['app_id']

@@ -22,13 +22,14 @@ class Command(BaseCommand):
             print('Military Vehicle data already loaded...exiting.')
             return
         print("Creating Military Vehicles")
-        DATAIO_DIR = os.path.join("D:\\MLDatasets", "TPAM_DATAIO")
-        filename = os.path.join(DATAIO_DIR, "ETL_Wiki_List_of_military_vehicles.csv")  
-        for row in DictReader(open(filename)):
-            #print(row.keys())
-            c = MilitaryVehicleClass()
-            c.mvclass = row['Name'] 
-            c.wikislug = row['Slug']
-            c.description = row['Description']
-            c.notes = 'None'
-            c.save()
+
+        with open(os.path.join("D:\\Data", "TPAM", "ETL_Wiki_List_of_military_vehicles.csv"), encoding="utf-8") as file:
+
+            for row in DictReader(open(file)):
+                #print(row.keys())
+                c = MilitaryVehicleClass()
+                c.mvclass = row['Name'] 
+                c.wikislug = row['Slug']
+                c.description = row['Description']
+                c.notes = 'None'
+                c.save()

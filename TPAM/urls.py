@@ -10,6 +10,7 @@ urlpatterns = [
   path('chaining/', include('smart_selects.urls')),
 
   re_path(r'', include('mainmenu.urls', namespace="mainmenu")),
+  re_path(r'^api/', include('api.urls', namespace="api")),
   re_path(r'^users/', include('users.urls', namespace="users")),
   re_path(r'^rtt/', include('rtt.urls', namespace="rtt")),
   re_path(r'^locos/', include('locos.urls', namespace="locos")),
@@ -17,6 +18,8 @@ urlpatterns = [
   re_path(r'^aircraft/', include('aircraft.urls', namespace="aircraft")),
   re_path(r'^maps/', include('maps.urls', namespace="maps")),
   re_path(r'^vehicles/', include('vehicles.urls', namespace="vehicles")),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]
 
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns = [path('__debug__/', include(debug_toolbar.urls)),] + urlpatterns

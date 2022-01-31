@@ -12,7 +12,7 @@ from getpass import getpass #getpass is built-in
 from mysql.connector import connect, Error
 
 webpage = "https://en.wikipedia.org/wiki/List_of_British_Railways_shed_codes"
-DATAIO_DIR = "D:\MLDatasets\TPAM_DATAIO"
+DATAIO_DIR = "D:\Data\TPAM"
 
 try:
     res = requests.get(webpage)

@@ -100,7 +100,9 @@ class TopicDetailView(OwnerDetailView):
     model = Topic
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs) #Get the current context data
+
         context['posts'] = context['topic'].post_set.all()
+        print("In TopicDetailView the context data is", context )
 
         # strval =  request.GET.get("search", False)
         # if strval :
@@ -203,7 +205,7 @@ def post_share(request, post_id):
               app_id = os.environ['EMAIL_ADDRESS']
             else:
               config = configparser.ConfigParser()
-              config.read(os.path.join("D:\\MLDatasets", "API_Keys", "TPAMWeb.ini"))
+              config.read(os.path.join("D:\\Data", "API_Keys", "TPAMWeb.ini"))
               address = config['Email']['address']
             send_mail(subject, message, address, [cd['to']])
             sent = True

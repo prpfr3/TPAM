@@ -10,8 +10,8 @@ from urllib import request
 class PersonForm(forms.ModelForm):
   class Meta:
     model = Person
-    fields = ['name', 'wikislug', 'url', 'notes']
-    labels = {'name':'', 'wikislug':'wikipedia slug', 'url':'additional url', 'notes':''}
+    fields = ['name', 'wikitextslug', 'notes']
+    labels = {'name':'', 'wikitextslug':'wikipedia slug', 'notes':''}
     widgets = {'text': forms.Textarea(attrs={'cols':80})}
 
 class ImageForm(forms.ModelForm):
