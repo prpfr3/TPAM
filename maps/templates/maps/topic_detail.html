@@ -1,35 +1,37 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
-{% block content_title %}{{ topic.type}} - {{ topic.text }}{% endblock %}
-{% block content_desc %}{% endblock %}
+{% block content_title %}{{ topic.type}}<br>{{ topic.text }} {% endblock %}
+
+{% block content_desc %}
+  <span style="float: center;">
+    {% if topic.owner == user %}
+      <a href="{% url 'maps:topic_update' topic.id %}">Update Topic - </a>
+      <a href="{% url 'maps:topic_delete' topic.id %}">Delete Topic - </a>
+      <a href="{% url 'maps:topics' %}">All topics</a>
+    {% endif %}
+    </span>
+{% endblock content_desc %}
 
 {% block content %}
-
-
-  <span style="float: right;">
-  {% if topic.owner == user %}
-  <a href="{% url 'maps:topic_update' topic.id %}">Update Topic - </a>
-  <a href="{% url 'maps:topic_delete' topic.id %}">Delete Topic - </a>
-  <a href="{% url 'maps:topics' %}">All topics</a>
-  
-  {% endif %}
-  </span>
-
   <!--- For future search feature
-  <div style="float:right">
-    https://www.w3schools.com/howto/howto_css_search_button.asp 
+        https://www.w3schools.com/howto/howto_css_search_button.asp     
+
+  -->
+  <p>
+  <a href="{% url 'maps:post_create' topic.id %}">Add new post</a>
+  <div style="float:center">
     <form>
       <input type="text" placeholder="Search.." name="search"
-      {% if search %} value="{{ search }}" {% endif %}
-      >
+        {% if search %} 
+          value="{{ search }}" 
+        {% endif %}>
       <button type="submit"><i class="fa fa-search"></i></button>
-    <a href="{% url 'maps:topic_detail' topic.id %}"><i class="fa fa-undo"></i></a>
+      <a href="{% url 'maps:topic_detail' topic.id %}"><i class="fa fa-undo"></i></a>
     </form>
-    </div>
-  -->
-
-  <p><a href="{% url 'maps:post_create' topic.id %}">Add new post</a></p>
-
+  </div>
+  </p>
+  
+  <p>
   {% for post in posts %}
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -52,5 +54,6 @@
   {% empty %}
     There are no posts for this topic yet.
   {% endfor %}
+</p>
 
 {% endblock content %}

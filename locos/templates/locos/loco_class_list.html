@@ -5,21 +5,19 @@
 
 {% block content %}
 
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">id</th>
-      <th scope="col">Wikipedia Class</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for loco_class in loco_classes %}
-    <tr>
-      <td><a href="{% url 'locos:loco_class' loco_class.id %}">{{ loco_class.id}}</a></td>
-      <td><a href="https://www.wikipedia_org/{{loco_class.grouping_class_slug}}">{{ loco_class.grouping_class_slug}}</a></td>  
+    <form method='POST' action="" enctype="multipart/form-data">
+      <p>
+      {% csrf_token %}
+      {{ selection_criteria }}
+      <input type="submit" name="submit_input" value="Submit">
+      </p>
+    </form>
 
+    <table>
+    {% for loco_class in loco_class_list %}
+      <tr><td><a href="https://en.wikipedia.org/{{loco_class.grouping_class_slug}}">{{ loco_class.grouping_class}}</a></td></tr>
     {% empty %}
-      No classes have been loaded in the database
+      <tr>No classes have been loaded yet.</tr>
     {% endfor %}
-</table>
+    </table>
 {% endblock content %}

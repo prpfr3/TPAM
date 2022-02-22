@@ -1,13 +1,12 @@
-﻿<!DOCTYPE html>
-<html>
-<!--- Created using Knightlab's Storymap.
+{% extends "../mainmenu/base.html" %}
 
-Build the storymap in a JSON file, which here is passed in from the Django view
+{% block content %}
+<!--- Created using Knightlab's Storymap.
 
 For documentation:- https://storymap.knightlab.com/advanced/
 For Github JSON example:- https://github.com/NUKnightLab/StoryMapJS/blob/master/storymap/static/demo/demo.json
 
-The StoryMap container can go anywhere on the page. Be sure to specify a width and height. 
+The StoryMap container can go anywhere on the page. Specify a width and height. 
 The width can be absolute (in pixels) or relative (in percentage) but the height must be an absolute value.
 CSS can be used for width and height specification if preferred 
 -->
@@ -21,10 +20,18 @@ CSS can be used for width and height specification if preferred
 
 <body>
     <script>
+        // storymap_data can be an URL or a Javascript object
+        // var storymap_data = '/static/storymap.json';
         var storymap_data = JSON.parse('{{ storymap_json | escapejs }}');
+        
+        // certain settings must be passed within a separate options object
         var storymap_options = {};
+        
         var storymap = new KLStoryMap.StoryMap('mapdiv', storymap_data, storymap_options);
-        window.onresize = function(event) {storymap.updateDisplay();        }
+        window.onresize = function(event) {
+            storymap.updateDisplay(); // this isn't automatic
+        }
     </script>
 </body>
 </html>
+{% endblock content %}

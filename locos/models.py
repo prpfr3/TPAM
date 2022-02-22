@@ -383,7 +383,7 @@ class Sighting(models.Model): #Specifies a sighting
     northing = models.FloatField(db_column='Northing', blank=True, null=True)
     citation = models.CharField(max_length=200, blank='True', null='True', default=None) #To hold a book or magazine reference
     citation_specifics = models.CharField(max_length=20, blank='True', null='True', default=None) #To hold the page or diagram number
-    hyperlink = models.URLField(db_column='Hyperlink', blank=True, null=True, max_length=300)
+    hyperlink = models.CharField(db_column='Hyperlink', blank=True, null=True, max_length=300)
     notes = models.TextField(blank='True', null='True', default=None)
 
     date_added = models.DateTimeField(auto_now_add=True)
@@ -403,4 +403,39 @@ class LocoClassSighting(models.Model):
     loco_class = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.loco_class.grouping_class) + " at " + str(self.sighting.location_description) 
+        return str(self.loco_class.grouping_class) + " at " + str(self.sighting.location_description)
+
+class SlideHeader(models.Model):
+    location_line = models.BooleanField(default=True)
+    media_caption = models.CharField(max_length=100, blank=True, null=True)
+    media_credit = models.CharField(max_length=200, blank=True, null=True)
+    media_url = models.URLField(blank=True, null=True, max_length=300)
+    text_headline = models.CharField(max_length=200, blank=True, null=True)
+    text_text = models.TextField(blank=True, null=True)
+    type = models.CharField(default='overview', max_length=20)
+
+    def __str__(self):
+        return self.text_headline
+
+class Slide(models.Model):
+    slideheader = models.ManyToManyField(SlideHeader, through='Slidepack', related_name='slidepack_slide')
+    background = models.URLField(blank=True, null=True, max_length=300)
+    northing = models.FloatField(blank=True, null=True)
+    easting = models.FloatField(blank=True, null=True)
+    zoom = models.SmallIntegerField(default=12)
+    media_caption = models.CharField(max_length=100, blank=True, null=True)
+    media_credit = models.CharField(max_length=200, blank=True, null=True)
+    media_url = models.URLField(blank=True, null=True, max_length=300)
+    text_headline = models.CharField(max_length=200, blank=True, null=True)
+    text_text = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.text_headline
+
+class Slidepack(models.Model):
+    slideheader_fk = models.ForeignKey(SlideHeader, on_delete=models.CASCADE)
+    slide_fk = models.ForeignKey(Slide, on_delete=models.CASCADE)
+    slide_order = models.SmallIntegerField()
+
+    def __str__(self):
+        return "{} Slide {} : {}".format(self.slideheader_fk, self.slide_order, self.slide_fk)

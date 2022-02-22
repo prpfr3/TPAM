@@ -4,16 +4,20 @@
 {% block content_desc %}{% endblock %}
 
 {% block content %}
-  <ul>
-    {% for person in persons %}
-      <li>
-        <h3>
-          <a href="https://en.wikipedia.org/{{person.wikitextslug}}"> {{ person.name }}</a> 
-        </h3>
-              </li>
-    {% empty %}
-      <li>No persons have been added yet.</li>
-    {% endfor %}
-  </ul>
 
+    <form method='POST' action="" enctype="multipart/form-data">
+      <p>
+      {% csrf_token %}
+      {{ selection_criteria }}
+      <input type="submit" name="submit_input" value="Submit">
+      </p>
+    </form>
+
+    <table>
+    {% for person in person_list %}
+      <tr><td>{{ person.code }}</td><td><a href="https://en.wikipedia.org/{{person.wikitextslug}}"> {{ person.name }}</a></td></tr>
+    {% empty %}
+      <tr>Nobody has been loaded yet.</tr>
+    {% endfor %}
+    </table>
 {% endblock content %}

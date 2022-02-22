@@ -1,32 +1,15 @@
-#import os
-#import folium
-#import webbrowser
-
-#import pandas as pd
-#import geopandas as gpd
-
-#from sqlalchemy import create_engine, text
-#from geopandas import GeoDataFrame
-#from shapely.geometry import Point
-#from datetime import datetime
-
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseRedirect, Http404, HttpResponse, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView, ListView, DetailView
-#from django.contrib.gis.geos import fromstr, Point
-#from django.contrib.gis.db.models.functions import Distance
+from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
 from django.core.mail import send_mail
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 
-from .forms import PostForm, TopicForm, EmailPostForm
-
+from .forms import PostForm, EmailPostForm
 from .models import Topic, Post, HeritageSite, Visit
+from mainmenu.models import Profile
 
 """
 # Explanatory notes for the Owner views
@@ -60,7 +43,7 @@ class OwnerCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         print('form_valid called')
         object = form.save(commit=False)
-        object.owner = self.request.user
+        object.owner = get_object_or_404(Profile, user=self.request.user)
         object.save()
         return super(OwnerCreateView, self).form_valid(form)
 
@@ -73,7 +56,8 @@ class OwnerUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         """ Limit a User to only modifying their own data. """
         qs = super(OwnerUpdateView, self).get_queryset()
-        return qs.filter(owner=self.request.user)
+
+        return qs.filter(owner=get_object_or_404(Profile, user=self.request.user))
 
 class OwnerDeleteView(LoginRequiredMixin, DeleteView):
     """
@@ -83,41 +67,29 @@ class OwnerDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         qs = super(OwnerDeleteView, self).get_queryset()
-        return qs.filter(owner=self.request.user)
+        return qs.filter(owner=get_object_or_404(Profile, user=self.request.user))
 
 def index(request):
   return render(request, 'maps/index.html')
 
 class TopicListView(OwnerListView):
-   model = Topic
+    model = Topic
 
 class TopicDetailView(OwnerDetailView):
-# Commented code is to introduce search as per 
-# https://www.coursera.org/learn/django-javascript-jquery-json/lecture/FNlcq/walkthrough-dj4e-search-well-sample-code
-# ...but will not accept 'request' as a parameter on get_context_data
-
-# class TopicDetailView(View):
     model = Topic
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs) #Get the current context data
+        context = super().get_context_data(**kwargs)
 
         context['posts'] = context['topic'].post_set.all()
-        print("In TopicDetailView the context data is", context )
 
-        # strval =  request.GET.get("search", False)
-        # if strval :
-        #     # Simple title-only search
-        #     # objects = Post.objects.filter(title__contains=strval).select_related().order_by('-updated_at')[:10]
-
-        #     # Multi-field search
-        #     # __icontains for case-insensitive search
-        #     query = Q(title__icontains=strval) 
-        #     query.add(Q(body__icontains=strval), Q.OR)
-        #     post_list = Post.objects.filter(query).select_related().order_by('-updated_at')[:10]
-        #     context['posts'] = context['topic'].post_set.filter(query).select_related().order_by('-updated_at')[:10]
-        # else :
-        #     context['posts'] = context['topic'].post_set.all()
-
+        strval =  self.request.GET.get("search", False)
+        if strval :
+            query = Q(title__icontains=strval) 
+            query.add(Q(body__icontains=strval), Q.OR)
+            post_list = Post.objects.filter(query).select_related().order_by('-updated')[:10]
+            context['posts'] = context['topic'].post_set.filter(query).select_related().order_by('-updated')[:10]
+        else :
+            context['posts'] = context['topic'].post_set.all()
         return context
 
 @method_decorator(login_required, name='dispatch')
@@ -145,7 +117,7 @@ class PostCreateView(OwnerCreateView): #Convention: post_form.html
     form = PostForm(data=request.POST)
     if form.is_valid():
         new_post = form.save(commit=False)
-        new_post.owner = request.user
+        new_post.owner = get_object_or_404(Profile, user=request.user)
         new_post.topic = get_object_or_404(Topic, id=pk)
         new_post.save()
         return redirect(reverse('maps:topic_detail', args=[pk]))

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from locos.models import Company, PersonRole, Role, Depots, Person, Image, ModernClass, Locomotive, Builder, WheelArrangement, LocoClass, Sighting, LocoClassSighting, LocoSighting
+from locos.models import *
 from datetime import datetime
 from tinymce.widgets import TinyMCE
 from django.db import models
@@ -87,3 +87,6 @@ admin.site.register(WheelArrangement, WheelArrangementAdmin)
 admin.site.register(Sighting)
 admin.site.register(LocoSighting)
 admin.site.register(LocoClassSighting)
+admin.site.register(SlideHeader)
+admin.site.register(Slide)
+admin.site.register(Slidepack)

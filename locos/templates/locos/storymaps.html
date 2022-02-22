@@ -1,0 +1,13 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}Railroutes Storymap Selection{% endblock %}
+{% block content_desc %}{% endblock %}
+{% block content %}
+    <table>
+    {% for storymap in storymaps %}
+      <tr><td><a href="{% url 'locos:storymap' storymap.id %}"> {{ storymap }}</a></td></tr>
+    {% empty %}
+      <tr>No storymaps have been loaded yet.</tr>
+    {% endfor %}
+    </table>
+{% endblock content %}

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.utils import timezone
 from django.urls import reverse
+from mainmenu.models import Profile
 
 class Topic(models.Model):
   type = models.ForeignKey('mainmenu.MyDjangoApp', default=1, verbose_name="Topic Type", on_delete=models.SET_DEFAULT)
@@ -21,7 +22,8 @@ class Post(models.Model):
     STATUS_CHOICES = (('draft', 'Draft'), ('published', 'Published'))
 
     title = models.CharField(max_length=250)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_owner')
+    # owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_owner') #Superseded by use of Profile model below
+    owner = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='post_owner')
     topic = models.ForeignKey(Topic, on_delete=models.PROTECT)
     url = models.URLField(default=None, null=True, blank=True)
     slug = models.SlugField(default=None, null=True, blank=True, max_length=255)
@@ -30,14 +32,10 @@ class Post(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
+    liked = models.ManyToManyField(User, blank=True)
     #The first model manager below will be the default. As an additional 'published' manager is specified we have to explicitly define the 'objects' manager as well which would normally be created automatically
     objects = models.Manager() # The model default manager which retrieves all objects
     published = PublishedManager() # Our model custom manager which retrieves only published.
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.title)
-        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'Posts'
