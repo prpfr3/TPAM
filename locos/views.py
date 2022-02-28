@@ -1,15 +1,77 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect, Http404, HttpResponse, HttpRequest
 from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
 
 from .models import *
-from .forms import ImageForm, BuilderSelectionForm, CompanySelectionForm, LocoClassSelectionForm, PersonSelectionForm, LocoClassForm  
+from .forms import ImageForm, BuilderSelectionForm, CompanySelectionForm, LocoClassSelectionForm, PersonSelectionForm, LocoClassForm, SlideSelectionForm  
 import json
 import pprint
+
+from .storymap_cart import Cart
+from .forms import CartAddSlideForm
+
+
+@require_POST
+def cart_add(request, slide_id):
+    cart = Cart(request)
+    slide = get_object_or_404(Slide, id=slide_id)
+    form = CartAddSlideForm(request.POST)
+    if form.is_valid():
+        cd = form.cleaned_data
+        cart.add(slide=slide,
+                 slide_order=cd['slide_order'])
+    else:
+        print(" form not valid ", form.errors)
+    return redirect('locos:cart_detail')
+
+
+@require_POST
+def cart_remove(request, slide_id):
+    cart = Cart(request)
+    slide = get_object_or_404(Slide, id=slide_id)
+    cart.remove(slide)
+    return redirect('locos:cart_detail')
+
+
+def cart_detail(request):
+    cart = Cart(request)
+
+    for item in cart:
+        item['update_slide_order_form'] = CartAddSlideForm(initial={'slide_order': item['slide_order'],})
+
+    return render(request, 'locos/cart_detail.html', {'cart': cart})
+ 
+
+def slides(request):
+
+    if request.method == 'POST':
+        selection_criteria = SlideSelectionForm(request.POST)
+
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data['text_headline'] != None:     
+            queryset = Slide.objects.filter(text_headline__icontains=selection_criteria.cleaned_data['text_headline']).order_by('text_headline')     
+            errors = None
+        else:
+            errors = selection_criteria.errors or None
+            queryset = Slide.objects.order_by('text_headline') 
+    else:
+        selection_criteria = SlideSelectionForm()
+        errors = selection_criteria.errors or None
+        queryset = Slide.objects.order_by('text_headline') 
+    
+    context = {'selection_criteria':selection_criteria, 'errors': errors, 'slide_list': queryset}
+    return render(request, 'locos/slide_list.html', context)
+
+def slide(request, slide_id):
+  slide = Slide.objects.get(id=slide_id)
+  cart_slide_form = CartAddSlideForm()
+  context = {'slide': slide, 'cart_slide_form':cart_slide_form}
+  return render(request, 'locos/slide.html', context)
+
 
 def index(request):
   return render(request, 'locos/index.html')
@@ -343,11 +405,11 @@ def storymaps(request):
     paginator = Paginator(storymaps, 20)
     page = request.GET.get('page')
     try:
-        mvimages = paginator.page(page)
+        storymaps = paginator.page(page)
     except PageNotAnInteger:
-        mvimages = paginator.page(1)
+        storymaps = paginator.page(1)
     except EmptyPage:
-        mvimages = paginator.page(paginator.num_pages)
+        storymaps = paginator.page(paginator.num_pages)
     context = {'page': page, 'storymaps': storymaps}
     return render(request, 'locos/storymaps.html', context)
 

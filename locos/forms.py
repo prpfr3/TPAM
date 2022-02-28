@@ -4,8 +4,22 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.files.base import ContentFile
 from tinymce.widgets import TinyMCE
 
-from .models import Person, Image, Company, Builder, LocoClass
+from .models import Person, Image, Company, Builder, LocoClass, Slide
 from urllib import request
+
+SLIDE_ORDER_CHOICES = [(i, str(i)) for i in range(1, 21)]
+
+class CartAddSlideForm(forms.Form):
+    slide_order = forms.TypedChoiceField(
+                                choices=SLIDE_ORDER_CHOICES,
+                                coerce=int)
+
+class SlideSelectionForm(forms.ModelForm):
+
+    class Meta:
+        model = Slide
+        fields = ('text_headline',)
+
 
 class BuilderSelectionForm(forms.ModelForm):
 

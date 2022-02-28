@@ -11,7 +11,7 @@ from getpass import getpass #getpass is built-in
 from mysql.connector import connect, Error
 
 webpage = os.path.join(DATAIO_DIR, "BRD List_of_Depots.html")
-DATAIO_DIR = "D:\Data\TPAM"
+
 
 try:
     #res.raise_for_status()

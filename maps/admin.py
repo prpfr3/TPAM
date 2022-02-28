@@ -8,8 +8,9 @@ from tinymce.widgets import TinyMCE
 
 @admin.register(HeritageSite)
 class HeritageSiteAdmin(admin.ModelAdmin):
-    list_display = ["id", "site_name", "wikislug", "url"]
-    ordering = ('site_name',)
+    list_display = ["tpam_type", "type", "name", "wikislug", "url", "type"]
+    list_filter = ["tpam_type", "type"]
+    ordering = ('name',)
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
 @admin.register(Visit)

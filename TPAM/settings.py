@@ -79,6 +79,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'TPAM.urls'
+CART_SESSION_ID = 'cart'
 #CRISPY_TEMPLATE_PACK = 'bootstrap4'
 #GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
 

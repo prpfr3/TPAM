@@ -1,8 +1,15 @@
 from django.contrib import admin
+from django.contrib.gis.admin import OSMGeoAdmin
 from locos.models import *
 from datetime import datetime
 from tinymce.widgets import TinyMCE
 from django.db import models
+
+class LocationsAdmin(OSMGeoAdmin):
+    list_display = ['wikiname', 'wikislug']
+    search_fields = ['wikiname']
+    ordering = ['wikiname']
+    verbose_name = "Railway Stations from Wikipedia/Naptan"
 
 class DepotsAdmin(admin.ModelAdmin):
     list_display = ["depot", "codes", "code_dates"]
@@ -90,3 +97,4 @@ admin.site.register(LocoClassSighting)
 admin.site.register(SlideHeader)
 admin.site.register(Slide)
 admin.site.register(Slidepack)
+admin.site.register(Locations, LocationsAdmin)

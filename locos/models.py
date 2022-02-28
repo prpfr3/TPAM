@@ -20,16 +20,6 @@ class Depots(models.Model):
     class Meta:
       verbose_name_plural = 'Depots'
 
-
-class HeritageSite(models.Model): 
-  site_name = models.CharField(max_length=100, default=None)
-  wikislug = models.SlugField(default=None, null=True, max_length=255)
-  url = models.URLField(default=None, null=True)
-  notes = models.TextField(default=None, null=True)
-  date_added = models.DateTimeField(auto_now_add=True)
-  def __str__(self):
-    return self.site_name
-
 class ModernClass(models.Model):
   class_type = models.CharField(max_length=1, blank=True, default='')  
   modern_class = models.CharField(max_length=100, blank=True, default='')
@@ -270,6 +260,34 @@ class Company(models.Model):
   class Meta:
     verbose_name_plural = 'Companies'
 
+class Locations(models.Model):
+    type = models.CharField(max_length=20, blank=True, null=True)
+    wikiname = models.CharField(max_length=200, blank=True, null=True)
+    wikislug = models.SlugField(default=None, null=True, max_length=255)
+    disusedslug = models.SlugField(default=None, null=True, max_length=255)
+    postcode = models.CharField(default=None, blank=True, null=True, max_length=10)
+    company_fk = models.ForeignKey(Company, blank=True, null=True, on_delete=models.CASCADE)
+    closed = models.CharField(max_length=200, blank=True, null=True)
+    disused_stations_slug = models.CharField(max_length=200, blank=True, null=True)
+    geometry = models.GeometryField(blank=True, null=True)
+    atcocode = models.CharField(max_length=20, blank=True, null=True) 
+    tiploccode = models.CharField(max_length=20, blank=True, null=True)
+    crscode = models.CharField(max_length=10, blank=True, null=True)
+    stationname = models.CharField(max_length=100, blank=True, null=True)
+  
+    stationnamelang = models.CharField(max_length=2, blank=True, null=True)
+    gridtype = models.CharField(max_length=1, blank=True, null=True)
+    easting = models.PositiveIntegerField (blank=True, null=True)
+    northing = models.PositiveIntegerField (blank=True, null=True) 
+    creationdatetime = models.DateTimeField
+    modificationdatetime = models.DateTimeField
+    revisionnumber = models.SmallIntegerField (blank=True, null=True)
+    modification = models.CharField(max_length=3, blank=True, null=True)
+    class Meta:
+      verbose_name_plural = 'Locations'
+    def __str__(self):
+      return self.wikiname
+
 class ClassBuilder(models.Model): 
   lococlass_fk = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
   builder_fk = models.ForeignKey(Builder, blank=True, null=True, on_delete=models.CASCADE)
@@ -325,13 +343,7 @@ class Locomotive(models.Model):
   def __str__(self):
     return self.number
 
-class Visit(models.Model): #Visit to a Location / Heritage Site
-  location = models.ForeignKey(HeritageSite, default=1, verbose_name="Location", on_delete=models.SET_DEFAULT)
-  date = models.DateField()
-  notes = models.TextField(default=None)
-  date_added = models.DateField(auto_now_add=True)
-  def __str__(self):
-    return self.location.site_name
+
 
 class Image(models.Model): #Railway Images
   image_name = models.CharField(max_length=100, default=None)

@@ -58,14 +58,18 @@ class Post(models.Model):
             args=[self.id])
 
 class HeritageSite(models.Model): 
-  type = models.ForeignKey('mainmenu.MyDjangoApp', default=1, verbose_name="Heritage Site Type", on_delete=models.SET_DEFAULT)
-  site_name = models.CharField(max_length=100, default=None)
+
+  tpam_type = models.ForeignKey('mainmenu.MyDjangoApp', default=1, verbose_name="Heritage Site Type", on_delete=models.SET_DEFAULT)
+  type = models.CharField(max_length=20, default=None)
+  name = models.CharField(max_length=100, default=None)
+  country = models.CharField(max_length=100, default=None)
   wikislug = models.SlugField(default=None, null=True, max_length=255)
   url = models.URLField(default=None, null=True)
   notes = models.TextField(default=None, null=True)
   date_added = models.DateTimeField(auto_now_add=True)
+  
   def __str__(self):
-    return self.site_name
+    return self.name
 
 class Visit(models.Model): #Visit to a Location / Heritage Site
   location = models.ForeignKey(HeritageSite, default=1, verbose_name="Location", on_delete=models.SET_DEFAULT)
@@ -73,7 +77,7 @@ class Visit(models.Model): #Visit to a Location / Heritage Site
   notes = models.TextField(default=None)
   date_added = models.DateField(auto_now_add=True)
   def __str__(self):
-    return self.location.site_name 
+    return self.location.name
 
 class Citation(models.Model): #Based on the Wikipedia citation model
     author = models.CharField(max_length=10, default=None, null=True)

@@ -7,6 +7,10 @@ urlpatterns = [
 
     re_path(r'^$', views.index, name='index'),
 
+    re_path(r'^cart_detail/$', views.cart_detail, name='cart_detail'),
+    re_path(r'^cart_add/(?P<slide_id>\d+)/$', views.cart_add, name='cart_add'),
+    re_path(r'^cart_remove/(?P<slide_id>\d+)/$', views.cart_remove, name='cart_remove'),
+
     re_path(r'^companies/$', views.companies, name='companies'),
     re_path(r'^company/(?P<company_id>\d+)/$', views.company, name='company'),
 
@@ -25,6 +29,9 @@ urlpatterns = [
     re_path(r'^new_image/$', views.new_image, name='new_image'),
     re_path(r'^edit_image/(?P<image_id>\d+)/$', views.edit_image, name='edit_image'),
  
+    re_path(r'^slides/$', views.slides, name='slides'),
+    re_path(r'^slide/(?P<slide_id>\d+)/$', views.slide, name='slide'),
+
     re_path(r'^storymaps/$', views.storymaps, name='storymaps'),
     re_path(r'^storymap/(?P<storymap_id>\d+)/$', views.storymap, name='storymap'),
 
