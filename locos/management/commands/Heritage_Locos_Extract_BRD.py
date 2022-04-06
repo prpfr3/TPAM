@@ -14,6 +14,7 @@ try:
 except Exception as exc:
     print('Unable to get the file: %s' % (exc))
 
+"""
 soup = BeautifulSoup(res, 'html.parser') 
 csvFile = open(output_file, 'wt+', newline='', encoding='utf-8')
 output = csv.writer(csvFile)
@@ -37,7 +38,7 @@ rows = soup.find_all("tr")
     
 # Get all the rows of table
 table_rows = []
-for tr in table.tbody.find_all("tr"): # find all tr's from table's tbody
+for tr in table_data.tbody.find_all("tr"): # find all tr's from table's tbody
     t_row = {}
     # find all td's in tr and zip it with t_header
     for td in tr.find_all("td"): 
@@ -119,3 +120,4 @@ try:
       OxfamListPage=getLinks(itemnum)
 finally:
   csvFile.close() 
+"""

@@ -80,6 +80,14 @@ class WheelArrangementAdmin(admin.ModelAdmin):
     list_display = ["whyte_notation", "uic_system", "american_name", "visual"]
     ordering = ('whyte_notation', )
 
+class SlidepackAdmin(admin.ModelAdmin):
+    raw_id_fields = ('slideheader_fk',)
+    autocomplete_fields = ['slide_fk']
+
+class SlideAdmin(admin.ModelAdmin):
+    ordering = ['text_headline']
+    search_fields = ['text_headline']
+
 admin.site.register(Depots, DepotsAdmin)
 admin.site.register(Company, CompanyAdmin)
 admin.site.register(Person,PersonAdmin)
@@ -95,6 +103,6 @@ admin.site.register(Sighting)
 admin.site.register(LocoSighting)
 admin.site.register(LocoClassSighting)
 admin.site.register(SlideHeader)
-admin.site.register(Slide)
-admin.site.register(Slidepack)
+admin.site.register(Slide, SlideAdmin)
+admin.site.register(Slidepack, SlidepackAdmin)
 admin.site.register(Locations, LocationsAdmin)

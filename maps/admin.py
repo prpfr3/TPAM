@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.gis.admin import OSMGeoAdmin
 # GeoModelAdmin is an alternative to OSMGeoAdmin which provides less map detail
-from .models import Topic, Post, HeritageSite, Visit
+from .models import *   
 from datetime import datetime
 from django.contrib.gis.db import models
 from tinymce.widgets import TinyMCE
@@ -30,3 +30,4 @@ class PostAdmin(admin.ModelAdmin):
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
 admin.site.register(Topic)
+admin.site.register(Citation)

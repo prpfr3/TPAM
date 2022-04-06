@@ -1,11 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
 from django.core.mail import send_mail
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 
 from .forms import PostForm, EmailPostForm
 from .models import Topic, Post, HeritageSite, Visit
@@ -120,6 +122,7 @@ class PostCreateView(OwnerCreateView): #Convention: post_form.html
         new_post.owner = get_object_or_404(Profile, user=request.user)
         new_post.topic = get_object_or_404(Topic, id=pk)
         new_post.save()
+        messages.success(request, ("Post Has Been Added"))
         return redirect(reverse('maps:topic_detail', args=[pk]))
 
 @method_decorator(login_required, name='dispatch')
@@ -133,11 +136,19 @@ class PostUpdateView(OwnerUpdateView): #Convention: post_form.html
         form = PostForm(instance=post, data=request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, ("Post Has Been Updated"))
             return redirect(reverse('maps:topic_detail', args=[topic.id]))
 
 @method_decorator(login_required, name='dispatch')
-class PostDeleteView(OwnerDeleteView): #Convention: post_confirm_delete.html
-   model = Post
+class PostDeleteView(SuccessMessageMixin, OwnerDeleteView): #Convention: post_confirm_delete.html
+    model = Post
+    success_url=reverse_lazy('maps:topic_detail') #But returnes to topic list. How can we add the topic id to this.
+    success_message = "Post Has Been Deleted"
+
+    def delete(self, request, *args, **kwargs):
+        print(args, kwargs)
+        messages.success(self.request, self.success_message)
+        return super(PostDeleteView, self).delete(request, *args, **kwargs)
 
 class HeritageSiteListView(ListView):
   model = HeritageSite

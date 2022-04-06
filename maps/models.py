@@ -1,9 +1,10 @@
-from django.contrib.gis.db import models
 from django.contrib.auth.models import User
-from django.utils.text import slugify
-from django.utils import timezone
+from django.contrib.gis.db import models
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.text import slugify
 from mainmenu.models import Profile
+
 
 class Topic(models.Model):
   type = models.ForeignKey('mainmenu.MyDjangoApp', default=1, verbose_name="Topic Type", on_delete=models.SET_DEFAULT)
@@ -79,7 +80,11 @@ class Visit(models.Model): #Visit to a Location / Heritage Site
   def __str__(self):
     return self.location.name
 
-class Citation(models.Model): #Based on the Wikipedia citation model
+# Based on the Wikipedia citation model
+# https://en.wikipedia.org/wiki/Template:Citation
+# https://en.wikipedia.org/wiki/Wikipedia:Citation_templates
+# https://en.wikipedia.org/wiki/Wikipedia:Template_index/Sources_of_articles/Citation_quick_reference
+class Citation(models.Model): 
     author = models.CharField(max_length=10, default=None, null=True)
     author_last = models.CharField(max_length=10, default=None, null=True)
     author_first = models.CharField(max_length=10, default=None, null=True)
@@ -94,10 +99,7 @@ class Citation(models.Model): #Based on the Wikipedia citation model
     title = models.CharField(max_length=200, default=None, null=True)
     chapter = models.CharField(max_length=10, default=None, null=True)
     type = models.CharField(max_length=10, default=None, null=True) \
-    #VRecommended values are book, journal, newspaper, magazine, periodical, web, conference, AV_media 
-    work = models.CharField(max_length=10, default=None, null=True)
-    #Name of the work containing the source (On Wikipedia this could link to the source)
-    #Required by {{cite journal}} and {{cite magazine}}
+    #Recommended values are book, journal, newspaper, magazine, periodical, web, conference, AV_media 
     edition = models.CharField(max_length=10, default=None, null=True)
     series = models.CharField(max_length=10, default=None, null=True)
     volume = models.CharField(max_length=10, default=None, null=True)
