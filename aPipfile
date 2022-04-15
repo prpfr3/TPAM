@@ -1,0 +1,39 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+beautifulsoup4 = "*"
+crispy-bootstrap5 = "*"
+dj-database-url = "*"
+dj-static = "*"
+django = "*"
+django-bootstrap5 = "*"
+django-configurations = "*"
+django-debug-toolbar = "*"
+django-smart-selects = "*"
+django-storages = "*"
+djangorestframework = "*"
+django-bootstrap3 = "*"
+django-crispy-forms = "*"
+django-extensions = "*"
+django-tinymce = "*"
+folium = "*"
+fuzzywuzzy = "*"
+gunicorn = "*"
+mysql-connector-repackaged = "*"
+numpy = "*"
+pandas = "*"
+psycopg2 = "*"
+requests = "*"
+shapely = "*"
+sorl-thumbnail = "*"
+gdal = {path = "C:/Users/paulf/Downloads/GDAL-3.4.2-cp39-cp39-win_amd64.whl"}
+fiona = {path = "C:/Users/paulf/Downloads/Fiona-1.8.21-cp39-cp39-win_amd64.whl"}
+geopandas = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

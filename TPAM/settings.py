@@ -19,6 +19,8 @@ print('BASE_DIR = ', BASE_DIR)
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 DEFAULT_AUTO_FIELD='django.db.models.AutoField' #Required as from Django 3.2
 
+GDAL_LIBRARY_PATH = r'C:\\OSGeo4W64\\bin\\gdal301'
+
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 INSTALLED_APPS = [
 
@@ -253,8 +255,8 @@ else:
   KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
   config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
   SECRET_KEY = config['Django']['tpam_secret_key']  
-  DEBUG = values.BooleanValue(True)
-  ALLOWED_HOSTS = values.ListValue([])
+  DEBUG = True
+  ALLOWED_HOSTS = []
   INTERNAL_IPS = ["127.0.0.1"] #Required for Django Debug
 
   db_pswd = config['MySQL']['p']
