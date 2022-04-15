@@ -3,6 +3,7 @@ crispy-bootstrap5
 dj_database_url==0.5.0
 dj_static==0.0.6
 Django==4.0.3
+django-bootstrap5
 django_configurations==2.2
 django_debug_toolbar==3.2.2
 django_smart_selects==1.5.9
