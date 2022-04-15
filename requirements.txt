@@ -112,7 +112,6 @@ PyQtWebEngine==5.15.4
 PyQtWebEngine-Qt5==5.15.2
 pyrsistent==0.17.3
 PySocks==1.7.1
-pystache==0.5.4
 python-dateutil==2.8.1
 PyYAML==5.4.1
 pyzmq==22.0.3
