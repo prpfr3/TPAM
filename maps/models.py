@@ -5,7 +5,6 @@ from django.utils import timezone
 from django.utils.text import slugify
 from mainmenu.models import Profile
 
-
 class Topic(models.Model):
   type = models.ForeignKey('mainmenu.MyDjangoApp', default=1, verbose_name="Topic Type", on_delete=models.SET_DEFAULT)
   text = models.CharField(max_length=25, verbose_name="Topic Name")
