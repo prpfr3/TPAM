@@ -76,13 +76,14 @@ output_file = os.path.join(DATAIO_DIR, 'Locations_Extract_Joined.csv')
 df.to_csv(output_file)
 
 import shapely, folium, webbrowser
-import geopandas as gpd
-from shapely.geometry import Point
-gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.Easting, df.Northing))
-gdf.crs = "epsg:27700"
-gdf.to_crs(epsg=4326, inplace=True)
-output_file = os.path.join(DATAIO_DIR, 'Locations_LoadFile.csv')
-df.to_csv(output_file)
+# COMMENTED OUT TO PREVENT VIRTUAL ENV INSTALL PROBLEMS
+# import geopandas as gpd
+# from shapely.geometry import Point
+# gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.Easting, df.Northing))
+# gdf.crs = "epsg:27700"
+# gdf.to_crs(epsg=4326, inplace=True)
+# output_file = os.path.join(DATAIO_DIR, 'Locations_LoadFile.csv')
+# df.to_csv(output_file)
 # print(gdf.head())
 
 # m2 = folium.Map([51.28, 00.16], zoom_start= 10, tiles='cartodbpositron')
