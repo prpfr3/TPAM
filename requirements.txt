@@ -26,3 +26,4 @@ Shapely
 sorl-thumbnail
 static
 static3
+whitenoise
