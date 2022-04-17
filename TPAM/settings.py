@@ -75,6 +75,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'TPAM.urls'
@@ -202,7 +203,8 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   #specify the Django storage classes
 
   STATICFILES_LOCATION = 'static'
-  STATICFILES_STORAGE = 'custom_storages.StaticStorage'
+#   STATICFILES_STORAGE = 'custom_storages.StaticStorage' #For AWS
+  STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # For Whitenoise Static Files Storage
   MEDIAFILES_LOCATION = 'media'
   DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage' #ideally this would be called mediafiles_storage in django but it isn't !
 
