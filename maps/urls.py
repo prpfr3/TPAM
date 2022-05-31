@@ -15,8 +15,6 @@ urlpatterns = [
     path('topic/<int:pk>/delete', views.TopicDeleteView.as_view(success_url=reverse_lazy('maps:topics')), name='topic_delete'),
 
     path('post/<int:pk>/create', views.PostCreateView.as_view(success_url=reverse_lazy('maps:topics')), name='post_create'),
-    #re_path(r'^post/(?P<post_id>\d+)/update', views.post_update_view,
-    #    name='post_update'),
     path('post/<int:pk>/update/', views.PostUpdateView.as_view(success_url=reverse_lazy('maps:topics')), name='post_update'),
     path('post/<int:pk>/delete', views.PostDeleteView.as_view(success_url=reverse_lazy('maps:topics')), name='post_delete'),
 

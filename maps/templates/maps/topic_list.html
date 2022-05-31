@@ -9,7 +9,9 @@
 <ul>
   {% for topic in topic_list %}
     <li>
+        {% autoescape off %}
         <a href="{% url 'maps:topic_detail' topic.id %}">{{ topic.text }}</a>
+        {% endautoescape %}
         {% if topic.owner == user %}
         (<a href="{% url 'maps:topic_update' topic.id %}">Edit</a> |
         <a href="{% url 'maps:topic_delete' topic.id %}">Delete</a>)

@@ -49,32 +49,39 @@ class PersonRoleAdmin(admin.ModelAdmin):
 class ImageAdmin(admin.ModelAdmin):
     list_display = ['image_name', 'image', 'location', 'notes', 'date_added']
     ordering = ('image_name',)
+    search_fields = ['image_name']
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
 class LocoClassAdmin(admin.ModelAdmin):
-    list_display = ["grouping_class", "grouping_company", "pre_grouping_class", "pre_grouping_company",  "wheel_body_type"]
-    list_filter = ['grouping_company', 'pre_grouping_company', 'br_power_class', 'wheel_body_type']
-    search_fields = ('grouping_class', 'pre_grouping_class')
-    ordering = ['grouping_company', 'pre_grouping_company', 'grouping_class']
-    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
- 
-class ModernClassAdmin(admin.ModelAdmin):
-    list_display = ["modern_class", "aka_class", "wheel_id"]
-    list_filter = ['transmission', 'builder']
-    search_fields = ['modern_class']
-    ordering = ['modern_class']
+    list_display = ["wikipedia_name", "wheel_body_type"]
+    list_filter = ['br_power_class', 'wheel_body_type']
+    search_fields = ['wikipedia_name']
+    ordering = ['wikipedia_name']
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
 class LocomotiveAdmin(admin.ModelAdmin):
-    list_display = ["number", "pre_grouping_class"]
-    list_filter = ['pre_grouping_class']
-    search_fields = ('pre_grouping_class', 'number')
-    ordering = ('pre_grouping_class', 'number')
+    list_display = ["number", "wikipedia_name"]
+    list_filter = ['wikipedia_name']
+    search_fields = ('wikipedia_name', 'number')
+    ordering = ('wikipedia_name', 'number')
 
 class BuilderAdmin(admin.ModelAdmin):
     list_display = ["name", "wikislug", "pre_grouping_owner", "grouping_owner", "date_opened", "date_closed", "railuk_builder_code", "railuk_builder_code", ]
     search_fields = ["name"]
     ordering = ["name"]
+
+class RouteAdmin(admin.ModelAdmin):
+    list_display = ["name", "wikipedia_slug"]
+    search_fields = ["name"]
+    ordering = ["name"]
+
+class ClassBuilderAdmin(admin.ModelAdmin):
+    list_display = ["lococlass_fk", "builder_fk", "person_fk", "company_fk", ]
+    ordering = ["lococlass_fk"]
+
+class RouteOwnerOperatorAdmin(admin.ModelAdmin):
+    list_display = ["route_fk", "company_fk",]
+    ordering = ["route_fk"]
 
 class WheelArrangementAdmin(admin.ModelAdmin):
     list_display = ["whyte_notation", "uic_system", "american_name", "visual"]
@@ -90,18 +97,22 @@ class SlideAdmin(admin.ModelAdmin):
 
 admin.site.register(Depots, DepotsAdmin)
 admin.site.register(Company, CompanyAdmin)
+admin.site.register(Route, RouteAdmin)
 admin.site.register(Person,PersonAdmin)
 admin.site.register(Role,RoleAdmin)
 admin.site.register(PersonRole,PersonRoleAdmin)
 admin.site.register(Image, ImageAdmin)
 admin.site.register(LocoClass, LocoClassAdmin)
-admin.site.register(ModernClass, ModernClassAdmin)
 admin.site.register(Locomotive, LocomotiveAdmin)
 admin.site.register(Builder, BuilderAdmin)
 admin.site.register(WheelArrangement, WheelArrangementAdmin)
 admin.site.register(Sighting)
+admin.site.register(ClassDesigner)
+admin.site.register(RouteOwnerOperator, RouteOwnerOperatorAdmin)
+admin.site.register(ClassBuilder, ClassBuilderAdmin)
 admin.site.register(LocoSighting)
 admin.site.register(LocoClassSighting)
+admin.site.register(LocoClassImage)
 admin.site.register(SlideHeader)
 admin.site.register(Slide, SlideAdmin)
 admin.site.register(Slidepack, SlidepackAdmin)

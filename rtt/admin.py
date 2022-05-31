@@ -12,7 +12,7 @@ class NaPTANRailReferencesAdmin(admin.ModelAdmin):
     #formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
     #prepopulated_fields = {'code_dates': ('title',)}    
     #raw_id_fields = ('codes',)    
-    #date_hierarchy = 'code_dates'    
+    #date_hierarchy = 'code_dates'   
     #fields = ["date_added", "text", "eng_name"]
     #fieldsets = [
     #("Groupings", {'fields': ["a", "b", "c", "d"]}),

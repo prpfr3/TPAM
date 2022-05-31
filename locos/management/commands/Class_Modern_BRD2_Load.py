@@ -27,14 +27,13 @@ class Command(BaseCommand):
               for row in DictReader(file):
 
                   c = LocoClass()
-                  #print(row)
                   c.grouping_company = row['Big 4']
                   c.pre_grouping_company = row['Pre Grouping']
                   c.designer = row['\ufeffDesigner'] #A fudge to remove the https://en.wikipedia.org/wiki/Byte_order_markcharacter put there by Windows which interferes with utf-8 coding
                   c.designer_slug = row['Designer_url']
-                  c.grouping_class = row['Class']
-                  c.grouping_class_slug = row['Class_url']
-                  c.pre_grouping_class = row['Pre Grouping Class'] 
+                  c.wikipedia_name = row['Class']
+                  c.wikipedia_name_slug = row['Class_url']
+                  c.wikipedia_name = row['Pre Grouping Class'] 
                   c.br_power_class = row['BR Power Class']
                   c.wheel_body_type = row['Wheels']
                   try:

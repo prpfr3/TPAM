@@ -12,12 +12,15 @@
       <input type="submit" name="submit_input" value="Submit">
       </p>
     </form>
-
-    <table>
-    {% for loco_class in loco_class_list %}
-      <tr><td><a href="https://en.wikipedia.org/{{loco_class.grouping_class_slug}}">{{ loco_class.grouping_class}}</a></td></tr>
+          
+    {% for loco_class_list_row in loco_class_list %}
+      <h4>
+        <a href="{% url 'locos:loco_class' loco_class_list_row.lococlass_fk.id %}">{{loco_class_list_row.name}}</a>
+        <a href="https://en.wikipedia.org//{{loco_class_list_row.wikislug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
+      </h4>
     {% empty %}
-      <tr>No classes have been loaded yet.</tr>
+      <h2>No classes have been loaded yet.</h2>
     {% endfor %}
-    </table>
+
+    {% include "locos/pagination.html" with page=loco_class_list %}
 {% endblock content %}

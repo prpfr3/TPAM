@@ -9,9 +9,12 @@
       <div class="panel-heading">
       </div>
       <div class="panel-body">
-        {{ heritage_site.wikislug }}
-        {{ heritage_site.url }}
-        {{ heritage_site.notes|linebreaks }}
+        Type: {{ heritage_site.tpam_type }}
+        ; {{ heritage_site.type }}
+        <br>
+        Country: {{ heritage_site.country }}
+        <br>
+        Notes: {{ heritage_site.notes|linebreaks|safe }}
       </div>
     </div> <!-- panel -->
 

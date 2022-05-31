@@ -1,20 +1,23 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect, Http404, HttpResponse, HttpRequest
-from django.urls import reverse
+import json
+import wikipediaapi
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.http import (HttpRequest, HttpResponseRedirect)
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
+from django.utils.text import slugify
+from zmq import ROUTER
 
+from .forms import (BuilderSelectionForm, CartAddSlideForm,
+                    CompanySelectionForm, ImageForm, LocoClassForm,
+                    LocoClassSelectionForm, PersonSelectionForm,
+                    SlideSelectionForm, RouteSelectionForm, )
 from .models import *
-from .forms import ImageForm, BuilderSelectionForm, CompanySelectionForm, LocoClassSelectionForm, PersonSelectionForm, LocoClassForm, SlideSelectionForm  
-import json
-import pprint
-
 from .storymap_cart import Cart
-from .forms import CartAddSlideForm
-
 
 @require_POST
 def cart_add(request, slide_id):
@@ -45,24 +48,24 @@ def cart_detail(request):
         item['update_slide_order_form'] = CartAddSlideForm(initial={'slide_order': item['slide_order'],})
 
     return render(request, 'locos/cart_detail.html', {'cart': cart})
- 
+
 
 def slides(request):
 
     if request.method == 'POST':
         selection_criteria = SlideSelectionForm(request.POST)
 
-        if selection_criteria.is_valid() and selection_criteria.cleaned_data['text_headline'] != None:     
-            queryset = Slide.objects.filter(text_headline__icontains=selection_criteria.cleaned_data['text_headline']).order_by('text_headline')     
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data['text_headline'] != None:
+            queryset = Slide.objects.filter(text_headline__icontains=selection_criteria.cleaned_data['text_headline']).order_by('text_headline')
             errors = None
         else:
             errors = selection_criteria.errors or None
-            queryset = Slide.objects.order_by('text_headline') 
+            queryset = Slide.objects.order_by('text_headline')
     else:
         selection_criteria = SlideSelectionForm()
         errors = selection_criteria.errors or None
-        queryset = Slide.objects.order_by('text_headline') 
-    
+        queryset = Slide.objects.order_by('text_headline')
+
     context = {'selection_criteria':selection_criteria, 'errors': errors, 'slide_list': queryset}
     return render(request, 'locos/slide_list.html', context)
 
@@ -80,37 +83,37 @@ def persons(request):
     if request.method == 'POST':
         selection_criteria = PersonSelectionForm(request.POST)
 
-        if selection_criteria.is_valid() and selection_criteria.cleaned_data['name'] != None:     
-            queryset = Person.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')     
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data['name'] != None:
+            queryset = Person.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
             errors = None
         else:
             errors = selection_criteria.errors or None
-            queryset = Person.objects.order_by('name') 
+            queryset = Person.objects.order_by('name')
     else:
         selection_criteria = PersonSelectionForm()
         errors = selection_criteria.errors or None
-        queryset = Person.objects.order_by('name') 
-    
+        queryset = Person.objects.order_by('name')
+
     context = {'selection_criteria':selection_criteria, 'errors': errors, 'person_list': queryset}
     return render(request, 'locos/person_list.html', context)
 
-def storymap_sightings(request):
-  sightings = Sighting.objects.order_by('id')
-  
-  storymap_dict = {"storymap": 
-      {"attribution": "", 
-        "call_to_action": True, 
-        "call_to_action_text": "", 
-        "map_as_image": False, 
-        "map_subdomains": "", 
-        "map_type": "osm:standard", 
+def storymap_references(request):
+  references = Sighting.objects.order_by('id')
+
+  storymap_dict = {"storymap":
+      {"attribution": "",
+        "call_to_action": True,
+        "call_to_action_text": "",
+        "map_as_image": False,
+        "map_subdomains": "",
+        "map_type": "osm:standard",
         "slides": [
-            { "date": "", 
-              "location": {"line": True}, 
-              "media": {"caption": "", "credit": "", "url": ""}, 
-              "text": {"headline": "Steam Locomotive Picture Library", "text": ""}, 
+            { "date": "",
+              "location": {"line": True},
+              "media": {"caption": "", "credit": "", "url": ""},
+              "text": {"headline": "Steam Locomotive Picture Library", "text": ""},
               "type": "overview"
-            }, 
+            },
         ],
         "zoomify": False
       }
@@ -118,35 +121,35 @@ def storymap_sightings(request):
 
   forlooplimiter = 0
 
-  for sighting in sightings:
+  for reference in references:
 
     if forlooplimiter < 13:
       forlooplimiter += 1
 
-      slide_date = str(sighting.DD) + "/" + str(sighting.MM) + "/" + str(sighting.YD) + str(sighting.YY)
-      slide_media_caption = str(sighting.location_description) + " on " + str(sighting.DD) + "/" + str(sighting.MM) + "/" + str(sighting.YD) + str(sighting.YY)
-      slide_media_credit = sighting.citation + ' ' + sighting.citation_specifics
-      slide_headline = str(sighting.location_description) + " on " + str(sighting.DD) + "/" + str(sighting.MM) + "/" + str(sighting.YD) + str(sighting.YY)
+      slide_date = str(reference.DD) + "/" + str(reference.MM) + "/" + str(reference.YD) + str(reference.YY)
+      slide_media_caption = str(reference.location_description) + " on " + str(reference.DD) + "/" + str(reference.MM) + "/" + str(reference.YD) + str(reference.YY)
+      slide_media_credit = reference.citation + ' ' + reference.citation_specifics
+      slide_headline = str(reference.location_description) + " on " + str(reference.DD) + "/" + str(reference.MM) + "/" + str(reference.YD) + str(reference.YY)
 
       #Turns a slugfield into a full url for the current site or keeps a url as is
-      media_url = request.build_absolute_uri(sighting.hyperlink)
+      media_url = request.build_absolute_uri(reference.hyperlink)
 
-      slide = { 
-        "background": {"url": ""}, 
-        "date": slide_date, 
-        "location": {"lat": sighting.northing, "line": True, "lon": sighting.easting, "zoom": 12}, 
-        "media": {"caption": slide_media_caption, "credit": slide_media_credit, "url": media_url}, 
-        "text": {"headline": slide_headline, "text": sighting.notes}
+      slide = {
+        "background": {"url": ""},
+        "date": slide_date,
+        "location": {"lat": reference.northing, "line": True, "lon": reference.easting, "zoom": 12},
+        "media": {"caption": slide_media_caption, "credit": slide_media_credit, "url": media_url},
+        "text": {"headline": slide_headline, "text": reference.notes}
       }
 
       storymap_dict['storymap']['slides'].append(slide)
 
   storymap_json = json.dumps(storymap_dict)
-  return render(request, 'locos/storymap_sightings.html', {'storymap_json':storymap_json})
+  return render(request, 'locos/storymap_references.html', {'storymap_json':storymap_json})
 
 def persons_timeline(request):
   persons = Person.objects.order_by('name')
-  
+
   tdict = {
     "title": {
         "media": {
@@ -195,7 +198,7 @@ def persons_timeline(request):
 
 def persons_vis_timeline(request):
   persons = Person.objects.order_by('name')
-  
+
   events = []
   forlooplimiter = 0
 
@@ -204,7 +207,7 @@ def persons_vis_timeline(request):
     if person.birthdate and person.dieddate:
       forlooplimiter += 1
 
-      ## https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format   
+      ## https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format
       event = {
           "id": forlooplimiter,
           "content": person.name,
@@ -255,40 +258,65 @@ def loco_classes(request):
     if request.method == 'POST':
         selection_criteria = LocoClassSelectionForm(request.POST)
 
-        if selection_criteria.is_valid() and selection_criteria.cleaned_data != None:     
-            queryset = LocoClass.objects.filter(grouping_class__icontains=selection_criteria.cleaned_data['grouping_class']).order_by('grouping_class')     
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data != None:
+            queryset = LocoClassList.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
             errors = None
         else:
             errors = selection_criteria.errors or None
-            queryset = LocoClass.objects.order_by('grouping_class') 
+            queryset = LocoClassList.objects.order_by('name')
     else:
         selection_criteria = LocoClassSelectionForm()
         errors = selection_criteria.errors or None
-        queryset = LocoClass.objects.order_by('grouping_class') 
-    
-    context = {'selection_criteria':selection_criteria, 'errors': errors, 'loco_class_list': queryset}
+        queryset = LocoClassList.objects.order_by('name')
+
+    paginator = Paginator(queryset, 20)
+    page = request.GET.get('page')
+    try:
+        queryset = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer deliver the first page
+        queryset = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range deliver last page of results
+        queryset = paginator.page(paginator.num_pages)
+
+    context = {'selection_criteria':selection_criteria, 'errors': errors, 'page': page, 'loco_class_list': queryset}
     return render(request, 'locos/loco_class_list.html', context)
 
 def loco_class(request, loco_class_id):
   loco_class = LocoClass.objects.get(id=loco_class_id)
-  operators = Company.objects.filter(loco_classes=loco_class_id)
-  sightings = Sighting.objects.filter(lococlass=loco_class_id)
-  class_designers1 = loco_class.loco_class_designer.all()
+  locomotives = Locomotive.objects.filter(lococlass=loco_class_id)
+  references = Sighting.objects.filter(lococlass=loco_class_id)
+  images = Image.objects.filter(lococlass=loco_class_id)
+  operators = loco_class.company_owneroperator.all()
+  class_designers1 = loco_class.person_designer.all()
   class_designers2 = loco_class.builder_designer.all()
   class_designers3 = loco_class.company_designer.all()
-  class_builders1 = loco_class.loco_class_builder.all()
+  class_builders1 = loco_class.person_builder.all()
   class_builders2 = loco_class.builder_builder.all()
   class_builders3 = loco_class.company_builder.all()
 
-  context = {'loco_class':loco_class, 
-              'operators':operators, 
-              'sightings':sightings, 
-              'designers1':class_designers1, 
+  wiki_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
+  page_name = loco_class.wikipedia_name.replace(' ', '_')
+  print(page_name)
+  wikipedia_summary = wiki_wiki.page(page_name).text
+  print(wikipedia_summary)
+  print('now I"m here')
+
+  context = {'loco_class':loco_class,
+              'locomotives':locomotives,
+              'operators':operators,
+              'references':references,
+              'images':images,
+
+              'designers1':class_designers1,
               'designers2':class_designers2,
               'designers3':class_designers3,
-              'builders1':class_builders1, 
+              'builders1':class_builders1,
               'builders2':class_builders2,
-              'builders3':class_builders3}
+              'builders3':class_builders3,
+              'wikipedia_summary':wikipedia_summary
+  }
   return render(request, 'locos/loco_class.html', context)
 
 
@@ -296,19 +324,41 @@ def companies(request):
     if request.method == 'POST':
         selection_criteria = CompanySelectionForm(request.POST)
 
-        if selection_criteria.is_valid() and selection_criteria.cleaned_data['name'] != None:     
-            queryset = Company.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')     
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data['name'] != None:
+            queryset = Company.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
             errors = None
         else:
             errors = selection_criteria.errors or None
-            queryset = Company.objects.order_by('name') 
+            queryset = Company.objects.order_by('name')
     else:
-        selection_criteria = CompanySelectionForm()
+        selection_criteria = CompanySelectionForm
         errors = selection_criteria.errors or None
-        queryset = Company.objects.order_by('name') 
-    
+        queryset = Company.objects.order_by('name')
+
     context = {'selection_criteria':selection_criteria, 'errors': errors, 'company_list': queryset}
     return render(request, 'locos/company_list.html', context)
+
+def routes(request):
+
+    if request.method == 'POST':
+        selection_criteria = RouteSelectionForm(request.POST)
+
+        if selection_criteria.is_valid() and str(selection_criteria.cleaned_data['name']) != 'None':
+            queryset = Route.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
+            errors = None
+        elif selection_criteria.is_valid() and str(selection_criteria.cleaned_data['route_categories']) != 'None':
+            queryset = Route.objects.filter(route_categories__in=selection_criteria.cleaned_data['route_categories']).order_by('name')
+            errors = None
+        else:
+            errors = selection_criteria.errors or None
+            queryset = Route.objects.order_by('name')
+    else:
+        selection_criteria = RouteSelectionForm()
+        errors = selection_criteria.errors or None
+        queryset = Route.objects.order_by('name')
+
+    context = {'selection_criteria':selection_criteria, 'errors': errors, 'route_list': queryset}
+    return render(request, 'locos/route_list.html', context)
 
 def company(request, company_id):
   company = Company.objects.get(id=company_id)
@@ -321,17 +371,17 @@ def builders(request):
     if request.method == 'POST':
         selection_criteria = BuilderSelectionForm(request.POST)
 
-        if selection_criteria.is_valid() and selection_criteria.cleaned_data['name'] != None:     
-            queryset = Builder.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')     
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data['name'] != None:
+            queryset = Builder.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
             errors = None
         else:
             errors = selection_criteria.errors or None
-            queryset = Builder.objects.order_by('name') 
+            queryset = Builder.objects.order_by('name')
     else:
         selection_criteria = BuilderSelectionForm()
         errors = selection_criteria.errors or None
-        queryset = Builder.objects.order_by('name') 
-    
+        queryset = Builder.objects.order_by('name')
+
     context = {'selection_criteria':selection_criteria, 'errors': errors, 'builder_list': queryset}
     return render(request, 'locos/builder_list.html', context)
 
@@ -341,8 +391,8 @@ def builder(request, builder_id):
   return render(request, 'locos/manufacturer.html', context)
 
 def images(request):
-  images = Image.objects.order_by('image_grouping_class')
-  paginator = Paginator(images, 20) 
+  images = Image.objects.order_by('image_name')
+  paginator = Paginator(images, 20)
   page = request.GET.get('page')
   try:
       images = paginator.page(page)
@@ -357,7 +407,8 @@ def images(request):
 
 def image(request, image_id):
   image = Image.objects.get(id=image_id)
-  context = {'image': image}
+  loco_classes = LocoClass.objects.filter(image=image_id)
+  context = {'image': image, 'loco_classes':loco_classes}
   return render(request, 'locos/image.html', context)
 
 @login_required
@@ -451,18 +502,17 @@ def storymap(request, storymap_id):
         slide_list.append(slide_dict)
 
     #Create a dictionary in the required JSON format, including the dictionary list of slides
-    storymap_dict = {"storymap": 
-      {"attribution": "Paul Frost", 
-        "call_to_action": True, 
-        "call_to_action_text": "A Journey in Time", 
-        "map_as_image": False, 
-        "map_subdomains": "", 
-        "map_type": "osm:standard", 
-        "slides": slide_list,   
+    storymap_dict = {"storymap":
+      {"attribution": "Paul Frost",
+        "call_to_action": True,
+        "call_to_action_text": "A Journey in Time",
+        "map_as_image": False,
+        "map_subdomains": "",
+        "map_type": "osm:standard",
+        "slides": slide_list,
         "zoomify": False
       }
     }
 
     storymap_json = json.dumps(storymap_dict)
-    print(storymap_json)
     return render(request, 'locos/storymap.html', {'storymap_json':storymap_json})

@@ -5,11 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from maps.models import HeritageSite
 from mainmenu.models import MyDjangoApp
 
-ALREADY_LOADED_ERROR_MESSAGE = """
-If you need to reload the data from the CSV file,
-first delete the db.sqlite3 file to destroy the database.
-Then, run `python manage.py migrate` for a new empty
-database with tables"""
+ALREADY_LOADED_ERROR_MESSAGE = """Empty the table before running this load"""
 
 
 class Command(BaseCommand):
@@ -19,12 +15,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         import os
 
-        do_not_load = ['Miniature', 'Defunct', 'Proposed', 'Defunct', 'Isle of Man', 'Channel Islands']
+        do_not_load = ['Miniature Railway', 'Proposed', 'Defunct', 'Isle of Man', 'Channel Islands']
 
         with open(os.path.join("D:\\Data", "TPAM", "Heritage_Railways_Master.csv"), encoding="utf-8") as file:   
             for row in DictReader(file):
                 
-                if row['Name'] not in do_not_load:
+                if row['Type'] not in do_not_load:
 
                     try:
                         h = HeritageSite.objects.get(name=row['Name'])

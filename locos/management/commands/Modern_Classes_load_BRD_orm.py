@@ -19,8 +19,8 @@ class Command(BaseCommand):
         print("Creating classes")
         import os
         for csv in [
-            'BRD_List_of_British_Rail_modern_diesel_locomotive_classes.csv',
-            'BRD_List_of_British_Rail_modern_electric_locomotive_classes.csv'
+            'Class_BRD_Diesel.csv',
+            'Class_BRD_Electric.csv'
           ]:
 
           with open(os.path.join("D:\\Data", "TPAM", csv), encoding="utf-8") as file:   
@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 c.modern_class = row['Class']
                 c.modern_class_slug = row['Class_url']
                 c.year_introduced = row['Introduced']
-                c.builder = row['Builder'] 
+                c.builder = row['Manufacturer'] 
                 if c.class_type == 'D':
                   c.power_unit = row['Power Unit']
                   c.horse_power = row['Horse Power']

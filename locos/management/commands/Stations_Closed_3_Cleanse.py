@@ -1,6 +1,6 @@
 
 # A fuzzy analysis of names has been used to determine which Disused records to map to which Wikipedia records
-# This improved on a straight join based on station names and minimal cleansing of those names
+# This fuzzy analysis improved on a straight join based on station names and minimal cleansing of those names
 
 import os
 import pandas as pd
@@ -30,7 +30,10 @@ def checker(strings_to_be_matched,possible_matches):
            names_array.append(string_to_be_matched)
            ratio_array.append("100")
         else:   
-            x=process.extractOne(string_to_be_matched,possible_matches,scorer=fuzz.token_set_ratio)
+            # x=process.extractOne(string_to_be_matched,possible_matches,scorer=fuzz.ratio)
+            # x=process.extractOne(string_to_be_matched,possible_matches,scorer=fuzz.partial_ratio)
+            x=process.extractOne(string_to_be_matched,possible_matches,scorer=fuzz.token_sort_ratio)
+            # x=process.extractOne(string_to_be_matched,possible_matches,scorer=fuzz.token_set_ratio)
             names_array.append(x[0])
             ratio_array.append(x[1])
     return names_array,ratio_array
@@ -44,6 +47,7 @@ df_mapping = pd.DataFrame()
 df_mapping["disused_names"]=pd.Series(disused_names)
 df_mapping["wikipedia_names"]=pd.Series(name_match)
 df_mapping["estimated_accuracy"]=pd.Series(ratio_match)
+# Saves the file as a record of the analysis; it is not used further in other ETL programs
 output_file = os.path.join(DATAIO_DIR, 'Locations_Disused_Extract_Fuzzy_Analysis.csv')
 df_mapping.to_csv(output_file)
 

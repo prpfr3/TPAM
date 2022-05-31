@@ -64,7 +64,7 @@ for row in rows:
 
           if cellcount in [1, 2]:
               a = cell.find("a", href=True)
-              if a:
+              if a and 'wiki' in a['href']:
                 csvRow.append(a['href'])
               else:
                 csvRow.append("")
@@ -78,6 +78,10 @@ for row in rows:
 
           if cellcount == 10: #Ignore the last cell with the newline indicator
             pass
+          elif cellcount == 1:
+            cell_cleansed = cell.get_text().replace(' class', '')
+            cell_cleansed = cell_cleansed.replace('Class ', '')
+            csvRow.append(cell_cleansed)            
           else:
             csvRow.append(cell.get_text())
 

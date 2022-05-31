@@ -16,8 +16,6 @@ try:
     #page = requests.get(webpage).text
     df = pd.read_html(webpage, flavor="bs4")[1]
     #df = pd.read_html(webpage, flavor="bs4", na_values=['none'])[1]
-    print(df.head())
-    print(df.info())
     df_clean = df.rename(columns={
                        df.columns[0]:"builder_code",
                        df.columns[1]:"builder_name",
@@ -33,12 +31,9 @@ try:
     #df_clean['date_opened'] = pd.to_datetime(df_clean['date_opened'])
     #df_clean = df_clean.drop([df.columns[2],df.columns[3]], axis=1) #To drop columns
     #df_clean = df_clean.drop([0, 27, 70, 76]) #To drop rows
-    print(df_clean.info())
     df_clean = df_clean.where(df_clean.notnull(), "")
     #df_clean['steam'] = df_clean['steam'].astype(int, errors='ignore')
     df_clean.to_csv(os.path.join(DATAIO_DIR, "Builder.csv"), index=False)
-    print(df_clean.info())
-    print(df_clean.head())
 
 except Exception as exc:
     print('Unable to get the file: %s' % (exc))

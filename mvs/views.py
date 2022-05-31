@@ -75,10 +75,6 @@ class DeleteFavoriteView(LoginRequiredMixin, View):
 
         return HttpResponse()
 
-
-
-
-
 def military_vehicle_class(request, military_vehicle_class_id):
   military_vehicle_class = MilitaryVehicleClass.objects.get(id=military_vehicle_class_id)
   context = {'military_vehicle_class': military_vehicle_class}

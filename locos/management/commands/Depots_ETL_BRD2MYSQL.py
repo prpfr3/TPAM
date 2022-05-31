@@ -18,8 +18,7 @@ try:
     #page = requests.get(webpage).text
     df = pd.read_html(webpage, flavor="bs4")[1]
     #df = pd.read_html(webpage, flavor="bs4", na_values=['none'])[1]
-    print(df.head())
-    print(df.info())
+
     df_clean = df.rename(columns={
                        df.columns[0]:"depot",
                        df.columns[1]:"codes",

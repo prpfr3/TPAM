@@ -1,13 +1,12 @@
 ﻿{% extends "../mainmenu/base.html" %}
+{% load bootstrap3 %}
 
-{% block header %}
-  <h2>Edit:<a href="{% url 'locos:image' image.id %} ">{{ image }}</a></h2>
-{% endblock header %}
+{% block content_title %}Edit Image Record{% endblock %}
+{% block content_desc %}{{ image }}{% endblock %}
 
 {% block content %}
     
-  <form action="{% url 'locos:edit_image' image.id %}" method='post'
-      class="form">
+  <form action="{% url 'locos:edit_image' image.id %}" method='post' class="form">
       
     {% csrf_token %}
     {% bootstrap_form form %}

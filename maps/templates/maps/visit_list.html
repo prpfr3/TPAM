@@ -8,11 +8,13 @@
   <ul>
     {% for visit in object_list %}
       <li>
-        <h3>
-          <a href="{% url 'maps:visit' visit.id %}"> {{ visit.date }}</a>
-           {{ visit.location }}
+        <h3>{{ visit.location }} on {{ visit.date }}
+        <a href="{% url 'maps:visit' visit.id %}"><i class="fa fa-solid fa-camera"></i></a>
         </h3>
-              </li>
+        {% autoescape off %}
+        {{ visit.notes|linebreaks }}
+        {% endautoescape %}
+      </li>
     {% empty %}
       <li>No Visits have been added yet.</li>
     {% endfor %}

@@ -1,17 +1,13 @@
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User
 
-# N.B. Classes have to be listed in order such that a class refering to another appears later in the list
-
 class Depots(models.Model):
-    depot = models.CharField(max_length=500, blank=True, null=True)
+    depot = models.CharField(max_length=1000, blank=True, null=True)
     codes = models.CharField(max_length=100, blank=True, null=True)
     code_dates = models.CharField(max_length=100, blank=True, null=True)
     date_opened = models.CharField(max_length=20, blank=True, null=True)
     date_closed_to_steam = models.CharField(max_length=20, blank=True, null=True)
     date_closed = models.CharField(max_length=20, blank=True, null=True)
-    pre_grouping_company = models.CharField(max_length=20, blank=True, null=True)
-    grouping_company = models.CharField(max_length=20, blank=True, null=True)
     br_region = models.CharField(db_column='BR_region', max_length=20, blank=True, null=True)
     map = models.CharField(max_length=200, blank=True, null=True)
     web = models.CharField(max_length=200, blank=True, null=True)
@@ -20,47 +16,17 @@ class Depots(models.Model):
     class Meta:
       verbose_name_plural = 'Depots'
 
-class ModernClass(models.Model):
-  class_type = models.CharField(max_length=1, blank=True, default='')  
-  modern_class = models.CharField(max_length=100, blank=True, default='')
-  modern_class_slug = models.SlugField(default=None, null=True, max_length=255)
-  aka_class = models.CharField(max_length=100, blank=True, default='')
-  aka_class_slug = models.SlugField(default=None, null=True, max_length=255)
-  year_introduced = models.CharField(max_length=100, blank=True, default='')
-  builder = models.CharField(max_length=100, blank=True, default='')
-  power_unit = models.CharField(max_length=100, blank=True, default='')
-  horse_power = models.CharField(max_length=100, blank=True, default='')
-  current = models.CharField(max_length=100, blank=True, default='')
-  wheel_id = models.CharField(max_length=100, blank=True, default='')
-  wheel_id_slug = models.SlugField(default=None, null=True, max_length=255)
-  transmission = models.CharField(max_length=50, blank=True, default='')
-  number_range = models.CharField(max_length=255, blank=True, default='')
-  number_range_slug = models.SlugField(default=None, null=True, max_length=255)
-  number_built = models.CharField(max_length=100, blank=True, default='')
-  multiple = models.CharField(max_length=100, blank=True, default='')
-  img_slug = models.SlugField(default=None, null=True, max_length=255)
-
-  class Meta:
-    verbose_name_plural = 'Post Steam Locomotive Classes'
-    managed = True
-  def __str__(self):
-    return self.modern_class
-
-
-
 class WheelArrangement(models.Model):
     uic_system = models.CharField(db_column='UIC_system', max_length=20, blank=True, null=True)
     whyte_notation = models.CharField(db_column='Whyte_notation', max_length=20, blank=True, null=True)
     american_name = models.CharField(db_column='American_name', max_length=75, blank=True, null=True)
     visual = models.CharField(db_column='Visual', max_length=20, blank=True, null=True)
 
+
 class LocoClass(models.Model):
-  grouping_company = models.CharField(max_length=10, blank=True, default='')
-  pre_grouping_company = models.CharField(max_length=20, blank=True, default='')
-  grouping_class = models.CharField(max_length=500, blank=True, default='')
-  grouping_class_slug = models.SlugField(default=None, null=True, max_length=255) #1923-1947
-  pre_grouping_class = models.CharField(max_length=100, blank=True, default='') #pre1923
-  br_power_class = models.CharField(max_length=5, blank=True, default='') #1948-1997
+  wikipedia_name = models.CharField(max_length=1000, blank=True, default='')
+
+  br_power_class = models.CharField(max_length=5, blank=True, default='')
   wheel_body_type = models.CharField(max_length=100, blank=True, default='')
   wheel_arrangement = models.ForeignKey(WheelArrangement, default=None, blank=None, null=True, verbose_name="Wheel Arrangement", on_delete=models.SET_DEFAULT)
   year_built = models.CharField(max_length=100, blank=True, default='')
@@ -70,7 +36,6 @@ class LocoClass(models.Model):
   year_last_built = models.CharField(max_length=100, blank=True, default='')
   number_built = models.CharField(max_length=100, blank=True, default='')
   img_slug = models.SlugField(default=None, null=True, max_length=255)
-
   adhesive_weight = models.CharField(max_length=200, blank=True, default='')
   adhesion_factor = models.CharField(max_length=40, blank=True, default='')
   alternator = models.CharField(max_length=75, blank=True, default='') 
@@ -149,7 +114,7 @@ class LocoClass(models.Model):
   tender_type = models.CharField(max_length=200, blank=True, default='')
   tender_weight = models.CharField(max_length=300, blank=True, default='')
   total_weight = models.CharField(max_length=200, blank=True, default='')
-  tractive_effort = models.CharField(max_length=200, blank=True, default='')
+  tractive_effort = models.CharField(max_length=1000, blank=True, default='')
   traction_motors = models.CharField(max_length=200, blank=True, default='')
   trailing_diameter = models.CharField(max_length=200, blank=True, default='')
   train_brakes = models.CharField(max_length=200, blank=True, default='')
@@ -168,14 +133,16 @@ class LocoClass(models.Model):
   whyte = models.CharField(max_length=200, blank=True, default='')
   width = models.CharField(max_length=200, blank=True, default='')
   withdrawn = models.CharField(max_length=200, blank=True, default='')
-
   class Meta:
     verbose_name_plural = 'Locomotive Classes'
     managed = True
-
   def __str__(self):
-    return self.grouping_class
+    return self.wikipedia_name
 
+class LocoClassList(models.Model):
+  name = models.CharField(max_length=1000, blank=True, default='')
+  wikislug = models.SlugField(default=None, null=True, max_length=255)
+  lococlass_fk = models.ForeignKey(LocoClass, blank=True, null=True, on_delete=models.CASCADE)
 
 class Person(models.Model): 
   """Railway Engineers etc"""
@@ -194,11 +161,9 @@ class Person(models.Model):
   gracetextslug = models.CharField(max_length=200, blank=True, default='') 
   notes = models.TextField(default=None)
   date_added = models.DateTimeField(auto_now_add=True)
-  # Whereas Company needed a related name for this Many-to-Many, objects Builder and Person did not. All three share the ClassDesigner table
   lococlass_designed = models.ManyToManyField(LocoClass, through='ClassDesigner', related_name="person_designer")
   lococlass_built = models.ManyToManyField(LocoClass, through='ClassBuilder', related_name="person_builder")
   def __str__(self):
-    """Return a string representation of the model"""
     return self.name
 
 class Role(models.Model): 
@@ -211,7 +176,6 @@ class Role(models.Model):
 class PersonRole(models.Model): 
   role = models.ForeignKey(Role, on_delete=models.CASCADE)
   person = models.ForeignKey(Person, on_delete=models.CASCADE)
-
   def __str__(self):
     return "{} {}".format(self.person.name, self.role.role)
 
@@ -233,14 +197,12 @@ class Builder(models.Model):
   electric = models.CharField(max_length=10, blank=True, null=True)
   map = models.CharField(max_length=200, blank=True, null=True)
   web = models.CharField(max_length=200, blank=True, null=True)
-  # Whereas Company needed a related name for this Many-to-Many, objects Builder and Person did not. All three share the ClassDesigner table
   lococlass_designed = models.ManyToManyField(LocoClass, through='ClassDesigner', related_name="builder_designer")
   lococlass_built = models.ManyToManyField(LocoClass, through='ClassBuilder', related_name="builder_builder")
-
-    
+  def __str__(self):
+    return self.name
   class Meta:
     verbose_name_plural = 'Builder' 
-
 
 class CompanyCategory(models.Model):
   category = models.CharField(max_length=100, null=True)
@@ -249,24 +211,13 @@ class CompanyCategory(models.Model):
   class Meta:
     managed = True
 
-class Company(models.Model):
-  name = models.CharField(max_length=200, blank=True, null=True)
-  wikislug = models.SlugField(max_length=200, default=None)
-  code = models.CharField(max_length=10, blank=True, null=True)
-  loco_classes = models.ManyToManyField(LocoClass)
-  company_categories = models.ManyToManyField(CompanyCategory)
-  lococlass_designed = models.ManyToManyField(LocoClass, through='ClassDesigner', related_name="company_designer")
-  lococlass_built = models.ManyToManyField(LocoClass, through='ClassBuilder', related_name="company_builder")
-  class Meta:
-    verbose_name_plural = 'Companies'
-
 class Locations(models.Model):
     type = models.CharField(max_length=20, blank=True, null=True)
     wikiname = models.CharField(max_length=200, blank=True, null=True)
     wikislug = models.SlugField(default=None, null=True, max_length=255)
     disusedslug = models.SlugField(default=None, null=True, max_length=255)
     postcode = models.CharField(default=None, blank=True, null=True, max_length=10)
-    company_fk = models.ForeignKey(Company, blank=True, null=True, on_delete=models.CASCADE)
+    # company_fk = models.ForeignKey(Company, blank=True, null=True, on_delete=models.CASCADE)
     closed = models.CharField(max_length=200, blank=True, null=True)
     disused_stations_slug = models.CharField(max_length=200, blank=True, null=True)
     geometry = models.GeometryField(blank=True, null=True)
@@ -274,7 +225,6 @@ class Locations(models.Model):
     tiploccode = models.CharField(max_length=20, blank=True, null=True)
     crscode = models.CharField(max_length=10, blank=True, null=True)
     stationname = models.CharField(max_length=100, blank=True, null=True)
-  
     stationnamelang = models.CharField(max_length=2, blank=True, null=True)
     gridtype = models.CharField(max_length=1, blank=True, null=True)
     easting = models.PositiveIntegerField (blank=True, null=True)
@@ -288,68 +238,121 @@ class Locations(models.Model):
     def __str__(self):
       return self.wikiname
 
+class RouteCategory(models.Model):
+  category = models.CharField(max_length=100, null=True)
+  def __str__(self):
+    return self.category
+  class Meta:
+    managed = True
+
+class RouteMap(models.Model):
+  # In Wikipedia, a Routemap can appear on more than one page (Route).
+  name = models.CharField(max_length=1000, null=True)
+  def __str__(self):
+    return self.name
+  class Meta:
+    managed = True
+
+class Route(models.Model):
+  name = models.CharField(max_length=1000, blank=True, default='')
+  wikipedia_slug = models.SlugField(default=None, null=True, max_length=255)
+  wikipedia_route_categories = models.ManyToManyField(RouteCategory)
+  wikipedia_routemaps = models.ManyToManyField(RouteMap)
+  locations = models.ManyToManyField(Locations)
+  def __str__(self):
+    return self.name
+
+class RouteLocation(models.Model):
+  routemap_fk = models.ForeignKey(RouteMap, on_delete=models.CASCADE, default=1)
+  tr = models.CharField(max_length=1000, blank=True, null=True)
+  td1 = models.CharField(max_length=1000, blank=True, null=True)
+  td2 = models.CharField(max_length=1000, blank=True, null=True)
+  td3 = models.CharField(max_length=1000, blank=True, null=True)
+  td4 = models.CharField(max_length=1000, blank=True, null=True)
+  td5 = models.CharField(max_length=1000, blank=True, null=True)
+  td6 = models.CharField(max_length=1000, blank=True, null=True)
+  # def __str__(self):
+  #   return self.route_fk
+
+class Company(models.Model):
+  name = models.CharField(max_length=200, blank=True, null=True)
+  wikislug = models.SlugField(max_length=200, default=None)
+  code = models.CharField(max_length=10, blank=True, null=True)
+  company_categories = models.ManyToManyField(CompanyCategory)
+  lococlass_owneroperator = models.ManyToManyField(LocoClass, through='ClassOwnerOperator', related_name="company_owneroperator")
+  lococlass_designed = models.ManyToManyField(LocoClass, through='ClassDesigner', related_name="company_designer")
+  lococlass_built = models.ManyToManyField(LocoClass, through='ClassBuilder', related_name="company_builder")
+  route_owneroperator = models.ManyToManyField(Route, through='RouteOwnerOperator', related_name="route_owneroperator")
+  def __str__(self):
+    return self.name
+  class Meta:
+    verbose_name_plural = 'Companies'
+
 class ClassBuilder(models.Model): 
   lococlass_fk = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
   builder_fk = models.ForeignKey(Builder, blank=True, null=True, on_delete=models.CASCADE)
   person_fk = models.ForeignKey(Person, blank=True, null=True, on_delete=models.CASCADE)
   company_fk = models.ForeignKey(Company, blank=True, null=True, on_delete=models.CASCADE)
-
   def __str__(self):
-    if self.person_fk != "":
-      builder = self.person_fk
-    elif self.builder_fk != "":
-      builder = self.builder_fk
-    elif self.company_fk != "":
-      builder = self.company_fk
+    if self.person_fk is not None:
+      builder = self.person_fk.name
+    elif self.builder_fk is not None:
+      builder = self.builder_fk.name
+    elif self.company_fk is not None:
+      builder = self.company_fk.name
+    else:
+      builder = ""
     return "{}".format(builder)
 
 class ClassDesigner(models.Model): 
-
   lococlass_fk = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
   builder_fk = models.ForeignKey(Builder, blank=True, null=True, on_delete=models.CASCADE)
   person_fk = models.ForeignKey(Person, blank=True, null=True, on_delete=models.CASCADE)
   company_fk = models.ForeignKey(Company, blank=True, null=True, on_delete=models.CASCADE)
-
   def __str__(self):
-    if self.person_fk != "":
-      designer_name = self.person_fk
-    elif self.builder_fk != "":
-      designer_name = self.builder_fk
-    elif self.company_fk != "":
-      designer_name = self.company_fk
-    return "{}".format(designer_name)
+    if self.person_fk is not None:
+      designer = self.person_fk.name
+    elif self.builder_fk is not None:
+      designer = self.builder_fk.name
+    elif self.company_fk is not None:
+      designer = self.company_fk.name
+    else:
+      designer = ""
+    return "{}".format(designer)
 
 class ClassOwnerOperator(models.Model): 
   lococlass_fk = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
   company_fk = models.ForeignKey(Company, on_delete=models.CASCADE)
-
   def __str__(self):
     return "{} {}".format(self.lococlass_fk, self.company_fk)
 
+class RouteOwnerOperator(models.Model): 
+  route_fk = models.ForeignKey(Route, on_delete=models.CASCADE)
+  company_fk = models.ForeignKey(Company, on_delete=models.CASCADE)
+  def __str__(self):
+    return "{} {}".format(self.route_fk, self.company_fk)
+
 class Locomotive(models.Model):
   build_date = models.CharField(max_length=10, blank=True, null=True)
-  pre_grouping_class = models.CharField(max_length=10, blank=True, null=True)
-  steam_class = models.ForeignKey(LocoClass, default=None, null=True, blank=True, verbose_name="Steam Class", on_delete=models.SET_DEFAULT)
-  modern_class = models.ForeignKey(ModernClass, default=None, null=True, blank=True, verbose_name="Modern Class", on_delete=models.SET_DEFAULT)
+  wikipedia_name = models.CharField(max_length=10, blank=True, null=True)
+  lococlass = models.ForeignKey(LocoClass, default=None, null=True, blank=True, verbose_name="Locomotive Class", on_delete=models.SET_DEFAULT)
   number = models.CharField(max_length=20, blank=True, null=True)
+  name = models.CharField(max_length=100, blank=True, null=True)
   wheel_arrangement = models.CharField(max_length=10, blank=True, null=True)
   designer = models.CharField(max_length=30, blank=True, null=True)
   builder = models.CharField(max_length=50, blank=True, null=True)
   order_number = models.CharField(max_length=30, blank=True, null=True)
   works_number = models.CharField(max_length=30, blank=True, null=True)
   withdrawn = models.CharField(max_length=15, blank=True, null=True)
-  images = models.ManyToManyField('Image', through='HeritageLocoSeen')
-
+  images = models.ManyToManyField('Image', through='LocoImage')
   def __str__(self):
     return self.number
-
-
 
 class Image(models.Model): #Railway Images
   image_name = models.CharField(max_length=100, default=None)
   image = models.ImageField(upload_to='images/')
-  loco_class = models.ForeignKey(LocoClass, default=1, verbose_name="Locomotive Class", on_delete=models.SET_DEFAULT)
-  locos = models.ManyToManyField('Locomotive', through='HeritageLocoSeen')
+  lococlass = models.ManyToManyField('LocoClass', through='LocoClassImage')
+  locos = models.ManyToManyField('Locomotive', through='LocoImage')
   location = models.ForeignKey('maps.HeritageSite', default=1, verbose_name="Location", on_delete=models.SET_DEFAULT)
   visit = models.ForeignKey('maps.Visit', default=1, verbose_name="Visit", on_delete=models.SET_DEFAULT)
   notes = models.TextField(default=None)
@@ -357,7 +360,7 @@ class Image(models.Model): #Railway Images
   def __str__(self):
     return self.image_name
 
-class HeritageLocoSeen(models.Model): #Specifies loco seen in an image
+class LocoImage(models.Model): #Specifies loco seen in an image
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
     loco = models.ForeignKey(Locomotive, on_delete=models.CASCADE)
 
@@ -377,10 +380,21 @@ class HeritageLocoSeen(models.Model): #Specifies loco seen in an image
     def __str__(self):
         return "Image "+ str(self.image.id) + " of Loco " + str(self.loco.number)
 
-class Sighting(models.Model): #Specifies a sighting
+class Sighting(models.Model):
+    REFERENCE_TYPE = (
+      ( 1, 'Book'),
+      ( 2, 'Website'),
+      ( 3, 'Magazine'),
+      ( 4, 'Video'),
+      ( 5, 'Sighting'),
+    )
+    type = models.IntegerField(choices=REFERENCE_TYPE, default=1,)
+    short_description = models.CharField(max_length=50, blank='True', null='True', default=None)
+    citation = models.TextField(blank='True', null='True', default=None)
+    url = models.URLField(blank=True, null=True, max_length=300)
+    notes = models.TextField(blank='True', null='True', default=None)
     locos = models.ManyToManyField(Locomotive, through='LocoSighting')
     lococlass = models.ManyToManyField(LocoClass, through='LocoClassSighting')
-
     DD = models.CharField(max_length=2, blank='True', null='True', default=None)
     MM = models.CharField(max_length=2, blank='True', null='True', default=None)
     YD = models.CharField(max_length=1, blank='True', null='True', default=None) #Year decade (for when the year is not accurately known)
@@ -388,34 +402,30 @@ class Sighting(models.Model): #Specifies a sighting
     HH = models.CharField(max_length=2, blank='True', null='True', default=None)
     MM = models.CharField(max_length=2, blank='True', null='True', default=None)
     SS = models.CharField(max_length=2, blank='True', null='True', default=None)
-    
     location_description = models.CharField(max_length=100, blank='True', null='True', default=None)
-    orientation = models.SmallIntegerField(blank='True', null='True', default=None)
     easting = models.FloatField(db_column='Easting', blank=True, null=True)
     northing = models.FloatField(db_column='Northing', blank=True, null=True)
-    citation = models.CharField(max_length=200, blank='True', null='True', default=None) #To hold a book or magazine reference
-    citation_specifics = models.CharField(max_length=20, blank='True', null='True', default=None) #To hold the page or diagram number
-    hyperlink = models.CharField(db_column='Hyperlink', blank=True, null=True, max_length=300)
-    notes = models.TextField(blank='True', null='True', default=None)
-
     date_added = models.DateTimeField(auto_now_add=True)
-
     def __str__(self):
-      return str(self.location_description) + " on " + str(self.DD) + "/" + str(self.MM) + "/" + str(self.YD) + str(self.YY)
+      return str(self.short_description)
 
-class LocoSighting(models.Model): 
-    sighting = models.ForeignKey(Sighting, on_delete=models.CASCADE)
+class LocoSighting(models.Model):
+    reference = models.ForeignKey(Sighting, on_delete=models.CASCADE)
     loco = models.ForeignKey(Locomotive, on_delete=models.CASCADE)
-
     def __str__(self):
-        return str(self.loco.number) + " at " + str(self.sighting.location_description)
+        return str(self.loco.number) + " at " + str(self.reference.location_description)
+
+class LocoClassImage(models.Model):
+    image = models.ForeignKey(Image, on_delete=models.CASCADE)
+    loco_class = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
+    def __str__(self):
+        return str(self.loco_class.wikipedia_name) + " at " + str(self.image)
 
 class LocoClassSighting(models.Model):
-    sighting = models.ForeignKey(Sighting, on_delete=models.CASCADE)
+    reference = models.ForeignKey(Sighting, on_delete=models.CASCADE)
     loco_class = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
-
     def __str__(self):
-        return str(self.loco_class.grouping_class) + " at " + str(self.sighting.location_description)
+        return str(self.loco_class.wikipedia_name) + " at " + str(self.reference.location_description)
 
 class SlideHeader(models.Model):
     location_line = models.BooleanField(default=True)
@@ -425,7 +435,6 @@ class SlideHeader(models.Model):
     text_headline = models.CharField(max_length=200, blank=True, null=True)
     text_text = models.TextField(blank=True, null=True)
     type = models.CharField(default='overview', max_length=20)
-
     def __str__(self):
         return self.text_headline
 
@@ -440,7 +449,6 @@ class Slide(models.Model):
     media_url = models.URLField(blank=True, null=True, max_length=300)
     text_headline = models.CharField(max_length=200, blank=True, null=True)
     text_text = models.TextField(blank=True, null=True)
-
     def __str__(self):
         return self.text_headline
 
@@ -448,6 +456,5 @@ class Slidepack(models.Model):
     slideheader_fk = models.ForeignKey(SlideHeader, on_delete=models.CASCADE)
     slide_fk = models.ForeignKey(Slide, on_delete=models.CASCADE)
     slide_order = models.SmallIntegerField()
-
     def __str__(self):
         return "{} Slide {} : {}".format(self.slideheader_fk, self.slide_order, self.slide_fk)

@@ -30,8 +30,6 @@ else:
     res = open(os.path.join(DATAIO_DIR, "Builder_BRD.html"))
 
 df = pd.read_html(res, flavor="bs4")[1]
-print(df.head())
-print(df.info())
 df_clean = df.rename(columns={
                     df.columns[0]:"builder_code",
                     df.columns[1]:"builder_name",
@@ -53,5 +51,3 @@ df_clean['steam'] = df_clean['steam'].astype(int, errors='ignore')
 """
 df_clean = df_clean.where(df_clean.notnull(), "")
 df_clean.to_csv(output_file, index=False)
-print(df_clean.info())
-print(df_clean.head())

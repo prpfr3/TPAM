@@ -15,8 +15,10 @@ import requests, csv, os
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
-"""urls on the BRD site are in the format
- https://www.brdatabase.info/classes.php?type=S&subtype=GWR&prg=BaR and therefore the quickest method of specifying which files, be it from the web or a saved html page from the web, is to use the following format to specify the pages (any html pages should use this same format as the filename). Note that all diesels and all electrics can be extracted using a subtype of All"""
+"""
+urls on the BRD site are in the format
+ https://www.brdatabase.info/classes.php?type=S&subtype=GWR&prg=BaR and therefore the quickest method of specifying which files, be it from the web or a saved html page from the web, is to use the following format to specify the pages (any html pages should use this same format as the filename). Note that all diesels and all electrics can be extracted using a subtype of All
+"""
 
 input_files = ['S&subtype=GWR&prg=BaR', 'S&subtype=GWR&prg=BaR', 'D&subtype=All', 'D&subtype=All', 'E&subtype=All']
 
@@ -92,7 +94,6 @@ for input_file in input_files:
                     except:
                       csvRow.append('')
 
-              print(csvRow)
               output.writerow(csvRow)
 
 csvFile.close()

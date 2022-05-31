@@ -1,17 +1,20 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse, reverse_lazy
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
-from django.core.mail import send_mail
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-
-from .forms import PostForm, EmailPostForm
-from .models import Topic, Post, HeritageSite, Visit
+from django.core.mail import send_mail
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  UpdateView)
+from locos.models import Image, LocoClass
 from mainmenu.models import Profile
+
+from .forms import EmailPostForm, PostForm
+from .models import HeritageSite, Post, Topic, Visit
 
 """
 # Explanatory notes for the Owner views
@@ -151,7 +154,8 @@ class PostDeleteView(SuccessMessageMixin, OwnerDeleteView): #Convention: post_co
         return super(PostDeleteView, self).delete(request, *args, **kwargs)
 
 class HeritageSiteListView(ListView):
-  model = HeritageSite
+    model = HeritageSite
+    queryset = HeritageSite.objects.order_by('country', 'type', 'name')
 
 class VisitListView(ListView):
   model = Visit
@@ -164,7 +168,19 @@ def heritage_site(request, heritage_site_id):
 @login_required
 def visit(request, visit_id):
   visit = Visit.objects.get(id=visit_id)
-  context = {'visit': visit}
+  images = Image.objects.filter(visit=visit_id).order_by('id')
+  paginator = Paginator(images, 20) 
+  page = request.GET.get('page')
+  try:
+      images = paginator.page(page)
+  except PageNotAnInteger:
+      # If page is not an integer deliver the first page
+      images = paginator.page(1)
+  except EmptyPage:
+      # If page is out of range deliver last page of results
+      images = paginator.page(paginator.num_pages)
+
+  context = {'visit': visit, 'page': page, 'images': images}
   return render(request, 'maps/visit.html', context)
 
 @login_required

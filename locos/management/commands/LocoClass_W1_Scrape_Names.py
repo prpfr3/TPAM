@@ -1,6 +1,8 @@
 """
 Traverses a set of pre-defined category pages and finds/stores all the url references on those pages 
 which are likely Locomotive Classes along with the category name
+
+Note that even after deduplication two urls could lead to the same webpage, due to a redirect (e.g. if a locomotive class had both an LNER and a NER class name)
 """
 import requests, csv, os, re
 from bs4 import BeautifulSoup
@@ -9,7 +11,7 @@ import pandas as pd
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 
-output_file1 = os.path.join(DATAIO_DIR, "LocoClass_Class_Category_Extract_Wikipedia.csv")
+output_file1 = os.path.join(DATAIO_DIR, "Class_All_W1_ClassNames_Full.csv")
 csvFile1 = open(output_file1, 'wt+', newline='', encoding='utf-8')
 output1 = csv.writer(csvFile1)
 
@@ -19,7 +21,7 @@ csvrow1.append("wikislug")
 csvrow1.append("name")
 output1.writerow(csvrow1)
 
-output_file2 = os.path.join(DATAIO_DIR, "LocoClass_Class_Extract_Wikipedia.csv")
+output_file2 = os.path.join(DATAIO_DIR, "Class_All_W1_ClassNames_Deduplicated.csv")
 csvFile2 = open(output_file2, 'wt+', newline='', encoding='utf-8')
 output2 = csv.writer(csvFile2)
 
@@ -30,7 +32,7 @@ output2.writerow(csvrow2)
 
 Categories = ["https://en.wikipedia.org/wiki/Category:Standard_gauge_steam_locomotives_of_Great_Britain", 
                 "https://en.wikipedia.org/w/index.php?title=Category:Standard_gauge_steam_locomotives_of_Great_Britain&pagefrom=Gwr+1340+Trojan%0AGWR+No.+1340+Trojan#mw-pages",
-               "https://en.wikipedia.org/w/index.php?title=Category:Standard_gauge_steam_locomotives_of_Great_Britain&pagefrom=List+of+SECR+K+and+SR+K1+class+locomotives#mw-pages",
+                "https://en.wikipedia.org/w/index.php?title=Category:Standard_gauge_steam_locomotives_of_Great_Britain&pagefrom=List+of+SECR+K+and+SR+K1+class+locomotives#mw-pages",
                 "https://en.wikipedia.org/w/index.php?title=Category:Standard_gauge_steam_locomotives_of_Great_Britain&pagefrom=Lswr+L12+Class%0ALSWR+L12+class#mw-pages",
                 "https://en.wikipedia.org/wiki/Category:London,_Midland_and_Scottish_Railway_locomotives",
                 "https://en.wikipedia.org/wiki/Category:Caledonian_Railway_locomotives",
@@ -62,6 +64,7 @@ Categories = ["https://en.wikipedia.org/wiki/Category:Standard_gauge_steam_locom
                 "https://en.wikipedia.org/wiki/Category:Rhymney_Railway_locomotives",
                 "https://en.wikipedia.org/wiki/Category:Taff_Vale_Railway_locomotives",
                 "https://en.wikipedia.org/wiki/Category:Lynton_and_Barnstaple_Railway_locomotives",
+                "https://en.wikipedia.org/wiki/Category:Standard_gauge_locomotives_of_Great_Britain", 
                 ]
 
 class_exclusions = [
@@ -220,7 +223,6 @@ for url in Categories:
         raise SystemExit(err)
 
     soup = BeautifulSoup(res.text, 'html.parser') 
-
 
     for link in soup.find_all(title=True):
         href = str(link.get('href'))

@@ -7,7 +7,7 @@ from locos.models import Company, LocoClass
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 INPUT_FILES = [
                 # 'Class_Steam_W3_Detail_Cleansed.csv', 
-                'Class_Modern_W3_Cleansed_Detail.csv'
+                'Class_All_W3_Cleansed_Detail.csv'
                 ]
 
 class Command(BaseCommand):
@@ -23,9 +23,9 @@ class Command(BaseCommand):
                 for row in DictReader(file):
                     if row['2'] == "Operators":
                         try:
-                            l = LocoClass.objects.get(grouping_class_slug=row['0'])
+                            l = LocoClass.objects.get(lococlasslist__wikislug=row['0'])
                         except ObjectDoesNotExist:
-                            print(row['0'], ' not found in the Lococlass grouping_class_slug field')
+                            print(row['0'], ' not found in the Lococlass wikipedia_name_slug field')
                         else:
                             for column in ['4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18']:
                                 if 'wiki' in row[column]:
@@ -36,6 +36,6 @@ class Command(BaseCommand):
                                         print(row[column], e)
                                     else:
                                         try:
-                                            c.loco_classes.add(l)
+                                            c.lococlass_owneroperator.add(l)
                                         except Exception as e:
                                             print(row[column], e)

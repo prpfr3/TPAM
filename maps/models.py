@@ -60,24 +60,24 @@ class Post(models.Model):
 class HeritageSite(models.Model): 
 
   tpam_type = models.ForeignKey('mainmenu.MyDjangoApp', default=1, verbose_name="Heritage Site Type", on_delete=models.SET_DEFAULT)
-  type = models.CharField(max_length=20, default=None)
-  name = models.CharField(max_length=100, default=None)
-  country = models.CharField(max_length=100, default=None)
-  wikislug = models.SlugField(default=None, null=True, max_length=255)
-  url = models.URLField(default=None, null=True)
-  notes = models.TextField(default=None, null=True)
+  type = models.CharField(max_length=50, default=None, blank=True)
+  name = models.CharField(max_length=100, default=None, blank=True)
+  country = models.CharField(max_length=100, default=None, blank=True)
+  wikislug = models.SlugField(default=None, null=True, blank=True, max_length=255)
+  url = models.URLField(default=None, blank=True, null=True)
+  notes = models.TextField(default=None,blank=True, null=True)
   date_added = models.DateTimeField(auto_now_add=True)
   
   def __str__(self):
     return self.name
 
 class Visit(models.Model): #Visit to a Location / Heritage Site
-  location = models.ForeignKey(HeritageSite, default=1, verbose_name="Location", on_delete=models.SET_DEFAULT)
-  date = models.DateField()
-  notes = models.TextField(default=None)
+  location = models.ForeignKey(HeritageSite, default=1398, verbose_name="Location", on_delete=models.SET_DEFAULT)
+  date = models.DateField(blank=True)
+  notes = models.TextField(default=None, blank=True)
   date_added = models.DateField(auto_now_add=True)
   def __str__(self):
-    return self.location.name
+    return str(self.date)
 
 # Based on the Wikipedia citation model
 # https://en.wikipedia.org/wiki/Template:Citation

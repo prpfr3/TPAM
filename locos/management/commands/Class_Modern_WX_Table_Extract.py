@@ -43,7 +43,6 @@ try:
                   csvRow.append('N/A')
               try:
                  colspan = cell.attrs['colspan']
-                 print(colspan)
                  cellcount == cellcount + colspan - 1
               except:
                  pass
@@ -62,7 +61,6 @@ try:
             #if rowcount > 2:
             #  csvRow.append('MR')
             #  csvRow.append('LMS')
-            print(csvRow)
             output.writerow(csvRow)
 finally:
     csvFile.close()

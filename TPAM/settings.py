@@ -257,7 +257,7 @@ else:
   DEBUG = True
   ALLOWED_HOSTS = []
   INTERNAL_IPS = ["127.0.0.1"] #Required for Django Debug
-  GDAL_LIBRARY_PATH = r'C:\\OSGeo4W64\bin\\gdal301' 
+#   GDAL_LIBRARY_PATH = r'C:\\OSGeo4W64\\bin\\gdal301' 
 
   db_pswd = config['MySQL']['p']
 
@@ -281,7 +281,7 @@ else:
           #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 
       'default': {
-          #'ENGINE': 'django.db.backends.postgresql',
+        #   'ENGINE': 'django.db.backends.postgresql',
           'ENGINE': 'django.contrib.gis.db.backends.postgis',
           'NAME': 'TPAM',
           'USER': 'postgres',

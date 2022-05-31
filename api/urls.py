@@ -34,5 +34,5 @@ urlpatterns = [
     # re_path(r'^new_image/$', views.new_image, name='new_image'),
     # re_path(r'^edit_image/(?P<image_id>\d+)/$', views.edit_image, name='edit_image'),
  
-    # re_path(r'^sightings_storymap/$', views.sightings_storymap, name='sightings_storymap'),
+    # re_path(r'^references_storymap/$', views.references_storymap, name='references_storymap'),
     ]

@@ -1,5 +1,10 @@
-#To extract and save a Wikipedia or other HTML Table
-##Note that the import may bring in some UTF-8 characters of \xa0 which is non-breaking space in Latin1 (ISO 8859-1) and chr(160)
+"""
+Extracts the List of British Heritage and Private Railways from Wikipedia
+
+Largely redundant as the original extract has been manually added to since loading into TPAM
+
+May be of future use for a Delta comparison of the Wikipedia list and contents of the TPAM database to identify new records
+"""
 from encodings import utf_8
 import requests, csv, os, re
 from bs4 import BeautifulSoup

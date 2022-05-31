@@ -15,7 +15,9 @@
     </h3>
   </div>
   <div class="panel-body">
-    {{ post.body|linebreaks }}
+        {% autoescape off %}
+        <a href="{% url 'maps:topic_detail' topic.id %}">{{ topic.t }}</a>
+        {% endautoescape %}
   </div>
 </div> <!-- panel -->
 <p>

@@ -45,6 +45,5 @@ class Command(BaseCommand):
                     category_fk, category_created = CompanyCategory.objects.get_or_create(
                         category=row['category'],
                         )
-                    print(f'{category_created=}', f'{company_created=}', f'{category_fk=}', f'{company_fk=}',  )
                     
                     company_fk.company_categories.add(category_fk)

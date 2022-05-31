@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.files.base import ContentFile
 from tinymce.widgets import TinyMCE
 
-from .models import Person, Image, Company, Builder, LocoClass, Slide
+from .models import Person, Image, Company, Builder, LocoClass, Route, Slide, LocoClassList
 from urllib import request
 
 SLIDE_ORDER_CHOICES = [(i, str(i)) for i in range(1, 21)]
@@ -42,8 +42,14 @@ class PersonSelectionForm(forms.ModelForm):
 class LocoClassSelectionForm(forms.ModelForm):
 
     class Meta:
-        model = LocoClass
-        fields = ('grouping_company', 'pre_grouping_company', 'grouping_class',)
+        model = LocoClassList
+        fields = ('name',)
+
+class RouteSelectionForm(forms.ModelForm):
+
+    class Meta:
+        model = Route
+        fields = ('name', 'wikipedia_route_categories')
 
 class PersonForm(forms.ModelForm):
   class Meta:
@@ -55,16 +61,15 @@ class PersonForm(forms.ModelForm):
 class ImageForm(forms.ModelForm):
   class Meta:
     model = Image
-    fields = ['image_name', 'image', 'location', 'notes']
-    labels = {'image_name':'Title', 'image':'Filename',  'location':'Location', 'notes':'Notes'}
+    fields = ['image_name', 'image', 'location', 'visit', 'notes']
+    labels = {'image_name':'Title', 'image':'Filename',  'location':'Location', 'visit':'Visit', 'notes':'Notes'}
     widgets = {'text': forms.Textarea(attrs={'cols':80})}
 
 class LocoClassForm(forms.ModelForm):
  class Meta:
    model = LocoClass
-   fields = ["grouping_company", "pre_grouping_company", "grouping_class", "pre_grouping_class", "br_power_class", "wheel_body_type"]
-   labels = {'grouping_company':'Grouping Company', 'pre_grouping_company':'company',
-     'grouping_class':'class', 'wheel_body_type':'wheel configuration',}
+   fields = ["wikipedia_name", "wikipedia_name", "br_power_class", "wheel_body_type"]
+   labels = {'wikipedia_name':'class', 'wheel_body_type':'wheel configuration',}
    widgets = {'text': forms.Textarea(attrs={'cols':80})}
 
 class BootstrapAuthenticationForm(AuthenticationForm):

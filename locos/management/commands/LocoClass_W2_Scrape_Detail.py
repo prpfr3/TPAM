@@ -5,14 +5,18 @@ from csv import DictReader
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 
-input_file = os.path.join(DATAIO_DIR, 'LocoClass_Class_Extract_Wikipedia.csv')
+input_file = os.path.join(DATAIO_DIR, 'Class_All_W1_ClassNames_DeduplicatedB.csv')
 
-output_file = os.path.join(DATAIO_DIR, 'LocoClass_Detail_Extract_Wikipedia.csv')
+output_file = os.path.join(DATAIO_DIR, 'Class_All_W2_Detail.csv')
 csvFile = open(output_file, 'wt+', newline='', encoding='utf-8')
 output = csv.writer(csvFile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
 
+rowcount = 0
 for row in DictReader(open(input_file)):
     time.sleep(2)
+    rowcount += 1
+    # if rowcount == 5:
+    #     break
     wikislug=row['wikislug']
     url = "https://en.wikipedia.org" + wikislug
     print(url)
@@ -27,16 +31,22 @@ for row in DictReader(open(input_file)):
         raise SystemExit(err)
 
     soup = BeautifulSoup(res.text, 'html.parser')
+    
+    entrycount = 0
+    csvRow = []
+    csvRow.append(wikislug)
+    csvRow.append(entrycount)
+    csvRow.append(soup.find('h1').get_text())
+    output.writerow(csvRow)
 
     for table in soup.find_all('table', class_="infobox"):
-        rowcount = 0
-        for row in table.find_all(['tr']):
+        for entry in table.find_all(['tr']):
             csvRow = []
-            rowcount += 1
+            entrycount += 1
             csvRow.append(wikislug)
-            csvRow.append(rowcount)
+            csvRow.append(entrycount)
             cellcount = 0
-            for cell in row.find_all(['td','th']):
+            for cell in entry.find_all(['td','th']):
                 cellcount += 1
                 csvRow.append(cell.get_text())
                 if cell.find('a', class_="image"):

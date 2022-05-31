@@ -22,6 +22,7 @@ class Command(BaseCommand):
             l.type = "Closed Station"
             l.wikiname = row['Name']
             l.wikislug = row['Wiki']
+            l.geometry = row['Geometry']
 
             try:
                 c = Company.objects.get(wikislug=row['Company_Wiki'])

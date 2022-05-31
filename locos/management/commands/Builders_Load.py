@@ -19,14 +19,13 @@ class Command(BaseCommand):
         with open(os.path.join("D:\\Data", "TPAM", "Builder_Load_Final.csv"), encoding="utf-8") as file:   
 
             for row in DictReader(file):
-                print(row)
                 m = Builder()
                 m.name = row['Builder_Name'] 
                 m.wikislug = row['Wikipedia_slug']
                 m.railuk_builder_code = row['RailUK_Builder_Code']
                 m.brd_builder_code = row['BRD_Builder_Code']
-                m.brsl_builder_code = row['BRSL_Builder_Code']
-                m.date_opened = row['date_built_BRW']
+                m.brsl_builder_code = row['BRSL_Builder_Code'] #OPC British Railway Steam Locomotives 1948-1968 
+                m.date_opened = row['date_built_BRW'] #British Railway Works book
                 m.date_closed = row['date_closure_BRW']
                 m.pre_grouping_owner = row['pre_grouping_owner']
                 m.grouping_owner = row['grouping_owner']

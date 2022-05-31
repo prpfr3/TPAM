@@ -3,7 +3,7 @@ boto3
 crispy-bootstrap5
 dj_database_url
 dj_static
-Django==3.2.1
+Django
 django-bootstrap3
 django_bootstrap5
 django-crispy-forms
