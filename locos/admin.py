@@ -11,6 +11,11 @@ class LocationsAdmin(OSMGeoAdmin):
     ordering = ['wikiname']
     verbose_name = "Railway Stations from Wikipedia/Naptan"
 
+class RouteLocationAdmin(OSMGeoAdmin):
+    list_display = ['routemap_fk', 'loc_no', 'type', 'item', 'location_fk']
+    search_fields = ['item', 'type']
+    ordering = ['routemap_fk', 'loc_no']
+
 class DepotsAdmin(admin.ModelAdmin):
     list_display = ["depot", "codes", "code_dates"]
     list_filter = ['br_region']
@@ -75,6 +80,11 @@ class RouteAdmin(admin.ModelAdmin):
     search_fields = ["name"]
     ordering = ["name"]
 
+class RouteMapAdmin(admin.ModelAdmin):
+    list_display = ["name"]
+    search_fields = ["name"]
+    ordering = ["name"]
+
 class ClassBuilderAdmin(admin.ModelAdmin):
     list_display = ["lococlass_fk", "builder_fk", "person_fk", "company_fk", ]
     ordering = ["lococlass_fk"]
@@ -109,6 +119,8 @@ admin.site.register(WheelArrangement, WheelArrangementAdmin)
 admin.site.register(Sighting)
 admin.site.register(ClassDesigner)
 admin.site.register(RouteOwnerOperator, RouteOwnerOperatorAdmin)
+admin.site.register(RouteLocation, RouteLocationAdmin)
+admin.site.register(RouteMap, RouteMapAdmin)
 admin.site.register(ClassBuilder, ClassBuilderAdmin)
 admin.site.register(LocoSighting)
 admin.site.register(LocoClassSighting)

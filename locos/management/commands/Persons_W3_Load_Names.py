@@ -71,7 +71,7 @@ class Command(BaseCommand):
                         "/Henry_Fowler_(1821-1854)",
                         "/James_Johnson_(2)",
                         "/John_Grantham_(2)"]:
-                        person_fk, role_created = Person.objects.get_or_create(
+                        person_fk, person_created = Person.objects.get_or_create(
                             name=row['name'],
                             firstname=row['firstnames'],
                             surname=row['surname'],

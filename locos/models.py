@@ -235,8 +235,8 @@ class Locations(models.Model):
     modification = models.CharField(max_length=3, blank=True, null=True)
     class Meta:
       verbose_name_plural = 'Locations'
-    def __str__(self):
-      return self.wikiname
+    # def __str__(self):
+    #   return self.wikiname
 
 class RouteCategory(models.Model):
   category = models.CharField(max_length=100, null=True)
@@ -264,15 +264,12 @@ class Route(models.Model):
 
 class RouteLocation(models.Model):
   routemap_fk = models.ForeignKey(RouteMap, on_delete=models.CASCADE, default=1)
-  tr = models.CharField(max_length=1000, blank=True, null=True)
-  td1 = models.CharField(max_length=1000, blank=True, null=True)
-  td2 = models.CharField(max_length=1000, blank=True, null=True)
-  td3 = models.CharField(max_length=1000, blank=True, null=True)
-  td4 = models.CharField(max_length=1000, blank=True, null=True)
-  td5 = models.CharField(max_length=1000, blank=True, null=True)
-  td6 = models.CharField(max_length=1000, blank=True, null=True)
-  # def __str__(self):
-  #   return self.route_fk
+  loc_no = models.IntegerField()
+  type = models.CharField(max_length=10, blank=True, null=True)
+  item = models.CharField(max_length=1000, blank=True, null=True)
+  location_fk  = models.ForeignKey(Locations, on_delete=models.CASCADE, blank=True, null=True, default=None)
+  def __str__(self):
+    return self.item
 
 class Company(models.Model):
   name = models.CharField(max_length=200, blank=True, null=True)

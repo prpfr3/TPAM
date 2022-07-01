@@ -10,6 +10,7 @@ from urllib.request import urlopen
 import pandas as pd
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
+REQUEST_HEADERS = {'User-Agent': 'LocoClass_W1_Scrape_Names.py; https://github.com/prpfr3/TPAM)'}
 
 output_file1 = os.path.join(DATAIO_DIR, "Class_All_W1_ClassNames_Full.csv")
 csvFile1 = open(output_file1, 'wt+', newline='', encoding='utf-8')
@@ -212,8 +213,8 @@ unique_hrefs = []
 
 for url in Categories:
 
-    try:
-        res = requests.get(url)
+    try:    
+        res = requests.get(url, headers=REQUEST_HEADERS)
         res.raise_for_status()
     except requests.exceptions.ConnectionError as err:
         # eg, no internet

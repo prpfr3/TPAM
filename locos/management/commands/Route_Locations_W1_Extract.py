@@ -27,6 +27,7 @@ Categories = [
 href_fullname_exclusions = [
     "/wiki/Template:UK-railway-routemap",
     "/wiki/Template:Bristol_railway_map/MetroWest",
+    "/wiki/Template:Lanarkshire_and_Ayrshire_Railway_Map",
 ]
 
 

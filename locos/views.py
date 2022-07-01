@@ -1,4 +1,5 @@
 import json
+from sqlalchemy import null
 import wikipediaapi
 
 from django.contrib import messages
@@ -451,7 +452,69 @@ def about(request):
     assert isinstance(request, HttpRequest)
     return render(request, 'locos/about.html', {'title':'About', 'message':'Your application description page.','year':datetime.now().year,})
 
-def storymaps(request):
+def routemap(request, route_id):
+
+    slide_list = []
+    route = Route.objects.get(id=route_id)
+    #Add the first slide to a dictionary list from the SlideHeader Object
+    slide_dict={}
+    slide_dict['location_line'] = "true"
+    slide_dict['media'] = {}
+    slide_dict['media']['caption'] = ""
+    slide_dict['media']['credit'] = ""
+    slide_dict['media']['url'] = ""
+    slide_dict['text'] = {}
+    slide_dict['text']['headline'] = route.name
+    slide_dict['text']['text'] = ""
+    slide_dict['type'] = "overview"
+    slide_list.append(slide_dict)
+
+    routemaps = route.wikipedia_routemaps.all()
+    for routemap in routemaps:
+      routelocations = RouteLocation.objects.filter(routemap_fk=routemap.id)
+      for routelocation in routelocations:
+        if routelocation.type == "Wikislug":
+          try:
+            # print(f'{routelocation.location_fk=}')
+            # print(f'{routelocation.location_fk.type=}')
+            # print(f'{routelocation.location_fk.geometry=}')
+            slide_dict={}
+            slide_dict['background'] = {}
+            slide_dict['background']['url'] = ""
+            slide_dict['location'] = {}
+            slide_dict['location']['lat'] = routelocation.location_fk.geometry.y
+            slide_dict['location']['lon'] = routelocation.location_fk.geometry.x
+            slide_dict['location']['zoom'] = "12"
+            slide_dict['media'] = {}
+            slide_dict['media']['caption'] = ""
+            slide_dict['media']['credit'] = ""
+            slide_dict['media']['url'] = ""
+            slide_dict['text'] = {}
+            slide_dict['text']['headline'] = routelocation.location_fk.wikiname
+            slide_dict['text']['text'] = str(routelocation.location_fk.stationname)
+            slide_list.append(slide_dict)
+          except:
+            pass
+
+      #Create a dictionary in the required JSON format, including the dictionary list of slides
+      routemap_dict = {"storymap":
+        {"attribution": "Paul Frost",
+          "call_to_action": True,
+          "call_to_action_text": "A Routemap",
+          "map_as_image": False,
+          "map_subdomains": "",
+          "map_type": "osm:standard",
+          "slides": slide_list,
+          "zoomify": False
+        }
+      }
+
+      storymap_json = json.dumps(routemap_dict)
+      print(json.dumps(routemap_dict, sort_keys=False, indent=4))
+      # Routemaps uses the same template as storymaps
+    return render(request, 'locos/storymap.html', {'storymap_json':storymap_json})
+
+def  storymaps(request):
     storymaps = SlideHeader.objects.order_by('text_headline')
     paginator = Paginator(storymaps, 20)
     page = request.GET.get('page')

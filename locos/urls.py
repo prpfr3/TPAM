@@ -15,6 +15,7 @@ urlpatterns = [
     re_path(r'^company/(?P<company_id>\d+)/$', views.company, name='company'),
 
     re_path(r'^routes/$', views.routes, name='routes'),
+    re_path(r'^routemap/(?P<route_id>\d+)/$', views.routemap, name='routemap'),
 
     re_path(r'^loco_classes/$', views.loco_classes, name='loco_classes'),
     re_path(r'^loco_classes/(?P<loco_class_id>\d+)/$', views.loco_class, name='loco_class'),
@@ -33,6 +34,8 @@ urlpatterns = [
  
     re_path(r'^slides/$', views.slides, name='slides'),
     re_path(r'^slide/(?P<slide_id>\d+)/$', views.slide, name='slide'),
+
+
 
     re_path(r'^storymaps/$', views.storymaps, name='storymaps'),
     re_path(r'^storymap/(?P<storymap_id>\d+)/$', views.storymap, name='storymap'),

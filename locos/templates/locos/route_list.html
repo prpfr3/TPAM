@@ -16,9 +16,10 @@
     {% for route_list_row in route_list %}
       <h4>
         {{route_list_row.name}}
-        <a href="https://en.wikipedia.org//{{route_list_row.wikislug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
+        <a href="https://en.wikipedia.org//{{route_list_row.wikipedia_slug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
+        <a href="{% url 'locos:routemap' route_list_row.id %}" class="btn btn-primary"><i class="fa fa-solid fa-map"></i></a>
       </h4>
-
+ 
     {% empty %}
       <h2>No routes found.</h2>
     {% endfor %}
