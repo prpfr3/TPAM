@@ -25,7 +25,7 @@ df_naptan['StationNameClean'].replace(' Railway Station','', inplace=True, regex
 df_naptan['StationNameClean'].replace(' Rail Station','', inplace=True, regex=True)
 df_naptan['StationNameClean'].replace('Metrocentre','Metro Centre (Gateshead)', inplace=True, regex=True)
 
-# LET OP ! Fuzzy matching uses 'Name' rather than 'NameSlugClean' so following redundant at the moment
+# Note that Fuzzy matching uses 'Name' rather than 'NameSlugClean' so following redundant at the moment
 df_wikipedia['NameSlugClean'] = df_wikipedia['NameSlug']
 df_wikipedia['NameSlugClean'].replace('/wiki/','', inplace=True, regex=True)
 df_wikipedia['NameSlugClean'].replace('_',' ', inplace=True, regex=True)

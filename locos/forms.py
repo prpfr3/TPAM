@@ -4,8 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.files.base import ContentFile
 from tinymce.widgets import TinyMCE
 
-from .models import Person, Image, Company, Builder, LocoClass, Route, Slide, LocoClassList
-from urllib import request
+from .models import Person, Image, Company, Builder, LocoClass, Route, Slide, LocoClassList, UkAdminBoundaries, LocosRoutesGeoClosed, LocosRoutesGeoOsm
 
 SLIDE_ORDER_CHOICES = [(i, str(i)) for i in range(1, 21)]
 
@@ -82,3 +81,17 @@ class BootstrapAuthenticationForm(AuthenticationForm):
                                widget=forms.PasswordInput({
                                    'class': 'form-control',
                                    'placeholder':'Password'}))
+
+class LocationChoiceField(forms.Form):
+    #queryset=UkAdminBoundaries.objects.all().order_by('ctyua19nm'), #For selecting by county rather than route
+    #queryset=LocosRoutesGeoClosed.objects.all().order_by('name')
+    locations = forms.ModelChoiceField(
+        queryset=UkAdminBoundaries.objects.all().order_by('ctyua19nm'),
+        empty_label=None
+    )
+
+class LocationOSMChoiceField(forms.Form):
+    locations = forms.ModelChoiceField(
+        queryset=LocosRoutesGeoOsm.objects.filter(type='route').order_by('name'),
+        empty_label=None
+    )

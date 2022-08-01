@@ -1,0 +1,10 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block header %}{{map.header.render|safe}}{% endblock header %}
+{% block content_title %}Route:- {{route}}{% endblock %}
+{% block content %}
+  {{wikipage|safe}}
+  {{map.html.render|safe}}
+  <script>{{map.script.render|safe}}</script>
+
+{% endblock %}

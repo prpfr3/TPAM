@@ -1,0 +1,8 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block header %}{{map.header.render|safe}}{% endblock header %}
+{% block content_title %}Closed Railway Line:- {{county}}{% endblock %}
+{% block content %}
+  {{map.html.render|safe}}
+  <script>{{map.script.render|safe}}</script>
+{% endblock %}

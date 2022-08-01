@@ -5,15 +5,44 @@ from datetime import datetime
 from tinymce.widgets import TinyMCE
 from django.db import models
 
+@admin.register(UkAdminBoundaries)
+class UkAdminBoundariesAdmin(OSMGeoAdmin):
+    list_display = ['ctyua19cd', 'ctyua19nm']
+    search_fields = ['ctyua19nm']
+    ordering = ['ctyua19nm']
+    verbose_name = "UK Administrative Boundaries"
+
+@admin.register(LocosRoutesGeoClosed)
+class LocosRoutesGeoClosedAdmin(OSMGeoAdmin):
+    list_display = ['name', 'description']
+    search_fields = ['name', 'description']
+    ordering = ['name']
+    verbose_name = "Closed Lines from Google Map"
+
+@admin.register(LocosRoutesGeoOsm)
+class LocosRoutesGeoOsmAdmin(OSMGeoAdmin):
+    list_display = ['name']
+    search_fields = ['name', 'type']
+    ordering = ['name']
+    verbose_name = "OSM Current Map Rail Routes"
+
+@admin.register(LocosRoutesGeoOsmhistory)
+class LocosRoutesGeoOsmhistoryAdmin(OSMGeoAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    ordering = ['name']
+    verbose_name = "OSM History Rail Routes"
+
 class LocationsAdmin(OSMGeoAdmin):
     list_display = ['wikiname', 'wikislug']
     search_fields = ['wikiname']
     ordering = ['wikiname']
     verbose_name = "Railway Stations from Wikipedia/Naptan"
+    formfield_overrides = {models.TextField: {'widget': TinyMCE(attrs={'cols': 80, 'rows': 30},)},}
 
 class RouteLocationAdmin(OSMGeoAdmin):
-    list_display = ['routemap_fk', 'loc_no', 'type', 'item', 'location_fk']
-    search_fields = ['item', 'type']
+    list_display = ['routemap_fk', 'loc_no', 'label', 'location_fk']
+    search_fields = ['label']
     ordering = ['routemap_fk', 'loc_no']
 
 class DepotsAdmin(admin.ModelAdmin):
@@ -125,6 +154,7 @@ admin.site.register(ClassBuilder, ClassBuilderAdmin)
 admin.site.register(LocoSighting)
 admin.site.register(LocoClassSighting)
 admin.site.register(LocoClassImage)
+admin.site.register(LocoClassList)
 admin.site.register(SlideHeader)
 admin.site.register(Slide, SlideAdmin)
 admin.site.register(Slidepack, SlidepackAdmin)

@@ -11,12 +11,10 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.utils.text import slugify
+from django.views.generic import TemplateView
 from zmq import ROUTER
 
-from .forms import (BuilderSelectionForm, CartAddSlideForm,
-                    CompanySelectionForm, ImageForm, LocoClassForm,
-                    LocoClassSelectionForm, PersonSelectionForm,
-                    SlideSelectionForm, RouteSelectionForm, )
+from .forms import *
 from .models import *
 from .storymap_cart import Cart
 
@@ -452,8 +450,57 @@ def about(request):
     assert isinstance(request, HttpRequest)
     return render(request, 'locos/about.html', {'title':'About', 'message':'Your application description page.','year':datetime.now().year,})
 
-def routemap(request, route_id):
+def routemap_folium(request, route_id):
+    route = Route.objects.get(id=route_id)
 
+    # First method for getting wikipedia data
+    import wikipediaapi
+    wiki_wiki = wikipediaapi.Wikipedia(
+            language='en',
+            extract_format=wikipediaapi.ExtractFormat.HTML
+    )
+    slug = route.wikipedia_slug.replace('/wiki/', '')
+    route_page = wiki_wiki.page(slug).text
+
+    # Method 3:- Javascript. 
+    # See template and https://stackoverflow.com/questions/26577292/is-there-a-way-to-embed-and-style-a-wikipedia-article-in-a-website
+  
+    # Generating the map
+    import folium
+    figure = folium.Figure()
+
+    # A Wikipedia Route Page can have many Routemaps, though this is rarely if ever seen. But we select them all just in case.
+    routemaps = route.wikipedia_routemaps.all()
+
+    # Then for each routemap (though no known case of there being more than one for a route) we get all the route locations
+    for routemap in routemaps:
+
+      routelocations = RouteLocation.objects.filter(routemap_fk=routemap.id)
+      # print(routelocations)
+      for routelocation in routelocations:
+        if routelocation.location_fk != None:
+          # Start the folium map centering it on the geometry of the first route location which had geometry
+          m = folium.Map([routelocation.location_fk.geometry.y, routelocation.location_fk.geometry.x], zoom_start= 13, tiles='cartodbpositron', prefer_canvas=True)
+          m.add_to(figure)
+          break
+
+      # For each of the locations on the routemap, see if has a relationship with a location (i.e. a location is normally in the Routes table if it has a wikipedia page, normally for a railway station). Only if it has will there be geometry available which would allow us to add it to the map.
+      for routelocation in routelocations:
+        # print(routelocation.label, routelocation.location_fk)
+        if routelocation.location_fk != None:
+            # print(routelocation.location_fk.wikiname, routelocation.location_fk.geometry.y, routelocation.location_fk.geometry.x)
+            # folium.GeoJson(data=routelocation.location_fk.geometry.geojson, popup=folium.Popup(str(routelocation.location_fk.wikiname),parse_html=True)).add_to(m)
+
+            folium.Marker(location=[routelocation.location_fk.geometry.y, routelocation.location_fk.geometry.x], 
+                       tooltip=str(routelocation.location_fk.wikiname), 
+                       popup=folium.Popup(str(routelocation.location_fk.wikiname), parse_html=True)).add_to(m)
+
+    figure.render()
+    context =  {"map": figure, "route": route.name, "wikipage": route_page }
+    return render(request, 'locos/routemap_folium.html', context)
+
+def routemap(request, route_id):
+    import markdown
     slide_list = []
     route = Route.objects.get(id=route_id)
     #Add the first slide to a dictionary list from the SlideHeader Object
@@ -473,11 +520,8 @@ def routemap(request, route_id):
     for routemap in routemaps:
       routelocations = RouteLocation.objects.filter(routemap_fk=routemap.id)
       for routelocation in routelocations:
-        if routelocation.type == "Wikislug":
+        if routelocation.location_fk != None:
           try:
-            # print(f'{routelocation.location_fk=}')
-            # print(f'{routelocation.location_fk.type=}')
-            # print(f'{routelocation.location_fk.geometry=}')
             slide_dict={}
             slide_dict['background'] = {}
             slide_dict['background']['url'] = ""
@@ -491,9 +535,14 @@ def routemap(request, route_id):
             slide_dict['media']['url'] = ""
             slide_dict['text'] = {}
             slide_dict['text']['headline'] = routelocation.location_fk.wikiname
-            slide_dict['text']['text'] = str(routelocation.location_fk.stationname)
+
+            html_string = markdown.markdown(routelocation.label.replace('/wiki/', 'https://en.wikipedia.org/wiki/'))
+            slide_dict['text']['text'] = html_string.replace('"', '\'')
             slide_list.append(slide_dict)
           except:
+            import sys
+            e = sys.exc_info()[0]
+            print(e)
             pass
 
       #Create a dictionary in the required JSON format, including the dictionary list of slides
@@ -579,3 +628,117 @@ def storymap(request, storymap_id):
 
     storymap_json = json.dumps(storymap_dict)
     return render(request, 'locos/storymap.html', {'storymap_json':storymap_json})
+
+def location_select(request):
+
+    if request.method == 'POST':
+        location_list = LocationChoiceField(request.POST)
+
+        if location_list.is_valid():
+            selected_location = location_list.cleaned_data['locations']
+            county=str(selected_location)
+            return HttpResponseRedirect(reverse('locos:map_closed_lines', args=[county]))
+    else:
+        location_list = LocationChoiceField()
+        errors = location_list.errors or None
+        context = {'location_list':location_list, 'errors': errors,}
+        return render(request, 'locos/location_select.html', context)
+
+class MapClosedLines(TemplateView):
+
+    template_name = "locos/map_closed_lines.html"
+
+    def get_context_data(self, **kwargs):
+        county = self.kwargs['county_name']
+
+        import os
+        from sqlalchemy import create_engine, text
+        from django.conf import settings
+        import geopandas as gpd
+
+        if os.environ.get('DATABASE_URL'):
+            db_connection_url = os.environ.get('DATABASE_URL')
+        else:
+            db_connection_url = settings.DATABASE_URL
+        con = create_engine(db_connection_url)
+
+        # sql = text('SELECT * FROM public."UK_admin_boundaries" WHERE ctyua19nm = :county')      
+        # county_27700 = gpd.GeoDataFrame.from_postgis(sql, con, geom_col="geometry", params={"county":county})
+        # county_4326 = county_27700.to_crs(epsg=4326)
+        # print(county_4326.head())
+
+        """
+        View originally constructed to select based on UK admin boundaries but the following throws an error when passed to gpd.GeoDataFrame
+        sql = text('SELECT * FROM public."locos_routes_geo_closed" as a JOIN public."UK_admin_boundaries" as b ON ST_WITHIN(a.geometry, b.geometry) WHERE b.ctyua19nm = :county')
+        """
+        sql = text('SELECT * FROM public."locos_routes_geo_closed" WHERE name = :county')
+        sql = text('SELECT * FROM public."locos_routes_geo_closed"')    
+        routes = gpd.GeoDataFrame.from_postgis(sql, con, geom_col="geometry", params={"county":county})
+
+        import folium
+        figure = folium.Figure()
+        m = folium.Map([routes.geometry.centroid.y[0], routes.geometry.centroid.x[0]], zoom_start= 12, tiles='cartodbpositron', prefer_canvas=True)
+        m.add_to(figure)
+        folium.GeoJson(data=routes["geometry"], popup=routes["name"]).add_to(m)
+
+        figure.render()
+        return {"map": figure, "county": county}
+
+def locationosm_select(request):
+
+    if request.method == 'POST':
+        location_list = LocationOSMChoiceField(request.POST)
+
+        if location_list.is_valid():
+            selected_location = location_list.cleaned_data['locations']
+            print(selected_location)
+            county=str(selected_location)
+            print(county)
+            return HttpResponseRedirect(reverse('locos:map_osm_lines', args=[county]))
+    else:
+        location_list = LocationOSMChoiceField()
+        errors = location_list.errors or None
+        context = {'location_list':location_list, 'errors': errors,}
+        return render(request, 'locos/locationosm_select.html', context)
+
+class MapOSMLines(TemplateView):
+
+    template_name = "locos/map_osm_lines.html"
+
+    def get_context_data(self, **kwargs):
+        county = self.kwargs['county_name']
+
+        import os
+        from sqlalchemy import create_engine, text
+        from django.conf import settings
+        import geopandas as gpd
+
+
+
+        if os.environ.get('DATABASE_URL'):
+            db_connection_url = os.environ.get('DATABASE_URL')
+        else:
+            db_connection_url = settings.DATABASE_URL
+        con = create_engine(db_connection_url)
+
+        # sql = text('SELECT * FROM public."UK_admin_boundaries" WHERE ctyua19nm = :county')      
+        # county_27700 = gpd.GeoDataFrame.from_postgis(sql, con, geom_col="geometry", params={"county":county})
+        # county_4326 = county_27700.to_crs(epsg=4326)
+        # print(county_4326.head())
+
+        """
+        View originally constructed to select based on UK admin boundaries but the following throws an error when passed to gpd.GeoDataFrame
+        sql = text('SELECT * FROM public."locos_routes_geo_closed" as a JOIN public."UK_admin_boundaries" as b ON ST_WITHIN(a.geometry, b.geometry) WHERE b.ctyua19nm = :county')
+        """
+        sql = text('SELECT * FROM public."locos_routes_geo_osm" WHERE name = :county')    
+        routes = gpd.GeoDataFrame.from_postgis(sql, con, geom_col="geometry", params={"county":county})
+
+
+        import folium
+        figure = folium.Figure()
+        m = folium.Map([routes.geometry.centroid.y[0], routes.geometry.centroid.x[0]], zoom_start= 12, tiles='cartodbpositron', prefer_canvas=True)
+        m.add_to(figure)
+        folium.GeoJson(data=routes["geometry"], popup=routes["name"]).add_to(m)
+
+        figure.render()
+        return {"map": figure, "county": county}
