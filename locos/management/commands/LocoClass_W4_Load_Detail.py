@@ -14,7 +14,7 @@ class Command(BaseCommand):
         print("Creating Loco class details")
         import os
         count = 0
-        with open(os.path.join(DATAIO_DIR, 'Class_All_W3_Cleansed_Detail.csv'), encoding="utf-8") as file:   
+        with open(os.path.join(DATAIO_DIR, 'Class_All_W3_Cleansed_Detail_Delta.csv'), encoding="utf-8") as file:   
              for row in DictReader(file):
                 count += 1
                 # if count > 200:
@@ -32,6 +32,7 @@ class Command(BaseCommand):
                     except Exception as e:
                         print(row[0], e)
                     else:
+                        print(row['2'], ' already loaded')
                         class_already_loaded = True
                 else:
                     if class_already_loaded == False:
@@ -118,6 +119,6 @@ class Command(BaseCommand):
 
                         try:    
                             c.save()
-                            # print('SAVED: ', row[0],'VALUE=', row['2'], '=', row['3'])
+                            print('SAVED: ', row[0], row['2'], '=', row['3'])
                         except Exception as e: 
-                            print('ERROR: ', row['0'],'VALUE=', row['2'], '=', row['3'], '\n', e, 'LENGTH IS:- ', len(row['3']))
+                            print('ERROR: ', row['0'], row['2'], '=', row['3'], '\n', e, 'LENGTH IS:- ', len(row['3']))

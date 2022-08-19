@@ -3,7 +3,7 @@ import pandas as pd
 from csv import DictReader
 from django.core.management import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from locos.models import ClassBuilder, ClassDesigner, Company, Builder, Person, LocoClass, LocoClassList
+from locos.models import ClassDesigner, Company, Builder, Person, LocoClass
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 TEMP_FILE = 'Class_W5_Load_Designers_Temp.csv'

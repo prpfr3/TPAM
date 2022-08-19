@@ -33,11 +33,11 @@ class LocoClass(models.Model):
   wheel_arrangement = models.ForeignKey(WheelArrangement, default=None, blank=None, null=True, verbose_name="Wheel Arrangement", on_delete=models.SET_DEFAULT)
   year_built = models.CharField(max_length=100, blank=True, default='')
   number_range = models.CharField(max_length=100, blank=True, default='')
-  number_range_slug = models.SlugField(default=None, null=True, max_length=255)
+  number_range_slug = models.SlugField(default=None, blank=True, null=True, max_length=255)
   year_first_built = models.CharField(max_length=100, blank=True, default='')
   year_last_built = models.CharField(max_length=100, blank=True, default='')
   number_built = models.CharField(max_length=100, blank=True, default='')
-  img_slug = models.SlugField(default=None, null=True, max_length=255)
+  img_slug = models.SlugField(default=None, blank=True, null=True, max_length=255)
   adhesive_weight = models.CharField(max_length=200, blank=True, default='')
   adhesion_factor = models.CharField(max_length=40, blank=True, default='')
   alternator = models.CharField(max_length=75, blank=True, default='') 
@@ -143,8 +143,11 @@ class LocoClass(models.Model):
 
 class LocoClassList(models.Model):
   name = models.CharField(max_length=1000, blank=True, default='')
-  wikislug = models.SlugField(default=None, null=True, max_length=255)
+  wikislug = models.CharField(default=None, null=True, max_length=255)
+  brdslug = models.CharField(default=None, null=True, max_length=255)
   lococlass_fk = models.ForeignKey(LocoClass, blank=True, null=True, on_delete=models.CASCADE)
+  def __str__(self):
+    return self.name
 
 class Person(models.Model): 
   """Railway Engineers etc"""
@@ -333,20 +336,30 @@ class RouteOwnerOperator(models.Model):
     return "{} {}".format(self.route_fk, self.company_fk)
 
 class Locomotive(models.Model):
-  build_date = models.CharField(max_length=10, blank=True, null=True)
-  wikipedia_name = models.CharField(max_length=10, blank=True, null=True)
+  identifier = models.CharField(max_length=500, blank=True, null=True)
+  brd_number_as_built = models.CharField(max_length=20, blank=True, null=True)
+  brd_slug = models.CharField(max_length=250, blank=True, null=True)
+  brd_order_number = models.CharField(max_length=30, blank=True, null=True)
+  brd_order_number_slug = models.CharField(max_length=250, blank=True, null=True)
+  brd_works_number = models.CharField(max_length=30, blank=True, null=True)
+  brd_class_name = models.CharField(max_length=250, blank=True, null=True)
+  brd_class_name_slug = models.CharField(max_length=250, blank=True, null=True)
+  brd_build_date_recorded = models.CharField(max_length=10, blank=True, null=True)
+  brd_build_date_datetime = models.DateField(blank=True, null=True)
+  brd_builder = models.CharField(max_length=50, blank=True, null=True)
+  brd_withdrawn_date_recorded = models.CharField(max_length=10, blank=True, null=True)
+  brd_withdrawn_date_datetime = models.DateField(blank=True, null=True)
+  brd_company_grouping_code = models.CharField(max_length=10, blank=True, null=True)
+  brd_company_pregrouping_code = models.CharField(max_length=10, blank=True, null=True)
   lococlass = models.ForeignKey(LocoClass, default=None, null=True, blank=True, verbose_name="Locomotive Class", on_delete=models.SET_DEFAULT)
-  number = models.CharField(max_length=20, blank=True, null=True)
   name = models.CharField(max_length=100, blank=True, null=True)
-  wheel_arrangement = models.CharField(max_length=10, blank=True, null=True)
-  designer = models.CharField(max_length=30, blank=True, null=True)
-  builder = models.CharField(max_length=50, blank=True, null=True)
-  order_number = models.CharField(max_length=30, blank=True, null=True)
-  works_number = models.CharField(max_length=30, blank=True, null=True)
-  withdrawn = models.CharField(max_length=15, blank=True, null=True)
   images = models.ManyToManyField('Image', through='LocoImage')
+
   def __str__(self):
-    return self.number
+    return f"{self.brd_company_grouping_code} \
+            {self.brd_company_pregrouping_code} \
+            {self.brd_class_name}: Number as Built \
+            {self.brd_number_as_built}"
 
 class Image(models.Model): #Railway Images
   image_name = models.CharField(max_length=100, default=None)
@@ -389,6 +402,7 @@ class Sighting(models.Model):
       ( 5, 'MySighting'),
       ( 6, 'MyPhoto'),
     )
+    ref = models.IntegerField()
     type = models.IntegerField(choices=REFERENCE_TYPE, default=1,)
     citation = models.TextField(blank='True', null='True', 
         default='cite book | last1 = | first1 = | title = [[ ]] | publisher = [[]] | pages = 1-2  | date = ??/??/?? | isbn = 0-786918-50-0 | journal = | volume = | issue = | issn = ')

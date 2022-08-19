@@ -11,6 +11,7 @@ urlpatterns = [
 
   re_path(r'', include('mainmenu.urls', namespace="mainmenu")),
   re_path(r'^api/', include('api.urls', namespace="api")),
+  re_path(r'^D3/', include('D3.urls', namespace="D3")),
   re_path(r'^users/', include('users.urls', namespace="users")),
   re_path(r'^rtt/', include('rtt.urls', namespace="rtt")),
   re_path(r'^locos/', include('locos.urls', namespace="locos")),

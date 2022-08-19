@@ -21,6 +21,8 @@ urlpatterns = [
     re_path(r'^loco_classes/$', views.loco_classes, name='loco_classes'),
     re_path(r'^loco_classes/(?P<loco_class_id>\d+)/$', views.loco_class, name='loco_class'),
 
+    re_path(r'^locomotives/$', views.locomotives, name='locomotives'),
+
     re_path(r'^builders/$', views.builders, name='builders'),
     re_path(r'^builder/(?P<builder_id>\d+)/$', views.builder, name='builder'),
 

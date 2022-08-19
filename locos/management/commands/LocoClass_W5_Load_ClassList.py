@@ -14,7 +14,7 @@ class Command(BaseCommand):
         print("Creating LocoClassLists")
         import os
         count = 0
-        with open(os.path.join(DATAIO_DIR, 'Class_All_W3_Cleansed_Detail.csv'), encoding="utf-8") as file:   
+        with open(os.path.join(DATAIO_DIR, 'Class_All_W3_Cleansed_Detail_Delta.csv'), encoding="utf-8") as file:   
             for row in DictReader(file):
                 count += 1
                 # if count > 200:
@@ -34,6 +34,7 @@ class Command(BaseCommand):
                         c.name = c.name.replace('/wiki/','')
                         c.lococlass_fk = LocoClass.objects.get(wikipedia_name=row['2'])                        
                         c.save()
+                        print(c.wikislug, ' added to LocoClassList')
                     except Exception as e:
                         print(row[0], e)
                     else:

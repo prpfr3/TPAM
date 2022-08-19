@@ -37,7 +37,7 @@
 
       <h2>Owners/Operators</h2>
       {% for operator in operators %}
-        <li><a href="https://en.wikipedia.org//{{operator.wikislug}}">{{operator.name}}</a></li>
+        <li><a href="https://en.wikipedia.org//{{operator.wikislug}}">{{operator.name}}{{operator.wikislug}}</a></li>
       {% empty %}
         <li>None recorded for this class.</li>
       {% endfor %} 

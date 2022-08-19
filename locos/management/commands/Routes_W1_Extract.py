@@ -102,7 +102,7 @@ for url in Categories:
                     res = requests.get(href_absolute)
                     res.raise_for_status()
                     soup = BeautifulSoup(res.text, 'html.parser')
-                    table = soup.find_all('table', {'cellspacing':'0'})[0] #Cellspacing limits the tables to thos which are routemaps
+                    table = soup.find_all('table', {'cellspacing':'0'})[0] #Cellspacing limits the tables to those which are routemaps
                     template_link = ""
                     template_link = table.find_all('li', {'class':'nv-view'})[0].find('a').get('href')
 

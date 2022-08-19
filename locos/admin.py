@@ -93,11 +93,15 @@ class LocoClassAdmin(admin.ModelAdmin):
     ordering = ['wikipedia_name']
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
+class LocoClassListAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+    ordering = ['name']
+
 class LocomotiveAdmin(admin.ModelAdmin):
-    list_display = ["number", "wikipedia_name"]
-    list_filter = ['wikipedia_name']
-    search_fields = ('wikipedia_name', 'number')
-    ordering = ('wikipedia_name', 'number')
+    list_display = ["brd_number_as_built", "brd_class_name", "brd_build_date_datetime", 'brd_company_grouping_code', 'brd_company_pregrouping_code', ]
+    list_filter = ['brd_build_date_datetime', 'brd_company_grouping_code', 'brd_company_pregrouping_code', 'brd_builder']
+    search_fields = ("brd_number_as_built", "brd_class_name")
+    ordering = ("brd_class_name", 'brd_company_grouping_code', 'brd_company_pregrouping_code',  "brd_number_as_built")
 
 class BuilderAdmin(admin.ModelAdmin):
     list_display = ["name", "wikislug", "pre_grouping_owner", "grouping_owner", "date_opened", "date_closed", "railuk_builder_code", "railuk_builder_code", ]
@@ -154,7 +158,7 @@ admin.site.register(ClassBuilder, ClassBuilderAdmin)
 admin.site.register(LocoSighting)
 admin.site.register(LocoClassSighting)
 admin.site.register(LocoClassImage)
-admin.site.register(LocoClassList)
+admin.site.register(LocoClassList, LocoClassListAdmin)
 admin.site.register(SlideHeader)
 admin.site.register(Slide, SlideAdmin)
 admin.site.register(Slidepack, SlidepackAdmin)

@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Exclude Nobel Prize Winner D3 data
+D3/static/data
+D3/static/images/winners/full
+
 # User-specific files
 *.rsuser
 *.suo

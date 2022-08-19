@@ -8,8 +8,9 @@ https://data.gov.uk/dataset/278685e8-2991-444d-9134-2af48645216b/countries-decem
 import os
 import pandas as pd
 from sqlalchemy import create_engine
+from django.core.management import BaseCommand
 import geopandas as gpd
-import configparser
+from django.conf import settings
 
 def shapefile_postgres_preprocessing(filename):
     
@@ -28,15 +29,20 @@ def shapefile_postgres_preprocessing(filename):
 
     return(shapefile_4326)
 
-config = configparser.ConfigParser()
-KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
-config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
-db_pswd = config['MySQL']['p']
-#Assumes a PostGIS DB created in pgAdmin with the chosen db using "CREATE EXTENSION postgis"
-engine = create_engine('postgresql://postgres:family@localhost/TPAM')
+if os.environ.get('DATABASE_URL'):
+    db_connection_url = os.environ.get('DATABASE_URL')
+else:
+    db_connection_url = settings.DATABASE_URL
+engine = create_engine(db_connection_url)
 
 pd.set_option('display.max_columns', None)
 
 os.chdir(os.path.join('D:\\Data\\UK_Admin_Boundaries'))
-gpd_UK_admin_boundaries = shapefile_postgres_preprocessing("Counties_and_Unitary_Authorities__December_2019__Boundaries_UK_BFE.shp")
-gpd_UK_admin_boundaries.to_postgis(name="UK_admin_boundaries", if_exists='append', index=False, con=engine)
+
+class Command(BaseCommand):
+    # Show this when the user types help
+    help = "Loads UK County_and_Unitary-Authorities table"
+
+    def handle(self, *args, **options):
+        gpd_UK_admin_boundaries = shapefile_postgres_preprocessing("Counties_and_Unitary_Authorities__December_2019__Boundaries_UK_BFE.shp")
+        gpd_UK_admin_boundaries.to_postgis(name="UK_admin_boundaries", if_exists='append', index=False, con=engine)

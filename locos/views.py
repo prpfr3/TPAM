@@ -1,6 +1,7 @@
 import json
 from sqlalchemy import null
 import wikipediaapi
+import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,7 +13,9 @@ from django.views.decorators.http import require_POST
 from django.views.generic import ListView
 from django.utils.text import slugify
 from django.views.generic import TemplateView
-from zmq import ROUTER
+from django.db.models import Q, F, ExpressionWrapper, fields
+from django.db.models import Count
+from django.db.models.functions import ExtractYear
 
 from .forms import *
 from .models import *
@@ -260,6 +263,9 @@ def loco_classes(request):
         if selection_criteria.is_valid() and selection_criteria.cleaned_data != None:
             queryset = LocoClassList.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
             errors = None
+            page = None
+            context = {'selection_criteria':selection_criteria, 'errors': errors, 'page': page, 'loco_class_list': queryset}
+            return render(request, 'locos/loco_class_list.html', context)
         else:
             errors = selection_criteria.errors or None
             queryset = LocoClassList.objects.order_by('name')
@@ -297,27 +303,65 @@ def loco_class(request, loco_class_id):
 
   wiki_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
   page_name = loco_class.wikipedia_name.replace(' ', '_')
-  print(page_name)
   wikipedia_summary = wiki_wiki.page(page_name).text
-  print(wikipedia_summary)
-  print('now I"m here')
 
   context = {'loco_class':loco_class,
               'locomotives':locomotives,
               'operators':operators,
               'references':references,
               'images':images,
-
               'designers1':class_designers1,
               'designers2':class_designers2,
               'designers3':class_designers3,
               'builders1':class_builders1,
               'builders2':class_builders2,
               'builders3':class_builders3,
-              'wikipedia_summary':wikipedia_summary
+              'wikipedia_summary':wikipedia_summary,
   }
+
   return render(request, 'locos/loco_class.html', context)
 
+def locomotives(request):
+
+    if request.method == 'POST':
+        selection_criteria = LocomotiveSelectionForm(request.POST)
+
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data != None:
+            queryset = Locomotive.objects \
+              .filter(identifier__icontains=selection_criteria.cleaned_data['identifier']) \
+              .values('brd_class_name') \
+              .annotate(total=Count('brd_class_name')) \
+              .order_by('total')
+            age = ExpressionWrapper(F('brd_withdrawn_date_datetime')-F('brd_build_date_datetime'), \
+              output_field=fields.DurationField())
+            queryset = Locomotive.objects \
+              .filter(identifier__icontains=selection_criteria.cleaned_data['identifier']) \
+              .annotate(age=age) \
+              .order_by('age')
+            errors = None
+            context = {'selection_criteria':selection_criteria, 'errors': errors, 'locomotives_list': queryset}
+            return render(request, 'locos/locomotives_list.html', context)
+        else:
+            errors = selection_criteria.errors or None
+            queryset = Locomotive.objects.order_by('brd_number_as_built')
+    else:
+        selection_criteria = LocomotiveSelectionForm()
+        errors = selection_criteria.errors or None
+        queryset = Locomotive.objects.order_by('brd_number_as_built')
+
+    paginator = Paginator(queryset, 20)
+    page = request.GET.get('page')
+    try:
+        queryset = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer deliver the first page
+        queryset = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range deliver last page of results
+        queryset = paginator.page(paginator.num_pages)
+
+    context = {'selection_criteria':selection_criteria, 'errors': errors, 'page': page, 'locomotives_list': queryset}
+    return render(request, 'locos/locomotives_list.html', context)
 
 def companies(request):
     if request.method == 'POST':

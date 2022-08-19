@@ -6,11 +6,10 @@ import pandas as pd
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 INPUT_FILES = [
-    'Class_All_W2_Detail_PartA.csv',
-    'Class_All_W2_Detail.csv',
+    'Class_All_W2_Detail_delta.csv',
 ]
 
-output_file = os.path.join(DATAIO_DIR, 'Class_All_W3_Cleansed_Detail.csv')
+output_file = os.path.join(DATAIO_DIR, 'Class_All_W3_Cleansed_Detail_Delta.csv')
 
 df_wiki = pd.DataFrame()
  
