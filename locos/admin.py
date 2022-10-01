@@ -41,9 +41,9 @@ class LocationsAdmin(OSMGeoAdmin):
     formfield_overrides = {models.TextField: {'widget': TinyMCE(attrs={'cols': 80, 'rows': 30},)},}
 
 class RouteLocationAdmin(OSMGeoAdmin):
-    list_display = ['routemap_fk', 'loc_no', 'label', 'location_fk']
-    search_fields = ['label']
-    ordering = ['routemap_fk', 'loc_no']
+    list_display = ['routemap', 'loc_no', 'label', 'location_fk']
+    search_fields = ['routemap__name', 'label']
+    ordering = ['routemap', 'loc_no']
 
 class DepotsAdmin(admin.ModelAdmin):
     list_display = ["depot", "codes", "code_dates"]
@@ -155,11 +155,10 @@ admin.site.register(RouteOwnerOperator, RouteOwnerOperatorAdmin)
 admin.site.register(RouteLocation, RouteLocationAdmin)
 admin.site.register(RouteMap, RouteMapAdmin)
 admin.site.register(ClassBuilder, ClassBuilderAdmin)
-admin.site.register(LocoSighting)
 admin.site.register(LocoClassSighting)
 admin.site.register(LocoClassImage)
 admin.site.register(LocoClassList, LocoClassListAdmin)
-admin.site.register(SlideHeader)
-admin.site.register(Slide, SlideAdmin)
-admin.site.register(Slidepack, SlidepackAdmin)
+# admin.site.register(SlideHeader)
+# admin.site.register(Slide, SlideAdmin)
+# admin.site.register(Slidepack, SlidepackAdmin)
 admin.site.register(Locations, LocationsAdmin)

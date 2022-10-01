@@ -22,6 +22,7 @@ urlpatterns = [
     re_path(r'^loco_classes/(?P<loco_class_id>\d+)/$', views.loco_class, name='loco_class'),
 
     re_path(r'^locomotives/$', views.locomotives, name='locomotives'),
+    re_path(r'^locomotive/(?P<locomotive_id>\d+)/$', views.locomotive, name='locomotive'),
 
     re_path(r'^builders/$', views.builders, name='builders'),
     re_path(r'^builder/(?P<builder_id>\d+)/$', views.builder, name='builder'),
@@ -46,4 +47,6 @@ urlpatterns = [
 
     re_path(r'^locationosm_select/$', views.locationosm_select, name='locationosm_select'),
     re_path(r'^map_osm_lines/(?P<county_name>[^/]+)/$', views.MapOSMLines.as_view(), name='map_osm_lines'),
+
+    re_path(r'^trackmap/$', views.Trackmap.as_view(), name='trackmap'),
     ]

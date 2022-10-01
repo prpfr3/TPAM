@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     #Myapps
     'aircraft',
     'api',
-    'D3',
     'locos',
     'mainmenu',
     'maps',

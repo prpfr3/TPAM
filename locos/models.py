@@ -1,6 +1,4 @@
 from django.contrib.gis.db import models
-from django.contrib.auth.models import User
-
 
 class Depots(models.Model):
     depot = models.CharField(max_length=1000, blank=True, null=True)
@@ -27,6 +25,7 @@ class WheelArrangement(models.Model):
 
 class LocoClass(models.Model):
   wikipedia_name = models.CharField(max_length=1000, blank=True, default='')
+  brdslug = models.CharField(default=None, null=True, max_length=255)
 
   br_power_class = models.CharField(max_length=5, blank=True, default='')
   wheel_body_type = models.CharField(max_length=100, blank=True, default='')
@@ -182,7 +181,7 @@ class PersonRole(models.Model):
   role = models.ForeignKey(Role, on_delete=models.CASCADE)
   person = models.ForeignKey(Person, on_delete=models.CASCADE)
   def __str__(self):
-    return "{} {}".format(self.person.name, self.role.role)
+      return f"{self.person.name} {self.role.role}"
 
 class Builder(models.Model):
   name = models.CharField(max_length=200, blank=True, null=True)
@@ -270,7 +269,7 @@ class Route(models.Model):
     return self.name
 
 class RouteLocation(models.Model):
-  routemap_fk = models.ForeignKey(RouteMap, on_delete=models.CASCADE, default=1)
+  routemap = models.ForeignKey(RouteMap, on_delete=models.CASCADE, default=1)
   loc_no = models.IntegerField()
   label = models.CharField(max_length=1000, blank=True, null=True)
   location_fk  = models.ForeignKey(Locations, on_delete=models.CASCADE, blank=True, null=True, default=None)
@@ -297,15 +296,15 @@ class ClassBuilder(models.Model):
   person_fk = models.ForeignKey(Person, blank=True, null=True, on_delete=models.CASCADE)
   company_fk = models.ForeignKey(Company, blank=True, null=True, on_delete=models.CASCADE)
   def __str__(self):
-    if self.person_fk is not None:
-      builder = self.person_fk.name
-    elif self.builder_fk is not None:
-      builder = self.builder_fk.name
-    elif self.company_fk is not None:
-      builder = self.company_fk.name
-    else:
-      builder = ""
-    return "{}".format(builder)
+      if self.person_fk is not None:
+        builder = self.person_fk.name
+      elif self.builder_fk is not None:
+        builder = self.builder_fk.name
+      elif self.company_fk is not None:
+        builder = self.company_fk.name
+      else:
+        builder = ""
+      return f"{builder}"
 
 class ClassDesigner(models.Model): 
   lococlass_fk = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
@@ -313,27 +312,27 @@ class ClassDesigner(models.Model):
   person_fk = models.ForeignKey(Person, blank=True, null=True, on_delete=models.CASCADE)
   company_fk = models.ForeignKey(Company, blank=True, null=True, on_delete=models.CASCADE)
   def __str__(self):
-    if self.person_fk is not None:
-      designer = self.person_fk.name
-    elif self.builder_fk is not None:
-      designer = self.builder_fk.name
-    elif self.company_fk is not None:
-      designer = self.company_fk.name
-    else:
-      designer = ""
-    return "{}".format(designer)
+      if self.person_fk is not None:
+        designer = self.person_fk.name
+      elif self.builder_fk is not None:
+        designer = self.builder_fk.name
+      elif self.company_fk is not None:
+        designer = self.company_fk.name
+      else:
+        designer = ""
+      return f"{designer}"
 
 class ClassOwnerOperator(models.Model): 
   lococlass_fk = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
   company_fk = models.ForeignKey(Company, on_delete=models.CASCADE)
   def __str__(self):
-    return "{} {}".format(self.lococlass_fk, self.company_fk)
+      return f"{self.lococlass_fk} {self.company_fk}"
 
 class RouteOwnerOperator(models.Model): 
   route_fk = models.ForeignKey(Route, on_delete=models.CASCADE)
   company_fk = models.ForeignKey(Company, on_delete=models.CASCADE)
   def __str__(self):
-    return "{} {}".format(self.route_fk, self.company_fk)
+      return f"{self.route_fk} {self.company_fk}"
 
 class Locomotive(models.Model):
   identifier = models.CharField(max_length=500, blank=True, null=True)
@@ -391,7 +390,7 @@ class LocoImage(models.Model): #Specifies loco seen in an image
         )
 
     def __str__(self):
-        return "Image "+ str(self.image.id) + " of Loco " + str(self.loco.number)
+        return f"Image {str(self.image.id)} of Loco {str(self.loco.number)}"
 
 class Sighting(models.Model):
     REFERENCE_TYPE = (
@@ -408,7 +407,7 @@ class Sighting(models.Model):
         default='cite book | last1 = | first1 = | title = [[ ]] | publisher = [[]] | pages = 1-2  | date = ??/??/?? | isbn = 0-786918-50-0 | journal = | volume = | issue = | issn = ')
     url = models.URLField(blank=True, null=True, max_length=300)
     notes = models.TextField(blank='True', null='True', default=None)
-    locos = models.ManyToManyField(Locomotive, through='LocoSighting')
+    locos = models.ManyToManyField(Locomotive, through='LocoClassSighting')
     lococlass = models.ManyToManyField(LocoClass, through='LocoClassSighting')
     date = models.CharField(max_length=20, blank='True', null='True', default='??/??/?? ??:??:??')
     location_fk  = models.ForeignKey(Locations, on_delete=models.CASCADE, blank=True, null=True, default=None)
@@ -417,23 +416,19 @@ class Sighting(models.Model):
     def __str__(self):
       return str(self.citation)
 
-class LocoSighting(models.Model):
-    reference = models.ForeignKey(Sighting, on_delete=models.CASCADE)
-    loco = models.ForeignKey(Locomotive, on_delete=models.CASCADE)
-    def __str__(self):
-        return str(self.loco.number) + " at " + str(self.reference.location_description)
-
 class LocoClassImage(models.Model):
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
-    loco_class = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
+    loco_class = models.ForeignKey(LocoClass, blank=True, null=True, on_delete=models.CASCADE)
+
     def __str__(self):
-        return str(self.loco_class.wikipedia_name) + " at " + str(self.image)
+        return f"{str(self.loco_class.wikipedia_name)} at {str(self.image)}"
 
 class LocoClassSighting(models.Model):
     reference = models.ForeignKey(Sighting, on_delete=models.CASCADE)
-    loco_class = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
+    loco_class = models.ForeignKey(LocoClass, blank=True, null=True, on_delete=models.CASCADE)
+    loco = models.ForeignKey(Locomotive, blank=True, null=True, on_delete=models.CASCADE)
     def __str__(self):
-        return str(self.loco_class.wikipedia_name) + " at " + str(self.reference.location_description)
+        return f"{str(self.loco_class.wikipedia_name)} at {str(self.reference.location_description)}"
 
 class SlideHeader(models.Model):
     location_line = models.BooleanField(default=True)
@@ -465,7 +460,7 @@ class Slidepack(models.Model):
     slide_fk = models.ForeignKey(Slide, on_delete=models.CASCADE)
     slide_order = models.SmallIntegerField()
     def __str__(self):
-        return "{} Slide {} : {}".format(self.slideheader_fk, self.slide_order, self.slide_fk)
+        return f"{self.slideheader_fk} Slide {self.slide_order} : {self.slide_fk}"
 
 """
 Load the data via TPAM_Routemaps_Load.ipynb

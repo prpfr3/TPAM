@@ -13,11 +13,10 @@
 
     <table>
     {% for locomotive in locomotives_list %}
-      <!--<a href="% url 'locos:locomotive' locomotive.id %">{{locomotive.brd_number_as_built}}</a>-->
       <tr>
         <td>
           {% if locomotive.brd_number_as_built %}
-          {{locomotive.brd_number_as_built}}
+            <a href="{% url 'locos:locomotive' locomotive.id %}">{{locomotive.brd_number_as_built}}</a>
           {% endif %}
 
           {% if locomotive.brd_company_grouping_code %}

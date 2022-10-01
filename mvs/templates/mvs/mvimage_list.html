@@ -26,7 +26,7 @@
                 <a href="{% url 'mvs:mvimage' mvimage.id %}">
                   <img src="{{ im.url }}" class="image-detail"></a>
             {% endthumbnail %}</td>
-        <td><a href="{% url 'mvs:mvimage' mvimage.id %}">{{mvimage.image_name}}<a/></td>
+        <td><a href="{% url 'mvs:mvimage' mvimage.id %}">{{mvimage.image_name}}</a></td>
         <td>{{mvimage.location}}</td>
         <td>{{mvimage.visit.date}}</td>
 

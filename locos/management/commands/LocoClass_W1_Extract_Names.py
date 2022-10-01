@@ -79,7 +79,7 @@ class Command(BaseCommand):
                         "https://en.wikipedia.org/wiki/Category:Rhymney_Railway_locomotives",
                         "https://en.wikipedia.org/wiki/Category:Taff_Vale_Railway_locomotives",
                         "https://en.wikipedia.org/wiki/Category:Lynton_and_Barnstaple_Railway_locomotives",
-                        "https://en.wikipedia.org/wiki/Category:Standard_gauge_locomotives_of_Great_Britain", 
+                        "https://en.wikipedia.org/wiki/Category:Standard_gauge_locomotives_of_Great_Britain", # Primarily Modern Locomotive Classes
                         ]
 
         # Pages that are not to be processed; primarily because they are not a class but rather a specific locomotive from within a a class

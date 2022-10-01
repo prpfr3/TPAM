@@ -30,7 +30,7 @@
 
     <h2>Locos in Class</h2>
     {% for locomotive in locomotives %}
-      <li>{{locomotive}}</li>
+      {{locomotive.brd_number_as_built}},
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %} 

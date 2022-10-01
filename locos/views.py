@@ -128,10 +128,10 @@ def storymap_references(request):
     if forlooplimiter < 13:
       forlooplimiter += 1
 
-      slide_date = str(reference.DD) + "/" + str(reference.MM) + "/" + str(reference.YD) + str(reference.YY)
-      slide_media_caption = str(reference.location_description) + " on " + str(reference.DD) + "/" + str(reference.MM) + "/" + str(reference.YD) + str(reference.YY)
-      slide_media_credit = reference.citation + ' ' + reference.citation_specifics
-      slide_headline = str(reference.location_description) + " on " + str(reference.DD) + "/" + str(reference.MM) + "/" + str(reference.YD) + str(reference.YY)
+      slide_date = f"{str(reference.DD)}/{str(reference.MM)}/{str(reference.YD)}{str(reference.YY)}"
+      slide_media_caption = f"{str(reference.location_description)} on {str(reference.DD)}/{str(reference.MM)}/{str(reference.YD)}{str(reference.YY)}"
+      slide_media_credit = f'{reference.citation} {reference.citation_specifics}'
+      slide_headline = f"{str(reference.location_description)} on {str(reference.DD)}/{str(reference.MM)}/{str(reference.YD)}{str(reference.YY)}"
 
       #Turns a slugfield into a full url for the current site or keeps a url as is
       media_url = request.build_absolute_uri(reference.hyperlink)
@@ -362,6 +362,40 @@ def locomotives(request):
 
     context = {'selection_criteria':selection_criteria, 'errors': errors, 'page': page, 'locomotives_list': queryset}
     return render(request, 'locos/locomotives_list.html', context)
+
+def locomotive(request, locomotive_id):
+  locomotive = Locomotive.objects.get(id=locomotive_id)
+  lococlass = LocoClass.objects.get(id=locomotive.lococlass_id)
+  references = LocoSighting.objects.filter(loco=locomotive_id)
+  images = LocoImage.objects.filter(loco=locomotive_id)
+  operators = lococlass.company_owneroperator.all()
+  class_designers1 = lococlass.person_designer.all()
+  class_designers2 = lococlass.builder_designer.all()
+  class_designers3 = lococlass.company_designer.all()
+  class_builders1 = lococlass.person_builder.all()
+  class_builders2 = lococlass.builder_builder.all()
+  class_builders3 = lococlass.company_builder.all()
+
+  wiki_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
+  # The following could be introduced at a later date for where there is a Wikipedia page for a locomotive
+  # page_name = locomotive.wikipedia_name.replace(' ', '_') 
+  # wikipedia_summary = wiki_wiki.page(page_name).text
+
+  context = {'locomotive':locomotive,
+              'lococlass':lococlass,
+              'operators':operators,
+              'references':references,
+              'images':images,
+              'designers1':class_designers1,
+              'designers2':class_designers2,
+              'designers3':class_designers3,
+              'builders1':class_builders1,
+              'builders2':class_builders2,
+              'builders3':class_builders3,
+              # 'wikipedia_summary':wikipedia_summary,
+  }
+
+  return render(request, 'locos/locomotive.html', context)
 
 def companies(request):
     if request.method == 'POST':
@@ -609,6 +643,7 @@ def routemap(request, route_id):
 
 def  storymaps(request):
     storymaps = SlideHeader.objects.order_by('text_headline')
+    print(storymaps)
     paginator = Paginator(storymaps, 20)
     page = request.GET.get('page')
     try:
@@ -622,7 +657,6 @@ def  storymaps(request):
 
 def storymap(request, storymap_id):
 
-    slide_list = []
     slideheader = SlideHeader.objects.get(id=storymap_id)
     slides = Slide.objects.filter(slideheader__id=storymap_id).order_by('slidepack__slide_order')
 
@@ -637,8 +671,7 @@ def storymap(request, storymap_id):
     slide_dict['text']['headline'] = slideheader.text_headline
     slide_dict['text']['text'] = slideheader.text_text
     slide_dict['type'] = slideheader.type
-    slide_list.append(slide_dict)
-
+    slide_list = [slide_dict]
     #Add subsequent slides to the dictionary list from the Slide objects
     for slide in slides:
         slide_dict={}
@@ -757,8 +790,6 @@ class MapOSMLines(TemplateView):
         from django.conf import settings
         import geopandas as gpd
 
-
-
         if os.environ.get('DATABASE_URL'):
             db_connection_url = os.environ.get('DATABASE_URL')
         else:
@@ -777,7 +808,6 @@ class MapOSMLines(TemplateView):
         sql = text('SELECT * FROM public."locos_routes_geo_osm" WHERE name = :county')    
         routes = gpd.GeoDataFrame.from_postgis(sql, con, geom_col="geometry", params={"county":county})
 
-
         import folium
         figure = folium.Figure()
         m = folium.Map([routes.geometry.centroid.y[0], routes.geometry.centroid.x[0]], zoom_start= 12, tiles='cartodbpositron', prefer_canvas=True)
@@ -786,3 +816,29 @@ class MapOSMLines(TemplateView):
 
         figure.render()
         return {"map": figure, "county": county}
+
+class Trackmap(TemplateView):
+    template_name = "locos/trackmap.html"
+
+    def get_context_data(self, **kwargs):
+        import geopandas as gpd
+        import folium
+        file = "D:\Data\QGIS\ElhamValleyRailway.geojson"
+        track_details = gpd.read_file(file)
+        print(track_details.head())
+
+        figure = folium.Figure()
+        m = folium.Map([track_details.geometry.centroid.y[0], track_details.geometry.centroid.x[0]], zoom_start= 12, 
+        # tiles='cartodbpositron', 
+        tiles='https://tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
+        attr='OpenRailwayMap, OpenStreetMap',
+        prefer_canvas=True)
+
+        m.add_to(figure)
+        # folium.Icon(icon="cloud").add_to(m)
+        folium.GeoJson(data=track_details["geometry"], popup=track_details["id"]).add_to(m)
+        # tooltip = 'Click me'
+        # folium.Marker(track_details["geometry"][0], popup=track_details["id"][0], tooltip=tooltip,).add_to(m)
+
+        figure.render()
+        return {"map": figure}

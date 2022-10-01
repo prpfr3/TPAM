@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.files.base import ContentFile
 from tinymce.widgets import TinyMCE
 
-from .models import Person, Image, Company, Builder, Locomotive, LocoClass, Route, Slide, LocoClassList, UkAdminBoundaries, LocosRoutesGeoClosed, LocosRoutesGeoOsm
+from .models import *
 
 SLIDE_ORDER_CHOICES = [(i, str(i)) for i in range(1, 21)]
 

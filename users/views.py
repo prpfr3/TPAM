@@ -1,14 +1,8 @@
 from django.contrib.auth import logout, login, authenticate
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render
 from django.contrib.auth.forms import UserCreationForm
-
-
-# Create your views here.
-def logout_view(request):
-  logout(request)
-  return HttpResponseRedirect(reverse('mainmenu:index'))
 
 def register(request):
   if request.method != 'POST':
@@ -24,4 +18,3 @@ def register(request):
 
   context = {'form': form}
   return render(request, 'users/register.html', context)
-
