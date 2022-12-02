@@ -2,7 +2,7 @@ import os
 from csv import DictReader
 from django.core.management import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from locos.models import LocoClass, LocoSighting, Locomotive, Sighting, LocoClassSighting, Locations
+from locos.models import LocoClass, , LocoClassSighting, Location
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 INPUT_FILES = ['Sightings_Peak.csv',]
@@ -19,7 +19,7 @@ class Command(BaseCommand):
             with open(os.path.join(DATAIO_DIR, INPUT_FILE), encoding="utf-8") as file:   
                 for row in DictReader(file):
 
-                    s, created = Sighting.objects.get_or_create(ref=row['\ufeffid'])
+                    s, created = Reference.objects.get_or_create(ref=row['\ufeffid'])
                     if row['type']: s.type = row['type']
                     if row['url']: s.url = row['url']
                     if row['notes'] : s.notes = row['notes']
@@ -35,7 +35,7 @@ class Command(BaseCommand):
                     #         print(row['locos'], ' not found in the Locomotive table')
                     if row['lococlass']:
                         try:
-                            lococlass_fk = LocoClass.objects.get(wikipedia_name=row['lococlass'])
+                            lococlass_fk = LocoClass.objects.get(wikiname=row['lococlass'])
                             lcs = LocoClassSighting()
                             lcs.loco_class = lococlass_fk
                             lcs.reference = s
@@ -46,13 +46,10 @@ class Command(BaseCommand):
                     if row['location_description']: 
                         s.location_description = row['location_description']
                         try:
-                            s.location_fk = Locations.objects.get(wikiname=row['location_description'])
+                            s.location_fk = Location.objects.get(wikiname=row['location_description'])
                         except ObjectDoesNotExist:
-                            print(row['location_description'], ' not found in the Locations table')
+                            print(row['location_description'], ' not found in the Location table')
                         except MultipleObjectsReturned:
-                            print(row['location_description'], ' found multiple times in the Locations table')
-                    if row['citation']: 
-                        s.citation = row['citation']
-                    else:
-                        s.citation = ""
+                            print(row['location_description'], ' found multiple times in the Location table')
+                    s.citation = row['citation'] or ""
                     s.save()

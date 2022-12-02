@@ -26,7 +26,7 @@ class Command(BaseCommand):
         DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
         REQUEST_HEADERS = {'User-Agent': 'LocoClass_W1_Scrape_Names.py; https://github.com/prpfr3/TPAM)'}
 
-        output_file1 = os.path.join(DATAIO_DIR, "Class_All_W1_ClassNames_Full_delta.csv")
+        output_file1 = os.path.join(DATAIO_DIR, "Class_All_W1_ClassNames_Full.csv")
         csvFile1 = open(output_file1, 'wt+', newline='', encoding='utf-8')
         output1 = csv.writer(csvFile1)
 
@@ -36,7 +36,7 @@ class Command(BaseCommand):
         csvrow1.append("name")
         output1.writerow(csvrow1)
 
-        output_file2 = os.path.join(DATAIO_DIR, "Class_All_W1_ClassNames_Deduplicated_delta.csv")
+        output_file2 = os.path.join(DATAIO_DIR, "Class_All_W1_ClassNames_Deduplicated.csv")
         csvFile2 = open(output_file2, 'wt+', newline='', encoding='utf-8')
         output2 = csv.writer(csvFile2)
 
@@ -80,6 +80,7 @@ class Command(BaseCommand):
                         "https://en.wikipedia.org/wiki/Category:Taff_Vale_Railway_locomotives",
                         "https://en.wikipedia.org/wiki/Category:Lynton_and_Barnstaple_Railway_locomotives",
                         "https://en.wikipedia.org/wiki/Category:Standard_gauge_locomotives_of_Great_Britain", # Primarily Modern Locomotive Classes
+                        "https://en.wikipedia.org/wiki/Category:British_Railways_standard_classes",
                         ]
 
         # Pages that are not to be processed; primarily because they are not a class but rather a specific locomotive from within a a class

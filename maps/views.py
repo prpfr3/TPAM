@@ -10,11 +10,13 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
-from locos.models import Image, LocoClass
+from locos.models import Reference
 from mainmenu.models import Profile
 
 from .forms import EmailPostForm, PostForm
 from .models import HeritageSite, Post, Topic, Visit
+
+import os, configparser
 
 """
 # Explanatory notes for the Owner views
@@ -45,7 +47,7 @@ class OwnerCreateView(LoginRequiredMixin, CreateView):
     """
 
     # Saves the form instance, sets the current object for the view, and redirects to get_success_url().
-    def form_valid(self, form):
+    def form_valid(self, form):  # sourcery skip: avoid-builtin-shadow
         print('form_valid called')
         object = form.save(commit=False)
         object.owner = get_object_or_404(Profile, user=self.request.user)
@@ -87,13 +89,12 @@ class TopicDetailView(OwnerDetailView):
 
         context['posts'] = context['topic'].post_set.all()
 
-        strval =  self.request.GET.get("search", False)
-        if strval :
-            query = Q(title__icontains=strval) 
+        if strval := self.request.GET.get("search", False):
+            query = Q(title__icontains=strval)
             query.add(Q(body__icontains=strval), Q.OR)
             post_list = Post.objects.filter(query).select_related().order_by('-updated')[:10]
             context['posts'] = context['topic'].post_set.filter(query).select_related().order_by('-updated')[:10]
-        else :
+        else:
             context['posts'] = context['topic'].post_set.all()
         return context
 
@@ -155,7 +156,7 @@ class PostDeleteView(SuccessMessageMixin, OwnerDeleteView): #Convention: post_co
 
 class HeritageSiteListView(ListView):
     model = HeritageSite
-    queryset = HeritageSite.objects.order_by('country', 'type', 'name')
+    queryset = HeritageSite.objects.order_by('country', 'type', 'name').exclude(name='N/A')
 
 class VisitListView(ListView):
   model = Visit
@@ -168,7 +169,7 @@ def heritage_site(request, heritage_site_id):
 @login_required
 def visit(request, visit_id):
   visit = Visit.objects.get(id=visit_id)
-  images = Image.objects.filter(visit=visit_id).order_by('id')
+  images = Reference.objects.filter(visit=visit_id).order_by('id')
   paginator = Paginator(images, 20) 
   page = request.GET.get('page')
   try:

@@ -18,6 +18,8 @@ urlpatterns = [
   re_path(r'^aircraft/', include('aircraft.urls', namespace="aircraft")),
   re_path(r'^maps/', include('maps.urls', namespace="maps")),
   re_path(r'^vehicles/', include('vehicles.urls', namespace="vehicles")),
+  re_path(r'^storymaps/', include('storymaps.urls', namespace="storymaps")),
+  re_path(r'^locations/', include('locations.urls', namespace="locations")),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

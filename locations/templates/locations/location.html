@@ -1,0 +1,41 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}{{ location }}</td></tr>{% endblock %}
+{% block content_desc %}{% endblock %}
+
+{% block content %}
+    <div class="panel panel-default">
+      <div class="panel-heading"></div>
+      <div class="panel-body">
+
+        <table width="99%" frame="box">
+          <tbody>
+            <tr>
+              <td width="40%" vatrgn="top">
+                <table width="99%" frame="box" id="depot">
+                  <h1 class="text-primary">Location Details</h1>
+                  <tbody>                   
+                    <tr><td width="35%"><strong>Status</strong></td><td>{{location.type }}</td></tr>
+                    <tr><td width="35%"><strong>Postcode:</strong></td><td>{{location.postcode }}</td></tr>
+                    <tr><td width="35%"><strong>Opened:</strong></td><td>{{location.opened }}</td></tr>
+                    <tr><td width="35%"><strong>Closed:</strong></td><td>{{location.closed }}</td></tr>
+                    <tr><td width="35%"><strong>ATCO code:</strong></td><td>{{location.atcocode }}</td></tr>
+                    <tr><td width="35%"><strong>Tiploc Code:</strong></td><td>{{location.tiploccode }}</td></tr>
+                    <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
+                    <tr><td width="35%"><strong>Co-ordinates:</strong></td><td>{{location.easting }} {{location.geometry.x}} {{ location.northing }} {{location.geometry.y}}</td></tr>
+                    <!-- <tr><td>{{nls_url}}</td></tr> -->
+                  </tbody>
+                </table>
+              </td>
+              <td width="59%" vatrgn="top">
+                <iframe src ="https://maps.nls.uk/projects/api/maptiler-cloud-api.html" width="500" height="300" scrolling="no" frameborder="0"></iframe>
+                <iframe src={{nls_url}} width="100%" height="700" marginwidth="300">
+                " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
+                </iframe>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div> <!-- panel body -->
+    </div> <!-- panel -->
+{% endblock content %}

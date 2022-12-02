@@ -15,8 +15,11 @@
     {% for locomotive in locomotives_list %}
       <tr>
         <td>
+
+          <a href="{% url 'locos:locomotive' locomotive.id %}">{{ locomotive.identifier }}</a>
+
           {% if locomotive.brd_number_as_built %}
-            <a href="{% url 'locos:locomotive' locomotive.id %}">{{locomotive.brd_number_as_built}}</a>
+            {{locomotive.brd_number_as_built}}
           {% endif %}
 
           {% if locomotive.brd_company_grouping_code %}
@@ -48,7 +51,5 @@
       {% endfor %}
     </table>
 
-    {% if page %} 
-      {% include "locos/pagination.html" with page=locomotives_list %}
-    {% endif %}
+    {% include "locos/pagination.html" with page=locomotives_list %}
 {% endblock content %}

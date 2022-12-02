@@ -13,21 +13,18 @@
       </p>
     </form>
           
-    {% for loco_class_list_row in loco_class_list %}
+    {% for row in loco_class_list %}
       <h4>
-        <a href="{% url 'locos:loco_class' loco_class_list_row.lococlass_fk.id %}">{{loco_class_list_row.name}}</a>
-        <a href="https://en.wikipedia.org//{{loco_class_list_row.wikislug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
-        {% if loco_class_list_row.brdslug %}
-          <a href="https://www.brdatabase.info//{{loco_class_list_row.brdslug}}" class="btn btn-primary"><i class="fa">BRD</i></a>
+        <a href="{% url 'locos:loco_class' row.lococlass_fk.id %}">{{row.name}}</a>
+        <a href="https://en.wikipedia.org//wiki/{{row.wikislug}}" target="_blank" rel="noopener noreferrer" 
+          class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
+        {% if row.brdslug %}
+          <a href="https://www.brdatabase.info/locoqry.php?{{row.brdslug}}" target="_blank" class="btn btn-primary"><i class="fa">BRD</i></a>
         {% endif %}
       </h4>
     {% empty %}
       <h2>No classes have been loaded yet.</h2>
     {% endfor %}
-
-    {{page}}
-
-    {% if page %} 
-      {% include "locos/pagination.html" with page=loco_class_list %}
-    {% endif %}
+    
+    {% include "locos/pagination.html" with page=loco_class_list %}
 {% endblock content %}

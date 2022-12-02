@@ -21,7 +21,7 @@ class Command(BaseCommand):
             for row in DictReader(file):
                 m = Builder()
                 m.name = row['Builder_Name'] 
-                m.wikislug = row['Wikipedia_slug']
+                m.wikislug = row['Wikipedia_slug'].replace("/wiki/","")
                 m.railuk_builder_code = row['RailUK_Builder_Code']
                 m.brd_builder_code = row['BRD_Builder_Code']
                 m.brsl_builder_code = row['BRSL_Builder_Code'] #OPC British Railway Steam Locomotives 1948-1968 

@@ -7,7 +7,7 @@ An option will arise which allows the images to be resized.
 
 from csv import DictReader
 from django.core.management import BaseCommand
-from locos.models import Image
+from locos.models import Image, Reference
 import csv, os
 from pathlib import Path
 
@@ -53,14 +53,25 @@ class Command(BaseCommand):
         #    print('Railway Heritage images already loaded...exiting.')
         #    return
         print("Creating Railway Heritage Images")
+        ref = 10000
         with open(csv_file, encoding="utf-8") as file:   
           for row in DictReader(file):
               print(row)
-              c = Image()
-              c.image_name = row['image_name'] 
+              ref = ref + 1
+              c = Reference()
+              c.ref = ref
+              c.type = 6
+              c.citation = row['image_name'] 
               c.image = row['image']
-              c.loco_class_id = int(row['loco_class_id'])
-              c.location_id = int(row['location_id'])
               c.visit_id = int(row['visit_id'])
-              c.notes = row['notes']
+              c.notes = row['image_name']
               c.save()
+
+              # c = Image()
+              # c.image_name = row['image_name'] 
+              # c.image = row['image']
+              # c.loco_class_id = int(row['loco_class_id'])
+              # c.location_id = int(row['location_id'])
+              # c.visit_id = int(row['visit_id'])
+              # c.notes = row['notes']
+              # c.save()

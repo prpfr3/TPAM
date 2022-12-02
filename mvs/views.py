@@ -83,7 +83,9 @@ def military_vehicle_class(request, military_vehicle_class_id):
 def mvimages(request):
   mvimages = MVImage.objects.order_by('image_name')
   paginator = Paginator(mvimages, 20) # 3 posts in each page
+
   page = request.GET.get('page')
+  print(page)
   try:
       mvimages = paginator.page(page)
   except PageNotAnInteger:

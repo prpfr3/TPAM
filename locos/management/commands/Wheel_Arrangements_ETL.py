@@ -7,7 +7,6 @@ Significant changes needed for the PostGres sql string which does not expect tab
 Both an SQL load and ORM load are available below. However, as at 23/06/21 the SQL load expects the database fieldnames to be all lowercase as they are in the Django model definition, whereas the ORM load expects them to be capitalised. 
 
 """
-
 import requests, csv
 import pandas as pd
 import configparser
@@ -30,12 +29,13 @@ try:
     res.raise_for_status()
 except requests.exceptions.ConnectionError as err:
     # eg, no internet
-    raise SystemExit(err)
+    raise SystemExit(err) from err
 except requests.exceptions.HTTPError as err:
     # eg, url, server and other errors
-    raise SystemExit(err)
+    raise SystemExit(err) from err
 
-df = pd.read_html(res.text, flavor="bs4", na_values=['none'])[2]
+df = pd.read_html(res.text, flavor="bs4", na_values=['none'])[1]
+print(df.head())
 df_clean = df.rename(columns={df.columns[0]:"UIC_system",
                     df.columns[1]:"Whyte_notation",
                     df.columns[2]:"American_name",

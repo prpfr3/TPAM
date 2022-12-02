@@ -15,10 +15,12 @@
 
   <table>
   {% for builder in builder_list %}
-    <tr><td><a href="https://en.wikipedia.org/{{builder.wikislug}}"> {{ builder.name }}</a></td></tr>
+    <tr><td><a href="https://en.wikipedia.org//wiki/{{builder.wikislug}}"> {{ builder.name }}</a></td></tr>
   {% empty %}
     <tr>No builders have been loaded yet.</tr>
   {% endfor %}
   </table>
+
+  {% include "locos/pagination.html" with page=builder_list %}
 
 {% endblock content %}

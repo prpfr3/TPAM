@@ -14,8 +14,8 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="shortcut icon" href="{%  static 'favicon.ico' %}">
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/v4-shims.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css">
 
     {% block head %}{% endblock %}
   </head>
@@ -65,21 +65,13 @@
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <b>T</b>rains</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'locos:images' %}">Photos</a>
               <a class="dropdown-item nav-link" href="{% url 'locos:loco_classes' %}">Locomotive Classes</a>
               <a class="dropdown-item nav-link" href="{% url 'locos:locomotives' %}">Locomotives</a>
               <a class="dropdown-item nav-link" href="{% url 'locos:persons' %}">Famous Engineers</a>
               <a class="dropdown-item nav-link" href="{% url 'locos:persons_timeline' %}">Famous Engineers Timeline</a>
               <a class="dropdown-item nav-link" href="{% url 'locos:persons_vis_timeline' %}">Famous Engineers vis Timeline</a>
-
               <a class="dropdown-item nav-link" href="{% url 'locos:builders' %}">Manufacturers</a>
               <a class="dropdown-item nav-link" href="{% url 'locos:companies' %}">Operating Companies</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:routes' %}">Routes</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:storymaps' %}">Historical Storymaps</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:storymap_references' %}">Sightings Storymap</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:location_select' %}">Closed Routes on a Map</a></li>
-              <a class="dropdown-item nav-link" href="{% url 'locos:locationosm_select' %}">OSM Routes on a Map</a></li>
-              <a class="dropdown-item nav-link" href="{% url 'locos:trackmap' %}">Trackmaps</a></li>
 
               </div>
             </div> <!--Trains-->
@@ -122,9 +114,16 @@
               <hr>
 
             <div class="nav-item dropdown"><!--Locations-->
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Sighting and Blog</a>
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Maps and Locations</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="nav-link" type="button" href="{% url 'maps:heritage_sites' %}">Museums & Heritage Sites </a>
+              <a class="dropdown-item nav-link" href="{% url 'locations:locations' %}">Locations</a>
+              <a class="dropdown-item nav-link" href="{% url 'locations:routes' %}">Routes</a>
+              <a class="dropdown-item nav-link" href="{% url 'locations:map_closed_lines_select' %}">Closed Lines Map</a>
+              <a class="dropdown-item nav-link" href="{% url 'locations:osm_rail_map_select' %}">OSM Railway Map</a>
+              <a class="dropdown-item nav-link" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
+              <a class="dropdown-item nav-link" href="{% url 'locations:location_timeline' %}">Location Timeline</a>
+              <a class="dropdown-item nav-link" href="{% url 'locations:depot_vis_timeline' %}">Depot Timeline</a>
+              <a class="dropdown-item nav-link" href="{% url 'maps:heritage_sites' %}">Museums & Heritage Sites </a>
               <a class="dropdown-item nav-link" href="{% url 'maps:visits' %}">Heritage Site Visits</a>
               <a class="dropdown-item nav-link" href="{% url 'maps:topics' %}">Blog Articles</a>
               </div>
@@ -162,8 +161,8 @@
 
           </section>
 
-        {% block content %}
-        {% endblock %}
+          {% block content %}
+          {% endblock %}
 
         </main>
       </div>

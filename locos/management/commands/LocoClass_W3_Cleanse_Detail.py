@@ -1,15 +1,14 @@
-import requests, csv, os, time
-from bs4 import BeautifulSoup
+import csv, os
 from urllib.request import urlopen
-from csv import DictReader
 import pandas as pd
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 INPUT_FILES = [
-    'Class_All_W2_Detail_delta.csv',
+    'Class_All_W2_Detail.csv',
+    'Class_All_W2_Detail_Blue_Pullmans.csv'
 ]
 
-output_file = os.path.join(DATAIO_DIR, 'Class_All_W3_Cleansed_Detail_Delta.csv')
+output_file = os.path.join(DATAIO_DIR, 'Class_All_W3_Cleansed_Detail.csv')
 
 df_wiki = pd.DataFrame()
  
@@ -27,8 +26,6 @@ indexNames = df_wiki[ (df_wiki[3] == 'Career')|
                     (df_wiki[2] == 'Career')|
                     (df_wiki[2] == 'Configuration:')        
                     ].index
-
-# df_wiki.drop(indexNames , inplace=True)
 
 df_wiki.drop_duplicates(subset=[0,1,2,3,4], inplace=True)
 
@@ -132,7 +129,7 @@ df_wiki.replace('Engine: 350 hp','hp', inplace=True, regex=True)
 df_wiki.replace('Engine:  350 hp','hp', inplace=True, regex=True)
 
 df_wiki.replace('square feet','sq ft', inplace=True, regex=True)
-# df_wiki.replace('LT','long tons', inplace=True, regex=True) # Impacts LT&SR as well as Long Tons
+# df_wiki.replace('LT','long tons', inplace=True, regex=True) # Commented out as impacts LT&SR as well as Long Tons
 df_wiki.replace(' tons','tons', inplace=True, regex=True)
 df_wiki.replace('tons',' tons', inplace=True, regex=True)
 df_wiki.replace('Mph','mph', inplace=True, regex=True)
@@ -258,8 +255,5 @@ df_wiki.replace('British Railways','British Rail', inplace=True, regex=True)
 df_wiki.replace(' • ',' ', inplace=True, regex=True)
 df_wiki.replace(' – ', '–', inplace=True)
 df_wiki.replace('–','-', inplace=True, regex=True)
-# df_wiki.replace('[1]','', inplace=True, regex=True)
-# df_wiki.replace('[2]','', inplace=True, regex=True)
-# df_wiki.replace('[3]','', inplace=True, regex=True)
 
 df_wiki.to_csv(output_file, mode='a', index=False, encoding='utf-8', header=not os.path.exists(output_file))

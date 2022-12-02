@@ -12,10 +12,12 @@
       </div>
 
       <div class="panel-body">
+      <h1>From Wikipedia:-</h1>
       {% autoescape off %}
       {{wikipedia_summary}}
       {% endautoescape %}
 
+<h1>Class Specification</h1>
       <!-- Template tags https://docs.djangoproject.com/en/2.0/howto/custom-template-tags/ -->
       <!-- Template tags https://stackoverflow.com/questions/2217478/django-templates-loop-through-and-print-all-available-properties-of-an-object -->     
       {% load my_tags %}
@@ -26,62 +28,53 @@
         {% endif %}
       {% endfor %}
       </ul>
-    </div>
 
-    <h2>Locos in Class</h2>
+    <h1>Locos in Class</h1>
     {% for locomotive in locomotives %}
-      {{locomotive.brd_number_as_built}},
+      {{locomotive.number_as_built}},
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %} 
 
-      <h2>Owners/Operators</h2>
-      {% for operator in operators %}
-        <li><a href="https://en.wikipedia.org//{{operator.wikislug}}">{{operator.name}}{{operator.wikislug}}</a></li>
-      {% empty %}
-        <li>None recorded for this class.</li>
-      {% endfor %} 
+    <h1>Owners/Operators</h1>
+    {% for operator in operators %}
+      <li><a href="https://en.wikipedia.org//{{operator.wikislug}}">{{operator.name}}</a></li>
+    {% empty %}
+      <li>None recorded for this class.</li>
+    {% endfor %} 
 
-      <h2>Designer(s)</h2>
-      {% for designer in designers1 %}
-        <li><a href="https://en.wikipedia.org/{{designer.wikitextslug}}">{{designer.name}}</a></li>
-      {% endfor %}
-      {% for designer in designers2 %}
-        <li><a href="https://en.wikipedia.org/{{designer.wikislug}}">{{designer.name}}</a></li>
-      {% endfor %}
-      {% for designer in designers3 %}
-        <li><a href="https://en.wikipedia.org/{{designer.wikislug}}">{{designer.name}}</a></li>
-      {% endfor %}
+    <h1>Designer(s)</h1>
+    {% for designer in designers %}
+      <li><a href="https://en.wikipedia.org/{{designer.wikitextslug}}">{{designer.name}}</a></li>
+    {% empty %}
+      <li>None recorded for this class.</li>
+    {% endfor %}
 
+    <h1>Builder(s)</h1>
+    {% for builder in builders %}
+      <li><a href="https://en.wikipedia.org/{{builder.wikitextslug}}">{{builder.name}}</a></li>
+    {% empty %}
+      <li>None recorded for this class.</li>
+    {% endfor %}
 
-      <h2>Builder(s)</h2>
-      {% for builder in builders1 %}
-        <li><a href="https://en.wikipedia.org/{{builder.wikitextslug}}">{{builder.name}}</a></li>
-      {% endfor %}
-      {% for builder in builders2 %}
-      <li><a href="https://en.wikipedia.org/{{builder.wikislug}}">{{builder.name}}</a></li>
-      {% endfor %}
-      {% for builder in builders3 %}
-      <li><a href="https://en.wikipedia.org/{{builder.wikislug}}">{{builder.name}}</a></li>
-      {% endfor %}
+    <h1>References</h1>
+    {% for reference in references %}
+      {% autoescape off %}
+      <li>{{reference.citation}}</li>
+      {% endautoescape %}
+    {% empty %}
+      <li>None recorded for this class.</li>
+    {% endfor %}
 
-      <h2>References</h2>
-      {% for reference in references %}
-        {% autoescape off %}
-        <li>{{reference.citation}}</li>
-        {% endautoescape %}
-      {% empty %}
-        <li>None recorded for this class.</li>
-      {% endfor %}
+    <h1>Images</h1>
+    {% for image in images %}
+      <img src="{{ image.image.url }}" >
+      <p><a href="{% url 'locos:image' image.id %}">{{image.image_name}}</a></p>
+    {% empty %}
+      <li>None recorded for this class.</li>
+    {% endfor %}
 
-      <h2>Images</h2>
-      {% for image in images %}
-        <img src="{{ image.image.url }}" >
-        <p><a href="{% url 'locos:image' image.id %}">{{image.image_name}}</a></p>
-      {% empty %}
-        <li>None available for this class.</li>
-      {% endfor %} 
-
+  </div> <!-- panel-body-->
     </div> <!-- panel -->
 
 {% endblock content %}

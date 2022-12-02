@@ -4,11 +4,7 @@ from django.conf import settings
 from django.urls import reverse
 from smart_selects.db_fields import ChainedForeignKey
 
-"""
-Class definitions to use smart_selects ChainedForeignKey were based on code submitted as an issue
-  @ https://github.com/jazzband/django-smart-selects/issues/292
 
-"""
 
 class VehicleType(models.Model): 
   type = models.CharField(max_length=25, null=True)
@@ -52,7 +48,10 @@ class VehicleVariant(models.Model):
     verbose_name_plural = 'Vehicle Variants'
     managed = True
 
+"""
+ChainedForeignKey solution based on https://github.com/jazzband/django-smart-selects/issues/292
 
+"""
 class UKLicensedVehicles(models.Model):
   year_ending = models.PositiveIntegerField(default='2020')
   type = models.ForeignKey(VehicleType, default=None, null=True, verbose_name="Vehicle Type", on_delete=models.SET_DEFAULT)#Added for smart selects

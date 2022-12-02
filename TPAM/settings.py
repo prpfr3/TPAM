@@ -45,12 +45,14 @@ INSTALLED_APPS = [
     #Myapps
     'aircraft',
     'api',
+    'locations',
     'locos',
     'mainmenu',
     'maps',
     'mvs',
     'rtt',
     'storages',
+    'storymaps',
     'TPAM',
     'users',
     'vehicles'

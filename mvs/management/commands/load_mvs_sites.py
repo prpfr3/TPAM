@@ -14,9 +14,9 @@ csv_file = os.path.join("D:\\Data", "TPAM", "mvs_heritagesite.csv")
 class Command(BaseCommand):
     def handle(self, *args, **options):
         if HeritageSite.objects.exists():
-            print('Military Vehicle Locations data already loaded...exiting.')
+            print('Military Vehicle Location data already loaded...exiting.')
             return
-        print("Creating Military Vehicle Locations")
+        print("Creating Military Vehicle Location")
         for row in DictReader(open(csv_file)):
             c = HeritageSite()
             c.id = row['id'] 

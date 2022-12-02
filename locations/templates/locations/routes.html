@@ -1,0 +1,28 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}Railway Routes{% endblock %}
+{% block content_desc %}{% endblock %}
+
+{% block content %}
+
+    <form method='POST' action="" enctype="multipart/form-data">
+      <p>
+      {% csrf_token %}
+      {{ selection_criteria }}
+      <input type="submit" name="submit_input" value="Submit">
+      </p>
+    </form>
+      
+    {% for route in routes %}
+      <h4>
+        {{route.name}}
+        <a href="https://en.wikipedia.org//wiki/{{route.wikipedia_slug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
+        <a href="{% url 'locations:routemap' route.id %}" class="btn btn-primary"><i class="fa fa-solid fa-map"></i></a>
+        <a href="{% url 'locations:routemap_storymap' route.id %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a>
+      </h4>
+ 
+    {% empty %}
+      <h2>No routes found.</h2>
+    {% endfor %}
+
+{% endblock content %}

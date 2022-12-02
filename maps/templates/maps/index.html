@@ -5,8 +5,13 @@
 
 {% block content %}
 
-    <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:topics' %}">Articles</a>
-    <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:heritage_sites' %}">Heritage Sites</a>
-    <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:visits' %}">Visits to Heritage Sites</a>
+    <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:routes' %}">Routes</a>
+    <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:map_closed_lines_select' %}">Closed Lines Map</a>
+    <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:osm_rail_map_select' %}">OSM Railway Map</a>
+    <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
+    <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:location_timeline' %}">Location Timeline</a>
+    <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:heritage_sites' %}">Museums & Heritage Sites </a>
+    <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:visits' %}">Heritage Site Visits</a>
+    <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:topics' %}">Blog Articles</a>
 
 {% endblock %}

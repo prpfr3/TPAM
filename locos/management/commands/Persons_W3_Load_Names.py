@@ -75,8 +75,8 @@ class Command(BaseCommand):
                             name=row['name'],
                             firstname=row['firstnames'],
                             surname=row['surname'],
-                            wikitextslug = row['wikitextslug'],
-                            gracetextslug = row['gracetextslug'],
+                            wikitextslug = row['wikitextslug'].replace("/wiki/",""),
+                            gracetextslug = row['gracetextslug'].replace("/",""),
                             notes = 'None'
                             )
                         pr = PersonRole()

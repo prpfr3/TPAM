@@ -5,9 +5,9 @@ from csv import DictReader
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 
-input_file = os.path.join(DATAIO_DIR, 'Class_All_W1_ClassNames_Deduplicated_delta.csv')
+input_file = os.path.join(DATAIO_DIR, 'Class_All_W1_ClassNames_Deduplicated.csv')
 
-output_file = os.path.join(DATAIO_DIR, 'Class_All_W2_Detail_delta.csv')
+output_file = os.path.join(DATAIO_DIR, 'Class_All_W2_Detail.csv')
 csvFile = open(output_file, 'wt+', newline='', encoding='utf-8')
 output = csv.writer(csvFile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
 

@@ -224,7 +224,7 @@ class Command(BaseCommand):
         with open(os.path.join(DATAIO_DIR, 'Persons_Detail_Extract_Wikipedia.csv'), encoding="utf-8") as file:   
             for row in DictReader(file):
                 try:
-                    c = Person.objects.get(wikitextslug=row['Column1'])
+                    c = Person.objects.get(wikitextslug=row['Column1'].replace('/wiki/',''))
                 except Exception as e:
                     print(row['Column1'], e)
                 else:

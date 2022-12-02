@@ -4,13 +4,20 @@
 {% block content_desc %}(Ctrl-F in your browser to search the list){% endblock %}
 
 {% block content %}
+<form method='POST' action="">
+  {% csrf_token %}
+  {{location_list}}
+  <p></p><p></p>
+
+</form>
+
 
 <!--<div class="bg-light container">-->
 <div>
   <ul style="list-style-type:none;">
       {% for location in locations %}
         <li>
-            <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'rtt:getlocation' location.id %}"> <b>{{location.crscode}}</b>
+            <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'rtt:getlocation' location.crscode %}"> <b>{{location.crscode}}</b>
              - {{location.stationname}}</a> 
         </li>
       {% empty %}

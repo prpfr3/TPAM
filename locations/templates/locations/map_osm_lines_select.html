@@ -1,0 +1,31 @@
+{% extends "mainmenu\base.html" %}
+{% block title %}Route Selection{% endblock %}
+{% block header %}{% load django_bootstrap5 %}{% endblock %}
+{% block content_title %}Choose a Route{% endblock %}
+{% block content_desc %}{% endblock %}
+{% block content %}
+
+    <form method='POST' action="" enctype="multipart/form-data">
+      <p>
+      {% csrf_token %}
+      {{ selection_criteria }}
+      <input type="submit" name="submit_input" value="Submit">
+      </p>
+    </form>
+    
+    <table>
+    {% for elr in elrs %}
+      {% if elr.itemAltLabel %}
+      <h4>
+        <tr>
+          <td><a href="{% url 'locations:osm_rail_map' elr.id %}">{{elr.itemAltLabel}}</a></td>
+          <td>{{elr.itemLabel}}</td>
+        </tr>
+      </h4>
+      {% endif %}
+ 
+    {% empty %}
+      <h2>No Engineer Line References found.</h2>
+    {% endfor %}
+    </table>
+{% endblock content %}

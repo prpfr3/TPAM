@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Timeline</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+      #visualization {
+        width: 1300px;
+        height: 50px;
+        border: 5px solid rgb(14, 12, 26);
+      }
+    </style>
+  </head>
+
+  <body>
+  <div id="visualization"></div>
+    <script type="text/javascript">
+      var container = document.getElementById('visualization');
+      var jsonObject = JSON.parse('{{ timeline_json | escapejs }}');
+      var items = new vis.DataSet(jsonObject);
+      var options = {orientation: 'top'};
+      var timeline = new vis.Timeline(container, items, options);
+    </script>
+  </body>
+</html>

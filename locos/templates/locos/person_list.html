@@ -15,9 +15,11 @@
 
     <table>
     {% for person in person_list %}
-      <tr><td>{{ person.code }}</td><td><a href="https://en.wikipedia.org/{{person.wikitextslug}}"> {{ person.name }}</a></td></tr>
+      <tr><td>{{ person.code }}</td><td><a href="https://en.wikipedia.org//wiki/{{person.wikitextslug}}"> {{ person.name }}</a></td></tr>
     {% empty %}
       <tr>Nobody has been loaded yet.</tr>
     {% endfor %}
     </table>
+
+    {% include "locos/pagination.html" with page=person_list %}
 {% endblock content %}

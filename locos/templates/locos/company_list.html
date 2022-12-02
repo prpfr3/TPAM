@@ -17,9 +17,11 @@
 
     <table>
     {% for company in company_list %}
-      <tr><td>{{ company.code }}</td><td><a href="https://en.wikipedia.org/{{company.wikislug}}"> {{ company.name }}</a></td></tr>
+      <tr><td>{{ company.code }}</td><td><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></td></tr>
     {% empty %}
       <tr>No companies have been loaded yet.</tr>
     {% endfor %}
     </table>
+
+    {% include "locos/pagination.html" with page=company_list %}
 {% endblock content %}
