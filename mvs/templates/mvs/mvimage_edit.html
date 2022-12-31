@@ -5,7 +5,7 @@
 {% block content_desc %}{% endblock %}
 
 {% block content %}
-    
+  {% load bootstrap3 %} 
   <form action="{% url 'mvs:edit_mvimage' mvimage.id %}" method='post'
       class="form">
       

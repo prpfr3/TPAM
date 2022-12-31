@@ -2,7 +2,7 @@ import os
 from csv import DictReader
 from django.core.management import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from locos.models import LocoClass, , LocoClassSighting, Location
+from locos.models import LocoClass, LocoClassSighting, Location
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 INPUT_FILES = ['Sightings_Peak.csv',]

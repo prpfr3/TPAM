@@ -1,5 +1,6 @@
 """
 Django settings for TPAM solution.
+
 More info on settings:-
 https://docs.djangoproject.com/en/3.1/topics/settings/
 https://docs.djangoproject.com/en/3.1/ref/settings/
@@ -30,16 +31,17 @@ INSTALLED_APPS = [
     'django_extensions',
     'smart_selects',
 
-    #Third Party Apps
-    'bootstrap3',
-    'crispy_forms',
-    'crispy_bootstrap5',
-    'debug_toolbar',
-    'django_bootstrap5',
-    'rest_framework',
+    #Third Party Apps with Package name to install listed
+    'bootstrap3', #   django-bootstrap3
+    'crispy_forms', #   django-crispy-forms
+    'crispy_bootstrap5', #   crispy-bootstrap5
+    'debug_toolbar', #   django_debug_toolbar
+    'django_bootstrap5', #   django-bootstrap5
+    'rest_framework', #  djangorestframework
     'rest_framework.authtoken',
-    'sorl.thumbnail',
-    'tinymce',
+    'sorl.thumbnail', #   sorl-thumbnail
+    'storages', #   django-storages. Used for AWS S3 static/mediafiles
+    'tinymce', #   django-tinymce
 
     #Myapps
     'aircraft',
@@ -50,7 +52,6 @@ INSTALLED_APPS = [
     'maps',
     'mvs',
     'rtt',
-    'storages',
     'storymaps',
     'TPAM',
     'users',
@@ -76,7 +77,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'TPAM.urls'
@@ -85,27 +86,25 @@ CART_SESSION_ID = 'cart'
 #GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
 
 # Template configuration
-# https://docs.djangoproject.com/en/2.1/topics/templates/
+# https://docs.djangoproject.com/en/4.1/topics/templates/
+
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'BACKEND': 'django.template.backends.django.DjangoTemplates', # There is one other standard backend
+        'DIRS': [], # Specifies where Django should look for templates
+        'APP_DIRS': True, # Specifies whether Django should look for templates within app directories, the default being in teh template sub-directory
         'OPTIONS': {
-            'context_processors': [
+            'context_processors': [ #These standard entries pass variables as part of the context to the template engine
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-          'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
-
 WSGI_APPLICATION = 'TPAM.wsgi.application'
-
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -178,12 +177,12 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
   DEBUG = False #Always runs as False in Production
   ALLOWED_HOSTS = ['tpam.herokuapp.com']
- 
+
   DATABASES = {
       #'default': dj_database_url.config(default='postgres://localhost')
       'default': dj_database_url.config(default='postgis://localhost')
   }
-    
+
   # Honor the 'X-Forwarded-Proto' header for request.is_secure().
   SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -191,21 +190,19 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   app_id = os.environ['OTAPI_APP_ID']
   api_key = os.environ['OTAPI_API_KEY']
 
-  #AWS S3 settings
+  #AWS S3 settings for static and media files
   AWS_STORAGE_BUCKET_NAME = 'django-tpam-paulf'
   AWS_S3_REGION_NAME = 'eu-west-2'  # e.g. us-east-2
   AWS_DEFAULT_ACL = None
   AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
   AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
-
-  # Tell django-storages the domain to use to refer to static files.
-  AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+  AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
   #specify the Django storage classes
 
   STATICFILES_LOCATION = 'static'
-#   STATICFILES_STORAGE = 'custom_storages.StaticStorage' #For AWS
-  STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # For Whitenoise Static Files Storage
+  STATICFILES_STORAGE = 'custom_storages.StaticStorage' #custom_storage is used for AWS S3 static and media files
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # For Whitenoise Static Files Storage
   MEDIAFILES_LOCATION = 'media'
   DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage' #ideally this would be called mediafiles_storage in django but it isn't !
 
@@ -249,16 +246,19 @@ if cwd == '/app' or cwd[:4] == '/tmp':
     }
 
 else:
-  print('Using development/local settings from settings.py.\nStatic directory is {} given a base directory of {}'.format(STATIC_ROOT, BASE_DIR))
+  print(
+      f'Using development/local settings from settings.py.\n Static directory is {STATIC_ROOT} given a base directory of {BASE_DIR}'
+  )
 
   config = configparser.ConfigParser()
   KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
   config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
-  SECRET_KEY = config['Django']['tpam_secret_key']  
+  SECRET_KEY = config['Django']['tpam_secret_key']
   DEBUG = True
   ALLOWED_HOSTS = []
   INTERNAL_IPS = ["127.0.0.1"] #Required for Django Debug
-#   GDAL_LIBRARY_PATH = r'C:\\OSGeo4W64\\bin\\gdal301' 
+  GDAL_LIBRARY_PATH = r'C:\\OSGeo4W64\\bin\\gdal301'
+  GEOS_LIBRARY_PATH = r'C:\\OSGeo4W64\\bin\\geos'
 
   db_pswd = config['MySQL']['p']
 
@@ -269,12 +269,12 @@ else:
 #   EMAIL_HOST_PASSWORD = config['Email']['password']
 #   EMAIL_PORT = 587
 #   EMAIL_USE_TLS = True
- 
+
   #Get Other API keys
   OTAPI_APP_ID = config['opentransport']['app_id']
   OTAPI_API_KEY = config['opentransport']['api_key']
 
-  DATABASE_URL = 'postgresql://postgres:' + db_pswd + '@localhost/TPAM'
+  DATABASE_URL = f'postgresql://postgres:{db_pswd}@localhost/TPAM'
 
   DATABASES = {
       #'default': {

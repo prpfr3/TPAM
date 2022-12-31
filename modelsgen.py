@@ -1,9 +1,9 @@
-BASE_DIR =  D:\OneDrive\Source\Python Projects\TPAM
+BASE_DIR =  'D:\OneDrive\Source\Python Projects\TPAM'
 cwd='D:\\OneDrive\\Source\\Python Projects\\TPAM'
-Using development/local settings from settings.py.
-Static directory is D:\OneDrive\Source\Python Projects\TPAM\static given a base directory of D:\OneDrive\Source\Python Projects\TPAM
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
+# Using development/local settings from settings.py.
+# Static directory is D:\OneDrive\Source\Python Projects\TPAM\static given a base directory of D:\OneDrive\Source\Python Projects\TPAM
+# # This is an auto-generated Django model module.
+# # You'll have to do the following manually to clean this up:
 #   * Rearrange models' order
 #   * Make sure each model has one field with primary_key=True
 #   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior

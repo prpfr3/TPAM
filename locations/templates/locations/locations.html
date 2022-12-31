@@ -17,9 +17,9 @@
       <h4>
         <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
         {% if location.type == 'Closed Station' %}
-          <a href="" class="btn btn-primary">CLO</i></a>
+          (Closed Station)
         {% else %}
-          <a href="" class="btn btn-primary">OPE</i></a>
+
         {% endif %}
         <a href="https://en.wikipedia.org//wiki/{{location.wikislug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
         {% if location.disused_stations_slug %}

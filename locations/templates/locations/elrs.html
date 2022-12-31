@@ -18,8 +18,9 @@
       {% if elr.itemAltLabel %}
       <h4>
         <tr>
-          <td><a href="{% url 'locations:osm_rail_map' elr.id %}">{{elr.itemAltLabel}}</a></td>
-          <td>{{elr.itemLabel}}</td>
+          <td><a href="{% url 'locations:elr_map' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-map"></i></a></td>
+          <td><a href="{% url 'locations:elr_storymap' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a></td>
+          <td>{{elr.itemAltLabel}} : {{elr.itemLabel}}</td>
         </tr>
       </h4>
       {% endif %}

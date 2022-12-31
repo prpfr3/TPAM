@@ -18,7 +18,7 @@ class ELRAdmin(admin.ModelAdmin):
     search_fields = ['itemLabel', 'itemAltLabel']
 
 class LocationAdmin(OSMGeoAdmin):
-    list_display = ['crscode', 'wikiname', 'wikislug']
+    list_display = ['osm_node', 'stationname', 'wikiname', 'wikislug', 'elr_fk']
     list_filter = ['type']
     search_fields = ['wikiname']
     ordering = ['wikiname']

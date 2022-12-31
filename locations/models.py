@@ -26,7 +26,6 @@ class Location(models.Model):
     type = models.CharField(max_length=20, blank=True, null=True)
     wikiname = models.CharField(max_length=200, blank=True, null=True)
     wikislug = models.SlugField(default=None, blank=True, null=True, max_length=255)
-    disusedslug = models.SlugField(default=None, blank=True, null=True, max_length=255)
     postcode = models.CharField(default=None, blank=True, null=True, max_length=10)
     opened = models.CharField(max_length=200, blank=True, null=True)
     closed = models.CharField(max_length=200, blank=True, null=True)
@@ -36,6 +35,7 @@ class Location(models.Model):
     tiploccode = models.CharField(max_length=20, blank=True, null=True)
     crscode = models.CharField(max_length=10, blank=True, null=True)
     stationname = models.CharField(max_length=100, blank=True, null=True)
+    stationnamealt = models.CharField(max_length=100, blank=True, null=True)
     stationnamelang = models.CharField(max_length=2, blank=True, null=True)
     gridtype = models.CharField(max_length=1, blank=True, null=True)
     easting = models.PositiveIntegerField (blank=True, null=True)
@@ -44,11 +44,16 @@ class Location(models.Model):
     modificationdatetime = models.DateTimeField
     revisionnumber = models.SmallIntegerField (blank=True, null=True)
     modification = models.CharField(max_length=3, blank=True, null=True)
+    elr_fk  = models.ForeignKey(ELR, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    osm_node = models.CharField(max_length=20, blank=True, null=True)
     notes = models.TextField(blank=True, null=True) 
     class Meta:
       verbose_name_plural = 'Location'
     def __str__(self):
-      return self.wikiname
+      if self.wikiname:
+        return self.wikiname
+      else:
+        return self.stationname
 
 class RouteCategory(models.Model):
   category = models.CharField(max_length=100, null=True)
