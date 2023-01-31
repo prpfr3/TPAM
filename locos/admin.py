@@ -1,7 +1,5 @@
 from django.contrib import admin
-from django.contrib.gis.admin import OSMGeoAdmin
 from locos.models import *
-from datetime import datetime
 from tinymce.widgets import TinyMCE
 from django.db import models
 
@@ -34,7 +32,8 @@ class LocoClassAdmin(admin.ModelAdmin):
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
 class LocoClassListAdmin(admin.ModelAdmin):
-    search_fields = ['name']
+    list_display = ['name', 'wikislug', 'brdslug', 'lococlass_fk']
+    search_fields = ['name', 'wikislug']
     ordering = ['name']
 
 class LocomotiveAdmin(admin.ModelAdmin):
@@ -56,11 +55,11 @@ class WheelArrangementAdmin(admin.ModelAdmin):
     list_display = ["whyte_notation", "uic_system", "american_name", "visual"]
     ordering = ('whyte_notation', )
 
-class ReferenceAdmin(admin.ModelAdmin):
-    list_display = ['type', 'citation', 'route_fk', 'ELR_fk', 'location_fk', 'company_fk']
-    list_filter = ['type']
-    ordering = ['type', 'citation']
-    search_fields = ['citation']
+# class ReferenceAdmin(admin.ModelAdmin):
+#     list_display = ['type', 'citation', 'route_fk', 'ELR_fk', 'location_fk']
+#     list_filter = ['type']
+#     ordering = ['type', 'citation']
+#     search_fields = ['citation']
 
 class SlidepackAdmin(admin.ModelAdmin):
     raw_id_fields = ('slideheader_fk',)
@@ -78,7 +77,7 @@ admin.site.register(LocoClass, LocoClassAdmin)
 admin.site.register(Locomotive, LocomotiveAdmin)
 admin.site.register(Builder, BuilderAdmin)
 admin.site.register(WheelArrangement, WheelArrangementAdmin)
-admin.site.register(Reference, ReferenceAdmin)
+admin.site.register(Reference)
 admin.site.register(ClassDesigner)
 admin.site.register(ClassBuilder, ClassBuilderAdmin)
 admin.site.register(LocoClassSighting)

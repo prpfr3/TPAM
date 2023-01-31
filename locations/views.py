@@ -117,8 +117,22 @@ def location(request, location_id):
 
     location = Location.objects.get(id=location_id)
 
+    import wikipediaapi
+    import urllib
+        # # Get the Wikipedia Page
+
+    if location.post_fk:
+        wikipage = location.post_fk.body
+    elif location.wikislug:
+        wiki_wiki = wikipediaapi.Wikipedia(language='en',extract_format=wikipediaapi.ExtractFormat.HTML)
+        slug = location.wikislug.replace('/wiki/', '')
+        slug = urllib.parse.unquote(slug, encoding='utf-8', errors='replace')
+        wikipage = wiki_wiki.page(slug).text
+    else:
+        wikipage = None
+
     nls_url = f'https://maps.nls.uk/geo/explore/print/#zoom=15&lat={location.geometry.y}&lon={location.geometry.x}&layers=168&b=5'
-    context = {'location': location, 'nls_url': nls_url}
+    context = {'location': location, 'wikipage': wikipage, 'nls_url': nls_url}
     return render(request, 'locations/location.html', context)
 
 def route_map(request, route_id):
@@ -128,23 +142,51 @@ def route_map(request, route_id):
 
     route = Route.objects.get(id=route_id)
 
-    # Get the Wikipedia Page
-    wiki_wiki = wikipediaapi.Wikipedia(language='en',extract_format=wikipediaapi.ExtractFormat.HTML)
-    slug = route.wikipedia_slug.replace('/wiki/', '')
-    slug = urllib.parse.unquote(slug, encoding='utf-8', errors='replace')
-    route_page = wiki_wiki.page(slug).text
-
-    # Wikipedia usually only has one routemap for a railway route page...but there could be more than one
-    routemaps = route.wikipedia_routemaps.all()
-    routemap = routemaps[0]
-
-    if locations := Location.objects.filter(
-        routelocation__routemap=routemap.id):
-        figure = generate_folium_map(None, route.name, locations)
+    # # Get the Wikipedia Page
+    if route.post_fk:
+        route_page = route.post_fk.body
     else:
-        figure = None
+        wiki_wiki = wikipediaapi.Wikipedia(language='en',extract_format=wikipediaapi.ExtractFormat.HTML)
+        slug = route.wikipedia_slug.replace('/wiki/', '')
+        slug = urllib.parse.unquote(slug, encoding='utf-8', errors='replace')
+        route_page = wiki_wiki.page(slug).text
 
-    context =  {"map": figure, "route": route.name, "wikipage": route_page }
+    # Generate a map if there is a Wikipedia routemap with Location links available
+    routemaps = route.wikipedia_routemaps.all()
+    
+    if routemaps:
+        routemap = routemaps[0]
+
+        if locations := Location.objects.filter(
+            routelocation__routemap=routemap.id):
+            figure = generate_folium_map(None, route.name, locations)
+        else:
+            figure = None
+
+    else:
+        figure=None
+
+    # Check for events on this route
+
+    forlooplimiter = 0
+    route_events = LocationEvent.objects.filter(route_fk_id=route_id)
+
+    if route_events:
+        events = []
+        for route_event in route_events:
+            if route_event.datefield:
+                forlooplimiter += 1
+                ## https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format
+                event = {"id": forlooplimiter,
+                        "content": route_event.description,
+                        "start": route_event.datefield.strftime("%Y/%m/%d"),
+                        "event.type": 'point'}
+                events.append(event)
+                events_json = json.dumps(events)
+    else:
+        events_json = None
+
+    context =  {"map": figure, "route": route.name, "wikipage": route_page, 'timeline_json':events_json}
     return render(request, 'locations/routemap_folium.html', context)
 
 def route_storymap(request, route_id):
@@ -169,14 +211,18 @@ def route_storymap(request, route_id):
             "text":""}
         }
 
-    wikislug = route.wikipedia_slug.replace('/wiki/', '')
-    pagename = wikislug.replace('_', ' ')
-    pagename = urllib.parse.unquote(pagename, encoding='utf-8', errors='replace')
-    wiki_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
-    
-    if wikislug and wiki_wiki.page(wikislug).exists:
-        text_array = wiki_wiki.page(wikislug).text.split('<h2>References</h2>')
-        slide_dict['text']['text'] = text_array[0]
+    # If the route has some notes these should be used in preference to the wikipedia page for the route description
+    if route.post_fk:
+        slide_dict['text']['text'] = route.post_fk.body
+    else:
+        wikislug = route.wikipedia_slug.replace('/wiki/', '')
+        pagename = wikislug.replace('_', ' ')
+        pagename = urllib.parse.unquote(pagename, encoding='utf-8', errors='replace')
+        wiki_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
+        
+        # if wikislug and wiki_wiki.page(wikislug).exists:
+        #     text_array = wiki_wiki.page(wikislug).text.split('<h2>References</h2>')
+        #     slide_dict['text']['text'] = text_array[0]
 
     slide_list = [slide_dict]
 
@@ -185,6 +231,7 @@ def route_storymap(request, route_id):
       routelocations = RouteLocation.objects.filter(routemap=routemap.id)
       for routelocation in routelocations:
         if routelocation.location_fk != None:
+          print(routelocation.location_fk)
           try:
             slide_dict = \
                 {"background":

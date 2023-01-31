@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from maps.models import Post
 
 class Depot(models.Model):
     depot = models.CharField(max_length=1000, blank=True, null=True)
@@ -12,15 +13,22 @@ class Depot(models.Model):
     web = models.CharField(max_length=200, blank=True, null=True)
     comments = models.TextField()
     image = models.ImageField(upload_to='images/', default=None)
+    
     class Meta:
-      verbose_name_plural = 'Depot'
+      verbose_name = 'Depot'
+      verbose_name_plural = 'Depots'
 
 class ELR(models.Model):
   item = models.SlugField(max_length=20, blank=True, default='')
   itemLabel = models.CharField(max_length=400, blank=True, default='')
   itemAltLabel = models.CharField(max_length=200, blank=True, default='')
+  
   def __str__(self):
     return f"{self.itemAltLabel} {self.itemLabel}" or ""
+
+  class Meta:
+     verbose_name = "Engineer's Line Reference"
+     verbose_name_plural = "Engineer's Line References"
 
 class Location(models.Model):
     type = models.CharField(max_length=20, blank=True, null=True)
@@ -46,28 +54,37 @@ class Location(models.Model):
     modification = models.CharField(max_length=3, blank=True, null=True)
     elr_fk  = models.ForeignKey(ELR, on_delete=models.SET_NULL, blank=True, null=True, default=None)
     osm_node = models.CharField(max_length=20, blank=True, null=True)
-    notes = models.TextField(blank=True, null=True) 
-    class Meta:
-      verbose_name_plural = 'Location'
+    post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+
+    def get_absolute_url(self):
+      # Enables "View on Site" link in Admin to go to detail view on (non-admin) site
+      from django.urls import reverse
+      return reverse('locations:location', kwargs={'location_id': self.pk})
+
     def __str__(self):
-      if self.wikiname:
-        return self.wikiname
-      else:
-        return self.stationname
+        return self.wikiname or self.stationname or str(self.id)
 
 class RouteCategory(models.Model):
   category = models.CharField(max_length=100, null=True)
-  def __str__(self):
+  
+  def __str__(self): 
     return self.category
+  
   class Meta:
+    verbose_name = 'Route Category'
+    verbose_name_plural = 'Route Categories'
     managed = True
 
 class RouteMap(models.Model):
   # In Wikipedia, a Routemap can appear on more than one Route page.
   name = models.CharField(max_length=1000, null=True)
+  
   def __str__(self):
     return self.name
+  
   class Meta:
+    verbose_name = "Route Map (Wikipedia)"
+    verbose_name_plural = "Route Maps (Wikipedia)"
     managed = True
 
 class Route(models.Model):
@@ -75,6 +92,8 @@ class Route(models.Model):
   wikipedia_slug = models.SlugField(default=None, null=True, max_length=255)
   wikipedia_route_categories = models.ManyToManyField(RouteCategory, blank=True)
   wikipedia_routemaps = models.ManyToManyField(RouteMap)
+  post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+
   def __str__(self):
     return self.name
 
@@ -83,8 +102,13 @@ class RouteLocation(models.Model):
   loc_no = models.IntegerField()
   label = models.CharField(max_length=1000, blank=True, null=True)
   location_fk  = models.ForeignKey(Location, on_delete=models.CASCADE, blank=True, null=True, default=None)
+  
   def __str__(self):
     return self.label
+
+  class Meta:
+     verbose_name = 'Route Location'
+     verbose_name_plural = 'Route Locations'
 
 class LocationEvent(models.Model):
       EVENT_TYPE = (
@@ -104,8 +128,13 @@ class LocationEvent(models.Model):
       elr_fk  = models.ForeignKey(ELR, on_delete=models.CASCADE, blank=True, null=True, default=None)
       location_description = models.CharField(max_length=100, blank='True', null='True', default=None)
       date_added = models.DateTimeField(auto_now_add=True)
+      
       def __str__(self):
           return f"{str(self.get_type_display())}: {str(self.description)}"
+
+      class Meta:
+         verbose_name = 'Location Event'
+         verbose_name_plural = 'Location Events'
 
 class RouteGeoClosed(models.Model):
     name = models.TextField(db_column='name', blank=True, null=True)  # Field name made lowercase. Had to change Name to name in PgAdmin
@@ -114,7 +143,8 @@ class RouteGeoClosed(models.Model):
 
     class Meta:
         db_table = 'locations_routes_geo_closed'
-        verbose_name_plural = 'RouteGeoClosed'
+        verbose_name = 'Closed Route Geometries'
+        verbose_name_plural = 'Closed Routes Geometries'
 
     def __str__(self):
       return self.name
@@ -227,7 +257,8 @@ class RouteGeoOsm(models.Model):
 
     class Meta:
         db_table = 'locations_routes_geo_osm'
-        verbose_name_plural = 'RoutesGeoOsm'
+        verbose_name = 'OSM Route Geometry'
+        verbose_name_plural = 'OSM Routes Geometries'
 
     def __str__(self):
         return self.id
@@ -316,7 +347,8 @@ class RouteGeoOsmhistory(models.Model):
     class Meta:
         db_table = 'locations_routes_geo_osmhistory'
         managed = False
-        verbose_name_plural = 'RoutesGeoOsmhistory'
+        verbose_name = 'OSM History Route Geometry'
+        verbose_name_plural = 'OSM History Routes Geometries'
 
 class UkAdminBoundaries(models.Model):
     objectid = models.CharField(max_length=10, null=False, primary_key=True )
@@ -334,6 +366,8 @@ class UkAdminBoundaries(models.Model):
     class Meta:
         managed = False
         db_table = 'locations_UK_admin_boundaries'
+        verbose_name = 'UK Admin Area Geometry'
+        verbose_name_plural = 'UK Admin Areas Geometries'
 
     def __str__(self):
         return self.ctyua19nm

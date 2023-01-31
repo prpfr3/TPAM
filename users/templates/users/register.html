@@ -1,5 +1,5 @@
 {% extends "../mainmenu/base.html" %}
-{% load bootstrap3 %}
+{% load django_bootstrap5 %}
 
 {% block content_title %}Register an account{% endblock %}
 {% block content_desc %}{% endblock %}
@@ -10,9 +10,7 @@
     {% csrf_token %}
     {% bootstrap_form form %}
 
-    {% buttons %}
-      <button name="submit" class="btn btn-primary">Submit</button>
-    {% endbuttons %}
+    <button name="submit" class="btn btn-primary">Submit</button>
     
     <input type="hidden" name="next" value="{% url 'locos:index' %}" />
   </form>

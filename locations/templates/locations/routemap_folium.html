@@ -1,11 +1,45 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
-{% block header %}{{map.header.render|safe}}{% endblock header %}
+{% block header %}
+
+{{map.header.render|safe}}
+<script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+<link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+  #visualization {
+    border: 5px solid rgb(52, 14, 241);
+  }
+  .vis-item {
+    border-color: rgb(38, 13, 113);
+    background-color: rgb(99, 151, 230);
+    font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+  }
+</style>
+{% endblock header %}
+
 {% block content_title %}Route:- {{route}}{% endblock %}
 {% block content %}
 
-  {{map.html.render|safe}}
+  {% if map.html %}
+    <h1 class="text-primary">Map</h1>
+    {{map.html.render|safe}}
+  {% endif %}
+  
+  <h1 class="text-primary">Wikipedia Notes</h1>
   {{wikipage|safe}}
+
+  {% if timeline_json %}
+    <h1 class="text-primary">Timeline</h1>
+    <div id="visualization">
+      <script type="text/javascript">
+        var container = document.getElementById('visualization');
+        var jsonObject = JSON.parse('{{ timeline_json | escapejs }}');
+        var items = new vis.DataSet(jsonObject);
+        var options = {orientation: 'top'};
+        var timeline = new vis.Timeline(container, items, options);
+      </script>
+    </div>
+  {% endif %}
 
   <script>{{map.script.render|safe}}</script>
 

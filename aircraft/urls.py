@@ -1,19 +1,19 @@
-from django.urls import path, re_path
+from django.urls import path
 from . import views
 
 app_name = 'aircraft'
 
 urlpatterns = [
 
-    re_path(r'^$', views.index, name='index'), #Home Page
+    path('', views.index, name='index'), #Home Page
 
     path('create/', views.AirBMimage_create, name='create'),
 
-    re_path(r'^aircraft_classes/$', views.aircraft_classes, name='aircraft_classes'),
-    re_path(r'^aircraft_class/(?P<aircraft_class_id>\d+)/$', views.aircraft_class, name='aircraft_class'),
+    path('aircraft_classes/', views.aircraft_classes, name='aircraft_classes'),
+    path('aircraft_class/<int:aircraft_class_id>/', views.aircraft_class, name='aircraft_class'),
 
-    re_path(r'^airimages/$', views.airimages, name='airimages'),
-    re_path(r'^airimage/(?P<airimage_id>\d+)/$', views.airimage, name='airimage'),
-    re_path(r'^new_airimage/$', views.new_airimage, name='new_airimage'),
-    re_path(r'^edit_airimage/(?P<airimage_id>\d+)/$', views.edit_airimage, name='edit_airimage'),
+    path('airimages/', views.airimages, name='airimages'),
+    path('airimage/<int:airimage_id>/', views.airimage, name='airimage'),
+    path('new_airimage/', views.new_airimage, name='new_airimage'),
+    path('edit_airimage/<int:airimage_id>/', views.edit_airimage, name='edit_airimage'),
 ]

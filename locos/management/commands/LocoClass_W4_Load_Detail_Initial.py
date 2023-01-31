@@ -20,6 +20,9 @@ class Command(BaseCommand):
                         c = LocoClass.objects.get(wikiname=row['2'])
                     except ObjectDoesNotExist:
                         c = LocoClass()
+                        # Wikiname should probably be taken from row[0]
+                        # Some row 2 entries have been changed by the cleansing process
+                        # For example, British Rail has become B.R.
                         c.wikiname = row['2']
                         c.save()
                         class_already_loaded = False

@@ -25,15 +25,20 @@ class Command(BaseCommand):
                         Wikislug NER Class Y = BRD slug 000262 
                         Only NER Class Y is in the Lococlass table
                         """
-                        slug = row['wikiname'].replace('/wiki','')
-                        c = LocoClass.objects.get(wikiname=slug)
+                        lcl_wikislug = row['wikiname'].replace('/wiki','')
+                        lc_wikislug = lcl_wikislug.replace('British Rail','B.R.')
+                        c = LocoClass.objects.get(wikiname=lc_wikislug)
                     except ObjectDoesNotExist:
-                        print(slug, ' is not in the LocoClass table')
+                        print(lc_wikislug, ' is not in the LocoClass table')
                     except Exception as e:
-                        print(slug, e)
+                        print(lc_wikislug, e)
                     else:
+                        brdslug_before = c.brdslug
                         c.brdslug = row['BRD_Class_Slug']
                         c.save()
+
+                        if brdslug_before != c.brdslug:
+                            print(f'{brdslug_before} changed to {c.brdslug} for {c})')
 
                         try:
                             locomotives_queryset = Locomotive.objects.filter(brd_class_name_slug=row['BRD_Class_Slug'])
@@ -42,17 +47,24 @@ class Command(BaseCommand):
                         except Exception as e:
                             print(e)
                         else:
-                            for locomotive in locomotives_queryset:
-                                locomotive.lococlass = c
-                                locomotive.save()
-                                print(locomotive, ' updated with lococlass ', locomotive.lococlass)
 
-                        try:
-                            cl = LocoClassList.objects.get(name=slug)
-                        except ObjectDoesNotExist:
-                            print(slug, ' is not in the LocoClassList table')
-                        except Exception as e:
-                            print(slug, e)
-                        else:
-                            cl.brdslug = row['BRD_Class_Slug']
-                            cl.save()
+                            if len(locomotives_queryset) != 0:
+                                count = 0
+                                for locomotive in locomotives_queryset:
+                                    locomotive.lococlass = c
+                                    locomotive.save()
+                                    count +=1
+                                print(count, ' locomotives updated with lococlass ', locomotive.lococlass)
+
+                    try:
+                        cl = LocoClassList.objects.get(name=lcl_wikislug)
+                    except ObjectDoesNotExist:
+                        print(lcl_wikislug, ' is not in the LocoClassList table')
+                    except Exception as e:
+                        print(lcl_wikislug, e)
+                    else:
+                        brdslug_before = cl.brdslug
+                        cl.brdslug = row['BRD_Class_Slug']
+                        cl.save()
+                        if brdslug_before != cl.brdslug:
+                            print(f'{brdslug_before} changed to {cl.brdslug} for LocoClassList Entry {cl})')

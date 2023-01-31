@@ -1,8 +1,7 @@
-﻿{% extends "../mainmenu/base.html" %}
+﻿<!doctype html>
+{% extends "../mainmenu/base.html" %}
 
-{% load crispy_forms_tags %}
-{% load bootstrap3 %}
-{#{% load django_bootstrap5 %}#}
+{% load django_bootstrap5 %}
 
 {# Load CSS and JavaScript #}
 {% bootstrap_css %}
@@ -11,21 +10,20 @@
 {# Display django.contrib.messages as Bootstrap alerts #}
 {% bootstrap_messages %}
 
+{% block head %}
+  {{ form.media }}
+{% endblock %}
+
 {% block content %}
+  {{ form.media }}
+  <form action="" method="post">
+    
+    {% csrf_token %}
 
-<form action="" method="post">
-  <!--Bootstrap Form-->
-  
-  {% csrf_token %}
-  {% bootstrap_form form %}
+    {% bootstrap_form form %}
 
-  <!--{#<h1>Standard Django Form "form.as_p"</h1>
-  {{ form.as_p }}
-
-  <h1>Crispy Form</h1>
-  {{ form|crispy }}-->
-  <input type="submit" value="Submit">
-  <input type="submit" value="Cancel" onclick="window.location.href='{% url 'maps:topics' %}';return false;">
-</form>
+    <input type="submit" value="Submit">
+    <input type="submit" value="Cancel" onclick="window.location.href='{% url 'maps:topics' %}';return false;">
+  </form>
 
 {% endblock %}

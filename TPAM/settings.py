@@ -31,7 +31,6 @@ INSTALLED_APPS = [
     'smart_selects',
 
     #Third Party Apps
-    'bootstrap3',
     'crispy_forms',
     'crispy_bootstrap5',
     'debug_toolbar',
@@ -81,8 +80,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'TPAM.urls'
 CART_SESSION_ID = 'cart'
-#CRISPY_TEMPLATE_PACK = 'bootstrap4'
-#GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
 
 # Template configuration
 # https://docs.djangoproject.com/en/2.1/topics/templates/
@@ -133,11 +130,6 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
-
-#Setting for django-bootstrap3 to include a required Javascript library
-
-#BOOTSTRAP3 = {
-#  'include_jquery': True,}
 
 TINYMCE_DEFAULT_CONFIG = {
     'height': 360,

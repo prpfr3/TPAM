@@ -7,12 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>{% block title %}TPAM{% endblock title %}</title>
+
+    {% load static %} 
     {% load django_bootstrap5 %}
-    {% load static %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+    {% bootstrap_messages %}
+
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <link rel="shortcut icon" href="{%  static 'favicon.ico' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css">
@@ -169,11 +172,9 @@
       </div>
     </div>
 
-      <script src={% static "jquery-3.6.0.min.js" %}></script>
+    <!-- Theoretically not needed. bootstrap5 does not use jquery and popper is bundled with javascript -->
+      <script src="{% static 'jquery-3.6.0.min.js' %}"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-      {% comment %}
-      <!-- Loading bootstrap stops the navbars from working.
-      <script src={% static "\js\bootstrap.min.js" %}></script>-->
-      {% endcomment %}
+
   </body>
 </html>

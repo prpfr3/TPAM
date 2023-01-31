@@ -21,6 +21,8 @@
       {% endfor %}
       </ul>
 
+      Years Since Built  {{ locomotive.age }}
+
       {% if lococlass %}
         <h2>Locomotive Class Details</h2>
 
@@ -60,15 +62,7 @@
         <li>{{reference.citation}}</li>
         {% endautoescape %}
       {% empty %}
-        <li>None recorded for this class.</li>
-      {% endfor %}
-
-      <h2>Images</h2>
-      {% for image in images %}
-        <img src="{{ image.image.url }}" >
-        <p><a href="{% url 'locos:image' image.id %}">{{image.image_name}}</a></p>
-      {% empty %}
-        <li>None recorded for this class.</li>
+        <li>None recorded for this locomotive.</li>
       {% endfor %}
 
     </div> <!-- panel body -->

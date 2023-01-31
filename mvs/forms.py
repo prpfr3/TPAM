@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import ugettext_lazy as _
 from urllib import request
 from django.core.files.base import ContentFile
@@ -50,14 +49,3 @@ class MVImageForm(forms.ModelForm):
     fields = ['image_name', 'image', 'mvclass', 'location', 'notes']
     labels = {'image_name':'Title', 'image':'Filename', 'mvclass':'Military Vehicle Class', 'location':'Location', 'notes':'Notes'}
     widgets = {'text': forms.Textarea(attrs={'cols':80})}
-
-class BootstrapAuthenticationForm(AuthenticationForm):
-    """Authentication form which uses bootstrap CSS."""
-    username = forms.CharField(max_length=254,
-                               widget=forms.TextInput({
-                                   'class': 'form-control',
-                                   'placeholder': 'User name'}))
-    password = forms.CharField(label=_("Password"),
-                               widget=forms.PasswordInput({
-                                   'class': 'form-control',
-                                   'placeholder':'Password'}))

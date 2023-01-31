@@ -50,14 +50,3 @@ class AirImageForm(forms.ModelForm):
     fields = ['image_name', 'image', 'airclass', 'location', 'notes']
     labels = {'image_name':'Title', 'image':'Filename', 'airclass':'Aircraft Class', 'location':'Location', 'notes':'Notes'}
     widgets = {'text': forms.Textarea(attrs={'cols':80})}
-
-class BootstrapAuthenticationForm(AuthenticationForm):
-    """Authentication form which uses bootstrap CSS."""
-    username = forms.CharField(max_length=254,
-                               widget=forms.TextInput({
-                                   'class': 'form-control',
-                                   'placeholder': 'User name'}))
-    password = forms.CharField(label=_("Password"),
-                               widget=forms.PasswordInput({
-                                   'class': 'form-control',
-                                   'placeholder':'Password'}))

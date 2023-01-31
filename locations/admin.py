@@ -55,6 +55,7 @@ class RouteAdmin(admin.ModelAdmin):
     list_display = ["name", "wikipedia_slug"]
     search_fields = ["name"]
     ordering = ["name"]
+    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
 class RouteLocationAdmin(OSMGeoAdmin):
     list_display = ['routemap', 'loc_no', 'label', 'location_fk']

@@ -35,7 +35,7 @@ def index(request):
 def builder(request, builder_id):
   builder = Builder.objects.get(id=builder_id)
   context = {'builder': builder}
-  return render(request, 'locos/manufacturer.html', context)
+  return render(request, 'locos/builder.html', context)
 
 def builders(request):
 
@@ -239,35 +239,35 @@ def locomotives(request):
         selection_criteria = LocomotiveSelectionForm(request.POST)
 
         if selection_criteria.is_valid() and selection_criteria.cleaned_data != None:
-            queryset = Locomotive.objects \
-              .filter(identifier__icontains=selection_criteria.cleaned_data['identifier']) \
-              .values('brd_class_name') \
-              .annotate(total=Count('brd_class_name')) \
-              .order_by('total')
-            age = ExpressionWrapper(F('withdrawn_datetime')-F('build_datetime'), \
-              output_field=fields.DurationField())
-            queryset = Locomotive.objects \
-              .filter(identifier__icontains=selection_criteria.cleaned_data['identifier']) \
-              .annotate(age=age) \
-              .order_by('age')
-            errors = None
-            context = {'selection_criteria':selection_criteria, 'errors': errors, 'locomotives_list': queryset}
-            return render(request, 'locos/locomotives_list.html', context)
-        else:
-            errors = selection_criteria.errors or None
-            queryset = Locomotive.objects.order_by('identifier')
+          queryset = Locomotive.objects \
+            .filter(identifier__icontains=selection_criteria.cleaned_data['identifier']) \
+            .values('brd_class_name') \
+            .annotate(total=Count('brd_class_name')) \
+            .order_by('total')
+          age = ExpressionWrapper(F('withdrawn_datetime')-F('build_datetime'), \
+            output_field=fields.DurationField())
+          queryset = Locomotive.objects \
+            .filter(identifier__icontains=selection_criteria.cleaned_data['identifier']) \
+            .annotate(age=age) \
+            .order_by('age')
+          errors = None
+          context = {'selection_criteria':selection_criteria, 'errors': errors, 'locomotives_list': queryset}
+          return render(request, 'locos/locomotives_list.html', context)
+
     else:
         selection_criteria = LocomotiveSelectionForm()
-        errors = selection_criteria.errors or None
-        queryset = Locomotive.objects.order_by('identifier')
 
+    queryset = Locomotive.objects.order_by('identifier')
+    errors = selection_criteria.errors or None
     queryset, page = pagination(request, queryset)
 
     context = {'selection_criteria':selection_criteria, 'errors': errors, 'page': page, 'locomotives_list': queryset}
     return render(request, 'locos/locomotives_list.html', context)
 
+
 def locomotive(request, locomotive_id):
     locomotive = Locomotive.objects.get(id=locomotive_id)
+    print(locomotive.age)
     try:
         lococlass = LocoClass.objects.get(id=locomotive.lococlass)
     except ObjectDoesNotExist:
@@ -296,7 +296,6 @@ def locomotive(request, locomotive_id):
       class_builders = list(chain(class_builders1, class_builders2, class_builders3))
 
     references = LocoClassSighting.objects.filter(loco=locomotive_id)
-    images = Reference.objects.filter(loco=locomotive_id)
 
     wiki_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
     # The following could be introduced at a later date for where there is a Wikipedia page for a locomotive
@@ -307,7 +306,6 @@ def locomotive(request, locomotive_id):
                 'lococlass':lococlass,
                 'operators':operators,
                 'references':references,
-                'images':images,
                 'designers':class_designers,
                 'builders':class_builders,
                 # 'wikipedia_summary':wikipedia_summary,

@@ -1,9 +1,9 @@
-from django.urls import include, path, re_path
+from django.urls import path
 from . import views
 
 app_name = 'storymaps'
 
 urlpatterns = [
-    re_path(r'^storymaps/$', views.storymaps, name='storymaps'),
-    re_path(r'^storymap/(?P<storymap_id>\d+)/$', views.storymap, name='storymap'),
+    path('storymaps/', views.storymaps, name='storymaps'),
+    path('storymap/<int:storymap_id>/', views.storymap, name='storymap'),
     ]

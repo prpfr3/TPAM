@@ -27,7 +27,7 @@ class Post(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.PROTECT)
     url = models.URLField(default=None, null=True, blank=True)
     slug = models.SlugField(default=None, null=True, blank=True, max_length=255)
-    body = models.TextField() 
+    body = models.TextField()
     publish = models.DateTimeField(default=timezone.now)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -46,16 +46,18 @@ class Post(models.Model):
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        if len(self.title) > 50:
-            return self.title[:50] + "..." 
-        else:
-            return self.title
-
-    #Returns a canonical url which is the main url to be used for a specific post
     def get_absolute_url(self):
-        return reverse('maps:post_update',
-            args=[self.id])
+        # Enables "View on Site" link in Admin to go to detail view on (non-admin) site
+        from django.urls import reverse
+        return reverse('maps:post_detail', args=[self.id])
+
+    def __str__(self):
+      return f"{self.title[:50]}..." if len(self.title) > 50 else self.title
+
+    # #Returns a canonical url which is the main url to be used for a specific post
+    # def get_absolute_url(self):
+    #     return reverse('maps:post_update',
+    #         args=[self.id])
 
 class HeritageSite(models.Model): 
 

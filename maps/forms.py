@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import ugettext_lazy as _
 from django.core.files.base import ContentFile
 from django.utils.text import slugify
@@ -29,9 +28,10 @@ class PostForm(forms.ModelForm):
     model = Post
     fields = ['title', 'body', 'status', 'url']
     labels = {'title':'', 'body':'', 'status':'', 'url':'url'}
-    widgets = {#'body': TinyMCE(attrs={'cols': 80, 'rows': 30}), #Overridden by bootstrap class
+    widgets = {
+               'body': TinyMCE(attrs={'cols': 80, 'rows': 50}), 
                'title': forms.TextInput(attrs={'class': 'form-control', "placeholder" : ".form-control-lg"}),
-               'body': forms.Textarea(attrs={'class': 'form-control', "placeholder" : ".form-control-md"}),
+              #  'body': forms.Textarea(attrs={'class': 'form-control', "placeholder" : ".form-control-md"}),
                'status': forms.Select(attrs={'class': 'form-control', "placeholder" : ".form-control-sm"}),
                'url': forms.TextInput(attrs={'class': 'form-control', "placeholder" : ".form-control-lg"}),
                }
@@ -41,12 +41,3 @@ class TopicForm(forms.ModelForm):
     model = Topic
     fields = ['text']
     labels = {'text':''}
-
-class BootstrapAuthenticationForm(AuthenticationForm):
-    """Authentication form which uses bootstrap CSS."""
-    username = forms.CharField(max_length=254, widget=forms.TextInput({
-                        'class': 'form-control',
-                        'placeholder': 'User name'}))
-    password = forms.CharField(label=_("Password"), widget=forms.PasswordInput({
-                        'class': 'form-control',
-                        'placeholder':'Password'}))
