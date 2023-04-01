@@ -47,7 +47,6 @@ from django.db.utils import IntegrityError
 @method_decorator(csrf_exempt, name='dispatch')
 class AddFavoriteView(LoginRequiredMixin, View):
     def post(self, request, pk):
-      print("Add PK",pk)
       t = get_object_or_404(MilitaryVehicleClass, id=pk)
       fav = Fav(user=request.user, thing=t)
       with contextlib.suppress(IntegrityError):
@@ -57,7 +56,6 @@ class AddFavoriteView(LoginRequiredMixin, View):
 @method_decorator(csrf_exempt, name='dispatch')
 class DeleteFavoriteView(LoginRequiredMixin, View):
     def post(self, request, pk):
-      print("Delete PK",pk)
       t = get_object_or_404(MilitaryVehicleClass, id=pk)
       with contextlib.suppress(Fav.DoesNotExist):
         fav = Fav.objects.get(user=request.user, thing=t).delete()
@@ -69,7 +67,7 @@ def military_vehicle_class(request, military_vehicle_class_id):
   return render(request, 'mvs/military_vehicle_class.html', context)
 
 def mvimages(request):
-  mvimages = MVImage.objects.filter(location=7).order_by('image_name')
+  mvimages = MVImage.objects.order_by('image_name')
   paginator = Paginator(mvimages, 33)
   page = request.GET.get('page')
   try:

@@ -7,9 +7,9 @@ app_name = 'api'
 urlpatterns = [
     path('register/', views.register),
     path('login/', views.login),
-    # path('builders/', views.Builders.as_view(), name='builders'),
-    path('builders/', views.builders, name='builders'),
-    path('builder/<int:pk>', views.builder, name='builder'),
+    # path('manufacturers/', views.Manufacturers.as_view(), name='manufacturers'),
+    path('manufacturers/', views.manufacturers, name='manufacturers'),
+    path('manufacturer/<int:pk>', views.manufacturer, name='manufacturer'),
     path('persons/', views.persons, name='persons'),
     ]
 

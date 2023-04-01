@@ -3,7 +3,9 @@ import pandas as pd
 from csv import DictReader
 from django.core.management import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from locos.models import ClassDesigner, Company, Builder, Person, LocoClass
+from companies.models import ClassDesigner, Company, Manufacturer
+from people.models import Person
+from locos.models import LocoClass
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 TEMP_FILE = 'Class_W5_Load_Designers_Temp.csv'
@@ -20,7 +22,7 @@ df_cleaned_designers.to_csv(output_file, index=False, encoding='utf-8')
 
 class Command(BaseCommand):
     # Show this when the user types help
-    help = "Loads data from a csv file into the ClassBuilder model"
+    help = "Loads data from a csv file into the ClassManufacturer model"
 
     def handle(self, *args, **options):
         if ClassDesigner.objects.exists():
@@ -41,7 +43,7 @@ class Command(BaseCommand):
                         if row[column] != "":
                             try:
                                 slug = row[column].replace('/wiki/','')
-                                c.builder_fk = Builder.objects.get(wikislug=slug)
+                                c.manufacturer_fk = Manufacturer.objects.get(wikislug=slug)
                                 c.save()
                             except ObjectDoesNotExist:
                                 try:
@@ -52,5 +54,5 @@ class Command(BaseCommand):
                                         c.company_fk = Company.objects.get(wikislug=slug)
                                         c.save()
                                     except Exception:
-                                        print(slug, ' not in the company, person or builder table')
+                                        print(slug, ' not in the company, person or manufacturer table')
                                         continue

@@ -35,10 +35,6 @@ class Command(BaseCommand):
                     else:
                         cl.brdslug = row['BRD_Class_Slug']
                         cl.save()
-
-
-
-
                         wikislug = row['wikiname'].replace('/wiki','')
                         c = LocoClass.objects.get(wikiname=wikislug)
                     except ObjectDoesNotExist:

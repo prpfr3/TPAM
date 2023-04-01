@@ -1,11 +1,9 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from .models import NaPTANRailReferences
 from .forms import GetLocationForm
-from locos.views import pagination
 
 from .opentransport_api import otapi_timetable, otapi_location, otapi_livepassenger, otapi_livefreight, otapi_service
 

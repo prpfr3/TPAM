@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.contrib.gis.admin import OSMGeoAdmin
+# from django.contrib.gis.admin import OSMGeoAdmin
 from locations.models import *
 from datetime import datetime
 from tinymce.widgets import TinyMCE
@@ -14,15 +14,16 @@ class DepotAdmin(admin.ModelAdmin):
 
 class ELRAdmin(admin.ModelAdmin):
     list_display = ['item', 'itemLabel', 'itemAltLabel']
-    ordering = ['itemLabel']
+    ordering = ['itemAltLabel']
     search_fields = ['itemLabel', 'itemAltLabel']
 
-class LocationAdmin(OSMGeoAdmin):
+class LocationAdmin(admin.ModelAdmin):
+# class LocationAdmin(OSMGeoAdmin):
     list_display = ['osm_node', 'stationname', 'wikiname', 'wikislug', 'elr_fk']
     list_filter = ['type']
-    search_fields = ['wikiname']
+    search_fields = ['wikiname', 'stationname']
     ordering = ['wikiname']
-    verbose_name = "Railway Stations from Wikipedia/Naptan"
+    verbose_name = "Railway Locations"
     formfield_overrides = {models.TextField: {'widget': TinyMCE(attrs={'cols': 80, 'rows': 30},)},}
 
 class LocationEventAdmin(admin.ModelAdmin):
@@ -31,21 +32,24 @@ class LocationEventAdmin(admin.ModelAdmin):
     search_fields = ['route_fk', 'date']
 
 @admin.register(RouteGeoClosed)
-class RouteGeoClosedAdmin(OSMGeoAdmin):
+class RouteGeoClosedAdmin(admin.ModelAdmin):
+# class RouteGeoClosedAdmin(OSMGeoAdmin):
     list_display = ['name', 'description']
     search_fields = ['name', 'description']
     ordering = ['name']
     verbose_name = "Closed Lines from Google Map"
 
 @admin.register(RouteGeoOsm)
-class RouteGeoOsmAdmin(OSMGeoAdmin):
+class RouteGeoOsmAdmin(admin.ModelAdmin):
+# class RouteGeoOsmAdmin(OSMGeoAdmin):
     list_display = ['name']
     search_fields = ['name', 'type']
     ordering = ['name']
     verbose_name = "OSM Current Map Rail Routes"
 
 @admin.register(RouteGeoOsmhistory)
-class RouteGeoOsmhistoryAdmin(OSMGeoAdmin):
+class RouteGeoOsmAdmin(admin.ModelAdmin):
+# class RouteGeoOsmhistoryAdmin(OSMGeoAdmin):
     list_display = ['name']
     search_fields = ['name']
     ordering = ['name']
@@ -57,7 +61,8 @@ class RouteAdmin(admin.ModelAdmin):
     ordering = ["name"]
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
-class RouteLocationAdmin(OSMGeoAdmin):
+class RouteLocationAdmin(admin.ModelAdmin):
+# class RouteLocationAdmin(OSMGeoAdmin):
     list_display = ['routemap', 'loc_no', 'label', 'location_fk']
     search_fields = ['routemap__name', 'label']
     ordering = ['routemap', 'loc_no']
@@ -66,6 +71,19 @@ class RouteMapAdmin(admin.ModelAdmin):
     list_display = ["name"]
     search_fields = ["name"]
     ordering = ["name"]
+
+@admin.register(HeritageSite)
+class HeritageSiteAdmin(admin.ModelAdmin):
+    list_display = ["tpam_type", "type", "name", "wikislug", "url", "type"]
+    list_filter = ["tpam_type", "type"]
+    ordering = ('name',)
+    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
+
+@admin.register(Visit)
+class VisitAdmin(admin.ModelAdmin):
+    list_display = ["id", "location", "date", "notes"]
+    ordering = ('date',)
+    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
 
 admin.site.register(Depot, DepotAdmin)
 admin.site.register(ELR, ELRAdmin)

@@ -72,8 +72,6 @@ with open(output_file, 'wt+', newline='', encoding='utf-8') as csvFile:
     ]
 
     unique_hrefs = []
-
-
     routes_added = 0
     route_templates_added = 0
 

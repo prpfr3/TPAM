@@ -1,6 +1,5 @@
-from django.contrib.gis.db import models
-from locations.models import Route, Location, ELR, RouteMap
-from maps.models import Visit, Post
+from django.db import models
+from notes.models import Post, Reference
 import datetime
 
 class WheelArrangement(models.Model):
@@ -94,7 +93,7 @@ class LocoClass(models.Model):
   power_type = models.CharField(max_length=200, blank=True, default='')
   prime_mover = models.CharField(max_length=200, blank=True, default='')
   rebuild_date = models.CharField(max_length=200, blank=True, default='')
-  rebuilder = models.CharField(max_length=200, blank=True, default='')
+  remanufacturer = models.CharField(max_length=200, blank=True, default='')
   retired = models.CharField(max_length=200, blank=True, default='')
   rpm_range = models.CharField(max_length=200, blank=True, default='')
   safety_systems = models.CharField(max_length=200, blank=True, default='')
@@ -123,6 +122,8 @@ class LocoClass(models.Model):
   whyte = models.CharField(max_length=200, blank=True, default='')
   width = models.CharField(max_length=200, blank=True, default='')
   withdrawn = models.CharField(max_length=200, blank=True, default='')
+
+  references = models.ManyToManyField(Reference, blank=True)
   post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
   def get_absolute_url(self):
@@ -140,7 +141,7 @@ class LocoClass(models.Model):
 
 class LocoClassList(models.Model):
   name = models.CharField(max_length=1000, blank=True, default='')
-  wikislug = models.CharField(default=None, null=True, max_length=255)
+  wikislug = models.SlugField(max_length=250, allow_unicode=True ,default=None, blank=True, null=True)
   brdslug = models.CharField(default=None, null=True, max_length=255)
   lococlass_fk = models.ForeignKey(LocoClass, blank=True, null=True, on_delete=models.CASCADE)
   
@@ -150,155 +151,6 @@ class LocoClassList(models.Model):
   class Meta:
     verbose_name = 'Locomotive Class Mapping'
     verbose_name_plural = 'Locomotive Class Mappings'
-
-class Person(models.Model): 
-  """Railway Engineers etc"""
-  name = models.CharField(max_length=100, default=None)
-  firstname = models.CharField(max_length=100, default=None)
-  surname = models.CharField(max_length=100, default=None) 
-  birthdate = models.CharField(max_length=10, blank=True, default='')
-  birthplace = models.CharField(max_length=200, blank=True, default='')
-  dieddate = models.CharField(max_length=10, blank=True, default='')
-  diedplace = models.CharField(max_length=200, blank=True, default='')
-  nationality = models.CharField(max_length=200, blank=True, default='') 
-  occupation = models.CharField(max_length=200, blank=True, default='')
-  wikitextslug = models.CharField(max_length=200, blank=True, default='') 
-  wikiimageslug = models.CharField(max_length=200, blank=True, default='')
-  wikiimagetext = models.CharField(max_length=200, blank=True, default='')  
-  gracetextslug = models.CharField(max_length=200, blank=True, default='') 
-  post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
-  date_added = models.DateTimeField(auto_now_add=True)
-  lococlass_designed = models.ManyToManyField(LocoClass, through='ClassDesigner', related_name="person_designer")
-  lococlass_built = models.ManyToManyField(LocoClass, through='ClassBuilder', related_name="person_builder")
-  
-  def __str__(self):
-    return self.name
-
-class Role(models.Model): 
-  role = models.CharField(max_length=100, null=True)
-  
-  def __str__(self):
-    return self.role
-  
-  class Meta:
-    managed = True
-
-class PersonRole(models.Model): 
-  role = models.ForeignKey(Role, on_delete=models.CASCADE)
-  person = models.ForeignKey(Person, on_delete=models.CASCADE)
-  
-  def __str__(self):
-      return f"{self.person.name} {self.role.role}"
-
-class Builder(models.Model):
-  name = models.CharField(max_length=200, blank=True, null=True)
-  wikislug = models.SlugField(max_length=200, default=None)
-  railuk_builder_code = models.CharField(max_length=3, blank=True, null=True)
-  brd_builder_code = models.CharField(max_length=3, blank=True, null=True)
-  brsl_builder_code = models.CharField(max_length=10, blank=True, null=True)
-  location = models.CharField(max_length=200, blank=True, null=True)
-  pre_grouping_owner = models.CharField(max_length=10, blank=True, default='') #pre1923
-  grouping_owner = models.CharField(max_length=4, blank=True, default='') #1923-1947
-  br_region_owner = models.CharField(max_length=3, blank=True, default='') #1948-1997
-  date_opened = models.CharField(max_length=10, blank=True, null=True)
-  date_closed = models.CharField(max_length=10, blank=True, null=True)
-  type = models.CharField(max_length=77, blank=True, null=True)
-  steam = models.CharField(max_length=10, blank=True, null=True)
-  diesel = models.CharField(max_length=10, blank=True, null=True)
-  electric = models.CharField(max_length=10, blank=True, null=True)
-  map = models.CharField(max_length=200, blank=True, null=True)
-  web = models.CharField(max_length=200, blank=True, null=True)
-  lococlass_designed = models.ManyToManyField(LocoClass, through='ClassDesigner', related_name="builder_designer")
-  lococlass_built = models.ManyToManyField(LocoClass, through='ClassBuilder', related_name="builder_builder")
-  post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
-
-  def get_absolute_url(self):
-    # Enables "View on Site" link in Admin to go to detail view on (non-admin) site
-    from django.urls import reverse
-    return reverse('locos:builder', kwargs={'builder_id': self.pk})
-
-  def __str__(self):
-    return self.name
-  
-  class Meta:
-    verbose_name_plural = 'Builder' 
-
-class CompanyCategory(models.Model):
-  category = models.CharField(max_length=100, null=True)
-  
-  def __str__(self):
-    return self.category
-  
-  class Meta:
-    managed = True
-
-class Company(models.Model):
-  name = models.CharField(max_length=200, blank=True, null=True)
-  wikislug = models.SlugField(max_length=200, default=None)
-  code = models.CharField(max_length=10, blank=True, null=True)
-  company_categories = models.ManyToManyField(CompanyCategory)
-  lococlass_owneroperator = models.ManyToManyField(LocoClass, through='ClassOwnerOperator', related_name="company_owneroperator")
-  lococlass_designed = models.ManyToManyField(LocoClass, through='ClassDesigner', related_name="company_designer")
-  lococlass_built = models.ManyToManyField(LocoClass, through='ClassBuilder', related_name="company_builder")
-  route_owneroperator = models.ManyToManyField(Route, through='RouteOwnerOperator', related_name="route_owneroperator")
-  post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
-
-  def get_absolute_url(self):
-    # Enables "View on Site" link in Admin to go to detail view on (non-admin) site
-    from django.urls import reverse
-    return reverse('locos:company', kwargs={'company_id': self.pk})
-
-  def __str__(self):
-    return self.name or ""
-  
-  class Meta:
-    verbose_name_plural = 'Companies'
-
-class RouteOwnerOperator(models.Model): 
-  route_fk = models.ForeignKey(Route, on_delete=models.CASCADE)
-  company_fk = models.ForeignKey(Company, on_delete=models.CASCADE)
-  def __str__(self):
-      return f"{self.route_fk} {self.company_fk}"
-
-class ClassBuilder(models.Model): 
-  lococlass_fk = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
-  builder_fk = models.ForeignKey(Builder, blank=True, null=True, on_delete=models.CASCADE)
-  person_fk = models.ForeignKey(Person, blank=True, null=True, on_delete=models.CASCADE)
-  company_fk = models.ForeignKey(Company, blank=True, null=True, on_delete=models.CASCADE)
-  
-  def __str__(self):
-      if self.person_fk is not None:
-        builder = self.person_fk.name
-      elif self.builder_fk is not None:
-        builder = self.builder_fk.name
-      elif self.company_fk is not None:
-        builder = self.company_fk.name
-      else:
-        builder = ""
-      return f"{builder}"
-
-class ClassDesigner(models.Model): 
-  lococlass_fk = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
-  builder_fk = models.ForeignKey(Builder, blank=True, null=True, on_delete=models.CASCADE)
-  person_fk = models.ForeignKey(Person, blank=True, null=True, on_delete=models.CASCADE)
-  company_fk = models.ForeignKey(Company, blank=True, null=True, on_delete=models.CASCADE)
-  
-  def __str__(self):
-      if self.person_fk is not None:
-        designer = self.person_fk.name
-      elif self.builder_fk is not None:
-        designer = self.builder_fk.name
-      elif self.company_fk is not None:
-        designer = self.company_fk.name
-      else:
-        designer = ""
-      return f"{designer}"
-
-class ClassOwnerOperator(models.Model): 
-  lococlass_fk = models.ForeignKey(LocoClass, on_delete=models.CASCADE)
-  company_fk = models.ForeignKey(Company, on_delete=models.CASCADE)
-  def __str__(self):
-      return f"{self.lococlass_fk} {self.company_fk}"
 
 class Locomotive(models.Model):
   identifier = models.CharField(max_length=500, blank=True, null=True)
@@ -317,7 +169,7 @@ class Locomotive(models.Model):
   order_datetime = models.DateField(blank=True, null=True)
   build_date = models.CharField(max_length=10, blank=True, null=True)
   build_datetime = models.DateField(blank=True, null=True)
-  builder = models.CharField(max_length=50, blank=True, null=True)
+  manufacturer = models.CharField(max_length=50, blank=True, null=True)
   withdrawn_date = models.CharField(max_length=10, blank=True, null=True)
   withdrawn_datetime = models.DateField(blank=True, null=True)
   scrapped_date = models.CharField(max_length=10, blank=True, null=True)
@@ -326,6 +178,8 @@ class Locomotive(models.Model):
   company_pregrouping_code = models.CharField(max_length=10, blank=True, null=True)
   lococlass = models.ForeignKey(LocoClass, default=None, null=True, blank=True, verbose_name="Locomotive Class", on_delete=models.SET_DEFAULT)
   name = models.CharField(max_length=100, blank=True, null=True)
+
+  references = models.ManyToManyField(Reference, blank=True)
   post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
   def __str__(self):
@@ -342,60 +196,3 @@ class Locomotive(models.Model):
           (self.build_datetime.month, self.build_datetime.day))
       print(age_years)
       return age_years
-
-class Reference(models.Model):
-    
-    # Choices are enumerated here using a technique recommended @
-    # https://www.b-list.org/weblog/2007/nov/02/handle-choices-right-way/
-    
-    TYPE_BOOK = 1
-    TYPE_WEBSITE = 2
-    TYPE_MAGAZINE = 3
-    TYPE_VIDEO = 4
-    TYPE_MYSIGHTING = 5
-    TYPE_MYPHOTO = 6
-    
-    REFERENCE_TYPE = (
-      ( TYPE_BOOK, 'Book'),
-      ( TYPE_WEBSITE, 'Website'),
-      ( TYPE_MAGAZINE, 'Magazine'),
-      ( TYPE_VIDEO, 'Video'),
-      ( TYPE_MYSIGHTING, 'MySighting'),
-      ( TYPE_MYPHOTO, 'MyPhoto'),
-    )
-    ref = models.IntegerField()
-    type = models.IntegerField(choices=REFERENCE_TYPE)
-    citation = models.TextField(blank='True', null='True', 
-        default='cite book | last1 = | first1 = | title = [[ ]] | publisher = [[]] | pages = 1-2  | date = ??/??/?? | isbn = 0-786918-50-0 | journal = | volume = | issue = | issn = ')
-    url = models.URLField(blank=True, null=True, max_length=300)
-    notes = models.TextField(blank='True', null='True', default=None)
-    # CharField rather than fk used for loco pending clarification of loco numbering handling
-    loco = models.CharField(max_length=20, blank=True, null=True)
-    # locos = models.ManyToManyField(Locomotive, through='LocoClassSighting', blank='True')
-    lococlass = models.ManyToManyField(LocoClass, through='LocoClassSighting', blank='True')
-    date = models.CharField(max_length=10, blank=True, null=True)
-    date_datetime = models.DateField(blank=True, null=True)
-    route_fk  = models.ForeignKey(Route, on_delete=models.CASCADE, blank=True, null=True, default=None)
-    routemap_fk  = models.ForeignKey(RouteMap, on_delete=models.CASCADE, blank=True, null=True, default=None)
-    location_fk  = models.ForeignKey(Location, on_delete=models.CASCADE, blank=True, null=True, default=None)
-    location_description = models.CharField(max_length=100, blank='True', null='True', default=None)
-    company_fk = models.ForeignKey(Company, on_delete=models.CASCADE, blank=True, null=True, default=None)
-    ELR_fk = models.ForeignKey(ELR, on_delete=models.CASCADE, blank=True, null=True, default=None)
-    visit = models.ForeignKey(Visit, blank=True, null=True, default=None, verbose_name="Visit", on_delete=models.CASCADE)
-    image = models.ImageField(blank=True, null=True, upload_to='images/')
-    date_added = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f'{self.type}: {self.citation}'
-
-class LocoClassSighting(models.Model):
-    reference = models.ForeignKey(Reference, on_delete=models.CASCADE)
-    loco_class = models.ForeignKey(LocoClass, blank=True, null=True, on_delete=models.CASCADE)
-    loco = models.ForeignKey(Locomotive, blank=True, null=True, on_delete=models.CASCADE)
-       
-    def __str__(self):
-        return f"{str(self.loco_class.wikiname)} at {str(self.reference.location_description)}"
-    
-    class Meta:
-      verbose_name = 'Locomotive Class Sighting'
-      verbose_name_plural = 'Locomotive Class Sightings'

@@ -2,7 +2,8 @@ import os
 from csv import DictReader
 from django.core.management import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from locos.models import Company, LocoClass
+from locos.models import LocoClass
+from companies.models import Company
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 INPUT_FILES = [

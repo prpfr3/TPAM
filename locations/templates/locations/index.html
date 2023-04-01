@@ -1,0 +1,24 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}Heritage Sites, Visits and Articles{% endblock %}
+{% block content_desc %}{% endblock %}
+
+{% block content %}
+
+<div class="bd-example">
+    <ul class="list-group">
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:locations' %}">Locations</a>    
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:routes' %}">Routes</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:elrs' %}">ELRs</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:osm_railmap_county_select' %}">OSM Railway Map</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:heritage_sites' %}">Museums & Heritage Sites </a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:visits' %}">Heritage Site Visits</a>
+        {% comment %}
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:map_closed_lines_select' %}">Closed Lines Map</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:location_timeline' %}">Location Timeline</a>
+        {% endcomment %}
+    </ul>
+</div>
+
+{% endblock %}

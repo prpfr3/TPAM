@@ -1,6 +1,6 @@
 {% extends "../mainmenu/base.html" %}
 
-{% block content_title %}UK Railway Locomotives, People and Organisations{% endblock %}
+{% block content_title %}Rolling Stock{% endblock %}
 {% block content_desc %}{% endblock %}
 
 {% block content %}
@@ -9,21 +9,8 @@
     <ul class="list-group">
       <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'locos:loco_classes' %}">Locomotive Classes</a></li>
       <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'locos:locomotives' %}">Locomotives</a></li>
-      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'locos:persons' %}">Famous Engineers</a></li>
-      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'locos:builders' %}">Loco Builders</a></li>
+      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'locos:photos' %}">Photo Album</a></li>
     </ul>
   </div>
 
-  <!--
-  {% with total_references_created=request.owner.references_data_added.count %}
-    <p>You have bookmarked {{ total_references_created }} image {{ total_references_created|pluralize }}.</p>
-  {% endwith %}
-  <p>Drag the following button to your bookmarks toolbar to bookmark images from other websites → <a href="javascript:{% include "bookmarklet_launcher.js" %}" class="button">Bookmark it</a></p>
-  -->
-{% endblock %}
-
-
-    <!--  <p>You can also <a href="{% url "edit" %}">edit your profile</a> or <a href="{% url "password_change" %}">change your password</a>.</p>
-   
-    <!--<li><a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locos:visits' %}">Visits</a></li>
-      <a href="{% url 'users:register' %}">Register an account</a> to view the archive and add records of your own-->
+  {% endblock content %}

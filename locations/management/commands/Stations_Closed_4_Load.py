@@ -1,7 +1,8 @@
 from csv import DictReader
 from django.core.management import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from locos.models import Location, Company
+from locations.models import Location
+from companies.models import Company
 
 ALREADY_LOADED_ERROR_MESSAGE = """
 Delete the current data from the table being loaded into BEFORE executing this command
@@ -25,7 +26,7 @@ class Command(BaseCommand):
             l.geometry = row['Geometry']
 
             try:
-                company_wiki = row['Company_Wiki'].replace('/wiki/', '').replace('%26','&').replace('%22','').replace('%27',"'")
+                company_wiki = row['Company_Wiki'].replace('/wiki/', '').replace('%26','&').replace('%22','').replace('%27',"'").replace('%E2%80%93','-')
                 c = Company.objects.get(wikislug=company_wiki)
             except ObjectDoesNotExist:
                 print(company_wiki, ' not found in the Company table')

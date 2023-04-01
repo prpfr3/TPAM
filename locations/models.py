@@ -1,5 +1,7 @@
-from django.contrib.gis.db import models
-from maps.models import Post
+# from django.contrib.gis.db import models
+from django.db import models
+from notes.models import *
+from companies.models import Company
 
 class Depot(models.Model):
     depot = models.CharField(max_length=1000, blank=True, null=True)
@@ -22,7 +24,8 @@ class ELR(models.Model):
   item = models.SlugField(max_length=20, blank=True, default='')
   itemLabel = models.CharField(max_length=400, blank=True, default='')
   itemAltLabel = models.CharField(max_length=200, blank=True, default='')
-  
+  post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+
   def __str__(self):
     return f"{self.itemAltLabel} {self.itemLabel}" or ""
 
@@ -31,14 +34,20 @@ class ELR(models.Model):
      verbose_name_plural = "Engineer's Line References"
 
 class Location(models.Model):
+    
+    SOURCE_TYPE = (
+    (1, 'Wikipedia'),
+    (2, 'Custom'),
+    )
+
     type = models.CharField(max_length=20, blank=True, null=True)
     wikiname = models.CharField(max_length=200, blank=True, null=True)
-    wikislug = models.SlugField(default=None, blank=True, null=True, max_length=255)
+    wikislug = models.SlugField(max_length=250, allow_unicode=True ,default=None, blank=True, null=True)
     postcode = models.CharField(default=None, blank=True, null=True, max_length=10)
     opened = models.CharField(max_length=200, blank=True, null=True)
     closed = models.CharField(max_length=200, blank=True, null=True)
     disused_stations_slug = models.CharField(max_length=200, blank=True, null=True)
-    geometry = models.GeometryField(blank=True, null=True)
+    geometry = models.TextField(blank=True, null=True) #Geometry Field if using contrib.gis
     atcocode = models.CharField(max_length=20, blank=True, null=True) 
     tiploccode = models.CharField(max_length=20, blank=True, null=True)
     crscode = models.CharField(max_length=10, blank=True, null=True)
@@ -55,6 +64,11 @@ class Location(models.Model):
     elr_fk  = models.ForeignKey(ELR, on_delete=models.SET_NULL, blank=True, null=True, default=None)
     osm_node = models.CharField(max_length=20, blank=True, null=True)
     post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    references = models.ManyToManyField(Reference, blank=True)
+    source = models.IntegerField(choices=SOURCE_TYPE, default=1,)
+    media_caption = models.CharField(max_length=100, blank=True, null=True)
+    media_credit = models.CharField(max_length=200, blank=True, null=True)
+    media_url = models.URLField(blank=True, null=True, max_length=400)
 
     def get_absolute_url(self):
       # Enables "View on Site" link in Admin to go to detail view on (non-admin) site
@@ -63,6 +77,9 @@ class Location(models.Model):
 
     def __str__(self):
         return self.wikiname or self.stationname or str(self.id)
+    
+    class Meta:
+      managed = False
 
 class RouteCategory(models.Model):
   category = models.CharField(max_length=100, null=True)
@@ -77,22 +94,34 @@ class RouteCategory(models.Model):
 
 class RouteMap(models.Model):
   # In Wikipedia, a Routemap can appear on more than one Route page.
+  SOURCE_TYPE = (
+    (1, 'Wikipedia'),
+    (2, 'Custom'),
+  )
   name = models.CharField(max_length=1000, null=True)
+  source = models.IntegerField(choices=SOURCE_TYPE, default=1,)
   
   def __str__(self):
     return self.name
   
   class Meta:
-    verbose_name = "Route Map (Wikipedia)"
-    verbose_name_plural = "Route Maps (Wikipedia)"
+    verbose_name = "Route Map"
+    verbose_name_plural = "Route Maps"
     managed = True
 
 class Route(models.Model):
+  SOURCE_TYPE = (
+    (1, 'Wikipedia'),
+    (2, 'Custom'),
+  )
   name = models.CharField(max_length=1000, blank=True, default='')
-  wikipedia_slug = models.SlugField(default=None, null=True, max_length=255)
+  wikipedia_slug = models.SlugField(default=None, allow_unicode=True, null=True, max_length=255)
   wikipedia_route_categories = models.ManyToManyField(RouteCategory, blank=True)
-  wikipedia_routemaps = models.ManyToManyField(RouteMap)
+  wikipedia_routemaps = models.ManyToManyField(RouteMap, blank=True)
+  references = models.ManyToManyField(Reference, blank=True)
   post_fk = models.ForeignKey(Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+  route_owneroperator = models.ManyToManyField(Company, blank=True)
+  source = models.IntegerField(choices=SOURCE_TYPE, default=1,)
 
   def __str__(self):
     return self.name
@@ -136,10 +165,13 @@ class LocationEvent(models.Model):
          verbose_name = 'Location Event'
          verbose_name_plural = 'Location Events'
 
+"""
+CLOSED RAILWAY DATA FROM GOOGLE MAPS
+"""
 class RouteGeoClosed(models.Model):
     name = models.TextField(db_column='name', blank=True, null=True)  # Field name made lowercase. Had to change Name to name in PgAdmin
     description = models.TextField(db_column='Description', blank=True, null=True)  # Field name made lowercase.
-    geometry = models.GeometryField(dim=3, blank=True, null=True)
+    geometry = models.TextField(blank=True, null=True) #Geometry Field if using contrib.gis
 
     class Meta:
         db_table = 'locations_routes_geo_closed'
@@ -150,6 +182,8 @@ class RouteGeoClosed(models.Model):
       return self.name
 
 """
+RAILWAYS DATA FROM OSM
+To recreate and populate this model
 Load the data via OSM_GoogleMaps_dataloads.ipynb
 Then generate the Django table model from the loaded database table using:-
   python manage.py inspectdb > models_temporary.py
@@ -253,9 +287,10 @@ class RouteGeoOsm(models.Model):
     surveillance_type = models.TextField(db_column='surveillance:type', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     historic = models.TextField(blank=True, null=True)
     field_relations = models.TextField(db_column='@relations', blank=True, null=True)  # Field renamed to remove unsuitable characters. Field renamed because it started with '_'.
-    geometry = models.GeometryField(blank=True, null=True)
+    geometry = models.TextField(blank=True, null=True) #Geometry Field if using contrib.gis
 
     class Meta:
+        managed = False
         db_table = 'locations_routes_geo_osm'
         verbose_name = 'OSM Route Geometry'
         verbose_name_plural = 'OSM Routes Geometries'
@@ -264,6 +299,7 @@ class RouteGeoOsm(models.Model):
         return self.id
 
 """
+RAILWAY DATA FROM OSM HISTORY
 Load the data via OSM_GoogleMaps_dataloads.ipynb
 Then generate the Django table model from the loaded database table using:-
   python manage.py inspectdb > models_temporary.py
@@ -322,27 +358,28 @@ class RouteGeoOsmhistory(models.Model):
     level = models.TextField(blank=True, null=True)
     fixme = models.TextField(blank=True, null=True)
     note = models.TextField(blank=True, null=True)
+    start_date_source = models.TextField(db_column='start_date:source', blank=True, null=True)  # Field renamed to remove unsuitable characters.
+    start_date_edtf = models.TextField(db_column='start_date:edtf', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     electrified = models.TextField(blank=True, null=True)
     usage = models.TextField(blank=True, null=True)
-    country = models.TextField(blank=True, null=True)
     end_date_edtf = models.TextField(db_column='end_date:edtf', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     end_date_note = models.TextField(db_column='end_date:note', blank=True, null=True)  # Field renamed to remove unsuitable characters.
-    start_date_edtf = models.TextField(db_column='start_date:edtf', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     source_operator = models.TextField(db_column='source:operator', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     operator_1940 = models.TextField(db_column='operator:1940', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     end_date_freight = models.TextField(db_column='end_date:freight', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     end_date_passengers = models.TextField(db_column='end_date:passengers', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     start_date_passengers = models.TextField(db_column='start_date:passengers', blank=True, null=True)  # Field renamed to remove unsuitable characters.
+    start_date_goods = models.TextField(db_column='start_date:goods', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     name_1886_1937 = models.TextField(db_column='name:1886-1937', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     name_1937_field = models.TextField(db_column='name:1937-', blank=True, null=True)  # Field renamed to remove unsuitable characters. Field renamed because it ended with '_'.
     source_data = models.TextField(db_column='source:data', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     name_1932_1934 = models.TextField(db_column='name:1932-1934', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     name_1881_1895 = models.TextField(db_column='name:1881-1895', blank=True, null=True)  # Field renamed to remove unsuitable characters.
-    start_date_source = models.TextField(db_column='start_date:source', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     wikimedia_commons = models.TextField(blank=True, null=True)
     station = models.TextField(blank=True, null=True)
     subway = models.TextField(blank=True, null=True)
-    geometry = models.GeometryField(blank=True, null=True)
+    railway_yard_purpose = models.TextField(db_column='railway:yard:purpose', blank=True, null=True)  # Field renamed to remove unsuitable characters.
+    geometry = models.TextField(blank=True, null=True) #Geometry Field if using contrib.gis
 
     class Meta:
         db_table = 'locations_routes_geo_osmhistory'
@@ -361,7 +398,7 @@ class UkAdminBoundaries(models.Model):
     lat = models.FloatField(blank=True, null=True)
     st_areasha = models.FloatField(blank=True, null=True)
     st_lengths = models.FloatField(blank=True, null=True)
-    geometry = models.GeometryField(blank=True, null=True)
+    geometry = models.TextField(blank=True, null=True) #Geometry Field if using contrib.gis
 
     class Meta:
         managed = False
@@ -371,3 +408,26 @@ class UkAdminBoundaries(models.Model):
 
     def __str__(self):
         return self.ctyua19nm
+    
+class HeritageSite(models.Model): 
+
+  tpam_type = models.ForeignKey('mainmenu.MyDjangoApp', default=1, verbose_name="Heritage Site Type", on_delete=models.SET_DEFAULT)
+  type = models.CharField(max_length=50, default=None, blank=True)
+  name = models.CharField(max_length=100, default=None, blank=True)
+  country = models.CharField(max_length=100, default=None, blank=True)
+  wikislug = models.SlugField(max_length=250, allow_unicode=True ,default=None, blank=True, null=True)
+  url = models.URLField(default=None, blank=True, null=True)
+  notes = models.TextField(default=None,blank=True, null=True)
+  date_added = models.DateTimeField(auto_now_add=True)
+
+  def __str__(self):
+    return self.name
+
+class Visit(models.Model): #Visit to a Location / Heritage Site
+  location = models.ForeignKey(HeritageSite, default=1398, verbose_name="Location", on_delete=models.SET_DEFAULT)
+  date = models.DateField(blank=True)
+  notes = models.TextField(default=None, blank=True)
+  date_added = models.DateField(auto_now_add=True)
+
+  def __str__(self):
+    return str(self.date)

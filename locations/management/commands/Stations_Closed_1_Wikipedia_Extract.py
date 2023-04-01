@@ -20,7 +20,8 @@ with open(output_file, 'wt+', newline='', encoding='utf-8') as csvFile:
     csvLogfile = open(log_file, 'wt+', newline='', encoding='utf-8')
     outputLogfile= csv.writer(csvLogfile)
 
-    alphabet = ['D-F', 'G', 'H-J', 'K-L', 'M-O', 'P-R', 'S', 'T-V', 'W-Z']
+    alphabet = ['A', 'B', 'C', 'D-F', 'G', 'H-J', 'K-L', 'M-O', 'P-R', 'S', 'T-V', 'W-Z']
+    alphabet = ['T-V', 'W-Z']
 
     stations_added = 0
 
@@ -94,4 +95,4 @@ with open(output_file, 'wt+', newline='', encoding='utf-8') as csvFile:
                     output.writerow(csv_output_row)
                     stations_added += 1
 
-print(f'{stations_added=}')
+csv_logfile_row.append(f'{stations_added=}')

@@ -1,12 +1,13 @@
 from csv import DictReader
 from django.core.management import BaseCommand
-from locos.models import Location
+from locations.models import Location
+import contextlib
 
-input_filename = 'D://Data/TPAM/Location_Junctions_Loadfile.csv'
+input_filename = 'D://Data/TPAM/Location_Junctions_OSM_Loadfile.csv'
 
 class Command(BaseCommand):
     # Show this when the user types help
-    help = "Loads data from RailReferences.csv into our NaPTAN Rail References rable"
+    help = "Loads data from RailReferences.csv into the locations table"
 
     def handle(self, *args, **options):
         print("Loading Junctions")
@@ -21,8 +22,7 @@ class Command(BaseCommand):
                 l.stationname = row['name']
                 l.stationnamealt = row['alt_name']
                 l.osm_node = row['@id']
-                print(l)
                 l.save()
-            count += 1
+                count += 1
 
         print(f'{count} junctions loaded as locations')

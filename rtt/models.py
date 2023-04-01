@@ -17,5 +17,9 @@ class NaPTANRailReferences(models.Model):
     revisionnumber = models.SmallIntegerField (blank=True, null=True)
     modification = models.CharField(max_length=3, blank=True, null=True)
 
+    class Meta:
+      verbose_name = 'Naptan Rail Reference'
+      verbose_name_plural = 'Naptan Rail References'
+
     def __str__(self):
       return self.stationname

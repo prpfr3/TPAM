@@ -67,15 +67,16 @@ def storymap(request, storymap_id):
     storymap_dict = {"storymap": 
       {"attribution": "Paul Frost", 
         "call_to_action": True, 
-        "call_to_action_text": "Take the Trip", 
+        "call_to_action_text": "Travel the Route", 
         "map_as_image": False, 
         "map_subdomains": "", 
-        # "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
-        "map_type": "osm:standard",
+        "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+        # "map_type": "osm:standard",
         "slides": slide_list,   
         "zoomify": False
       }
     }
 
     storymap_json = json.dumps(storymap_dict)
+
     return render(request, 'storymaps/storymap.html', {'storymap_json':storymap_json})

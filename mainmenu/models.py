@@ -5,6 +5,7 @@ class MyDjangoApp(models.Model):
     image = models.ImageField(upload_to='media/')
     summary = models.TextField()
     url = models.SlugField()
+    order = models.IntegerField()
 
     def __str__(self):
         return self.summary

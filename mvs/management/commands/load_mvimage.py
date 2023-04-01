@@ -2,14 +2,15 @@
 
 from csv import DictReader
 from django.core.management import BaseCommand
-from mvs.models import MVImage
+from mvs.models import MVImage, MilitaryVehicleClass
+from django.core.exceptions import ObjectDoesNotExist
 import csv, os
 from pathlib import Path
 
 # !!! WARNING - Running this may change the ids of records that are referred to with foreign keys in other tables
 
 #Set up a CSV file and write a Header Row
-csv_file = os.path.join("D:\\OneDrive\\Source\\Python Projects\\TPAM\\media\\Saumur Tanks\\ETL_Wiki_MVImages_Saumur.csv")
+csv_file = os.path.join("D:\\Data\\TPAM\\ETL_Wiki_MVImages_Saumur.csv")
 #csvFile = open(csv_file, 'wt+', newline='', encoding='utf-8')
 #output = csv.writer(csvFile)
 #output.writerow(['image_name', 'image', 'mvclass_id', 'location_id', 'visit_id', 'notes'])
@@ -63,13 +64,23 @@ class Command(BaseCommand):
             print('Military Vehicle images already loaded...but continuing.')
             pass
         print("Creating Military Vehicle Images")
-        for row in DictReader(open(csv_file)):
-            print(row)
-            c = MVImage()
-            c.image_name = row['ï»¿image_name'] 
-            c.image = row['image']
-            c.mvclass_id = int(row['mvclass_id'])
-            c.location_id = int(row['location_id'])
-            c.visit_id = int(row['visit_id'])
-            c.notes = row['notes']
-            c.save()
+        with open(csv_file, encoding="utf-8-sig") as file:   
+            for row in DictReader(file):
+
+                print(row)
+                c = MVImage()
+
+                c.image_name = row['image_name'] 
+                c.image = row['image']
+                try:
+                    mvclass = MilitaryVehicleClass.objects.get(mvclass=row['image_name'] )
+                except ObjectDoesNotExist:
+                    print(row['image_name'], ' is not in the Military Vehicle Class table')
+                except Exception as e:
+                    print(row['image_name'], e)
+                else:            
+                    c.mvclass = mvclass
+                c.location_id = int(row['location_id'])
+                c.visit_id = int(row['visit_id'])
+                c.notes = row['notes']
+                c.save()

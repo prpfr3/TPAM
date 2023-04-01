@@ -74,7 +74,7 @@ class Command(BaseCommand):
                         l.brd_class_name = row['Class_x']
                         l.brd_class_name_slug = row['Class_a']
                         l.build_date, l.build_datetime = dateformatter(row['Build Date'])
-                        l.builder = row['Builder']
+                        l.manufacturer = row['Manufacturer']
                         if row['Withdrawn'] and row['Withdrawn'] != '0':
                             l.withdrawn_date, l.withdrawn_datetime = dateformatter(row['Withdrawn'])
                         l.company_grouping_code = row['Big 4']

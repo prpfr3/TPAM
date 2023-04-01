@@ -1,0 +1,34 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}{{ photo.citation }}{% endblock %}
+{% block content_desc %}{% endblock %}
+
+{% block content %}
+     <div class="panel panel-default">
+      <div class="panel-heading"></div>
+      <div class="panel-body">
+
+        <h2><a href="{{photo.location.url}}">{{ mvimage.location }}</a></h2>
+        <!--<h2>Notes: {{ photo.notes|linebreaks }}</h2>-->
+        <h2><img src="{{ photo.image.url }}" ></h2>
+
+        <h1>Location</h1>
+        {% for location in locations %}
+          <li><a href="https://en.wikipedia.org/wiki/{{location.wikislug}}">{{location}}</a></li>
+        {% empty %}
+          <li>None Identified</li>
+        {% endfor %}
+
+        <h1>Loco Classes in this Photo</h1>
+        {% for class in classes %}
+          <li><a href="https://en.wikipedia.org/wiki/{{class.wikiname}}">{{class}}</a></li>
+        {% empty %}
+          <li>None Identified</li>
+        {% endfor %}
+      </div>
+
+      {% comment %}
+      <a href="{% url 'locos:edit_mvimage' mvimage.id %}"  class="btn btn-primary">Edit</a>
+      {% endcomment %}
+    </div> <!-- panel -->
+{% endblock content %}

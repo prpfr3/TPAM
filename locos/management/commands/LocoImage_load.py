@@ -7,7 +7,7 @@ An option will arise which allows the images to be resized.
 
 from csv import DictReader
 from django.core.management import BaseCommand
-from locos.models import Image, Reference
+from locations.models import Reference
 import csv, os
 from pathlib import Path
 
@@ -63,7 +63,7 @@ class Command(BaseCommand):
               c.type = 6
               c.citation = row['image_name'] 
               c.image = row['image']
-              c.visit_id = int(row['visit_id'])
+              # c.visit_fk = int(row['visit_fk '])
               c.notes = row['image_name']
               c.save()
 

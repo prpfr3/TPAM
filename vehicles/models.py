@@ -99,8 +99,8 @@ class VehicleImage(models.Model): #Road Vehicle Images
   image = models.ImageField(upload_to='images/')
   make = models.ForeignKey(VehicleMake, default=None, verbose_name="Vehicle Make", on_delete=models.SET_DEFAULT)
   model = models.ForeignKey(VehicleModel, default=None, verbose_name="Vehicle Model", on_delete=models.SET_DEFAULT)
-  location = models.ForeignKey('maps.HeritageSite', default=None, verbose_name="Location", on_delete=models.SET_DEFAULT)
-  visit = models.ForeignKey('maps.Visit', default=None, verbose_name="Visit", on_delete=models.SET_DEFAULT)
+  # location = models.ForeignKey('locations.HeritageSite', default=None, verbose_name="Location", on_delete=models.SET_DEFAULT)
+  # visit = models.ForeignKey('locations.Visit', default=None, verbose_name="Visit", on_delete=models.SET_DEFAULT)
   notes = models.TextField(default=None)
   date_added = models.DateTimeField(auto_now_add=True)
 

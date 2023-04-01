@@ -10,8 +10,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view # For Function Based Views
 from rest_framework.views import APIView # For Class Based Views
 
-from locos.models import Builder, Person
-from .serializers import BuilderSerializer, PersonSerializer
+from people.models import Person
+from companies.models import Manufacturer
+from .serializers import ManufacturerSerializer, PersonSerializer
 
 """
 Registers a user for the first time and provides a token. API call:-
@@ -52,29 +53,29 @@ def login(request):
 
 """
 To make a token based API call:-
-curl http://localhost:8000/api/builder/ -H "Authorization: Token 00cee603ce74d1f0c9708500eee814c72215778a"
+curl http://localhost:8000/api/manufacturer/ -H "Authorization: Token 00cee603ce74d1f0c9708500eee814c72215778a"
 """
-# class Builders(generics.ListAPIView):
-#     queryset = Builder.objects.all()
-#     serializer_class = BuilderSerializer
+# class Manufacturers(generics.ListAPIView):
+#     queryset = Manufacturer.objects.all()
+#     serializer_class = ManufacturerSerializer
 #     # Following will ensure a good error message when the user has not signed in 
 #     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 # Class Based View from https://www.django-rest-framework.org/tutorial/3-class-based-views/
 # Not used at present as does not offer the PUT/update method in the API screen
-class Builders(APIView):
+class Manufacturers(APIView):
     """
-    List all builders, or create a new builder.
+    List all manufacturers, or create a new manufacturer.
     """
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request, format=None):
-        builders = Builder.objects.all()
-        serializer = BuilderSerializer(builders, many=True)
+        manufacturers = Manufacturer.objects.all()
+        serializer = ManufacturerSerializer(manufacturers, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = BuilderSerializer(data=request.data)
+        serializer = ManufacturerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -83,15 +84,15 @@ class Builders(APIView):
 # Function Based View approach
 
 @api_view(['GET', 'POST'])
-def builders(request):
+def manufacturers(request):
 
     if request.method == 'GET':
-        builders = Builder.objects.all()
-        serializer = BuilderSerializer(builders, many=True)
+        manufacturers = Manufacturer.objects.all()
+        serializer = ManufacturerSerializer(manufacturers, many=True)
         return Response(serializer.data)
 
     if request.method == 'POST':
-        serializer = BuilderSerializer(data=request.data)
+        serializer = ManufacturerSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -100,20 +101,20 @@ def builders(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def builder(request, pk):
+def manufacturer(request, pk):
 
     if request.method == 'GET':
         try:
-            builder = Builder.objects.get(pk=pk)
-        except Builder.DoesNotExist:
-            return Response({'error': 'Builder not found'}, status=status.HTTP_404_NOT_FOUND)
+            manufacturer = Manufacturer.objects.get(pk=pk)
+        except Manufacturer.DoesNotExist:
+            return Response({'error': 'Manufacturer not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = BuilderSerializer(builder)
+        serializer = ManufacturerSerializer(manufacturer)
         return Response(serializer.data)
 
     if request.method == 'PUT':
-        builder = Builder.objects.get(pk=pk)
-        serializer = BuilderSerializer(builder, data=request.data)
+        manufacturer = Manufacturer.objects.get(pk=pk)
+        serializer = ManufacturerSerializer(manufacturer, data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -122,7 +123,7 @@ def builder(request, pk):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == 'DELETE':
-        post = Builder.objects.get(pk=pk)
+        post = Manufacturer.objects.get(pk=pk)
         post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

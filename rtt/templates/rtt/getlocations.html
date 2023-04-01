@@ -8,18 +8,18 @@
   {% csrf_token %}
   {{location_list}}
   <p></p><p></p>
-
 </form>
-
 
 <!--<div class="bg-light container">-->
 <div>
   <ul style="list-style-type:none;">
+  </ul>
+</div>
+  <div class="bd-example">
+    <ul class="list-group">
       {% for location in locations %}
-        <li>
-            <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'rtt:getlocation' location.crscode %}"> <b>{{location.crscode}}</b>
+          <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'rtt:getlocation' location.crscode %}"> <b>{{location.crscode}}</b>
              - {{location.stationname}}</a> 
-        </li>
       {% empty %}
         <li>No Sites have been added yet.</li>
       {% endfor %}

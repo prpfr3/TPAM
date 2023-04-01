@@ -12,10 +12,7 @@ import pandas as pd
 import configparser
 import os
 import psycopg2
-from urllib.request import urlopen
 import mysql.connector #needs mysql-connector-python from pip (e.g. 8.0.25)
-from getpass import getpass #getpass is built-in
-from mysql.connector import connect, Error
 
 url = "https://en.wikipedia.org/wiki/Wheel_arrangement"
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
@@ -49,7 +46,7 @@ KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
 config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
 db_pswd = config['MySQL']['p']
 
-"""
+
 try:
     with psycopg2.connect(
         host="localhost",
@@ -59,59 +56,58 @@ try:
         database="TPAM"
         ) as connection:
 
-      #  drop_table_query = "DROP TABLE locos_wheelarrangement"
-      #  with connection.cursor() as cursor:
-      #    cursor.execute(drop_table_query)
+        drop_table_query = "DROP TABLE locos_wheelarrangement"
+        with connection.cursor() as cursor:
+            cursor.execute(drop_table_query)
 
-      #  create_wheel_arrangement_query = "
-      #  CREATE TABLE locos_wheelarrangement(
-      #      wheelid SMALLINT,
-      #      UIC_system VARCHAR(20),
-      #      Whyte_notation VARCHAR(20),
-      #      American_name VARCHAR(75),
-      #      Visual VARCHAR(20),
-      #      CONSTRAINT pk_wheel_arrangement PRIMARY KEY (wheelid) 
-      #  )"
-      #  with connection.cursor() as cursor:
-      #    cursor.execute(create_wheel_arrangement_query)
-      #    connection.commit()
+        create_wheel_arrangement_query = """
+        CREATE TABLE locos_wheelarrangement(
+            wheelid SMALLINT,
+            UIC_system VARCHAR(20),
+            Whyte_notation VARCHAR(20),
+            American_name VARCHAR(75),
+            Visual VARCHAR(20),
+            CONSTRAINT pk_wheel_arrangement PRIMARY KEY (wheelid) 
+        )"""
+        with connection.cursor() as cursor:
+            cursor.execute(create_wheel_arrangement_query)
+            connection.commit()
 
-      # ALTER statement added separately just as an example of how a key can be changed post creation
-      #  alter_wheel_arrangement_query = "
-      #  ALTER TABLE locos_wheelarrangement
-      #      MODIFY wheelid SMALLINT UNSIGNED AUTO_INCREMENT
-      #  "
-      #  with connection.cursor() as cursor:
-      #    cursor.execute(alter_wheel_arrangement_query)
-      #    connection.commit()
-
-      # INSERT wheel_arrangement
+        # Example shows post-creation alteration
+        alter_wheel_arrangement_query = """
+            ALTER TABLE locos_wheelarrangement
+            MODIFY wheelid SMALLINT UNSIGNED AUTO_INCREMENT
+            """
+        
+        # Inserting data into the table
+        with connection.cursor() as cursor:
+            cursor.execute(alter_wheel_arrangement_query)
+            connection.commit()
 
         # creating column list for insertion
         cols = ",".join([str(i) for i in df_clean.columns.tolist()])
 
-        # Insert DataFrame records one by one.
         for i,row in df_clean.iterrows():
             sql = "INSERT INTO locos_wheelarrangement (" +cols + ") VALUES (" + "%s,"*(len(row)-1) + "%s)"
 
-            print(f'{sql=}', '/n', f'{tuple(row)=}')
+            print(f'{sql=}/n{tuple(row)=}')
             with connection.cursor() as cursor:
                 cursor.execute(sql, tuple(row))
                 connection.commit()
 
         sql = "SELECT * FROM locos_wheelarrangement"
         with connection.cursor() as cursor:        
-          cursor.execute(sql)
-          result = cursor.fetchall()
-          for i in result:
-              print(i)
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            for i in result:
+                print(i)
 
-except Error as e:
+except Exception as e:
     print(e)
 
 finally:
     connection.close()
-"""
+
 
 from csv import DictReader
 from django.core.management import BaseCommand

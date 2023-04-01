@@ -7,9 +7,11 @@
 
   <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'mvs:mvimages' %}">Military Vehicle Images</a> 
   <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'mvs:military_vehicle_classes' %}">Military Vehicles Classes (from Wikipedia)</a>
-  <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:heritage_sites' %}">Museums and Sites</a> 
-  <!--<a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'maps:visits' %}">Visits</a>
+  <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:heritage_sites' %}">Museums and Sites</a> 
+  {% comment %}
+  <!--<a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:visits' %}">Visits</a>
 
   <!--<a href="#">Register an account</a> to view the archive and add records of your own-->
+  {% endcomment %}
 
 {% endblock content %}

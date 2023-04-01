@@ -68,7 +68,7 @@ class Command(BaseCommand):
                     elif row['Field'] == "Power class": c.power_class = row['Value']
                     elif row['Field'] == "Power type": c.power_type = row['Value']
                     elif row['Field'] == "Rebuild date": c.rebuild_date = row['Value']
-                    elif row['Field'] == "Rebuilder": c.rebuilder = row['Value']
+                    elif row['Field'] == "Remanufacturer": c.remanufacturer = row['Value']
                     elif row['Field'] == "Retired": c.retired = row['Value']
                     elif row['Field'] == "Serial number": c.serial_number = row['Value']
                     elif row['Field'] == "Superheater": c.superheater_type = row['Value']

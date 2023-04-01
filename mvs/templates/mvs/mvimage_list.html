@@ -20,21 +20,22 @@
     </thead>
     <tbody>
       {% for mvimage in mvimages %}
-      <tr>
-        <td>{% load thumbnail %}
-              {% thumbnail mvimage.image "100" as im %}
-                <a href="{% url 'mvs:mvimage' mvimage.id %}">
-                  <img src="{{ im.url }}" class="image-detail"></a>
-            {% endthumbnail %}</td>
-        <td><a href="{% url 'mvs:mvimage' mvimage.id %}">{{mvimage.image_name}}</a></td>
-        <td>{{mvimage.location}}</td>
-        <td>{{mvimage.visit.date}}</td>
+        <tr>
+          <td>
+              {% load thumbnail %}
+              {% thumbnail mvimage.image "200" as im %}
+                  <a href="{% url 'mvs:mvimage' mvimage.id %}"><img src="{{ im.url }}" class="image-detail"></a>
+              {% endthumbnail %}
+          </td>
+          <td><a href="{% url 'mvs:mvimage' mvimage.id %}">{{mvimage.image_name}}</a></td>
+          <td>{{mvimage.location}}</td>
+          <td>{{mvimage.visit.date}}</td>
 
-        {% empty %}
-          <h2>No military vehicle images have been added yet.</h2>
-        {% endfor %}
-      </tr>
+          {% empty %}
+            <h2>No military vehicle images have been added yet.</h2>
+          {% endfor %}
+        </tr>
     </tbody>
   </table>
-{% include "mvs/pagination.html" with page=mvimages %}
+{% include "mainmenu/pagination.html" with page=mvimages %}
 {% endblock content %}

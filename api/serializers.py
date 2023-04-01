@@ -1,17 +1,18 @@
 from rest_framework import serializers
-from locos.models import Builder, Person
+from people.models import Person
+from companies.models import Manufacturer
 
 def name_length(value):
     if len(value) < 2:
         raise serializers.ValidationError("Name is too short!")
 
-class BuilderSerializer(serializers.Serializer):
+class ManufacturerSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(validators=[name_length])
     wikislug = serializers.CharField()
 
     def create(self, validated_data):
-        return Builder.objects.create(**validated_data)
+        return Manufacturer.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)

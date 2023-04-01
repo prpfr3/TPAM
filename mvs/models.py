@@ -4,7 +4,7 @@ from django.conf import settings
 
 class HeritageSite(models.Model): 
   site_name = models.CharField(max_length=100, default=None)
-  wikislug = models.SlugField(default=None, null=True, max_length=255)
+  wikislug = models.SlugField(max_length=250, allow_unicode=True ,default=None, blank=True, null=True)
   url = models.URLField(default=None, null=True)
   notes = models.TextField(default=None, null=True)
   date_added = models.DateTimeField(auto_now_add=True)
@@ -22,7 +22,7 @@ class Visit(models.Model): #Visit to a Location / Heritage Site
 
 class MilitaryVehicleClass(models.Model): 
   mvclass = models.CharField(max_length=100, default=None, blank=True, null=True)
-  wikislug = models.SlugField(max_length=250, default=None, blank=True, null=True)
+  wikislug = models.SlugField(max_length=250, allow_unicode=True ,default=None, blank=True, null=True)
   description = models.CharField(max_length=500, default=None, blank=True, null=True)
   notes = models.TextField(default=None, blank=True, null=True)
   favorites = models.ManyToManyField(settings.AUTH_USER_MODEL, through='Fav',
@@ -33,6 +33,7 @@ class MilitaryVehicleClass(models.Model):
     return self.description
 
   class Meta:
+    verbose_name = 'Military Vehicle Class'
     verbose_name_plural = 'Military Vehicle Classes'
     managed = True
 
@@ -44,6 +45,8 @@ class Fav(models.Model) :
     # https://docs.djangoproject.com/en/3.0/ref/models/options/#unique-together
     class Meta:
         unique_together = ('thing', 'user')
+        verbose_name = 'Military Vehicle Favourite'
+        verbose_name_plural = 'Military Vehicle Favourites'
 
     def __str__(self):
       return f'{self.user.username} likes {self.thing.mvclass[:10]}'
@@ -57,7 +60,11 @@ class MVImage(models.Model): #Military Vehicle Images
   visit = models.ForeignKey(Visit, default=1, verbose_name="Visit", on_delete=models.SET_DEFAULT)
   notes = models.TextField(default=None, blank=True, null=True)
   date_added = models.DateTimeField(auto_now_add=True)
-  
+
+  class Meta:
+    verbose_name = 'Military Vehicle Image'
+    verbose_name_plural = 'Military Vehicle Images'
+
   def __str__(self):
     return self.image_name
 
@@ -73,6 +80,10 @@ class MVBMImage(models.Model):
   users_like = models.ManyToManyField(settings.AUTH_USER_MODEL,
                                   related_name='mvimages_liked',# Needed because of similar relationships in other appas
                                   blank=True)
+
+  class Meta:
+    verbose_name = 'Military Vehicle Bookmarked Image'
+    verbose_name_plural = 'Military Vehicle Bookmarked Images'
 
   def __str__(self):
       return self.title

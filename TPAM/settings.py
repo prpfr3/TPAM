@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.gis',
+    #'django.contrib.gis',
     'django.contrib.messages',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
@@ -43,11 +43,13 @@ INSTALLED_APPS = [
     #Myapps
     'aircraft',
     'api',
+    'companies',
     'locations',
     'locos',
     'mainmenu',
-    'maps',
+    'notes',
     'mvs',
+    'people',
     'rtt',
     'storages',
     'storymaps',
@@ -172,8 +174,8 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   ALLOWED_HOSTS = ['tpam.herokuapp.com']
  
   DATABASES = {
-      #'default': dj_database_url.config(default='postgres://localhost')
-      'default': dj_database_url.config(default='postgis://localhost')
+      'default': dj_database_url.config(default='postgres://localhost')
+      #'default': dj_database_url.config(default='postgis://localhost')
   }
     
   # Honor the 'X-Forwarded-Proto' header for request.is_secure().
@@ -196,7 +198,7 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   #specify the Django storage classes
 
   STATICFILES_LOCATION = 'static'
-#   STATICFILES_STORAGE = 'custom_storages.StaticStorage' #For AWS
+  STATICFILES_STORAGE = 'custom_storages.StaticStorage' #For AWS
   STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # For Whitenoise Static Files Storage
   MEDIAFILES_LOCATION = 'media'
   DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage' #ideally this would be called mediafiles_storage in django but it isn't !
@@ -274,8 +276,8 @@ else:
           #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 
       'default': {
-        #   'ENGINE': 'django.db.backends.postgresql',
-          'ENGINE': 'django.contrib.gis.db.backends.postgis',
+           'ENGINE': 'django.db.backends.postgresql',
+        #  'ENGINE': 'django.contrib.gis.db.backends.postgis',
           'NAME': 'TPAM',
           'USER': 'postgres',
           'PASSWORD': db_pswd,

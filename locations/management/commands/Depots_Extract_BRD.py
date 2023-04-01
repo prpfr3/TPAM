@@ -1,4 +1,4 @@
-# Extracts BR Builders from TPAM website saved html page and loads into Oracle
+# Extracts BR Manufacturers from TPAM website saved html page and loads into Oracle
 
 import os
 import pandas as pd

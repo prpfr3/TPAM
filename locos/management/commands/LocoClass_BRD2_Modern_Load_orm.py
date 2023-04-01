@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 c.modern_class = row['Class']
                 c.modern_class_slug = row['Class_url']
                 c.year_introduced = row['Introduced']
-                c.builder = row['Manufacturer'] 
+                c.manufacturer = row['Manufacturer'] 
                 if c.class_type == 'D':
                   c.power_unit = row['Power Unit']
                   c.horse_power = row['Horse Power']

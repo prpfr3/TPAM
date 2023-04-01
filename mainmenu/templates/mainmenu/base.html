@@ -64,27 +64,74 @@
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
           <div class="position-sticky pt-3">
        
-            <div class="nav-item dropdown"> <!--Trains-->
+            <div class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <b>T</b>rains</a>
+              <b>R</b>olling Stock</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'locos:loco_classes' %}">Locomotive Classes</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:locomotives' %}">Locomotives</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:persons' %}">Famous Engineers</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:persons_timeline' %}">Famous Engineers Timeline</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:persons_vis_timeline' %}">Famous Engineers vis Timeline</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:builders' %}">Manufacturers</a>
-              <a class="dropdown-item nav-link" href="{% url 'locos:companies' %}">Operating Companies</a>
-
+                <a class="dropdown-item nav-link" href="{% url 'locos:loco_classes' %}">Locomotive Classes</a>
+                <a class="dropdown-item nav-link" href="{% url 'locos:locomotives' %}">Locomotives</a>
+                <a class="dropdown-item nav-link" href="{% url 'locos:photos' %}">Photo Album</a>
               </div>
-            </div> <!--Trains-->
+            </div>
 
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>P</b>eople</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'people:people' %}">Famous People</a>
+                <a class="dropdown-item nav-link" href="{% url 'people:people_timeline' %}">Famous People Timeline</a>
+              </div>
+            </div>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><b>L</b>ocations, Routes and Maps</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'locations:locations' %}">Locations</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:routes' %}">Routes</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:elrs' %}">Engineers Line References</a>              
+                <a class="dropdown-item nav-link" href="{% url 'locations:osm_railmap_county_select' %}">OSM County Railmap</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:heritage_sites' %}">Museums & Heritage Sites </a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:visits' %}">Heritage Site Visits</a>
+                {% comment %}
+                <a class="dropdown-item nav-link" href="{% url 'locations:map_closed_lines_select' %}">Closed Lines Map</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:depot_vis_timeline' %}">Depot Timeline</a>
+                {% endcomment %}
+              </div>
+            </div>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>C</b>ompanies</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'companies:manufacturers' %}">Manufacturers</a>
+                <a class="dropdown-item nav-link" href="{% url 'companies:companies' %}">Owner Operators</a>
+              </div>
+            </div>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>N</b>otes</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'notes:topics' %}">Own Notes & Articles</a>
+              </div>
+            </div>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>L</b>ive Train Times</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'rtt:getlocations' %}">Live Train Times</a>
+              </div>
+            </div>
+
+            {% comment %}
             <div class="nav-item dropdown"> <!--Aircraft-->
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <b>P</b>lanes</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'aircraft:airimages' %}">Photos</a>
-              <a class="dropdown-item nav-link" href="{% url 'aircraft:aircraft_classes' %}">Classes</a>
+                  <a class="dropdown-item nav-link" href="{% url 'aircraft:airimages' %}">Photos</a>
+                  <a class="dropdown-item nav-link" href="{% url 'aircraft:aircraft_classes' %}">Classes</a>
               </div>
             </div> <!--Aircraft-->
 
@@ -92,9 +139,9 @@
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <b>A</b>utomobiles</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'vehicles:licensed_vehicles_list' %}">Database of UK Licensed Vehicles</a>
-              <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_models_list' %}">UK Most Popular Models</a>
-              <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_makes' %}">UK Most Popular Makes</a>
+                <a class="dropdown-item nav-link" href="{% url 'vehicles:licensed_vehicles_list' %}">Database of UK Licensed Vehicles</a>
+                <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_models_list' %}">UK Most Popular Models</a>
+                <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_makes' %}">UK Most Popular Makes</a>
               </div>
             </div><!--Vehicle Licensing-->
 
@@ -102,36 +149,12 @@
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <b>M</b>ilitary Vehicles</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'mvs:mvimages' %}">Photos</a>
-              <a class="dropdown-item nav-link" href="{% url 'mvs:military_vehicle_classes' %}">Classes</a>
+                <a class="dropdown-item nav-link" href="{% url 'mvs:mvimages' %}">Photos</a>
+                <a class="dropdown-item nav-link" href="{% url 'mvs:military_vehicle_classes' %}">Classes</a>
               </div>
             </div> <!--Military Vehicles-->
+            {% endcomment %}
 
-              <hr>
-
-              <ul class="nav flex-column">
-              <li class="nav-item">
-              <a class="nav-link" href="{% url 'rtt:getlocations' %}">Live Train Times</a>
-              </li>
-              </ul>
-              <hr>
-
-            <div class="nav-item dropdown"><!--Locations-->
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Maps and Locations</a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'locations:locations' %}">Locations</a>
-              <a class="dropdown-item nav-link" href="{% url 'locations:routes' %}">Routes</a>
-              <a class="dropdown-item nav-link" href="{% url 'locations:map_closed_lines_select' %}">Closed Lines Map</a>
-              <a class="dropdown-item nav-link" href="{% url 'locations:elrs' %}">Engineers Line References</a>              
-              <a class="dropdown-item nav-link" href="{% url 'locations:osm_railmap_county_select' %}">OSM County Railmap</a>
-              <a class="dropdown-item nav-link" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
-              <a class="dropdown-item nav-link" href="{% url 'locations:location_timeline' %}">Location Timeline</a>
-              <a class="dropdown-item nav-link" href="{% url 'locations:depot_vis_timeline' %}">Depot Timeline</a>
-              <a class="dropdown-item nav-link" href="{% url 'maps:heritage_sites' %}">Museums & Heritage Sites </a>
-              <a class="dropdown-item nav-link" href="{% url 'maps:visits' %}">Heritage Site Visits</a>
-              <a class="dropdown-item nav-link" href="{% url 'maps:topics' %}">Blog Articles</a>
-              </div>
-            </div> <!--Locations-->
           </div>
         </nav>
 

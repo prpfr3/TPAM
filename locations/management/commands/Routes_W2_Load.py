@@ -21,15 +21,15 @@ class Command(BaseCommand):
         with open(os.path.join(DATAIO_DIR, "Routes.csv"), encoding="utf-8") as file: 
             
             for row in DictReader(file):
-                wikislug = row['wikislug'].replace('/wiki/', '')                             
+                wikislug = row['wikislug'].replace('/wiki/', '').replace('%26','&').replace('%22','').replace('%27',"'").replace('%E2%80%93','-')                             
                 route_fk, route_created = Route.objects.get_or_create(name=row['name'],wikipedia_slug = wikislug)
                 if route_created:
                     routes_added += 1
 
                 # Get or create the routemap for the route and then add the routemap as a fk into the route table
                 if row['routemap'] != None:
-                    wikipedia_routemap = row['routemap']
-                    wikipedia_routemap = wikipedia_routemap.replace('/wiki/Template:', '')
+                    wikipedia_routemap = row['routemap'].replace('/wiki/Template:', '').replace('%26','&').replace('%22','').replace('%27',"'").replace('%E2%80%93','-')                             
+                    wikipedia_routemap = wikipedia_routemap
                     routemap_fk, routemap_created = RouteMap.objects.get_or_create(name=wikipedia_routemap,)
                     if routemap_created:
                         route_templates_added += 1

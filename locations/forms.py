@@ -1,5 +1,5 @@
 from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .models import *
 
@@ -35,7 +35,7 @@ class LocationSelectionForm(forms.ModelForm):
 class RouteSelectionForm(forms.ModelForm):
     class Meta:
         model = Route
-        fields = ('name', 'wikipedia_route_categories')
+        fields = ('name', 'wikipedia_route_categories', 'source')
 
 class LocationForm(forms.ModelForm):
   class Meta:

@@ -15,25 +15,42 @@
       
     {% for location in locations %}
       <h4>
-        <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
+        
         {% if location.type == 'Closed Station' %}
-          (Closed Station)
-        {% else %}
-
+          <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>(Closed Station)
         {% endif %}
-        <a href="https://en.wikipedia.org//wiki/{{location.wikislug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
+
+        {% if location.type == 'Current Station' %}
+        <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
+        {% endif %}
+
+        {% if location.type == 'Junction' and location.stationname %}
+        <a href="{% url 'locations:location' location.id %}">{{location.stationname}}</a>
+        {% endif %}
+
+        {% if location.type == 'Junction' and not location.stationname %}
+        <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
+        {% endif %}
+
+        {% if location.wikislug %}
+          <a href="https://en.wikipedia.org//wiki/{{location.wikislug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
+        {% endif %}
+          
         {% if location.disused_stations_slug %}
           <a href="http://disused-stations.org.uk/{{location.disused_stations_slug}}" class="btn btn-primary">DS</a>
         {% endif %}
+
+        {% comment %}
         {% if location.atcocode %}
           <a href="{% url 'rtt:getlocation' location.crscode %}" class="btn btn-primary">RTT</a>
         {% endif %}
+        {% endcomment %}
       </h4>
  
     {% empty %}
       <h2>No locations found.</h2>
     {% endfor %}
 
-    {% include "locations/pagination.html" with page=locations %}
+    {% include "mainmenu/pagination.html" with page=locations %}
 
 {% endblock content %}

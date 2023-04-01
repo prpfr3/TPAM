@@ -1,10 +1,8 @@
 from csv import DictReader
 from django.core.management import BaseCommand
-from locos.models import Location
+from locations.models import Location
 
 class Command(BaseCommand):
-    # Show this when the user types help
-    help = "Loads data from RailReferences.csv into our NaPTAN Rail References rable"
 
     def handle(self, *args, **options):
         print("Creating Locations")
@@ -17,8 +15,8 @@ class Command(BaseCommand):
             if count != 0:
                 l = Location()
                 l.type = 'Current Station'
-                l.wikiname = row['Name'].replace('/wiki/','')
-                l.wikislug = row['NameSlug']
+                l.wikiname = row['Name']
+                l.wikislug = row['NameSlug'].replace('/wiki/','')
                 l.postcode = row['Postcode']
                 l.geometry = row['geometry']
                 l.atcocode = row['AtcoCode'] 

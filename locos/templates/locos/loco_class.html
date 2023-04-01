@@ -50,13 +50,14 @@
       <li>None recorded for this class.</li>
     {% endfor %}
 
-    <h1>Builder(s)</h1>
-    {% for builder in builders %}
-      <li><a href="https://en.wikipedia.org/{{builder.wikitextslug}}">{{builder.name}}</a></li>
+    <h1>Manufacturer(s)</h1>
+    {% for manufacturer in manufacturers %}
+      <li><a href="https://en.wikipedia.org/{{manufacturer.wikitextslug}}">{{manufacturer.name}}</a></li>
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %}
 
+    {% comment %}
     <h1>References</h1>
     {% for reference in references %}
       {% autoescape off %}
@@ -65,6 +66,7 @@
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %}
+    {% endcomment %}
 
     <h1>Images</h1>
     {% for image in images %}

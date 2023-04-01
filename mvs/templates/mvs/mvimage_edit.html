@@ -11,11 +11,7 @@
       
     {% csrf_token %}
     {% bootstrap_form form %}
-    
-    {% buttons %}
-      <button name="submit" class="btn btn-primary">Submit</button>
-    {% endbuttons %}
-    
+    <button name="submit" class="btn btn-primary">Submit</button>
   </form>
     
 {% endblock content %}

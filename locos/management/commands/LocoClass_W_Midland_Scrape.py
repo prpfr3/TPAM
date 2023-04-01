@@ -22,7 +22,7 @@ filename = os.path.join(DATAIO_DIR,"LocoClass_Wikitable_Midland_Scrape.csv")
 csvFile = open(filename, 'wt+', newline='', encoding='utf-8')
 output = csv.writer(csvFile)
 
-filename = os.path.join(DATAIO_DIR,"LocoClass_Wikitable_Midland_Builder_Mapping.csv")
+filename = os.path.join(DATAIO_DIR,"LocoClass_Wikitable_Midland_Manufacturer_Mapping.csv")
 csvFile2 = open(filename, 'wt+', newline='', encoding='utf-8')
 output2 = csv.writer(csvFile2)
 
@@ -38,8 +38,8 @@ for row in rows:
       pass
     else:
       if rowcount == 1:
-        csvRow = ['grouping_company', 'company', 'designer_slug', 'class_slug', 'class', 'wheel_slug', 'wheels', 'pre1907_numbers', 'post1907_numbers', 'builder_nos', 'built', 'number_built', 'withdrawn', 'notes']
-        csvRow2 = ['grouping_company', 'company', 'designer_slug', 'class_slug', 'class', 'wheel_slug', 'wheels', 'pre1907_numbers', 'post1907_numbers', 'builder_slug']
+        csvRow = ['grouping_company', 'company', 'designer_slug', 'class_slug', 'class', 'wheel_slug', 'wheels', 'pre1907_numbers', 'post1907_numbers', 'manufacturer_nos', 'built', 'number_built', 'withdrawn', 'notes']
+        csvRow2 = ['grouping_company', 'company', 'designer_slug', 'class_slug', 'class', 'wheel_slug', 'wheels', 'pre1907_numbers', 'post1907_numbers', 'manufacturer_slug']
         output2.writerow(csvRow2)
       else:
         csvRow = ['LMS', 'MR']
