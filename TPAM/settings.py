@@ -33,7 +33,6 @@ INSTALLED_APPS = [
     #Third Party Apps
     'crispy_forms',
     'crispy_bootstrap5',
-    'debug_toolbar',
     'django_bootstrap5',
     'rest_framework',
     'rest_framework.authtoken',
@@ -250,6 +249,14 @@ else:
   config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
   SECRET_KEY = config['Django']['tpam_secret_key']  
   DEBUG = True
+  if DEBUG:
+        MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware',] + MIDDLEWARE
+        INSTALLED_APPS += ['debug_toolbar',]
+        INTERNAL_IPS = ["127.0.0.1"] #Required for Django Debug
+        DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False,}
+        # Following overcomes main reason why Debug toolbar sometimes does not show up
+        import mimetypes
+        mimetypes.add_type("application/javascript", ".js", True) 
   ALLOWED_HOSTS = []
   INTERNAL_IPS = ["127.0.0.1"] #Required for Django Debug
 #   GDAL_LIBRARY_PATH = r'C:\\OSGeo4W64\\bin\\gdal301' 
