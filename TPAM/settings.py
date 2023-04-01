@@ -5,6 +5,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+
 import os
 import configparser
 import dj_database_url
@@ -170,12 +171,12 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
   DEBUG = False #Always runs as False in Production
   ALLOWED_HOSTS = ['tpam-production.up.railway.app']
- 
+
   DATABASES = {
       'default': dj_database_url.config(default='postgres://localhost')
       #'default': dj_database_url.config(default='postgis://localhost')
   }
-    
+
   # Honor the 'X-Forwarded-Proto' header for request.is_secure().
   SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -191,13 +192,13 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
   # Tell django-storages the domain to use to refer to static files.
-  AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+  AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
   #specify the Django storage classes
 
   STATICFILES_LOCATION = 'static'
   STATICFILES_STORAGE = 'custom_storages.StaticStorage' #For AWS
-  STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # For Whitenoise Static Files Storage
+#   STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # For Whitenoise Static Files Storage
   MEDIAFILES_LOCATION = 'media'
   DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage' #ideally this would be called mediafiles_storage in django but it isn't !
 
@@ -269,7 +270,7 @@ else:
 #   EMAIL_HOST_PASSWORD = config['Email']['password']
 #   EMAIL_PORT = 587
 #   EMAIL_USE_TLS = True
- 
+
   #Get Other API keys
   OTAPI_APP_ID = config['opentransport']['app_id']
   OTAPI_API_KEY = config['opentransport']['api_key']
