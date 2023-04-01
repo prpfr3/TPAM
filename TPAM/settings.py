@@ -169,7 +169,7 @@ if cwd == '/app' or cwd[:4] == '/tmp':
 
   SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
   DEBUG = False #Always runs as False in Production
-  ALLOWED_HOSTS = ['tpam.herokuapp.com']
+  ALLOWED_HOSTS = ['tpam-production.up.railway.app']
  
   DATABASES = {
       'default': dj_database_url.config(default='postgres://localhost')
