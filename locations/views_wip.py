@@ -61,7 +61,7 @@ def depot_vis_timeline(request):
 
     return render(request, 'locations/depots_vis_timeline.html', {'timeline_json':json.dumps(events)})
 
-def map_closed_lines_select(request):
+def county_select(request):
 
     if request.method == 'POST':
         location_list = LocationChoiceField(request.POST)
@@ -74,7 +74,7 @@ def map_closed_lines_select(request):
         location_list = LocationChoiceField()
         errors = location_list.errors or None
         context = {'location_list':location_list, 'errors': errors,}
-        return render(request, 'locations/map_closed_lines_select.html', context)
+        return render(request, 'locations/county_select.html', context)
 
 class MapClosedLines(TemplateView):
 

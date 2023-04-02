@@ -254,8 +254,7 @@ def osm_railmap_county_select(request):
         location_list = LocationChoiceField()
         errors = location_list.errors or None
         context = {'location_list':location_list, 'errors': errors,}
-        # Uses the same county selection form as map_closed_lines
-        return render(request, 'locations/map_closed_lines_select.html', context)
+        return render(request, 'locations/county_select.html', context)
 
 def osm_railmap_county(request, county):
 

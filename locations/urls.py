@@ -14,7 +14,7 @@ urlpatterns = [
     path('route/<int:route_id>/', views.route, name='route'),
     path('route_storymap/<int:route_id>/', views.route_storymap, name='route_storymap'),
 
-    path('map_closed_lines_select/', views_wip.map_closed_lines_select, name='map_closed_lines_select'),
+    path('county_select/', views_wip.county_select, name='county_select'),
     path('map_closed_lines/<str:county_name>/', views_wip.MapClosedLines.as_view(), name='map_closed_lines'),
 
     path('elrs/', views.elrs, name='elrs'),
