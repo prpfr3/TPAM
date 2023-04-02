@@ -192,7 +192,7 @@ if cwd == '/app' or cwd[:4] == '/tmp':
 
   #specify the Django storage classes
 
-  STATICFILES_LOCATION = 'static'
+  STATICFILES_LOCATION = 'staticfiles' #The directory name in S3
   STATICFILES_STORAGE = 'custom_storages.StaticStorage' #For AWS
 #   STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # For Whitenoise Static Files Storage
   MEDIAFILES_LOCATION = 'media'

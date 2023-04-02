@@ -16,5 +16,7 @@ class PostAdmin(admin.ModelAdmin):
 @admin.register(Reference)
 class ReferenceAdmin(admin.ModelAdmin):
     formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
+    search_fields = ['citation', 'image']
+    list_filter = ["type"]
 
 admin.site.register(Topic)
