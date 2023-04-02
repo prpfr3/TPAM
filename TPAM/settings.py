@@ -5,7 +5,6 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-
 import os
 import configparser
 import dj_database_url
@@ -14,7 +13,6 @@ import dj_database_url
 LOGIN_URL = '/users/login'
 #Note that the use of dirname twice has the effect of making the Base Directory one level up from that in which settings.py resides
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #__file__ is the current path of imports
-print('BASE_DIR = ', BASE_DIR)
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 DEFAULT_AUTO_FIELD='django.db.models.AutoField' #Required as from Django 3.2
 
@@ -58,7 +56,7 @@ INSTALLED_APPS = [
     'vehicles'
 ]
 
-#The following ensures that token authentication is used for REST APIs
+# Initiate token authentication for REST APIs
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication', #To enforce token based authentication
@@ -100,7 +98,6 @@ TEMPLATES = [
     },
 ]
 
-
 WSGI_APPLICATION = 'TPAM.wsgi.application'
 
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
@@ -138,7 +135,7 @@ TINYMCE_DEFAULT_CONFIG = {
     'cleanup_on_startup': True,
     'custom_undo_redo_levels': 20,
     'selector': 'textarea',
-    #Note the theme CANNOT be modern which is deprecated
+    #Note the theme 'modern' is deprecated - do not use
     #https://www.tiny.cloud/docs/migration-from-4x/#themes
     'theme': 'silver',
     'plugins': '''
@@ -164,7 +161,6 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Establish the current working directory to determine whether settings should be for a production or local server.
 cwd = os.getcwd()
-print(f'{cwd=}')
 if cwd == '/app' or cwd[:4] == '/tmp':
   print('Using production settings from settings.py')
 
@@ -173,9 +169,9 @@ if cwd == '/app' or cwd[:4] == '/tmp':
   ALLOWED_HOSTS = ['tpam-production.up.railway.app']
 
   DATABASES = {
-      'default': dj_database_url.config(default='postgres://localhost')
-      #'default': dj_database_url.config(default='postgis://localhost')
-  }
+        'default': dj_database_url.config(default='postgres://localhost')
+    }
+  DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql' # django.db.backends.postgresql or django.contrib.gis.db.backends.postgis
 
   # Honor the 'X-Forwarded-Proto' header for request.is_secure().
   SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -242,12 +238,17 @@ if cwd == '/app' or cwd[:4] == '/tmp':
     }
 
 else:
-  print('Using development/local settings from settings.py.\nStatic directory is {} given a base directory of {}'.format(STATIC_ROOT, BASE_DIR))
+  msg = (
+    f'Using development/local settings from settings.py.\n'
+    f'Base directory is {BASE_DIR}.'
+    f'Static directory is {STATIC_ROOT}.\n'
+    )
+  print(msg)
 
   config = configparser.ConfigParser()
   KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
   config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
-  SECRET_KEY = config['Django']['tpam_secret_key']  
+  SECRET_KEY = config['Django']['tpam_secret_key']
   DEBUG = True
   if DEBUG:
         MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware',] + MIDDLEWARE
@@ -256,7 +257,7 @@ else:
         DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False,}
         # Following overcomes main reason why Debug toolbar sometimes does not show up
         import mimetypes
-        mimetypes.add_type("application/javascript", ".js", True) 
+        mimetypes.add_type("application/javascript", ".js", True)
   ALLOWED_HOSTS = []
   INTERNAL_IPS = ["127.0.0.1"] #Required for Django Debug
 #   GDAL_LIBRARY_PATH = r'C:\\OSGeo4W64\\bin\\gdal301' 
