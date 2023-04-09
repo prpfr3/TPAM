@@ -18,22 +18,27 @@ from .forms import *
 from .models import *
 from .utils import *
 
+
 def home(request):
     assert isinstance(request, HttpRequest)
-    return render(request, 'locations/index.html',{'title':'Home Page', 'year':datetime.now().year,})
+    return render(request, 'locations/index.html', {'title': 'Home Page', 'year': datetime.now().year, })
+
 
 def index(request):
-  return render(request, 'locations/index.html')
+    return render(request, 'locations/index.html')
+
 
 def locations(request):
 
     if request.method == 'POST':
         selection_criteria = LocationSelectionForm(request.POST)
         if selection_criteria.is_valid() and selection_criteria.cleaned_data['wikiname'] != None:
-            queryset = Location.objects.filter(wikiname__icontains=selection_criteria.cleaned_data['wikiname']).order_by('wikiname', 'stationname')
+            queryset = Location.objects.filter(
+                wikiname__icontains=selection_criteria.cleaned_data['wikiname']).order_by('wikiname', 'stationname')
             errors = None
         elif selection_criteria.is_valid() and str(selection_criteria.cleaned_data['type']) != None:
-            queryset = Location.objects.filter(type__icontains=selection_criteria.cleaned_data['type']).order_by('wikiname', 'stationname')
+            queryset = Location.objects.filter(
+                type__icontains=selection_criteria.cleaned_data['type']).order_by('wikiname', 'stationname')
             errors = None
         else:
             errors = selection_criteria.errors or None
@@ -45,8 +50,10 @@ def locations(request):
 
     queryset, page = pagination(request, queryset)
 
-    context = {'selection_criteria':selection_criteria, 'errors': errors, 'locations': queryset}
+    context = {'selection_criteria': selection_criteria,
+               'errors': errors, 'locations': queryset}
     return render(request, 'locations/locations.html', context)
+
 
 def location(request, location_id):
 
@@ -63,13 +70,14 @@ def location(request, location_id):
     x_coord = coords[0][1]
     #  = f'https://maps.nls.uk/geo/explore/print/#zoom=15&lat={location.geometry.y}&lon={location.geometry.x}&layers=168&b=5'
     nls_url = f'https://maps.nls.uk/geo/explore/print/#zoom=15&lat={y_coord}&lon={x_coord}&layers=168&b=5'
-   
+
     # Get text describing the location either from a custom post, else Wikipedia, else none
     if location.post_fk:
         description = location.post_fk.body
         description_type = "Notes"
     elif location.wikislug:
-        wiki_wiki = wikipediaapi.Wikipedia(language='en',extract_format=wikipediaapi.ExtractFormat.HTML)
+        wiki_wiki = wikipediaapi.Wikipedia(
+            language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
         slug = location.wikislug.replace('/wiki/', '')
         slug = urllib.parse.unquote(slug, encoding='utf-8', errors='replace')
         description = wiki_wiki.page(slug).text
@@ -78,14 +86,14 @@ def location(request, location_id):
         description = None
         description_type = None
 
-    context = {'location': location, 'description_type': description_type, 'description': description, 'nls_url': nls_url}
+    context = {'location': location, 'description_type': description_type,
+               'description': description, 'nls_url': nls_url}
     return render(request, 'locations/location.html', context)
-
 
 
 def routes(request):
 
-    errors=None
+    errors = None
 
     if request.method == 'POST':
         selection_criteria = RouteSelectionForm(request.POST)
@@ -93,21 +101,26 @@ def routes(request):
             errors = selection_criteria.errors
             queryset = Route.objects.order_by('name')
         elif str(selection_criteria.cleaned_data['name']):
-            queryset = Route.objects.filter(name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
+            queryset = Route.objects.filter(
+                name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
         elif len(selection_criteria.cleaned_data['wikipedia_route_categories']) != 0:
-            queryset = Route.objects.filter(wikipedia_route_categories__in=selection_criteria.cleaned_data['wikipedia_route_categories']).order_by('name')
+            queryset = Route.objects.filter(
+                wikipedia_route_categories__in=selection_criteria.cleaned_data['wikipedia_route_categories']).order_by('name')
         elif str(selection_criteria.cleaned_data['source']) != 'None':
-            queryset = Route.objects.filter(source=selection_criteria.cleaned_data['source']).order_by('name')
+            queryset = Route.objects.filter(
+                source=selection_criteria.cleaned_data['source']).order_by('name')
     else:
         selection_criteria = RouteSelectionForm()
         errors = selection_criteria.errors
         queryset = Route.objects.order_by('name')
 
-    context = {'selection_criteria':selection_criteria, 'errors': errors, 'routes': queryset}
+    context = {'selection_criteria': selection_criteria,
+               'errors': errors, 'routes': queryset}
     return render(request, 'locations/routes.html', context)
 
+
 def route(request, route_id):
-  
+
     import urllib
     import wikipediaapi
 
@@ -119,7 +132,8 @@ def route(request, route_id):
         description = route.post_fk.body
         description_type = "Notes"
     elif route.wikipedia_slug:
-        wiki_wiki = wikipediaapi.Wikipedia(language='en',extract_format=wikipediaapi.ExtractFormat.HTML)
+        wiki_wiki = wikipediaapi.Wikipedia(
+            language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
         slug = route.wikipedia_slug.replace('/wiki/', '')
         slug = urllib.parse.unquote(slug, encoding='utf-8', errors='replace')
         description = wiki_wiki.page(slug).text
@@ -128,12 +142,11 @@ def route(request, route_id):
         description = None
         description_type = None
 
-
     figure = None
     events_json = None
 
-    if routemaps := route.wikipedia_routemaps.all(): # i.e. If the route has any wikipedia routemaps
-        
+    if routemaps := route.wikipedia_routemaps.all():  # i.e. If the route has any wikipedia routemaps
+
         """ THIS IS DJANGO ORM CODE SUPERSEDED BY NATIVE SQL CODE BELOW TO REMOVE GDAL DEPENDENCIES
         if locations := Location.objects.filter(
             routelocation__routemap=routemaps[0].id):
@@ -151,7 +164,7 @@ def route(request, route_id):
             WHERE a."geometry" IS NOT NULL AND b."routemap_id" = %s;
         """
 
-        if locations:= execute_sql(sql, [routemaps[0].id]):
+        if locations := execute_sql(sql, [routemaps[0].id]):
 
             # Calculate the Boundary Box from the Locations
             sql = """ 
@@ -166,15 +179,19 @@ def route(request, route_id):
             south = bounds[0][2]
             east = bounds[0][1]
             north = bounds[0][0]
-            bound_box_sql = [[south, west],[north,west],[north,east],[south,east]]
+            bound_box_sql = [[south, west], [north, west],
+                             [north, east], [south, east]]
 
-            figure = generate_folium_map_sql(None, route.name, locations, bound_box_sql)
+            figure = generate_folium_map_sql(
+                None, route.name, locations, bound_box_sql)
 
     if route_events := LocationEvent.objects.filter(route_fk_id=route_id):
         events_json = events_timeline(route_events)
 
-    context =  {"map": figure, "route": route.name, "references": references,"description_type": description_type, "description": description, 'timeline_json':events_json}
+    context = {"map": figure, "route": route.name, "references": references,
+               "description_type": description_type, "description": description, 'timeline_json': events_json}
     return render(request, 'locations/route.html', context)
+
 
 def events_timeline(events_in):
 
@@ -184,14 +201,15 @@ def events_timeline(events_in):
     for event in events_in:
         if event.datefield:
             count += 1
-            ## https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format
+            # https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format
             event = {"id": count,
-                    "content": event.description,
-                    "start": event.datefield.strftime("%Y/%m/%d"),
-                    "event.type": 'point'}
+                     "content": event.description,
+                     "start": event.datefield.strftime("%Y/%m/%d"),
+                     "event.type": 'point'}
             events_out.append(event)
 
     return json.dumps(events_out)
+
 
 def route_storymap(request, route_id):
 
@@ -200,9 +218,8 @@ def route_storymap(request, route_id):
 
     storymap_json = None
     route = Route.objects.get(id=route_id)
-    print(route)
 
-    if routemaps := route.wikipedia_routemaps.all(): # i.e. If the route has any wikipedia routemaps
+    if routemaps := route.wikipedia_routemaps.all():  # i.e. If the route has any wikipedia routemaps
 
         sql = """
             SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."stationname",
@@ -218,7 +235,7 @@ def route_storymap(request, route_id):
             ORDER BY b."loc_no";
         """
 
-        if slide_locations:= execute_sql(sql, [routemaps[0].id]):
+        if slide_locations := execute_sql(sql, [routemaps[0].id]):
             header_title = route.name or None
             wikislug = route.wikipedia_slug or None
 
@@ -228,17 +245,20 @@ def route_storymap(request, route_id):
             else:
                 wikislug = wikislug.replace('/wiki/', '')
                 pagename = wikislug.replace('_', ' ')
-                pagename = urllib.parse.unquote(pagename, encoding='utf-8', errors='replace')
-                wiki_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
+                pagename = urllib.parse.unquote(
+                    pagename, encoding='utf-8', errors='replace')
+                wiki_wiki = wikipediaapi.Wikipedia(
+                    language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
 
                 if wikislug and wiki_wiki.page(wikislug).exists:
-                    text_array = wiki_wiki.page(wikislug).text.split('<h2>References</h2>')
+                    text_array = wiki_wiki.page(
+                        wikislug).text.split('<h2>References</h2>')
                     header_text = text_array[0]
-            storymap_json = generate_storymap(header_title, header_text, slide_locations)
-            # from pprint import pprint
-            # pprint(storymap_json)
 
-    return render(request, 'locations/storymap.html', {'storymap_json':storymap_json})
+            storymap_json = generate_storymap(
+                header_title, header_text, slide_locations)
+
+    return render(request, 'locations/storymap.html', {'storymap_json': storymap_json})
 
 
 def osm_railmap_county_select(request):
@@ -248,13 +268,14 @@ def osm_railmap_county_select(request):
 
         if location_list.is_valid():
             selected_location = location_list.cleaned_data['locations']
-            county=str(selected_location)
+            county = str(selected_location)
             return HttpResponseRedirect(reverse('locations:osm_railmap_county', args=[county]))
     else:
         location_list = LocationChoiceField()
         errors = location_list.errors or None
-        context = {'location_list':location_list, 'errors': errors,}
+        context = {'location_list': location_list, 'errors': errors, }
         return render(request, 'locations/county_select.html', context)
+
 
 def osm_railmap_county(request, county):
 
@@ -290,7 +311,7 @@ def osm_railmap_county(request, county):
     south = bounds[0][1]
     east = bounds[0][2]
     north = bounds[0][3]
-    bound_box_sql = [[south, west],[north,west],[north,east],[south,east]]
+    bound_box_sql = [[south, west], [north, west], [north, east], [south, east]]
 
     # Calculate the Boundary Box from the Locations
     sql = """ 
@@ -305,7 +326,7 @@ def osm_railmap_county(request, county):
     south = bounds[0][2]
     east = bounds[0][1]
     north = bounds[0][0]
-    bound_box_sql = [[south, west],[north,west],[north,east],[south,east]]
+    bound_box_sql = [[south, west], [north, west], [north, east], [south, east]]
 
     # Get all the OSM data within the county
     overpass_url = "http://overpass-api.de/api/interpreter"
@@ -338,11 +359,13 @@ def osm_railmap_county(request, county):
     locations = execute_sql(sql, [county])
 
     if geojson:
-        figure = generate_folium_map_sql(geojson, county, locations, bound_box_sql)
+        figure = generate_folium_map_sql(
+            geojson, county, locations, bound_box_sql)
     else:
         figure = None
-    context =  {"map": figure, "title": county}
+    context = {"map": figure, "title": county}
     return render(request, 'locations/folium_map.html', context)
+
 
 def elrs(request):
 
@@ -367,11 +390,14 @@ def elrs(request):
         errors = selection_criteria.errors or None
         elrs = ELR.objects.order_by('itemAltLabel')
 
-    context = {'selection_criteria':selection_criteria, 'errors': errors, 'elrs': elrs}
+    context = {'selection_criteria': selection_criteria,
+               'errors': errors, 'elrs': elrs}
+
     return render(request, 'locations/elrs.html', context)
 
+
 def elr_map(request, elr_id):
-    
+
     import osm2geojson
     import requests
 
@@ -385,7 +411,7 @@ def elr_map(request, elr_id):
     """
 
     overpass_url = "http://overpass-api.de/api/interpreter"
-    
+
     overpass_query = f"""
         [out:json];
         area["ISO3166-1"="GB"][admin_level=2];
@@ -417,18 +443,20 @@ def elr_map(request, elr_id):
     ON (a."elr_fk_id" = b."id" ) 
     WHERE b."id" = %s;
     """
-    
+
     locations_sql = execute_sql(sql, [elr_id])
 
-    if geojson: # i.e. If OSM has some geodata relating to the ELR then generate the map
+    if geojson:  # i.e. If OSM has some geodata relating to the ELR then generate the map
         title = f'{elr.itemAltLabel}: {elr.itemLabel}'
         bound_box = geojson_boundbox(geojson['features'])
-        figure = generate_folium_map_sql(geojson, title, locations_sql, bound_box)
+        figure = generate_folium_map_sql(
+            geojson, title, locations_sql, bound_box)
     else:
         figure = None
 
-    context =  {"map": figure, "title": title}
+    context = {"map": figure, "title": title}
     return render(request, 'locations/folium_map.html', context)
+
 
 def elr_storymap(request, elr_id):
     import urllib
@@ -450,43 +478,47 @@ def elr_storymap(request, elr_id):
     WHERE b."id" = %s;
     """
 
-    if slide_locations:= execute_sql(sql, [elr_id]):
+    if slide_locations := execute_sql(sql, [elr_id]):
 
         header_title = f'{route.itemAltLabel}: {route.itemLabel}'
 
         # If the elr has some notes
         header_text = route.post_fk.body if route.post_fk else ''
-        storymap_json = generate_storymap(header_title, header_text, slide_locations)
-        # from pprint import pprint
-        # pprint(storymap_json)
-    return render(request, 'locations/storymap.html', {'storymap_json':storymap_json})
+        storymap_json = generate_storymap(
+            header_title, header_text, slide_locations)
+    return render(request, 'locations/storymap.html', {'storymap_json': storymap_json})
+
 
 class HeritageSiteListView(ListView):
     model = HeritageSite
-    queryset = HeritageSite.objects.order_by('country', 'type', 'name').exclude(name='N/A')
+    queryset = HeritageSite.objects.order_by(
+        'country', 'type', 'name').exclude(name='N/A')
+
 
 def heritage_site(request, heritage_site_id):
-  heritage_site = HeritageSite.objects.get(id=heritage_site_id)
-  context = {'heritage_site': heritage_site}
-  return render(request, 'locations/heritage_site.html', context)
+    heritage_site = HeritageSite.objects.get(id=heritage_site_id)
+    context = {'heritage_site': heritage_site}
+    return render(request, 'locations/heritage_site.html', context)
+
 
 class VisitListView(ListView):
-  model = Visit
+    model = Visit
+
 
 @login_required
 def visit(request, visit_id):
-  visit = Visit.objects.get(id=visit_id)
-  images = Reference.objects.filter(visit=visit_id).order_by('id')
-  paginator = Paginator(images, 20) 
-  page = request.GET.get('page')
-  try:
-      images = paginator.page(page)
-  except PageNotAnInteger:
-      # If page is not an integer deliver the first page
-      images = paginator.page(1)
-  except EmptyPage:
-      # If page is out of range deliver last page of results
-      images = paginator.page(paginator.num_pages)
+    visit = Visit.objects.get(id=visit_id)
+    images = Reference.objects.filter(visit=visit_id).order_by('id')
+    paginator = Paginator(images, 20)
+    page = request.GET.get('page')
+    try:
+        images = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer deliver the first page
+        images = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range deliver last page of results
+        images = paginator.page(paginator.num_pages)
 
-  context = {'visit': visit, 'page': page, 'images': images}
-  return render(request, 'maps/visit.html', context)
+    context = {'visit': visit, 'page': page, 'images': images}
+    return render(request, 'maps/visit.html', context)

@@ -1,8 +1,8 @@
 {% extends "../mainmenu/base.html" %}
-{% block title %}Route Selection{% endblock %}
-{% block header %}{% load django_bootstrap5 %}{% endblock %}
-{% block content_title %}Choose an Engineer's Line Reference{% endblock %}
+
+{% block content_title %}Engineer's Location References (ELRs){% endblock %}
 {% block content_desc %}{% endblock %}
+
 {% block content %}
 
     <form method='POST' action="" enctype="multipart/form-data">
@@ -15,15 +15,14 @@
     
     <table>
     {% for elr in elrs %}
-      {% if elr.itemAltLabel %}
       <h4>
-        <tr>
-          <td><a href="{% url 'locations:elr_map' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-map"></i></a></td>
-          <td><a href="{% url 'locations:elr_storymap' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a></td>
-          <td>{{elr.itemAltLabel}} : {{elr.itemLabel}}</td>
-        </tr>
+        <!-- Exclude items from Wikidata that have no description -->
+        {% if elr.itemAltLabel %}
+            {{elr.itemAltLabel}} : {{elr.itemLabel}}
+            <a href="{% url 'locations:elr_map' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-map"></i></a>
+            <a href="{% url 'locations:elr_storymap' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a>
+        {% endif %}
       </h4>
-      {% endif %}
  
     {% empty %}
       <h2>No Engineer Line References found.</h2>

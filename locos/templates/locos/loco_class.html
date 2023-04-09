@@ -12,12 +12,14 @@
       </div>
 
       <div class="panel-body">
-      <h1>From Wikipedia:-</h1>
-      {% autoescape off %}
-      {{wikipedia_summary}}
-      {% endautoescape %}
+        {% if description_type %}
+        <h1 class="text-primary">{{description_type}}</h1>
+          {% autoescape off %}
+          <div>{{ description }}</div>
+          {% endautoescape %}
+          {% endif %}
 
-<h1>Class Specification</h1>
+<h1 class="text-primary">Class Specification</h1>
       <!-- Template tags https://docs.djangoproject.com/en/2.0/howto/custom-template-tags/ -->
       <!-- Template tags https://stackoverflow.com/questions/2217478/django-templates-loop-through-and-print-all-available-properties-of-an-object -->     
       {% load my_tags %}
@@ -29,28 +31,28 @@
       {% endfor %}
       </ul>
 
-    <h1>Locos in Class</h1>
+    <h1 class="text-primary">Locos in Class</h1>
     {% for locomotive in locomotives %}
       {{locomotive.number_as_built}},
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %} 
 
-    <h1>Owners/Operators</h1>
+    <h1 class="text-primary">Owners/Operators</h1>
     {% for operator in operators %}
       <li><a href="https://en.wikipedia.org//{{operator.wikislug}}">{{operator.name}}</a></li>
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %} 
 
-    <h1>Designer(s)</h1>
+    <h1 class="text-primary">Designer(s)</h1>
     {% for designer in designers %}
       <li><a href="https://en.wikipedia.org/{{designer.wikitextslug}}">{{designer.name}}</a></li>
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %}
 
-    <h1>Manufacturer(s)</h1>
+    <h1 class="text-primary">Manufacturer(s)</h1>
     {% for manufacturer in manufacturers %}
       <li><a href="https://en.wikipedia.org/{{manufacturer.wikitextslug}}">{{manufacturer.name}}</a></li>
     {% empty %}
@@ -58,7 +60,7 @@
     {% endfor %}
 
     {% comment %}
-    <h1>References</h1>
+    <h1 class="text-primary">References</h1>
     {% for reference in references %}
       {% autoescape off %}
       <li>{{reference.citation}}</li>
@@ -68,7 +70,7 @@
     {% endfor %}
     {% endcomment %}
 
-    <h1>Images</h1>
+    <h1 class="text-primary">Images</h1>
     {% for image in images %}
       <img src="{{ image.image.url }}" >
       <p><a href="{% url 'locos:image' image.id %}">{{image.image_name}}</a></p>

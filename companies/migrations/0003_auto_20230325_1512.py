@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='company',
             name='company_category_fk',
-            field=models.ManyToManyField(blank=True, to='companies.CompanyCategory'),
+            field=models.ManyToManyField(
+                blank=True, to='companies.CompanyCategory'),
         ),
     ]

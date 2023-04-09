@@ -4,31 +4,28 @@
 {% block content_desc %}{% endblock %}
 
 {% block content %}
-     <div class="panel panel-default">
-      <div class="panel-heading"></div>
-      <div class="panel-body">
-
-        <h2><a href="{{photo.location.url}}">{{ mvimage.location }}</a></h2>
-        <!--<h2>Notes: {{ photo.notes|linebreaks }}</h2>-->
-        <h2><img src="{{ photo.image.url }}" ></h2>
-
-        <h1>Location</h1>
+  <div class="card text-center text-primary">
+    <img class="card-img-top mx-auto" style="max-width:60%" src="{{ photo.image.url }}" alt="">
+    <div class="card-body">
+      <h4 class="card-text text-primary">Location
         {% for location in locations %}
-          <li><a href="https://en.wikipedia.org/wiki/{{location.wikislug}}">{{location}}</a></li>
+          <a href="https://en.wikipedia.org/wiki/{{location.wikislug}}">{{location}}</a>
         {% empty %}
-          <li>None Identified</li>
+          None Identified
         {% endfor %}
+      </h4>
 
-        <h1>Loco Classes in this Photo</h1>
+      <h4 class="card-text text-primary">Description
         {% for class in classes %}
-          <li><a href="https://en.wikipedia.org/wiki/{{class.wikiname}}">{{class}}</a></li>
+          <a href="https://en.wikipedia.org/wiki/{{class.wikiname}}">{{class}}</a>
         {% empty %}
-          <li>None Identified</li>
+          None Identified
         {% endfor %}
-      </div>
+      </h4>
+    </div><!-- card-body -->
 
-      {% comment %}
+    {% comment %}
       <a href="{% url 'locos:edit_mvimage' mvimage.id %}"  class="btn btn-primary">Edit</a>
-      {% endcomment %}
-    </div> <!-- panel -->
+    {% endcomment %}
+  </div> <!-- card -->
 {% endblock content %}

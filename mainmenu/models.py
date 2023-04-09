@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class MyDjangoApp(models.Model):
     image = models.ImageField(upload_to='media/')
     summary = models.TextField()
@@ -9,6 +10,7 @@ class MyDjangoApp(models.Model):
 
     def __str__(self):
         return self.summary
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

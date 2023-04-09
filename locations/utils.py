@@ -1,87 +1,92 @@
 
 def generate_storymap(headline, text, locations):
-    
+
     import json
     import markdown
     import wikipediaapi
 
-    #Add the first slide to a dictionary list from the SlideHeader Object
+    # Add the first slide to a dictionary list from the SlideHeader Object
     header_slide = \
-        {"location_line":"true",
-        "type":"overview",
-        "media":
-            {"caption":"",
-            "credit":"",
-            "url":""},
-        "text":
-            {"headline":headline,
-            "text":text}
-        }
+        {"location_line": "true",
+         "type": "overview",
+         "media":
+            {"caption": "",
+             "credit": "",
+             "url": ""},
+         "text":
+            {"headline": headline,
+             "text": text}
+         }
 
     slide_list = [header_slide]
 
     for location in locations:
-        # if location.location_fk != None:
-            try:
-                print(location[9])
-                location_slide = \
-                    {"background":
-                        {"url": ""},
-                    "location":
-                        {"lat": location[5], # location.geometry.y, # when using ORM rather than SQL
-                        "lon": location[6], # location.geometry.x, # when using ORM rather than SQL
-                        "zoom": "12"},
-                    "media":
-                        {"caption":location[7],
-                        "credit":location[8],
-                        "url":location[9]},
-                    "text":
-                        {"headline":location[0]} # location.wikiname # when using ORM rather than SQL
-                    }
+        try:
+            location_slide = \
+                {"background":
+                    {"url": ""},
+                 "location":
+                    {"lat": location[5],  # location.geometry.y, # when using ORM rather than SQL
+                     # location.geometry.x, # when using ORM rather than SQL
+                     "lon": location[6],
+                     "zoom": "12"},
+                 "media":
+                    {"caption": location[7],
+                     "credit": location[8],
+                     "url": location[9]},
+                 "text":
+                    # location.wikiname # when using ORM rather than SQL
+                    {"headline": location[0]}
+                 }
 
-                html_string = markdown.markdown(f'https://en.wikipedia.org/wiki/{location[1]}') # location.wikislug # when using ORM rather than SQL
-                location_slide['text']['text'] = html_string.replace('"', '\'')
+            # location.wikislug # when using ORM rather than SQL
+            html_string = markdown.markdown(
+                f'https://en.wikipedia.org/wiki/{location[1]}')
+            location_slide['text']['text'] = html_string.replace('"', '\'')
 
-                wikislug = location[1].replace('/wiki/', '') # location.wikislug # when using ORM rather than SQL
-                pagename= wikislug.replace('_', ' ')
-                wiki_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
-                
-                if wikislug and wiki_wiki.page(wikislug).exists:
-                    text_array = wiki_wiki.page(wikislug).text.split('<h2>References</h2>')
-                    location_slide['text'] = {'text': text_array[0], 'headline': pagename}
-                else:
-                    location_slide['text'] = {'text': html_string, 'headline': pagename}
+            # location.wikislug # when using ORM rather than SQL
+            wikislug = location[1].replace('/wiki/', '')
+            pagename = wikislug.replace('_', ' ')
+            wiki_wiki = wikipediaapi.Wikipedia(
+                language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
 
-                slide_list.append(location_slide)
-            except Exception as e:
-                print(e)
+            if wikislug and wiki_wiki.page(wikislug).exists:
+                text_array = wiki_wiki.page(
+                    wikislug).text.split('<h2>References</h2>')
+                location_slide['text'] = {
+                    'text': text_array[0], 'headline': pagename}
+            else:
+                location_slide['text'] = {
+                    'text': html_string, 'headline': pagename}
 
-    #Create a dictionary in the required JSON format, including the dictionary list of slides
-    from pprint import pprint
-    pprint(slide_list)
+            slide_list.append(location_slide)
+        except Exception as e:
+            print(e)
+
+    # Create a dictionary in the required JSON format, including the dictionary list of slides
     routemap_dict = \
         {"storymap":
             {"attribution": "Wikipedia / OpenStreetMaps",
-            "call_to_action": True,
-            "call_to_action_text": "A Routemap",
-            "map_as_image": False,
-            "map_subdomains": "",
-            # OSM Railway Map Type alternative shows all ELRs but not the OSM basemap. Also some zooming issues.
-            #"map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
-            "map_type": "osm:standard",
-            "slides": slide_list,
-            "zoomify": False
-            }
-        }
+             "call_to_action": True,
+             "call_to_action_text": "A Routemap",
+             "map_as_image": False,
+             "map_subdomains": "",
+             # OSM Railway Map Type alternative shows all ELRs but not the OSM basemap. Also some zooming issues.
+             # "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+             "map_type": "osm:standard",
+             "slides": slide_list,
+             "zoomify": False
+             }
+         }
 
-    return(json.dumps(routemap_dict))
+    return (json.dumps(routemap_dict))
 
 
 def execute_sql(sql, parameters):
     from django.db import connection
 
     try:
-        with connection.cursor() as cursor:        
+        with connection.cursor() as cursor:
             cursor.execute(sql, parameters)
             result = cursor.fetchall()
 
@@ -89,6 +94,7 @@ def execute_sql(sql, parameters):
         print(e)
 
     return result
+
 
 """
 Function for use when using ORM & GeoDjango which required GDAL
@@ -122,9 +128,9 @@ An alternative to  function generate_folium_map sql
 #         bound_box = geojson_boundbox(geojson['features'])
 #     else:
 #         extent = locations.aggregate(Extent('geometry'))
-#         bound_box = [[extent['geometry__extent'][1], 
-#             extent['geometry__extent'][0]], 
-#             [extent['geometry__extent'][3], 
+#         bound_box = [[extent['geometry__extent'][1],
+#             extent['geometry__extent'][0]],
+#             [extent['geometry__extent'][3],
 #             extent['geometry__extent'][2]]]
 
 #     folium.FitBounds(bound_box).add_to(m)
@@ -162,34 +168,37 @@ An alternative to  function generate_folium_map sql
 
 #     return figure
 
+
 def generate_folium_map_sql(geojson, title, locations, bound_box):
 
     import folium
     from folium.plugins import MarkerCluster
 
     # By default folium will use OpenStreetMap as the baselayer. 'tiles=None' switches the default off
-    m = folium.Map(zoom_start= 13, prefer_canvas=True, height=500)
+    m = folium.Map(zoom_start=13, prefer_canvas=True, height=500)
 
     """
     Use OpenRailwayMap as the baselayer to give a better rendering of the line
     Minimum zoom setting of 12 gives about 40 miles/60 kms across the screen
     """
     folium.TileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
-        attr='<a href="https://www.openstreetmap.org/copyright"> \
+                     attr='<a href="https://www.openstreetmap.org/copyright"> \
             © OpenStreetMap contributors</a>, \
             Style: <a href="http://creativecommons.org/licenses/by-sa/2.0/"> \
-            CC-BY-SA 2.0</a> <a href="http://www.openrailwaymap.org/">OpenRailwayMap</a> and OpenStreetMap', \
-        name = "OpenRailwayMap", \
-        min_zoom = 2, max_zoom = 19).add_to(m)
+            CC-BY-SA 2.0</a> <a href="http://www.openrailwaymap.org/">OpenRailwayMap</a> and OpenStreetMap',
+                     name="OpenRailwayMap",
+                     min_zoom=2, max_zoom=19).add_to(m)
 
-    if geojson: folium.GeoJson(geojson, name=title).add_to(m)
+    if geojson:
+        folium.GeoJson(geojson, name=title).add_to(m)
 
     folium.FitBounds(bound_box).add_to(m)
 
     marker_cluster = MarkerCluster(name="Locations").add_to(m)
 
     for location in locations:
-        if location[5]: # i.e. if a y-coordinate is present (if not then it can't be mapped)
+        # i.e. if a y-coordinate is present (if not then it can't be mapped)
+        if location[5]:
 
             if str(location[2]) != 'None':
                 opened = f'<br>Opened {str(location[2])}'
@@ -209,7 +218,7 @@ def generate_folium_map_sql(geojson, title, locations, bound_box):
 
             label_html = folium.Html(f'{name}{opened}{closed}', script=True)
 
-            if location[7]: # i.e. if there is a media_url
+            if location[7]:  # i.e. if there is a media_url
                 img_html = f'<img src="{location[7]}" width="230" height="172">' or None
             else:
                 img_html = ''
@@ -219,7 +228,8 @@ def generate_folium_map_sql(geojson, title, locations, bound_box):
 
             label = folium.Popup(label_html, max_width=2650)
             coords_tuple = (location[5], location[6])
-            folium.Marker(location = coords_tuple, popup=label, tooltip=str(name)).add_to(marker_cluster)
+            folium.Marker(location=coords_tuple, popup=label,
+                          tooltip=str(name)).add_to(marker_cluster)
 
     folium.LayerControl().add_to(m)
     figure = folium.Figure()
@@ -227,10 +237,11 @@ def generate_folium_map_sql(geojson, title, locations, bound_box):
     figure.render()
     return figure
 
+
 def geojson_boundbox(features):
 
     #  Calculates the boundary box
-    #  the following may provide a simpler method 
+    #  the following may provide a simpler method
     #  https://gis.stackexchange.com/questions/166863/how-to-calculate-the-bounding-box-of-a-geojson-object-using-python-or-javascript
 
     xcoords = []
@@ -251,7 +262,7 @@ def geojson_boundbox(features):
                         xcoords.append(c[0])
                         ycoords.append(c[1])
 
-    return([[min(ycoords), min(xcoords)],
-        [max(ycoords), min(xcoords)],
-        [max(ycoords), max(xcoords)],
-        [min(ycoords), max(xcoords)]])
+    return ([[min(ycoords), min(xcoords)],
+            [max(ycoords), min(xcoords)],
+             [max(ycoords), max(xcoords)],
+             [min(ycoords), max(xcoords)]])

@@ -8,8 +8,9 @@
 
     <title>{% block title %}TPAM{% endblock title %}</title>
 
-    {% load static %} 
+    {% load static %}
     {% load django_bootstrap5 %}
+
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     {% bootstrap_messages %}
@@ -20,12 +21,17 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css">
 
+
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Montserrat" >  
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" type="text/css" href="https://www.bluebell-railway-museum.co.uk/css/additionalA.css">
+
     {% block head %}{% endblock %}
   </head>
   
   <body>  
 
-    <header class="navbar navbar-expand-lg navbar-dark bg-primary flex-md-nowrap p-0 shadow">
+    <header class="navbar navbar-expand-lg navbar-dark bg-primary flex-md-nowrap p-0 shadow fixed-top">
       <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="{% url 'mainmenu:index' %}">TPAM Home</a>
 
       <div class="container">
@@ -91,8 +97,8 @@
                 <a class="dropdown-item nav-link" href="{% url 'locations:elrs' %}">Engineers Line References</a>              
                 <a class="dropdown-item nav-link" href="{% url 'locations:osm_railmap_county_select' %}">OSM County Railmap</a>
                 <a class="dropdown-item nav-link" href="{% url 'locations:heritage_sites' %}">Museums & Heritage Sites </a>
-                <a class="dropdown-item nav-link" href="{% url 'locations:visits' %}">Heritage Site Visits</a>
                 {% comment %}
+                <a class="dropdown-item nav-link" href="{% url 'locations:visits' %}">Heritage Site Visits</a>
                 <a class="dropdown-item nav-link" href="{% url 'locations:county_select' %}">Closed Lines Map</a>
                 <a class="dropdown-item nav-link" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
                 <a class="dropdown-item nav-link" href="{% url 'locations:depot_vis_timeline' %}">Depot Timeline</a>

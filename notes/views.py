@@ -15,7 +15,8 @@ from mainmenu.models import Profile
 from .forms import EmailPostForm, PostForm
 from .models import Post, Topic
 
-import os, configparser
+import os
+import configparser
 
 """
 # Explanatory notes for the Owner views
@@ -29,15 +30,18 @@ import os, configparser
  https://stackoverflow.com/questions/5531258/example-of-django-class-based-deleteview
 """
 
+
 class OwnerListView(ListView):
     """
     Sub-class the ListView to pass the request to the form.
     """
 
+
 class OwnerDetailView(DetailView):
     """
     Sub-class the DetailView to pass the request to the form.
     """
+
 
 class OwnerCreateView(LoginRequiredMixin, CreateView):
     """
@@ -52,6 +56,7 @@ class OwnerCreateView(LoginRequiredMixin, CreateView):
         object.save()
         return super(OwnerCreateView, self).form_valid(form)
 
+
 class OwnerUpdateView(LoginRequiredMixin, UpdateView):
     """
     Sub-class the UpdateView to pass the request to the form and limit the
@@ -64,6 +69,7 @@ class OwnerUpdateView(LoginRequiredMixin, UpdateView):
 
         return qs.filter(owner=get_object_or_404(Profile, user=self.request.user))
 
+
 class OwnerDeleteView(LoginRequiredMixin, DeleteView):
     """
     Sub-class the DeleteView to restrict a User from deleting other
@@ -74,14 +80,18 @@ class OwnerDeleteView(LoginRequiredMixin, DeleteView):
         qs = super(OwnerDeleteView, self).get_queryset()
         return qs.filter(owner=get_object_or_404(Profile, user=self.request.user))
 
+
 def index(request):
-  return render(request, 'notes/index.html')
+    return render(request, 'notes/index.html')
+
 
 class TopicListView(OwnerListView):
     model = Topic
 
+
 class TopicDetailView(OwnerDetailView):
     model = Topic
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -90,25 +100,31 @@ class TopicDetailView(OwnerDetailView):
         if strval := self.request.GET.get("search", False):
             query = Q(title__icontains=strval)
             query.add(Q(body__icontains=strval), Q.OR)
-            post_list = Post.objects.filter(query).select_related().order_by('-updated')[:10]
-            context['posts'] = context['topic'].post_set.filter(query).select_related().order_by('-updated')[:10]
+            post_list = Post.objects.filter(
+                query).select_related().order_by('-updated')[:10]
+            context['posts'] = context['topic'].post_set.filter(
+                query).select_related().order_by('-updated')[:10]
         else:
             context['posts'] = context['topic'].post_set.all()
         return context
 
-@method_decorator(login_required, name='dispatch')
-class TopicCreateView(OwnerCreateView): #Convention: topic_form.html
-   model = Topic
-   fields = ['type', 'text']
 
 @method_decorator(login_required, name='dispatch')
-class TopicUpdateView(OwnerUpdateView): #Convention: topic_form.html
-   model = Topic
-   fields = ['type', 'text'] 
+class TopicCreateView(OwnerCreateView):  # Convention: topic_form.html
+    model = Topic
+    fields = ['type', 'text']
+
 
 @method_decorator(login_required, name='dispatch')
-class TopicDeleteView(OwnerDeleteView): #Convention: topic_confirm_delete.html
-   model = Topic
+class TopicUpdateView(OwnerUpdateView):  # Convention: topic_form.html
+    model = Topic
+    fields = ['type', 'text']
+
+
+@method_decorator(login_required, name='dispatch')
+class TopicDeleteView(OwnerDeleteView):  # Convention: topic_confirm_delete.html
+    model = Topic
+
 
 class PostDetailView(OwnerDetailView):
     model = Post
@@ -116,32 +132,32 @@ class PostDetailView(OwnerDetailView):
     # NEW
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        print(context['post'])
         context['references'] = context['post'].references.all()
-        print(context)
         return context
 
-@method_decorator(login_required, name='dispatch')
-class PostCreateView(OwnerCreateView): #Convention: post_form.html
-   model = Post
-   fields = ['title', 'body', 'status', 'url']
-   def post(self, request, pk):
-    form = PostForm(data=request.POST)
-    if form.is_valid():
-        new_post = form.save(commit=False)
-        new_post.owner = get_object_or_404(Profile, user=request.user)
-        new_post.topic = get_object_or_404(Topic, id=pk)
-        new_post.save()
-        messages.success(request, ("Post Has Been Added"))
-        return redirect(reverse('notes:topic_detail', args=[pk]))
 
 @method_decorator(login_required, name='dispatch')
-class PostUpdateView(OwnerUpdateView): #Convention: post_form.html
-   model = Post
-   fields = ['title', 'body', 'status', 'url']
+class PostCreateView(OwnerCreateView):  # Convention: post_form.html
+    model = Post
+    fields = ['title', 'body', 'status', 'url']
 
-   def post(self, request, pk):
+    def post(self, request, pk):
+        form = PostForm(data=request.POST)
+        if form.is_valid():
+            new_post = form.save(commit=False)
+            new_post.owner = get_object_or_404(Profile, user=request.user)
+            new_post.topic = get_object_or_404(Topic, id=pk)
+            new_post.save()
+            messages.success(request, ("Post Has Been Added"))
+            return redirect(reverse('notes:topic_detail', args=[pk]))
+
+
+@method_decorator(login_required, name='dispatch')
+class PostUpdateView(OwnerUpdateView):  # Convention: post_form.html
+    model = Post
+    fields = ['title', 'body', 'status', 'url']
+
+    def post(self, request, pk):
         post = Post.objects.get(id=pk)
         topic = post.topic
         form = PostForm(instance=post, data=request.POST)
@@ -150,15 +166,19 @@ class PostUpdateView(OwnerUpdateView): #Convention: post_form.html
             messages.success(request, ("Post Has Been Updated"))
             return redirect(reverse('notes:topic_detail', args=[topic.id]))
 
+
 @method_decorator(login_required, name='dispatch')
-class PostDeleteView(SuccessMessageMixin, OwnerDeleteView): #Convention: post_confirm_delete.html
+# Convention: post_confirm_delete.html
+class PostDeleteView(SuccessMessageMixin, OwnerDeleteView):
     model = Post
-    success_url=reverse_lazy('notes:topic_detail') #But returnes to topic list. How can we add the topic id to this.
+    # But returnes to topic list. How can we add the topic id to this.
+    success_url = reverse_lazy('notes:topic_detail')
     success_message = "Post Has Been Deleted"
 
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, self.success_message)
         return super(PostDeleteView, self).delete(request, *args, **kwargs)
+
 
 @login_required
 def post_share(request, post_id):
@@ -178,14 +198,18 @@ def post_share(request, post_id):
                       f"{cd['name']}\'s comments: {cd['comments']}"
             cwd = os.getcwd()
             if cwd == '/app' or cwd[:4] == '/tmp':
-              app_id = os.environ['EMAIL_ADDRESS']
+                app_id = os.environ['EMAIL_ADDRESS']
             else:
-              config = configparser.ConfigParser()
-              config.read(os.path.join("D:\\Data", "API_Keys", "TPAMWeb.ini"))
-              address = config['Email']['address']
+                config = configparser.ConfigParser()
+                config.read(os.path.join("D:\\Data", "API_Keys", "TPAMWeb.ini"))
+                address = config['Email']['address']
             send_mail(subject, message, address, [cd['to']])
             sent = True
 
     else:
         form = EmailPostForm()
-    return render(request, 'notes/share.html', {'post': post,'form': form,'sent': sent})
+    return render(request, 'notes/share.html', {'post': post, 'form': form, 'sent': sent})
+
+
+def enamel_signs(request):
+    return render(request, 'notes/enamel_signs.html')

@@ -18,25 +18,29 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ClassDesigner',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
             ],
         ),
         migrations.CreateModel(
             name='ClassManufacturer',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
             ],
         ),
         migrations.CreateModel(
             name='ClassOwnerOperator',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
             ],
         ),
         migrations.CreateModel(
             name='CompanyCategory',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('category', models.CharField(max_length=100, null=True)),
             ],
             options={
@@ -46,27 +50,40 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Manufacturer',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=200, null=True)),
-                ('wikislug', models.SlugField(allow_unicode=True, blank=True, default=None, max_length=250, null=True)),
-                ('railuk_manufacturer_code', models.CharField(blank=True, max_length=3, null=True)),
-                ('brd_manufacturer_code', models.CharField(blank=True, max_length=3, null=True)),
-                ('brsl_manufacturer_code', models.CharField(blank=True, max_length=10, null=True)),
+                ('wikislug', models.SlugField(allow_unicode=True,
+                 blank=True, default=None, max_length=250, null=True)),
+                ('railuk_manufacturer_code', models.CharField(
+                    blank=True, max_length=3, null=True)),
+                ('brd_manufacturer_code', models.CharField(
+                    blank=True, max_length=3, null=True)),
+                ('brsl_manufacturer_code', models.CharField(
+                    blank=True, max_length=10, null=True)),
                 ('location', models.CharField(blank=True, max_length=200, null=True)),
-                ('pre_grouping_owner', models.CharField(blank=True, default='', max_length=10)),
-                ('grouping_owner', models.CharField(blank=True, default='', max_length=4)),
-                ('br_region_owner', models.CharField(blank=True, default='', max_length=3)),
-                ('date_opened', models.CharField(blank=True, max_length=10, null=True)),
-                ('date_closed', models.CharField(blank=True, max_length=10, null=True)),
+                ('pre_grouping_owner', models.CharField(
+                    blank=True, default='', max_length=10)),
+                ('grouping_owner', models.CharField(
+                    blank=True, default='', max_length=4)),
+                ('br_region_owner', models.CharField(
+                    blank=True, default='', max_length=3)),
+                ('date_opened', models.CharField(
+                    blank=True, max_length=10, null=True)),
+                ('date_closed', models.CharField(
+                    blank=True, max_length=10, null=True)),
                 ('type', models.CharField(blank=True, max_length=77, null=True)),
                 ('steam', models.CharField(blank=True, max_length=10, null=True)),
                 ('diesel', models.CharField(blank=True, max_length=10, null=True)),
                 ('electric', models.CharField(blank=True, max_length=10, null=True)),
                 ('map', models.CharField(blank=True, max_length=200, null=True)),
                 ('web', models.CharField(blank=True, max_length=200, null=True)),
-                ('lococlass_built', models.ManyToManyField(related_name='manufacturer_manufacturer', through='companies.ClassManufacturer', to='locos.LocoClass')),
-                ('lococlass_designed', models.ManyToManyField(related_name='manufacturer_designer', through='companies.ClassDesigner', to='locos.LocoClass')),
-                ('post_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
+                ('lococlass_built', models.ManyToManyField(related_name='manufacturer_manufacturer',
+                 through='companies.ClassManufacturer', to='locos.LocoClass')),
+                ('lococlass_designed', models.ManyToManyField(
+                    related_name='manufacturer_designer', through='companies.ClassDesigner', to='locos.LocoClass')),
+                ('post_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
             ],
             options={
                 'verbose_name_plural': 'Manufacturers',
@@ -75,14 +92,20 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Company',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, max_length=200, null=True)),
-                ('wikislug', models.SlugField(allow_unicode=True, blank=True, default=None, max_length=250, null=True)),
+                ('wikislug', models.SlugField(allow_unicode=True,
+                 blank=True, default=None, max_length=250, null=True)),
                 ('code', models.CharField(blank=True, max_length=10, null=True)),
-                ('lococlass_built', models.ManyToManyField(related_name='company_manufacturer', through='companies.ClassManufacturer', to='locos.LocoClass')),
-                ('lococlass_designed', models.ManyToManyField(related_name='company_designer', through='companies.ClassDesigner', to='locos.LocoClass')),
-                ('lococlass_owneroperator', models.ManyToManyField(related_name='company_owneroperator', through='companies.ClassOwnerOperator', to='locos.LocoClass')),
-                ('post_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
+                ('lococlass_built', models.ManyToManyField(related_name='company_manufacturer',
+                 through='companies.ClassManufacturer', to='locos.LocoClass')),
+                ('lococlass_designed', models.ManyToManyField(
+                    related_name='company_designer', through='companies.ClassDesigner', to='locos.LocoClass')),
+                ('lococlass_owneroperator', models.ManyToManyField(
+                    related_name='company_owneroperator', through='companies.ClassOwnerOperator', to='locos.LocoClass')),
+                ('post_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
             ],
             options={
                 'verbose_name_plural': 'Companies',
@@ -91,51 +114,61 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='classowneroperator',
             name='company_fk',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='companies.company'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='companies.company'),
         ),
         migrations.AddField(
             model_name='classowneroperator',
             name='lococlass_fk',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='locos.lococlass'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='locos.lococlass'),
         ),
         migrations.AddField(
             model_name='classmanufacturer',
             name='company_fk',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company'),
         ),
         migrations.AddField(
             model_name='classmanufacturer',
             name='lococlass_fk',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='locos.lococlass'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='locos.lococlass'),
         ),
         migrations.AddField(
             model_name='classmanufacturer',
             name='manufacturer_fk',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.manufacturer'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.manufacturer'),
         ),
         migrations.AddField(
             model_name='classmanufacturer',
             name='person_fk',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='people.person'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='people.person'),
         ),
         migrations.AddField(
             model_name='classdesigner',
             name='company_fk',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.company'),
         ),
         migrations.AddField(
             model_name='classdesigner',
             name='lococlass_fk',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='locos.lococlass'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='locos.lococlass'),
         ),
         migrations.AddField(
             model_name='classdesigner',
             name='manufacturer_fk',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.manufacturer'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='companies.manufacturer'),
         ),
         migrations.AddField(
             model_name='classdesigner',
             name='person_fk',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='people.person'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='people.person'),
         ),
     ]

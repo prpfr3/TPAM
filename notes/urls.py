@@ -19,4 +19,6 @@ urlpatterns = [
     path('post/<int:pk>/delete', views.PostDeleteView.as_view(success_url=reverse_lazy('notes:topics')), name='post_delete'),
 
     path('<int:post_id>/share/', views.post_share, name='post_share'),
+
+    path('enamel_signs/', views.enamel_signs, name='enamel_signs'),
 ]

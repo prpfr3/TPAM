@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='person',
             name='source',
-            field=models.IntegerField(choices=[(1, 'Wikipedia'), (2, 'Custom')], default=1),
+            field=models.IntegerField(
+                choices=[(1, 'Wikipedia'), (2, 'Custom')], default=1),
         ),
     ]

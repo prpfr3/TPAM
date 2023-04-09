@@ -16,28 +16,39 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Person',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(default=None, max_length=100)),
                 ('firstname', models.CharField(default=None, max_length=100)),
                 ('surname', models.CharField(default=None, max_length=100)),
                 ('birthdate', models.CharField(blank=True, default='', max_length=10)),
-                ('birthplace', models.CharField(blank=True, default='', max_length=200)),
+                ('birthplace', models.CharField(
+                    blank=True, default='', max_length=200)),
                 ('dieddate', models.CharField(blank=True, default='', max_length=10)),
-                ('diedplace', models.CharField(blank=True, default='', max_length=200)),
-                ('nationality', models.CharField(blank=True, default='', max_length=200)),
-                ('occupation', models.CharField(blank=True, default='', max_length=200)),
-                ('wikitextslug', models.CharField(blank=True, default='', max_length=200)),
-                ('wikiimageslug', models.CharField(blank=True, default='', max_length=200)),
-                ('wikiimagetext', models.CharField(blank=True, default='', max_length=200)),
-                ('gracetextslug', models.CharField(blank=True, default='', max_length=200)),
+                ('diedplace', models.CharField(
+                    blank=True, default='', max_length=200)),
+                ('nationality', models.CharField(
+                    blank=True, default='', max_length=200)),
+                ('occupation', models.CharField(
+                    blank=True, default='', max_length=200)),
+                ('wikitextslug', models.CharField(
+                    blank=True, default='', max_length=200)),
+                ('wikiimageslug', models.CharField(
+                    blank=True, default='', max_length=200)),
+                ('wikiimagetext', models.CharField(
+                    blank=True, default='', max_length=200)),
+                ('gracetextslug', models.CharField(
+                    blank=True, default='', max_length=200)),
                 ('date_added', models.DateTimeField(auto_now_add=True)),
-                ('post_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
+                ('post_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
             ],
         ),
         migrations.CreateModel(
             name='Role',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('role', models.CharField(max_length=100, null=True)),
             ],
             options={
@@ -47,9 +58,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PersonRole',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.person')),
-                ('role', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='people.role')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('person', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='people.person')),
+                ('role', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='people.role')),
             ],
         ),
     ]

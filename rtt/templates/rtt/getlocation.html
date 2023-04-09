@@ -8,8 +8,25 @@
   {% csrf_token %}
   {% bootstrap_form form %}
 
-  {% url 'rtt:getlivefreight' location.crscode as button_url %}
-  {% bootstrap_button "Current Freight Movements" button_type="link" href=button_url button_class="btn-primary" %}
+  <!-- Note the two different ways of coding buttons. Does the first (pure bootstrap) rely on static files
+  being downloaded or a CRN url ? A test without both suggested not -->
+  <a class="button btn btn-outline-danger " type="button" href="{% url 'rtt:getlivefreight' location.crscode %}">Current Freight Movements</a>
+
+  {% url 'rtt:gettimes' location.crscode as button_url %}
+  {% bootstrap_button "Current Timetable" button_type="link" href=button_url  button_class="btn-outline-primary" %}
+
+  {% url 'rtt:getlivepassenger' location.crscode as button_url %}
+  {% bootstrap_button "Current Passenger Movements" button_type="link" href=button_url button_class="btn-outline-primary" %}
+</form>
+
+<a class="dropdown-item nav-link" href="{% url 'locos:loco_classes' %}">Locomotive Classes</a>
+
+<form action="{% url 'rtt:gettimes' location.id %}" method="post">
+
+  {% csrf_token %}
+  {% bootstrap_form form %}
+
+  <a class="button btn btn-outline-primary" type="button" href="{% url 'rtt:getlivefreight' location.crscode %}">Current Freight Movements</a>
 
   {% url 'rtt:gettimes' location.crscode as button_url %}
   {% bootstrap_button "Current Timetable" button_type="link" href=button_url  button_class="btn-primary" %}
@@ -17,5 +34,6 @@
   {% url 'rtt:getlivepassenger' location.crscode as button_url %}
   {% bootstrap_button "Current Passenger Movements" button_type="link" href=button_url button_class="btn-primary" %}
 </form>
+
 
 {% endblock content %}

@@ -30,28 +30,41 @@ class Migration(migrations.Migration):
                 ('type', models.TextField(blank=True, null=True)),
                 ('wikidata', models.TextField(blank=True, null=True)),
                 ('wikipedia', models.TextField(blank=True, null=True)),
-                ('start_date_note', models.TextField(blank=True, db_column='start_date:note', null=True)),
+                ('start_date_note', models.TextField(
+                    blank=True, db_column='start_date:note', null=True)),
                 ('area', models.TextField(blank=True, null=True)),
                 ('end_date', models.TextField(blank=True, null=True)),
                 ('source', models.TextField(blank=True, null=True)),
-                ('building_levels', models.TextField(blank=True, db_column='building:levels', null=True)),
+                ('building_levels', models.TextField(
+                    blank=True, db_column='building:levels', null=True)),
                 ('structure', models.TextField(blank=True, null=True)),
                 ('landuse', models.TextField(blank=True, null=True)),
-                ('name_1863_1908', models.TextField(blank=True, db_column='name:1863-1908', null=True)),
+                ('name_1863_1908', models.TextField(
+                    blank=True, db_column='name:1863-1908', null=True)),
                 ('alt_name', models.TextField(blank=True, null=True)),
                 ('operator', models.TextField(blank=True, null=True)),
-                ('name_1848_1966', models.TextField(blank=True, db_column='name:1848-1966', null=True)),
-                ('name_1966_2021', models.TextField(blank=True, db_column='name:1966-2021', null=True)),
+                ('name_1848_1966', models.TextField(
+                    blank=True, db_column='name:1848-1966', null=True)),
+                ('name_1966_2021', models.TextField(
+                    blank=True, db_column='name:1966-2021', null=True)),
                 ('architect', models.TextField(blank=True, null=True)),
-                ('architect_wikipedia', models.TextField(blank=True, db_column='architect:wikipedia', null=True)),
-                ('name_1847_1922', models.TextField(blank=True, db_column='name:1847-1922', null=True)),
-                ('name_1922', models.TextField(blank=True, db_column='name:1922', null=True)),
-                ('company_1898', models.TextField(blank=True, db_column='company:1898', null=True)),
-                ('company_end', models.TextField(blank=True, db_column='company:end', null=True)),
-                ('company_start', models.TextField(blank=True, db_column='company:start', null=True)),
-                ('end_date_goods', models.TextField(blank=True, db_column='end_date:goods', null=True)),
+                ('architect_wikipedia', models.TextField(
+                    blank=True, db_column='architect:wikipedia', null=True)),
+                ('name_1847_1922', models.TextField(
+                    blank=True, db_column='name:1847-1922', null=True)),
+                ('name_1922', models.TextField(
+                    blank=True, db_column='name:1922', null=True)),
+                ('company_1898', models.TextField(
+                    blank=True, db_column='company:1898', null=True)),
+                ('company_end', models.TextField(
+                    blank=True, db_column='company:end', null=True)),
+                ('company_start', models.TextField(
+                    blank=True, db_column='company:start', null=True)),
+                ('end_date_goods', models.TextField(
+                    blank=True, db_column='end_date:goods', null=True)),
                 ('gauge', models.TextField(blank=True, null=True)),
-                ('start_date_gwr', models.TextField(blank=True, db_column='start_date:GWR', null=True)),
+                ('start_date_gwr', models.TextField(
+                    blank=True, db_column='start_date:GWR', null=True)),
                 ('embankment', models.TextField(blank=True, null=True)),
                 ('bridge', models.TextField(blank=True, null=True)),
                 ('tracks', models.TextField(blank=True, null=True)),
@@ -67,28 +80,45 @@ class Migration(migrations.Migration):
                 ('level', models.TextField(blank=True, null=True)),
                 ('fixme', models.TextField(blank=True, null=True)),
                 ('note', models.TextField(blank=True, null=True)),
-                ('start_date_source', models.TextField(blank=True, db_column='start_date:source', null=True)),
-                ('start_date_edtf', models.TextField(blank=True, db_column='start_date:edtf', null=True)),
+                ('start_date_source', models.TextField(
+                    blank=True, db_column='start_date:source', null=True)),
+                ('start_date_edtf', models.TextField(
+                    blank=True, db_column='start_date:edtf', null=True)),
                 ('electrified', models.TextField(blank=True, null=True)),
                 ('usage', models.TextField(blank=True, null=True)),
-                ('end_date_edtf', models.TextField(blank=True, db_column='end_date:edtf', null=True)),
-                ('end_date_note', models.TextField(blank=True, db_column='end_date:note', null=True)),
-                ('source_operator', models.TextField(blank=True, db_column='source:operator', null=True)),
-                ('operator_1940', models.TextField(blank=True, db_column='operator:1940', null=True)),
-                ('end_date_freight', models.TextField(blank=True, db_column='end_date:freight', null=True)),
-                ('end_date_passengers', models.TextField(blank=True, db_column='end_date:passengers', null=True)),
-                ('start_date_passengers', models.TextField(blank=True, db_column='start_date:passengers', null=True)),
-                ('start_date_goods', models.TextField(blank=True, db_column='start_date:goods', null=True)),
-                ('name_1886_1937', models.TextField(blank=True, db_column='name:1886-1937', null=True)),
-                ('name_1937_field', models.TextField(blank=True, db_column='name:1937-', null=True)),
-                ('source_data', models.TextField(blank=True, db_column='source:data', null=True)),
-                ('name_1932_1934', models.TextField(blank=True, db_column='name:1932-1934', null=True)),
-                ('name_1881_1895', models.TextField(blank=True, db_column='name:1881-1895', null=True)),
+                ('end_date_edtf', models.TextField(
+                    blank=True, db_column='end_date:edtf', null=True)),
+                ('end_date_note', models.TextField(
+                    blank=True, db_column='end_date:note', null=True)),
+                ('source_operator', models.TextField(
+                    blank=True, db_column='source:operator', null=True)),
+                ('operator_1940', models.TextField(
+                    blank=True, db_column='operator:1940', null=True)),
+                ('end_date_freight', models.TextField(
+                    blank=True, db_column='end_date:freight', null=True)),
+                ('end_date_passengers', models.TextField(
+                    blank=True, db_column='end_date:passengers', null=True)),
+                ('start_date_passengers', models.TextField(
+                    blank=True, db_column='start_date:passengers', null=True)),
+                ('start_date_goods', models.TextField(
+                    blank=True, db_column='start_date:goods', null=True)),
+                ('name_1886_1937', models.TextField(
+                    blank=True, db_column='name:1886-1937', null=True)),
+                ('name_1937_field', models.TextField(
+                    blank=True, db_column='name:1937-', null=True)),
+                ('source_data', models.TextField(
+                    blank=True, db_column='source:data', null=True)),
+                ('name_1932_1934', models.TextField(
+                    blank=True, db_column='name:1932-1934', null=True)),
+                ('name_1881_1895', models.TextField(
+                    blank=True, db_column='name:1881-1895', null=True)),
                 ('wikimedia_commons', models.TextField(blank=True, null=True)),
                 ('station', models.TextField(blank=True, null=True)),
                 ('subway', models.TextField(blank=True, null=True)),
-                ('railway_yard_purpose', models.TextField(blank=True, db_column='railway:yard:purpose', null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.GeometryField(blank=True, null=True, srid=4326)),
+                ('railway_yard_purpose', models.TextField(
+                    blank=True, db_column='railway:yard:purpose', null=True)),
+                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                    blank=True, null=True, srid=4326)),
             ],
             options={
                 'verbose_name': 'OSM History Route Geometry',
@@ -100,17 +130,20 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UkAdminBoundaries',
             fields=[
-                ('objectid', models.CharField(max_length=10, primary_key=True, serialize=False)),
+                ('objectid', models.CharField(
+                    max_length=10, primary_key=True, serialize=False)),
                 ('ctyua19cd', models.CharField(blank=True, max_length=100, null=True)),
                 ('ctyua19nm', models.CharField(blank=True, max_length=100, null=True)),
-                ('ctyua19nmw', models.CharField(blank=True, max_length=100, null=True)),
+                ('ctyua19nmw', models.CharField(
+                    blank=True, max_length=100, null=True)),
                 ('bng_e', models.FloatField(blank=True, null=True)),
                 ('bng_n', models.FloatField(blank=True, null=True)),
                 ('long', models.FloatField(blank=True, null=True)),
                 ('lat', models.FloatField(blank=True, null=True)),
                 ('st_areasha', models.FloatField(blank=True, null=True)),
                 ('st_lengths', models.FloatField(blank=True, null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.GeometryField(blank=True, null=True, srid=4326)),
+                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                    blank=True, null=True, srid=4326)),
             ],
             options={
                 'verbose_name': 'UK Admin Area Geometry',
@@ -122,14 +155,17 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Depot',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('depot', models.CharField(blank=True, max_length=1000, null=True)),
                 ('code', models.CharField(blank=True, max_length=100, null=True)),
-                ('date_start', models.CharField(blank=True, max_length=10, null=True)),
+                ('date_start', models.CharField(
+                    blank=True, max_length=10, null=True)),
                 ('datefield_start', models.DateField(blank=True, null=True)),
                 ('date_end', models.CharField(blank=True, max_length=10, null=True)),
                 ('datefield_end', models.DateField(blank=True, null=True)),
-                ('br_region', models.CharField(blank=True, db_column='BR_region', max_length=20, null=True)),
+                ('br_region', models.CharField(blank=True,
+                 db_column='BR_region', max_length=20, null=True)),
                 ('map', models.CharField(blank=True, max_length=200, null=True)),
                 ('web', models.CharField(blank=True, max_length=200, null=True)),
                 ('comments', models.TextField()),
@@ -143,11 +179,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ELR',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('item', models.SlugField(blank=True, default='', max_length=20)),
-                ('itemLabel', models.CharField(blank=True, default='', max_length=400)),
-                ('itemAltLabel', models.CharField(blank=True, default='', max_length=200)),
-                ('post_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
+                ('itemLabel', models.CharField(
+                    blank=True, default='', max_length=400)),
+                ('itemAltLabel', models.CharField(
+                    blank=True, default='', max_length=200)),
+                ('post_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
             ],
             options={
                 'verbose_name': "Engineer's Line Reference",
@@ -157,53 +197,72 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='HeritageSite',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('type', models.CharField(blank=True, default=None, max_length=50)),
                 ('name', models.CharField(blank=True, default=None, max_length=100)),
                 ('country', models.CharField(blank=True, default=None, max_length=100)),
-                ('wikislug', models.SlugField(allow_unicode=True, blank=True, default=None, max_length=250, null=True)),
+                ('wikislug', models.SlugField(allow_unicode=True,
+                 blank=True, default=None, max_length=250, null=True)),
                 ('url', models.URLField(blank=True, default=None, null=True)),
                 ('notes', models.TextField(blank=True, default=None, null=True)),
                 ('date_added', models.DateTimeField(auto_now_add=True)),
-                ('tpam_type', models.ForeignKey(default=1, on_delete=django.db.models.deletion.SET_DEFAULT, to='mainmenu.mydjangoapp', verbose_name='Heritage Site Type')),
+                ('tpam_type', models.ForeignKey(default=1, on_delete=django.db.models.deletion.SET_DEFAULT,
+                 to='mainmenu.mydjangoapp', verbose_name='Heritage Site Type')),
             ],
         ),
         migrations.CreateModel(
             name='Location',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('type', models.CharField(blank=True, max_length=20, null=True)),
                 ('wikiname', models.CharField(blank=True, max_length=200, null=True)),
-                ('wikislug', models.SlugField(allow_unicode=True, blank=True, default=None, max_length=250, null=True)),
-                ('postcode', models.CharField(blank=True, default=None, max_length=10, null=True)),
+                ('wikislug', models.SlugField(allow_unicode=True,
+                 blank=True, default=None, max_length=250, null=True)),
+                ('postcode', models.CharField(blank=True,
+                 default=None, max_length=10, null=True)),
                 ('opened', models.CharField(blank=True, max_length=200, null=True)),
                 ('closed', models.CharField(blank=True, max_length=200, null=True)),
-                ('disused_stations_slug', models.CharField(blank=True, max_length=200, null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.GeometryField(blank=True, null=True, srid=4326)),
+                ('disused_stations_slug', models.CharField(
+                    blank=True, max_length=200, null=True)),
+                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                    blank=True, null=True, srid=4326)),
                 ('atcocode', models.CharField(blank=True, max_length=20, null=True)),
-                ('tiploccode', models.CharField(blank=True, max_length=20, null=True)),
+                ('tiploccode', models.CharField(
+                    blank=True, max_length=20, null=True)),
                 ('crscode', models.CharField(blank=True, max_length=10, null=True)),
-                ('stationname', models.CharField(blank=True, max_length=100, null=True)),
-                ('stationnamealt', models.CharField(blank=True, max_length=100, null=True)),
-                ('stationnamelang', models.CharField(blank=True, max_length=2, null=True)),
+                ('stationname', models.CharField(
+                    blank=True, max_length=100, null=True)),
+                ('stationnamealt', models.CharField(
+                    blank=True, max_length=100, null=True)),
+                ('stationnamelang', models.CharField(
+                    blank=True, max_length=2, null=True)),
                 ('gridtype', models.CharField(blank=True, max_length=1, null=True)),
                 ('easting', models.PositiveIntegerField(blank=True, null=True)),
                 ('northing', models.PositiveIntegerField(blank=True, null=True)),
                 ('revisionnumber', models.SmallIntegerField(blank=True, null=True)),
-                ('modification', models.CharField(blank=True, max_length=3, null=True)),
+                ('modification', models.CharField(
+                    blank=True, max_length=3, null=True)),
                 ('osm_node', models.CharField(blank=True, max_length=20, null=True)),
-                ('source', models.IntegerField(choices=[(1, 'Wikipedia'), (2, 'Custom')], default=1)),
-                ('media_caption', models.CharField(blank=True, max_length=100, null=True)),
-                ('media_credit', models.CharField(blank=True, max_length=200, null=True)),
+                ('source', models.IntegerField(choices=[
+                 (1, 'Wikipedia'), (2, 'Custom')], default=1)),
+                ('media_caption', models.CharField(
+                    blank=True, max_length=100, null=True)),
+                ('media_credit', models.CharField(
+                    blank=True, max_length=200, null=True)),
                 ('media_url', models.URLField(blank=True, max_length=400, null=True)),
-                ('elr_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='locations.elr')),
-                ('post_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
+                ('elr_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.SET_NULL, to='locations.elr')),
+                ('post_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
             ],
         ),
         migrations.CreateModel(
             name='RouteCategory',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('category', models.CharField(max_length=100, null=True)),
             ],
             options={
@@ -215,10 +274,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RouteGeoClosed',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.TextField(blank=True, db_column='name', null=True)),
-                ('description', models.TextField(blank=True, db_column='Description', null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.GeometryField(blank=True, dim=3, null=True, srid=4326)),
+                ('description', models.TextField(
+                    blank=True, db_column='Description', null=True)),
+                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                    blank=True, dim=3, null=True, srid=4326)),
             ],
             options={
                 'verbose_name': 'Closed Route Geometries',
@@ -231,14 +293,19 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.TextField(blank=True, primary_key=True, serialize=False)),
                 ('field_id', models.TextField(blank=True, db_column='@id', null=True)),
-                ('from_field', models.TextField(blank=True, db_column='from', null=True)),
+                ('from_field', models.TextField(
+                    blank=True, db_column='from', null=True)),
                 ('name', models.TextField(blank=True, null=True)),
-                ('name_de', models.TextField(blank=True, db_column='name:de', null=True)),
+                ('name_de', models.TextField(
+                    blank=True, db_column='name:de', null=True)),
                 ('network', models.TextField(blank=True, null=True)),
-                ('network_wikidata', models.TextField(blank=True, db_column='network:wikidata', null=True)),
-                ('network_wikipedia', models.TextField(blank=True, db_column='network:wikipedia', null=True)),
+                ('network_wikidata', models.TextField(
+                    blank=True, db_column='network:wikidata', null=True)),
+                ('network_wikipedia', models.TextField(
+                    blank=True, db_column='network:wikipedia', null=True)),
                 ('operator', models.TextField(blank=True, null=True)),
-                ('public_transport_version', models.TextField(blank=True, db_column='public_transport:version', null=True)),
+                ('public_transport_version', models.TextField(
+                    blank=True, db_column='public_transport:version', null=True)),
                 ('ref', models.TextField(blank=True, null=True)),
                 ('route', models.TextField(blank=True, null=True)),
                 ('service', models.TextField(blank=True, null=True)),
@@ -248,11 +315,15 @@ class Migration(migrations.Migration):
                 ('by_night', models.TextField(blank=True, null=True)),
                 ('colour', models.TextField(blank=True, null=True)),
                 ('dining', models.TextField(blank=True, null=True)),
-                ('from_de', models.TextField(blank=True, db_column='from:de', null=True)),
-                ('from_fr', models.TextField(blank=True, db_column='from:fr', null=True)),
+                ('from_de', models.TextField(
+                    blank=True, db_column='from:de', null=True)),
+                ('from_fr', models.TextField(
+                    blank=True, db_column='from:fr', null=True)),
                 ('highspeed', models.TextField(blank=True, null=True)),
-                ('name_en', models.TextField(blank=True, db_column='name:en', null=True)),
-                ('name_fr', models.TextField(blank=True, db_column='name:fr', null=True)),
+                ('name_en', models.TextField(
+                    blank=True, db_column='name:en', null=True)),
+                ('name_fr', models.TextField(
+                    blank=True, db_column='name:fr', null=True)),
                 ('reservation', models.TextField(blank=True, null=True)),
                 ('to_fr', models.TextField(blank=True, db_column='to:fr', null=True)),
                 ('via', models.TextField(blank=True, null=True)),
@@ -269,61 +340,85 @@ class Migration(migrations.Migration):
                 ('wikidata', models.TextField(blank=True, null=True)),
                 ('wikipedia', models.TextField(blank=True, null=True)),
                 ('brand', models.TextField(blank=True, null=True)),
-                ('colour_infill', models.TextField(blank=True, db_column='colour:infill', null=True)),
+                ('colour_infill', models.TextField(
+                    blank=True, db_column='colour:infill', null=True)),
                 ('frequency', models.TextField(blank=True, null=True)),
-                ('ref_colour', models.TextField(blank=True, db_column='ref:colour', null=True)),
-                ('ref_colour_bg', models.TextField(blank=True, db_column='ref:colour_bg', null=True)),
-                ('ref_colour_tx', models.TextField(blank=True, db_column='ref:colour_tx', null=True)),
+                ('ref_colour', models.TextField(
+                    blank=True, db_column='ref:colour', null=True)),
+                ('ref_colour_bg', models.TextField(
+                    blank=True, db_column='ref:colour_bg', null=True)),
+                ('ref_colour_tx', models.TextField(
+                    blank=True, db_column='ref:colour_tx', null=True)),
                 ('text_colour', models.TextField(blank=True, null=True)),
                 ('tracks', models.TextField(blank=True, null=True)),
                 ('voltage', models.TextField(blank=True, null=True)),
                 ('railway', models.TextField(blank=True, null=True)),
                 ('url', models.TextField(blank=True, null=True)),
                 ('note', models.TextField(blank=True, null=True)),
-                ('source_ref', models.TextField(blank=True, db_column='source:ref', null=True)),
+                ('source_ref', models.TextField(
+                    blank=True, db_column='source:ref', null=True)),
                 ('comment', models.TextField(blank=True, null=True)),
                 ('monorail', models.TextField(blank=True, null=True)),
                 ('opening_hours', models.TextField(blank=True, null=True)),
-                ('operator_cy', models.TextField(blank=True, db_column='operator:cy', null=True)),
-                ('operator_en', models.TextField(blank=True, db_column='operator:en', null=True)),
-                ('note_colour', models.TextField(blank=True, db_column='note:colour', null=True)),
+                ('operator_cy', models.TextField(
+                    blank=True, db_column='operator:cy', null=True)),
+                ('operator_en', models.TextField(
+                    blank=True, db_column='operator:en', null=True)),
+                ('note_colour', models.TextField(
+                    blank=True, db_column='note:colour', null=True)),
                 ('official_ref', models.TextField(blank=True, null=True)),
-                ('operator_wikidata', models.TextField(blank=True, db_column='operator:wikidata', null=True)),
-                ('operator_wikipedia', models.TextField(blank=True, db_column='operator:wikipedia', null=True)),
+                ('operator_wikidata', models.TextField(
+                    blank=True, db_column='operator:wikidata', null=True)),
+                ('operator_wikipedia', models.TextField(
+                    blank=True, db_column='operator:wikipedia', null=True)),
                 ('line', models.TextField(blank=True, null=True)),
-                ('name_cy', models.TextField(blank=True, db_column='name:cy', null=True)),
-                ('name_nl', models.TextField(blank=True, db_column='name:nl', null=True)),
+                ('name_cy', models.TextField(
+                    blank=True, db_column='name:cy', null=True)),
+                ('name_nl', models.TextField(
+                    blank=True, db_column='name:nl', null=True)),
                 ('to_de', models.TextField(blank=True, db_column='to:de', null=True)),
                 ('old_ref', models.TextField(blank=True, null=True)),
                 ('fee', models.TextField(blank=True, null=True)),
                 ('headway', models.TextField(blank=True, null=True)),
                 ('source', models.TextField(blank=True, null=True)),
-                ('not_network_wikidata', models.TextField(blank=True, db_column='not:network:wikidata', null=True)),
+                ('not_network_wikidata', models.TextField(
+                    blank=True, db_column='not:network:wikidata', null=True)),
                 ('website', models.TextField(blank=True, null=True)),
-                ('name_oc', models.TextField(blank=True, db_column='name:oc', null=True)),
-                ('source_name_oc', models.TextField(blank=True, db_column='source:name:oc', null=True)),
+                ('name_oc', models.TextField(
+                    blank=True, db_column='name:oc', null=True)),
+                ('source_name_oc', models.TextField(
+                    blank=True, db_column='source:name:oc', null=True)),
                 ('passenger', models.TextField(blank=True, null=True)),
                 ('alt_name', models.TextField(blank=True, null=True)),
                 ('distance', models.TextField(blank=True, null=True)),
                 ('maxwidth', models.TextField(blank=True, null=True)),
                 ('roundtrip', models.TextField(blank=True, null=True)),
                 ('usage', models.TextField(blank=True, null=True)),
-                ('wikipedia_en', models.TextField(blank=True, db_column='wikipedia:en', null=True)),
-                ('from_nl', models.TextField(blank=True, db_column='from:nl', null=True)),
-                ('ref_prorail', models.TextField(blank=True, db_column='ref:ProRail', null=True)),
+                ('wikipedia_en', models.TextField(
+                    blank=True, db_column='wikipedia:en', null=True)),
+                ('from_nl', models.TextField(
+                    blank=True, db_column='from:nl', null=True)),
+                ('ref_prorail', models.TextField(
+                    blank=True, db_column='ref:ProRail', null=True)),
                 ('to_nl', models.TextField(blank=True, db_column='to:nl', null=True)),
                 ('bus', models.TextField(blank=True, null=True)),
-                ('cargo_bus', models.TextField(blank=True, db_column='cargo:bus', null=True)),
-                ('cargo_vehicle', models.TextField(blank=True, db_column='cargo:vehicle', null=True)),
+                ('cargo_bus', models.TextField(
+                    blank=True, db_column='cargo:bus', null=True)),
+                ('cargo_vehicle', models.TextField(
+                    blank=True, db_column='cargo:vehicle', null=True)),
                 ('motor_vehicle', models.TextField(blank=True, null=True)),
                 ('segment', models.TextField(blank=True, null=True)),
                 ('internet_access', models.TextField(blank=True, null=True)),
-                ('internet_access_fee', models.TextField(blank=True, db_column='internet_access:fee', null=True)),
+                ('internet_access_fee', models.TextField(
+                    blank=True, db_column='internet_access:fee', null=True)),
                 ('surveillance', models.TextField(blank=True, null=True)),
-                ('surveillance_type', models.TextField(blank=True, db_column='surveillance:type', null=True)),
+                ('surveillance_type', models.TextField(
+                    blank=True, db_column='surveillance:type', null=True)),
                 ('historic', models.TextField(blank=True, null=True)),
-                ('field_relations', models.TextField(blank=True, db_column='@relations', null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.GeometryField(blank=True, null=True, srid=4326)),
+                ('field_relations', models.TextField(
+                    blank=True, db_column='@relations', null=True)),
+                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                    blank=True, null=True, srid=4326)),
             ],
             options={
                 'verbose_name': 'OSM Route Geometry',
@@ -334,9 +429,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RouteMap',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=1000, null=True)),
-                ('source', models.IntegerField(choices=[(1, 'Wikipedia'), (2, 'Custom')], default=1)),
+                ('source', models.IntegerField(choices=[
+                 (1, 'Wikipedia'), (2, 'Custom')], default=1)),
             ],
             options={
                 'verbose_name': 'Route Map',
@@ -347,21 +444,26 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Visit',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('date', models.DateField(blank=True)),
                 ('notes', models.TextField(blank=True, default=None)),
                 ('date_added', models.DateField(auto_now_add=True)),
-                ('location', models.ForeignKey(default=1398, on_delete=django.db.models.deletion.SET_DEFAULT, to='locations.heritagesite', verbose_name='Location')),
+                ('location', models.ForeignKey(default=1398, on_delete=django.db.models.deletion.SET_DEFAULT,
+                 to='locations.heritagesite', verbose_name='Location')),
             ],
         ),
         migrations.CreateModel(
             name='RouteLocation',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('loc_no', models.IntegerField()),
                 ('label', models.CharField(blank=True, max_length=1000, null=True)),
-                ('location_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='locations.location')),
-                ('routemap', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='locations.routemap')),
+                ('location_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.CASCADE, to='locations.location')),
+                ('routemap', models.ForeignKey(
+                    default=1, on_delete=django.db.models.deletion.CASCADE, to='locations.routemap')),
             ],
             options={
                 'verbose_name': 'Route Location',
@@ -371,29 +473,42 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Route',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(blank=True, default='', max_length=1000)),
-                ('wikipedia_slug', models.SlugField(allow_unicode=True, default=None, max_length=255, null=True)),
-                ('source', models.IntegerField(choices=[(1, 'Wikipedia'), (2, 'Custom')], default=1)),
-                ('post_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
+                ('wikipedia_slug', models.SlugField(
+                    allow_unicode=True, default=None, max_length=255, null=True)),
+                ('source', models.IntegerField(choices=[
+                 (1, 'Wikipedia'), (2, 'Custom')], default=1)),
+                ('post_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.SET_NULL, to='notes.post')),
                 ('references', models.ManyToManyField(to='notes.Reference')),
-                ('wikipedia_route_categories', models.ManyToManyField(blank=True, to='locations.RouteCategory')),
-                ('wikipedia_routemaps', models.ManyToManyField(to='locations.RouteMap')),
+                ('wikipedia_route_categories', models.ManyToManyField(
+                    blank=True, to='locations.RouteCategory')),
+                ('wikipedia_routemaps', models.ManyToManyField(
+                    to='locations.RouteMap')),
             ],
         ),
         migrations.CreateModel(
             name='LocationEvent',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.IntegerField(choices=[(1, 'Official Opening'), (2, 'Closed to Passengers'), (3, 'Closed to Freight'), (4, 'Razed'), (5, 'Name Change'), (99, 'Other')], default=1)),
-                ('description', models.CharField(blank=True, max_length=255, null=True)),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
+                ('type', models.IntegerField(choices=[(1, 'Official Opening'), (2, 'Closed to Passengers'), (
+                    3, 'Closed to Freight'), (4, 'Razed'), (5, 'Name Change'), (99, 'Other')], default=1)),
+                ('description', models.CharField(
+                    blank=True, max_length=255, null=True)),
                 ('date', models.CharField(blank=True, max_length=10, null=True)),
                 ('datefield', models.DateField(blank=True, null=True)),
-                ('location_description', models.CharField(blank='True', default=None, max_length=100, null='True')),
+                ('location_description', models.CharField(
+                    blank='True', default=None, max_length=100, null='True')),
                 ('date_added', models.DateTimeField(auto_now_add=True)),
-                ('elr_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='locations.elr')),
-                ('location_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='locations.location')),
-                ('route_fk', models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.CASCADE, to='locations.route')),
+                ('elr_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.CASCADE, to='locations.elr')),
+                ('location_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.CASCADE, to='locations.location')),
+                ('route_fk', models.ForeignKey(blank=True, default=None, null=True,
+                 on_delete=django.db.models.deletion.CASCADE, to='locations.route')),
             ],
             options={
                 'verbose_name': 'Location Event',

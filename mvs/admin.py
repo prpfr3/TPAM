@@ -4,6 +4,7 @@ from datetime import datetime
 from tinymce.widgets import TinyMCE
 from django.db import models
 
+
 class MVBMImageAdmin(admin.ModelAdmin):
     list_display = ['title', 'slug', 'image', 'created']
     list_filter = ['created']
@@ -12,13 +13,16 @@ class MVBMImageAdmin(admin.ModelAdmin):
 class MilitaryVehicleClassAdmin(admin.ModelAdmin):
     list_display = ["id", "mvclass", "description", "wikislug"]
     ordering = ('mvclass',)
-    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
+    formfield_overrides = {models.TextField: {'widget': TinyMCE()}, }
+
 
 class MVImageAdmin(admin.ModelAdmin):
-    list_display = ['image_name', 'image', 'mvclass', 'location', 'notes', 'date_added']
+    list_display = ['image_name', 'image',
+                    'mvclass', 'location', 'notes', 'date_added']
     search_fields = ['image_name', 'mvclass__mvclass']
     ordering = ('image_name',)
-    formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
+    formfield_overrides = {models.TextField: {'widget': TinyMCE()}, }
+
 
 admin.site.register(MVBMImage, MVBMImageAdmin)
 admin.site.register(MVImage, MVImageAdmin)

@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class SlideHeader(models.Model):
     location_line = models.BooleanField(default=True)
     media_caption = models.CharField(max_length=100, blank=True, null=True)
@@ -13,8 +14,10 @@ class SlideHeader(models.Model):
     def __str__(self):
         return self.text_headline
 
+
 class Slide(models.Model):
-    slideheader = models.ManyToManyField(SlideHeader, through='Slidepack', related_name='slidepack_slide')
+    slideheader = models.ManyToManyField(
+        SlideHeader, through='Slidepack', related_name='slidepack_slide')
     background = models.URLField(blank=True, null=True, max_length=300)
     northing = models.FloatField(blank=True, null=True)
     easting = models.FloatField(blank=True, null=True)
@@ -28,6 +31,7 @@ class Slide(models.Model):
 
     def __str__(self):
         return self.text_headline
+
 
 class Slidepack(models.Model):
     slideheader_fk = models.ForeignKey(SlideHeader, on_delete=models.CASCADE)

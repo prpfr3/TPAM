@@ -14,17 +14,22 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='NaPTANRailReferences',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('atcocode', models.CharField(blank=True, max_length=20, null=True)),
-                ('tiploccode', models.CharField(blank=True, max_length=20, null=True)),
+                ('tiploccode', models.CharField(
+                    blank=True, max_length=20, null=True)),
                 ('crscode', models.CharField(blank=True, max_length=10, null=True)),
-                ('stationname', models.CharField(blank=True, max_length=100, null=True)),
-                ('stationnamelang', models.CharField(blank=True, max_length=2, null=True)),
+                ('stationname', models.CharField(
+                    blank=True, max_length=100, null=True)),
+                ('stationnamelang', models.CharField(
+                    blank=True, max_length=2, null=True)),
                 ('gridtype', models.CharField(blank=True, max_length=1, null=True)),
                 ('easting', models.PositiveIntegerField(blank=True, null=True)),
                 ('northing', models.PositiveIntegerField(blank=True, null=True)),
                 ('revisionnumber', models.SmallIntegerField(blank=True, null=True)),
-                ('modification', models.CharField(blank=True, max_length=3, null=True)),
+                ('modification', models.CharField(
+                    blank=True, max_length=3, null=True)),
             ],
             options={
                 'verbose_name': 'Naptan Rail Reference',
