@@ -154,6 +154,7 @@ def route(request, route_id):
 
     figure = None
     events_json = None
+    locations = None
 
     if routemaps := route.wikipedia_routemaps.all():  # i.e. If the route has any wikipedia routemaps
 
@@ -192,7 +193,7 @@ def route(request, route_id):
             bound_box = [[south, west], [north, west],
                          [north, east], [south, east]]
 
-    elr_geojson = None
+    elr_geojsons = None
 
     if elrs := route.elrs.all():
 
