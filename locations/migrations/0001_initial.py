@@ -117,7 +117,7 @@ class Migration(migrations.Migration):
                 ('subway', models.TextField(blank=True, null=True)),
                 ('railway_yard_purpose', models.TextField(
                     blank=True, db_column='railway:yard:purpose', null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                ('geometry', django.contrib.gis.db.models.fields.GeometryField(
                     blank=True, null=True, srid=4326)),
             ],
             options={
@@ -142,7 +142,7 @@ class Migration(migrations.Migration):
                 ('lat', models.FloatField(blank=True, null=True)),
                 ('st_areasha', models.FloatField(blank=True, null=True)),
                 ('st_lengths', models.FloatField(blank=True, null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                ('geometry', django.contrib.gis.db.models.fields.GeometryField(
                     blank=True, null=True, srid=4326)),
             ],
             options={
@@ -226,7 +226,7 @@ class Migration(migrations.Migration):
                 ('closed', models.CharField(blank=True, max_length=200, null=True)),
                 ('disused_stations_slug', models.CharField(
                     blank=True, max_length=200, null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                ('geometry', django.contrib.gis.db.models.fields.GeometryField(
                     blank=True, null=True, srid=4326)),
                 ('atcocode', models.CharField(blank=True, max_length=20, null=True)),
                 ('tiploccode', models.CharField(
@@ -279,7 +279,7 @@ class Migration(migrations.Migration):
                 ('name', models.TextField(blank=True, db_column='name', null=True)),
                 ('description', models.TextField(
                     blank=True, db_column='Description', null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                ('geometry', django.contrib.gis.db.models.fields.GeometryField(
                     blank=True, dim=3, null=True, srid=4326)),
             ],
             options={
@@ -417,7 +417,7 @@ class Migration(migrations.Migration):
                 ('historic', models.TextField(blank=True, null=True)),
                 ('field_relations', models.TextField(
                     blank=True, db_column='@relations', null=True)),
-                ('geometry', django.contrib.gis.db.models.fields.TextField(
+                ('geometry', django.contrib.gis.db.models.fields.GeometryField(
                     blank=True, null=True, srid=4326)),
             ],
             options={

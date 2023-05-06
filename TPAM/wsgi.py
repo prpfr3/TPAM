@@ -6,7 +6,7 @@ This module contains the WSGI application used by Django's development server an
 Usually you will have the standard Django WSGI application here, but it also might make sense to replace the whole Django WSGI application with a custom one that later delegates to the Django one. For example, you could introduce WSGI middleware here, or combine a Django application with an application of another framework.
 
 For more information, visit
-https://docs.djangoproject.com/en/2.1/howto/deployment/wsgi/
+https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 """
 
 import os

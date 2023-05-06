@@ -1,18 +1,21 @@
-from django.db.utils import IntegrityError
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 import contextlib
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseRedirect, HttpResponse
-from django.urls import reverse
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import View
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.utils import IntegrityError
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+
+from mainmenu.views import pagination
+
+from .forms import *
 from .models import *
-from .forms import MVImageForm, MVBMImageCreateForm
 
 
 def index(request):
@@ -36,15 +39,29 @@ def MVBMimage_create(request):
 
 
 def military_vehicle_classes(request):
-    military_vehicle_classes = MilitaryVehicleClass.objects.order_by('id')
-    favorites = []
-    if request.user.is_authenticated:
-        rows = request.user.favorite_things.values('id')
-        favorites = [row['id'] for row in rows]
-    context = {'military_vehicle_classes': military_vehicle_classes,
-               'favorites': favorites}
-    return render(request, 'mvs/military_vehicle_class_list.html', context)
 
+    errors = None
+    favorites = []
+
+    if request.method == 'POST':
+        selection_criteria = MilitaryVehicleClassSelectionForm(request.POST)
+
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data['mvclass'] != None:
+            queryset = MilitaryVehicleClass.objects.filter(
+                mvclass__icontains=selection_criteria.cleaned_data['mvclass']).order_by('mvclass')
+            if request.user.is_authenticated:
+                rows = request.user.favorite_things.values('id')
+                favorites = [row['id'] for row in rows]
+        else:
+            errors = selection_criteria.errors or None
+            queryset = MilitaryVehicleClass.objects.order_by('mvclass')
+    else:
+        selection_criteria = MilitaryVehicleClassSelectionForm()
+        queryset = MilitaryVehicleClass.objects.order_by('mvclass')
+
+    context = {'selection_criteria': selection_criteria, 'errors': errors,
+               'favorites': favorites, 'military_vehicle_classes': queryset}
+    return render(request, 'mvs/military_vehicle_class_list.html', context)
 
 # csrf exemption in class based views
 # https://stackoverflow.com/questions/16458166/how-to-disable-djangos-csrf-validation
@@ -76,51 +93,65 @@ def military_vehicle_class(request, military_vehicle_class_id):
     return render(request, 'mvs/military_vehicle_class.html', context)
 
 
-def mvimages(request):
-    mvimages = MVImage.objects.order_by('image_name')
-    paginator = Paginator(mvimages, 33)
+def locations(request):
+    locations = HeritageSite.objects.order_by('site_name')
+    paginator = Paginator(locations, 33)
     page = request.GET.get('page')
     try:
-        mvimages = paginator.page(page)
+        locations = paginator.page(page)
     except PageNotAnInteger:
-        mvimages = paginator.page(1)
+        locations = paginator.page(1)
     except EmptyPage:
-        mvimages = paginator.page(paginator.num_pages)
-    context = {'page': page, 'mvimages': mvimages}
-    return render(request, 'mvs/mvimage_list.html', context)
+        locations = paginator.page(paginator.num_pages)
+    context = {'page': page, 'locations': locations}
+    return render(request, 'mvs/locations.html', context)
 
 
-def mvimage(request, mvimage_id):
-    mvimage = MVImage.objects.get(id=mvimage_id)
-    context = {'mvimage': mvimage}
-    return render(request, 'mvs/mvimage.html', context)
+def photos(request):
+    photos = MVImage.objects.order_by('image_name')
+    paginator = Paginator(photos, 33)
+    page = request.GET.get('page')
+    try:
+        photos = paginator.page(page)
+    except PageNotAnInteger:
+        photos = paginator.page(1)
+    except EmptyPage:
+        photos = paginator.page(paginator.num_pages)
+    context = {'page': page, 'photos': photos}
+    return render(request, 'mvs/photos.html', context)
+
+
+def photo(request, mvimage_id):
+    photo = MVImage.objects.get(id=mvimage_id)
+    context = {'photo': photo}
+    return render(request, 'mvs/photo.html', context)
 
 
 @login_required
-def new_mvimage(request):
+def new_photo(request):
     if request.method != 'POST':
         form = MVImageForm()
     else:
         form = MVImageForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('mvs:mvimages'))
+            return HttpResponseRedirect(reverse('mvs:photos'))
 
     context = {'form': form}
-    return render(request, 'mvs/mvimage_new.html', context)
+    return render(request, 'mvs/photo_new.html', context)
 
 
 @login_required
-def edit_mvimage(request, mvimage_id):
-    mvimage = MVImage.objects.get(id=mvimage_id)
+def edit_photo(request, mvimage_id):
+    photo = MVImage.objects.get(id=mvimage_id)
 
     if request.method != 'POST':
-        form = MVImageForm(instance=mvimage)
+        form = MVImageForm(instance=photo)
     else:
-        form = MVImageForm(instance=mvimage, data=request.POST)
+        form = MVImageForm(instance=photo, data=request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('mvs:mvimage', args=[mvimage_id]))
+            return HttpResponseRedirect(reverse('mvs:photo', args=[mvimage_id]))
 
-    context = {'mvimage': mvimage, 'form': form}
-    return render(request, 'mvs/mvimage_edit.html', context)
+    context = {'photo': photo, 'form': form}
+    return render(request, 'mvs/photo_edit.html', context)

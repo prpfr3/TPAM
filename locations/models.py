@@ -4,6 +4,7 @@ from companies.models import Company
 # from django.contrib.gis.db import models
 from django.db import models
 
+
 class Depot(models.Model):
     depot = models.CharField(max_length=1000, blank=True, null=True)
     code = models.CharField(max_length=100, blank=True, null=True)
@@ -92,7 +93,7 @@ class Location(models.Model):
         return self.wikiname or self.stationname or str(self.id)
 
     class Meta:
-        managed = True
+        managed = False
 
 
 class RouteCategory(models.Model):
@@ -133,13 +134,14 @@ class Route(models.Model):
     name = models.CharField(max_length=1000, blank=True, default='')
     wikipedia_slug = models.SlugField(
         default=None, allow_unicode=True, null=True, max_length=255)
-    wikipedia_route_categories = models.ManyToManyField(
+    wikipedia_categories = models.ManyToManyField(
         RouteCategory, blank=True)
     wikipedia_routemaps = models.ManyToManyField(RouteMap, blank=True)
+    elrs = models.ManyToManyField(ELR, blank=True)
     references = models.ManyToManyField(Reference, blank=True)
     post_fk = models.ForeignKey(
         Post, on_delete=models.SET_NULL, blank=True, null=True, default=None)
-    route_owneroperator = models.ManyToManyField(Company, blank=True)
+    owneroperators = models.ManyToManyField(Company, blank=True)
     source = models.IntegerField(choices=SOURCE_TYPE, default=1,)
 
     def __str__(self):
@@ -222,6 +224,7 @@ class RouteGeoClosed(models.Model):
     geometry = models.TextField(blank=True, null=True)
 
     class Meta:
+        managed = False
         db_table = 'locations_routes_geo_closed'
         verbose_name = 'Closed Route Geometries'
         verbose_name_plural = 'Closed Routes Geometries'

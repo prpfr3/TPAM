@@ -1,3 +1,32 @@
+def osm_elr_fetch(elr):
+
+    import osm2geojson
+    import requests
+
+    """
+    Overpass Turbo query gets the Way relating to the Engineer's Line Reference
+    and then uses the "around" statement to get nodes such as stations and ways
+    not labelled as the Engineer's Line Reference within x (e.g. 500) metres of the
+    ELR way
+    """
+
+    overpass_url = "http://overpass-api.de/api/interpreter"
+
+    overpass_query = f"""
+        [out:json];
+        area["ISO3166-1"="GB"][admin_level=2];
+        way(area)["ref"="{elr}"]->.elr;
+        node(around.elr:50)["railway"];
+        way(around.elr:50)["railway"];
+        out geom;
+        """
+
+    response = requests.get(overpass_url, params={'data': overpass_query})
+    data = response.json()
+
+    # Convert OSM json to Geojson. Warning ! The osm2geojson utility is still under development
+    return osm2geojson.json2geojson(data)
+
 
 def generate_storymap(headline, text, locations):
 
@@ -169,7 +198,7 @@ An alternative to  function generate_folium_map sql
 #     return figure
 
 
-def generate_folium_map_sql(geojson, title, locations, bound_box):
+def generate_folium_map_sql(geojsons, title, locations, bound_box):
 
     import folium
     from folium.plugins import MarkerCluster
@@ -189,8 +218,9 @@ def generate_folium_map_sql(geojson, title, locations, bound_box):
                      name="OpenRailwayMap",
                      min_zoom=2, max_zoom=19).add_to(m)
 
-    if geojson:
-        folium.GeoJson(geojson, name=title).add_to(m)
+    if geojsons:
+        for geojson in geojsons:
+            folium.GeoJson(geojson, name=title).add_to(m)
 
     folium.FitBounds(bound_box).add_to(m)
 

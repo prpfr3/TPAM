@@ -27,23 +27,20 @@ def loco_class(request, loco_class_id):
 
 def loco_classes(request):
 
+    errors = None
+    page = None
+
     if request.method == 'POST':
         selection_criteria = LocoClassSelectionForm(request.POST)
 
         if selection_criteria.is_valid() and selection_criteria.cleaned_data != None:
             queryset = LocoClassList.objects.filter(
                 name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
-            errors = None
-            page = None
-            context = {'selection_criteria': selection_criteria,
-                       'errors': errors, 'page': page, 'loco_class_list': queryset}
-            return render(request, 'locos/loco_class_list.html', context)
         else:
             errors = selection_criteria.errors or None
             queryset = LocoClassList.objects.order_by('name')
     else:
         selection_criteria = LocoClassSelectionForm()
-        errors = selection_criteria.errors or None
         queryset = LocoClassList.objects.order_by('name')
 
     queryset, page = pagination(request, queryset)

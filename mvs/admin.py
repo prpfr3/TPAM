@@ -12,6 +12,7 @@ class MVBMImageAdmin(admin.ModelAdmin):
 
 class MilitaryVehicleClassAdmin(admin.ModelAdmin):
     list_display = ["id", "mvclass", "description", "wikislug"]
+    search_fields = ['mvclass', 'description']
     ordering = ('mvclass',)
     formfield_overrides = {models.TextField: {'widget': TinyMCE()}, }
 

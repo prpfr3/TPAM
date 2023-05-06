@@ -5,13 +5,17 @@
 
 {% block content %}
 
-  <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'mvs:mvimages' %}">Military Vehicle Images</a> 
-  <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'mvs:military_vehicle_classes' %}">Military Vehicles Classes (from Wikipedia)</a>
-  <a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:heritage_sites' %}">Museums and Sites</a> 
-  {% comment %}
-  <!--<a  class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:visits' %}">Visits</a>
+  <div class="bd-example">
+    <ul class="list-group">
+      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'mvs:photos' %}">Military Vehicle Photo</a></li> 
+      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'mvs:military_vehicle_classes' %}">Military Vehicles Classes (from Wikipedia)</a></li>
+      <li class="list-group-item list-group-item-action list-group-item-primary"><a href="{% url 'mvs:locations' %}">Photo Locations</a></li> 
 
-  <!--<a href="#">Register an account</a> to view the archive and add records of your own-->
-  {% endcomment %}
+      {% comment %}
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:visits' %}">Visits</a>
+        <a href="#">Register an account</a> to view the archive and add records of your own
+      {% endcomment %}
+    </ul>
+  </div>
 
 {% endblock content %}

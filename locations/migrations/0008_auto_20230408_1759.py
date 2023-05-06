@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='routegeoclosed',
             name='geometry',
-            field=django.contrib.gis.db.models.fields.TextField(
+            field=django.contrib.gis.db.models.fields.GeometryField(
                 blank=True, null=True, srid=4326),
         ),
     ]

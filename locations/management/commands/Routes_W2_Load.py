@@ -54,6 +54,6 @@ class Command(BaseCommand):
                     category=wikipedia_category,)
                 if category_created:
                     route_category_created += 1
-                route_fk.wikipedia_route_categories.add(category_fk)
+                route_fk.wikipedia_categories.add(category_fk)
 
         print(f"{routes_added=}, {route_templates_added=} and {route_category_created=}")

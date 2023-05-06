@@ -4,7 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from locations.models import Location, ELR, ELRLocation
 
 """
-Run the following Wikidata SPARQL query and save to a csv file called WIkidata_Railway_Stations
+# Run the following Wikidata SPARQL query and save to a csv file called WIkidata_Railway_Stations
+# Project Webscraping, file Wikidata_SPARQLWrapper.ipynb has an example of how to do this using Python
 
 SELECT DISTINCT ?item ?itemLabel ?operator ?operatorLabel ?geo ?openedLabel ?closedLabel ?image ?adminareaLabel ?countyLabel ?elrnameLabel ?disused ?railscot ?adjacentLabel ?towards ?interchangeLabel ?elr ?distance ?inceptionLabel ?elevationLabel ?ownedby ?ownedbyLabel ?architectLabel
 WHERE

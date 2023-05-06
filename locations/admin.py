@@ -37,13 +37,13 @@ class LocationEventAdmin(admin.ModelAdmin):
     search_fields = ['route_fk', 'date']
 
 
-@admin.register(RouteGeoClosed)
-class RouteGeoClosedAdmin(admin.ModelAdmin):
-    # class RouteGeoClosedAdmin(OSMGeoAdmin):
-    list_display = ['name', 'description']
-    search_fields = ['name', 'description']
-    ordering = ['name']
-    verbose_name = "Closed Lines from Google Map"
+# @admin.register(RouteGeoClosed)
+# class RouteGeoClosedAdmin(admin.ModelAdmin):
+#     # class RouteGeoClosedAdmin(OSMGeoAdmin):
+#     list_display = ['name', 'description']
+#     search_fields = ['name', 'description']
+#     ordering = ['name']
+#     verbose_name = "Closed Lines from Google Map"
 
 
 @admin.register(RouteGeoOsm)

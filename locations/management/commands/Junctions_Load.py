@@ -5,14 +5,15 @@ import contextlib
 
 input_filename = 'D://Data/TPAM/Location_Junctions_OSM_Loadfile.csv'
 
+
 class Command(BaseCommand):
     # Show this when the user types help
-    help = "Loads data from RailReferences.csv into the locations table"
+    help = "Loads data from OpenStreetMaps into the locations table"
 
     def handle(self, *args, **options):
         print("Loading Junctions")
 
-        count= 0
+        count = 0
 
         with open(input_filename, encoding="utf-8-sig") as csvfile:
             for row in DictReader(csvfile):

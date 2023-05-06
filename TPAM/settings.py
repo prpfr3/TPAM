@@ -1,20 +1,21 @@
 """
 Django settings for TPAM solution.
 More info on settings:-
-https://docs.djangoproject.com/en/3.1/topics/settings/
-https://docs.djangoproject.com/en/3.1/ref/settings/
+https://docs.djangoproject.com/en/4.2/topics/settings/
+https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+
 import os
 import configparser
 import dj_database_url
 
 # My Settings
 LOGIN_URL = '/users/login'
-# Note that the use of dirname twice has the effect of making the Base Directory one level up from that in which settings.py resides
-# __file__ is the current path of imports
+# __file__ is the full path of the current file, settings.py
+# os.path.dirname is the directory of the current file and dirname x 2 the directory one level up
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
-# Required as from Django 3.2
+# Required as from Django 4.2
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
@@ -67,7 +68,7 @@ REST_FRAMEWORK = {
 }
 
 # Middleware framework
-# https://docs.djangoproject.com/en/2.1/topics/http/middleware/
+# https://docs.djangoproject.com/en/4.2/topics/http/middleware/
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -83,7 +84,7 @@ ROOT_URLCONF = 'TPAM.urls'
 CART_SESSION_ID = 'cart'
 
 # Template configuration
-# https://docs.djangoproject.com/en/2.1/topics/templates/
+# https://docs.djangoproject.com/en/4.2/topics/templates/
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -102,10 +103,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'TPAM.wsgi.application'
 
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-
 # Password validation
-# https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
@@ -114,17 +112,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/2.1/topics/i18n/
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images) and Media files (images maintainable by users of the applicaction)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
-
-# Theoretically the following is not used on an AWS S3 storage solution but in practice best to retain. Often expected by runserver (though normally only used on a local implementation)
+# Following theoretically not needed for production and/or AWS S3. Best to retain though.
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
@@ -163,7 +157,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Establish the current working directory to determine whether settings should be for a production or local server.
 cwd = os.getcwd()
-if cwd == '/app' or cwd[:4] == '/tmp':
+if cwd == '/app' or cwd.startswith('/tmp'):  # PRODUCTION SETTINGS
     print('Using production settings from settings.py')
 
     SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
@@ -241,7 +235,7 @@ if cwd == '/app' or cwd[:4] == '/tmp':
         }
     }
 
-else:
+else:  # DEVELOPMENT SETTINGS
     msg = (
         f'Using development/local settings from settings.py.\n'
         f'Base directory is {BASE_DIR}.'
@@ -261,14 +255,13 @@ else:
         MIDDLEWARE = [
             'debug_toolbar.middleware.DebugToolbarMiddleware',] + MIDDLEWARE
         INSTALLED_APPS += ['debug_toolbar',]
-        INTERNAL_IPS = ["127.0.0.1"]  # Required for Django Debug
+        INTERNAL_IPS = ["127.0.0.1"]
         DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False, }
-        # Following overcomes main reason why Debug toolbar sometimes does not show up
+        # Following addresses potential problem with debug toolbar display
         import mimetypes
         mimetypes.add_type("application/javascript", ".js", True)
 
     ALLOWED_HOSTS = []
-    INTERNAL_IPS = ["127.0.0.1"]  # Required for Django Debug
     # GDAL_LIBRARY_PATH = r'C:\\OSGeo4W64\\bin\\gdal301'
 
     db_pswd = config['MySQL']['p']

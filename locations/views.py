@@ -97,18 +97,16 @@ def routes(request):
 
     if request.method == 'POST':
         selection_criteria = RouteSelectionForm(request.POST)
-        if not selection_criteria.is_valid():
-            errors = selection_criteria.errors
-            queryset = Route.objects.order_by('name')
-        elif str(selection_criteria.cleaned_data['name']):
+
+        if selection_criteria.is_valid() and str(selection_criteria.cleaned_data['name']):
             queryset = Route.objects.filter(
                 name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
-        elif len(selection_criteria.cleaned_data['wikipedia_route_categories']) != 0:
+        elif selection_criteria.is_valid() and str(selection_criteria.cleaned_data['wikipedia_categories']) != 'None':
             queryset = Route.objects.filter(
-                wikipedia_route_categories__in=selection_criteria.cleaned_data['wikipedia_route_categories']).order_by('name')
-        elif str(selection_criteria.cleaned_data['source']) != 'None':
-            queryset = Route.objects.filter(
-                source=selection_criteria.cleaned_data['source']).order_by('name')
+                wikipedia_categories__in=selection_criteria.cleaned_data['wikipedia_categories']).order_by('name')
+        else:
+            errors = selection_criteria.errors or None
+            queryset = Route.objects.order_by('name')
     else:
         selection_criteria = RouteSelectionForm()
         errors = selection_criteria.errors
@@ -132,11 +130,23 @@ def route(request, route_id):
         description = route.post_fk.body
         description_type = "Notes"
     elif route.wikipedia_slug:
+
+        import sys
+        wikipediaapi.log.setLevel(level=wikipediaapi.logging.DEBUG)
+
+        # Set handler if you use Python in interactive mode
+        out_hdlr = wikipediaapi.logging.StreamHandler(sys.stderr)
+        out_hdlr.setFormatter(
+            wikipediaapi.logging.Formatter('%(asctime)s %(message)s'))
+        out_hdlr.setLevel(wikipediaapi.logging.DEBUG)
+        wikipediaapi.log.addHandler(out_hdlr)
+
         wiki_wiki = wikipediaapi.Wikipedia(
             language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
         slug = route.wikipedia_slug.replace('/wiki/', '')
         slug = urllib.parse.unquote(slug, encoding='utf-8', errors='replace')
-        description = wiki_wiki.page(slug).text
+        page_html = wiki_wiki.page(slug)
+        description = page_html.text
         description_type = "From Wikipedia:-"
     else:
         description = None
@@ -147,7 +157,7 @@ def route(request, route_id):
 
     if routemaps := route.wikipedia_routemaps.all():  # i.e. If the route has any wikipedia routemaps
 
-        """ THIS IS DJANGO ORM CODE SUPERSEDED BY NATIVE SQL CODE BELOW TO REMOVE GDAL DEPENDENCIES
+        """ THIS DJANGO ORM CODE SUPERSEDED BY SUBSEQUENT SQL TO REMOVE GDAL DEPENDENCIES WHICH COMPLICATE PRODUCTION DEPLOY
         if locations := Location.objects.filter(
             routelocation__routemap=routemaps[0].id):
             figure = generate_folium_map(None, route.name, locations)
@@ -179,11 +189,26 @@ def route(request, route_id):
             south = bounds[0][2]
             east = bounds[0][1]
             north = bounds[0][0]
-            bound_box_sql = [[south, west], [north, west],
-                             [north, east], [south, east]]
+            bound_box = [[south, west], [north, west],
+                         [north, east], [south, east]]
 
-            figure = generate_folium_map_sql(
-                None, route.name, locations, bound_box_sql)
+    elr_geojson = None
+
+    if elrs := route.elrs.all():
+
+        elr_geojsons = []
+        for elr in elrs:
+            elr = ELR.objects.get(id=elr.id)
+            elr_geojson = osm_elr_fetch(elr.itemAltLabel)
+            elr_geojsons.append(elr_geojson)
+            # Boundary box calculated from locations above for now
+            # Giving precedence to an ELR boundary box as per below could yield problems where there are multiple ELRs
+            # (Would need to calculate the aggregate boundary box from multiple ELR geojson boundary boxes)
+            # bound_box = geojson_boundbox(elr_geojson['features'])
+
+    if locations or elr_geojsons:
+        figure = generate_folium_map_sql(
+            elr_geojsons, route.name, locations, bound_box)
 
     if route_events := LocationEvent.objects.filter(route_fk_id=route_id):
         events_json = events_timeline(route_events)
@@ -324,7 +349,6 @@ def osm_railmap_county(request, county):
     bounds = execute_sql(sql, [county])
     west = bounds[0][3]
     south = bounds[0][2]
-    east = bounds[0][1]
     north = bounds[0][0]
     bound_box_sql = [[south, west], [north, west], [north, east], [south, east]]
 
@@ -339,8 +363,7 @@ def osm_railmap_county(request, county):
     response = requests.get(overpass_url, params={'data': overpass_query})
     data = response.json()
     # Convert OSM json to Geojson. Warning ! The osm2geojson utility is still under development
-    geojson = osm2geojson.json2geojson(data)
-
+    geojsons = [osm2geojson.json2geojson(data)]
     # Get all the locations within the county
     """ THIS IS DJANGO ORM CODE SUPERSEDED BY NATIVE SQL CODE BELOW TO REMOVE GDAL DEPENDENCIES
     county_record = UkAdminBoundaries.objects.filter(ctyua19nm=county)
@@ -358,9 +381,9 @@ def osm_railmap_county(request, county):
     """
     locations = execute_sql(sql, [county])
 
-    if geojson:
+    if geojsons:
         figure = generate_folium_map_sql(
-            geojson, county, locations, bound_box_sql)
+            geojsons, county, locations, bound_box_sql)
     else:
         figure = None
     context = {"map": figure, "title": county}
@@ -398,35 +421,9 @@ def elrs(request):
 
 def elr_map(request, elr_id):
 
-    import osm2geojson
-    import requests
-
     elr = ELR.objects.get(id=elr_id)
 
-    """
-    Overpass Turbo query gets the Way relating to the Engineer's Line Reference
-    and then uses the "around" statement to get nodes such as stations and ways
-    not labelled as the Engineer's Line Reference within x (e.g. 500) metres of the
-    ELR way
-    """
-
-    overpass_url = "http://overpass-api.de/api/interpreter"
-
-    overpass_query = f"""
-        [out:json];
-        area["ISO3166-1"="GB"][admin_level=2];
-        way(area)["ref"="{elr.itemAltLabel}"]->.elr;
-        node(around.elr:50)["railway"];
-        way(around.elr:50)["railway"];
-        out geom;
-        """
-
-    response = requests.get(overpass_url, params={'data': overpass_query})
-    data = response.json()
-
-    # Convert OSM json to Geojson. Warning ! The osm2geojson utility is still under development
-    geojson = osm2geojson.json2geojson(data)
-
+    elr_geojsons = [osm_elr_fetch(elr.itemAltLabel)]
     """ THIS IS DJANGO ORM CODE SUPERSEDED BY NATIVE SQL CODE BELOW TO REMOVE GDAL DEPENDENCIES
     locations_orm = Location.objects.filter(elr_fk__itemAltLabel=elr.itemAltLabel)
 
@@ -446,11 +443,11 @@ def elr_map(request, elr_id):
 
     locations_sql = execute_sql(sql, [elr_id])
 
-    if geojson:  # i.e. If OSM has some geodata relating to the ELR then generate the map
+    if elr_geojsons:  # i.e. If OSM has some geodata relating to the ELR then generate the map
         title = f'{elr.itemAltLabel}: {elr.itemLabel}'
-        bound_box = geojson_boundbox(geojson['features'])
+        bound_box = geojson_boundbox(elr_geojsons[0]['features'])
         figure = generate_folium_map_sql(
-            geojson, title, locations_sql, bound_box)
+            elr_geojsons, title, locations_sql, bound_box)
     else:
         figure = None
 

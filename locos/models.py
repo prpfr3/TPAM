@@ -234,5 +234,4 @@ class Locomotive(models.Model):
         age_years = (today.year - self.build_datetime.year) - int(
             (today.month, today.day) <
             (self.build_datetime.month, self.build_datetime.day))
-        print(age_years)
         return age_years

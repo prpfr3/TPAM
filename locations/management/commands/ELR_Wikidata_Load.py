@@ -18,6 +18,7 @@ P10271 means that an instance has a property of Engineer's Line Reference
 
 """
 
+
 from csv import DictReader
 from django.core.management import BaseCommand
 from locations.models import Route, RouteCategory, RouteMap
@@ -31,8 +32,9 @@ inputfile = os.path.join(DATAIO_DIR, "Wikidata_ELR.csv")
 outputfile = os.path.join(DATAIO_DIR, "Wikidata_ELR_sorted.csv")
 
 dfinput = pd.read_csv(os.path.join(inputfile), header=0, encoding='utf-8')
-dfinput.sort_values(by=['itemAltLabel'], inplace=True)
+dfinput = dfinput.sort_values(by=['itemAltLabel'])
 dfinput.to_csv(outputfile, encoding='utf-8')
+
 
 class Command(BaseCommand):
     help = "Loads Wikidata Engineer Line Reference Data"
@@ -45,18 +47,19 @@ class Command(BaseCommand):
 
             ELRs_added = 0
 
-            with open(os.path.join(DATAIO_DIR, "Wikidata_ELR_sorted.csv"), encoding="utf-8") as file: 
-                
+            with open(os.path.join(DATAIO_DIR, "Wikidata_ELR_sorted.csv"), encoding="utf-8") as file:
+
                 for row in DictReader(file):
                     elr = ELR()
-                    elr.item = row['item'].replace("http://www.wikidata.org/entity/","")
+                    elr.item = row['item'].replace(
+                        "http://www.wikidata.org/entity/", "")
                     itemAltLabel = row['itemAltLabel'].split(',')
                     # If the ELR Code includes superfluous description, move it to the item label as an aka
                     try:
                         elr.itemLabel = f"{row['itemLabel']} (aka. {itemAltLabel[1]})"
                     except Exception:
                         elr.itemLabel = row['itemLabel']
-                    elr.itemAltLabel = itemAltLabel[0]                     
+                    elr.itemAltLabel = itemAltLabel[0]
                     elr.save()
                     ELRs_added += 1
 
