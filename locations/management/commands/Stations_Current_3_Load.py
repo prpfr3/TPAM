@@ -2,6 +2,7 @@ from csv import DictReader
 from django.core.management import BaseCommand
 from locations.models import Location
 
+
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
@@ -9,24 +10,24 @@ class Command(BaseCommand):
         if Location.objects.exists():
             print('Note there is already data in the table')
 
-        count= 0
+        count = 0
 
         for row in DictReader(open('D://Data/TPAM/Location_Loadfile.csv')):
             if count != 0:
                 l = Location()
                 l.type = 'Current Station'
                 l.wikiname = row['Name']
-                l.wikislug = row['NameSlug'].replace('/wiki/','')
+                l.wikislug = row['NameSlug'].replace('/wiki/', '')
                 l.postcode = row['Postcode']
                 l.geometry = row['geometry']
-                l.atcocode = row['AtcoCode'] 
+                l.atcocode = row['AtcoCode']
                 l.tiploccode = row['TiplocCode']
                 l.crscode = row['CrsCode']
-                l.stationname = row['StationName']
-                l.stationnamelang = row['StationNameLang']
+                l.name = row['StationName']
+                l.namelang = row['StationNameLang']
                 l.gridtype = row['GridType']
                 l.easting = row['Easting']
-                l.northing = row['Northing'] 
+                l.northing = row['Northing']
                 l.creationdatetime = row['CreationDateTime']
                 l.modificationdatetime = row['ModificationDateTime']
                 l.revisionnumber = row['RevisionNumber']

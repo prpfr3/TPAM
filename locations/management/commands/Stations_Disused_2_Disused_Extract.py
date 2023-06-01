@@ -8,7 +8,7 @@ from urllib.request import urlopen
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 URL_OR_FILE = 'url'
 
-output_file = os.path.join(DATAIO_DIR, "Location_Extract_Disused_Stations.csv")
+output_file = os.path.join(DATAIO_DIR, "Location_Stations_Disused_Extract.csv")
 with open(output_file, 'wt+', newline='', encoding='utf-8') as csvFile:
     output = csv.writer(csvFile)
 

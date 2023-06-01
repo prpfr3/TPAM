@@ -34,19 +34,19 @@ def locations(request):
         selection_criteria = LocationSelectionForm(request.POST)
         if selection_criteria.is_valid() and selection_criteria.cleaned_data['wikiname'] != None:
             queryset = Location.objects.filter(
-                wikiname__icontains=selection_criteria.cleaned_data['wikiname']).order_by('wikiname', 'stationname')
+                wikiname__icontains=selection_criteria.cleaned_data['wikiname']).order_by('wikiname', 'name')
             errors = None
         elif selection_criteria.is_valid() and str(selection_criteria.cleaned_data['type']) != None:
             queryset = Location.objects.filter(
-                type__icontains=selection_criteria.cleaned_data['type']).order_by('wikiname', 'stationname')
+                type__icontains=selection_criteria.cleaned_data['type']).order_by('wikiname', 'name')
             errors = None
         else:
             errors = selection_criteria.errors or None
-            queryset = Location.objects.order_by('wikiname', 'stationname')
+            queryset = Location.objects.order_by('wikiname', 'name')
     else:
         selection_criteria = LocationSelectionForm()
         errors = selection_criteria.errors or None
-        queryset = Location.objects.order_by('wikiname', 'stationname')
+        queryset = Location.objects.order_by('wikiname', 'name')
 
     queryset, page = pagination(request, queryset)
 
@@ -165,7 +165,7 @@ def route(request, route_id):
         """
 
         sql = """
-            SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."stationname",
+            SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
                 ST_Y(ST_CENTROID(a.geometry)),
                 ST_X(ST_CENTROID(a.geometry)),
                 a."media_url"
@@ -248,7 +248,7 @@ def route_storymap(request, route_id):
     if routemaps := route.wikipedia_routemaps.all():  # i.e. If the route has any wikipedia routemaps
 
         sql = """
-            SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."stationname",
+            SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
                 ST_Y(ST_CENTROID(a.geometry)),
                 ST_X(ST_CENTROID(a.geometry)),
                 a."media_caption",
@@ -372,7 +372,7 @@ def osm_railmap_county(request, county):
     """
 
     sql = """ 
-    SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."stationname",
+    SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
     ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry)),
     a."media_url"
     FROM 
@@ -435,7 +435,7 @@ def elr_map(request, elr_id):
     """
 
     sql = """ 
-    SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."stationname",
+    SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
     ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry)), b."itemAltLabel", b."itemLabel"
     FROM "locations_location" AS a INNER JOIN "locations_elr" AS b
     ON (a."elr_fk_id" = b."id" ) 
@@ -464,7 +464,7 @@ def elr_storymap(request, elr_id):
     route = ELR.objects.get(id=elr_id)
 
     sql = """ 
-    SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."stationname",
+    SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
         ST_Y(ST_CENTROID(a.geometry)), 
         ST_X(ST_CENTROID(a.geometry)),
         a."media_caption",

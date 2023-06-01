@@ -48,8 +48,8 @@ class Location(models.Model):
 
     type = models.CharField(max_length=20, blank=True, null=True)
     wikiname = models.CharField(max_length=200, blank=True, null=True)
-    wikislug = models.SlugField(
-        max_length=250, allow_unicode=True, default=None, blank=True, null=True)
+    wikislug = models.CharField(
+        max_length=250, default=None, blank=True, null=True)
     postcode = models.CharField(
         default=None, blank=True, null=True, max_length=10)
     opened = models.CharField(max_length=200, blank=True, null=True)
@@ -61,9 +61,9 @@ class Location(models.Model):
     atcocode = models.CharField(max_length=20, blank=True, null=True)
     tiploccode = models.CharField(max_length=20, blank=True, null=True)
     crscode = models.CharField(max_length=10, blank=True, null=True)
-    stationname = models.CharField(max_length=100, blank=True, null=True)
-    stationnamealt = models.CharField(max_length=100, blank=True, null=True)
-    stationnamelang = models.CharField(max_length=2, blank=True, null=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    namealt = models.CharField(max_length=100, blank=True, null=True)
+    namelang = models.CharField(max_length=2, blank=True, null=True)
     gridtype = models.CharField(max_length=1, blank=True, null=True)
     easting = models.PositiveIntegerField(blank=True, null=True)
     northing = models.PositiveIntegerField(blank=True, null=True)
@@ -90,7 +90,7 @@ class Location(models.Model):
         return reverse('locations:location', kwargs={'location_id': self.pk})
 
     def __str__(self):
-        return self.wikiname or self.stationname or str(self.id)
+        return self.wikiname or self.name or str(self.id)
 
     class Meta:
         managed = False
@@ -154,6 +154,9 @@ class RouteLocation(models.Model):
     label = models.CharField(max_length=1000, blank=True, null=True)
     location_fk = models.ForeignKey(
         Location, on_delete=models.CASCADE, blank=True, null=True, default=None)
+    linear_reference = models.DecimalField(
+        blank=True, null=True, default=None, max_digits=6, decimal_places=2)
+    note = models.CharField(max_length=1000, blank=True, null=True)
 
     def __str__(self):
         return self.label

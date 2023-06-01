@@ -1,28 +1,28 @@
-﻿{% extends "../mainmenu/base.html" %}
-
-{% block content_title %}Choose a Location{% endblock %}
-{% block content_desc %}(Ctrl-F in your browser to search the list){% endblock %}
-
-{% block content %}
-<form method='POST' action="">
-  {% csrf_token %}
-  {{location_list}}
-  <p></p><p></p>
+﻿{% extends "../mainmenu/base.html" %} {% block content_title %}Choose a
+Location{% endblock %} {% block content_desc %}(Ctrl-F in your browser to search
+the list){% endblock %} {% block content %}
+<form method="POST" action="">
+  {% csrf_token %} {{location_list}}
+  <p></p>
+  <p></p>
 </form>
 
 <!--<div class="bg-light container">-->
 <div>
-  <ul style="list-style-type:none;">
-  </ul>
+  <ul style="list-style-type: none"></ul>
 </div>
-  <div class="bd-example">
-    <ul class="list-group">
-      {% for location in locations %}
-          <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'rtt:getlocation' location.crscode %}"> <b>{{location.crscode}}</b>
-             - {{location.stationname}}</a> 
-      {% empty %}
-        <li>No Sites have been added yet.</li>
-      {% endfor %}
+<div class="bd-example">
+  <ul class="list-group">
+    {% for location in locations %}
+    <a
+      class="list-group-item list-group-item-action list-group-item-primary"
+      href="{% url 'rtt:getlocation' location.crscode %}"
+    >
+      <b>{{location.crscode}}</b> - {{location.name}}</a
+    >
+    {% empty %}
+    <li>No Sites have been added yet.</li>
+    {% endfor %}
   </ul>
 </div>
 

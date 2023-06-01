@@ -183,7 +183,7 @@ An alternative to  function generate_folium_map sql
 #                 name = f'<a href="https://en.wikipedia.org//wiki/{str(location.wikislug)}"target="_blank"> \
 #                 {str(location.wikiname)}</a>'
 #             else:
-#                 name = f'{str(location.stationname)}'
+#                 name = f'{str(location.name)}'
 
 #             label_html = folium.Html(f'{name}{opened}{closed}', script=True)
 #             label = folium.Popup(label_html, max_width=2650)
@@ -243,6 +243,8 @@ def generate_folium_map_sql(geojsons, title, locations, bound_box):
             if str(location[1]) != 'None':
                 name = f'<a href="https://en.wikipedia.org//wiki/{str(location[1])}"target="_blank"> \
                 {str(location[0])}</a>'
+            elif str(location[4]) != 'None':
+                name = f'{str(location[4])}'
             else:
                 name = f'{str(location[5])}'
 

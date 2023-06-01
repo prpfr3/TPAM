@@ -7,9 +7,9 @@ from django.db import models
 
 class NaPTANRailReferencesAdmin(admin.ModelAdmin):
     list_display = ["atcocode", "tiploccode",
-                    "crscode", "stationname", "easting", "northing"]
+                    "crscode", "name", "easting", "northing"]
     # list_filter = ['']
-    search_fields = ("atcocode", "tiploccode", "crscode", "stationname")
+    search_fields = ("atcocode", "tiploccode", "crscode", "name")
     ordering = ('crscode', 'tiploccode')
     # formfield_overrides = {models.TextField: {'widget': TinyMCE()},}
     # prepopulated_fields = {'code_dates': ('title',)}

@@ -10,13 +10,13 @@ from urllib.request import urlopen
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 URL_OR_FILE = 'url'
 
-output_file = os.path.join(DATAIO_DIR, "Location_Extract_Wikipedia_Closed_Stations.csv")
+output_file = os.path.join(DATAIO_DIR, "Location_Stations_Closed_Wikipedia_Extract.csv")
 with open(output_file, 'wt+', newline='', encoding='utf-8') as csvFile:
     output = csv.writer(csvFile)
     csv_output_row = ['Name', 'Wiki', 'Geometry', 'Company', 'Company_Wiki', 'Closed', 'Ref_Wiki']
     output.writerow(csv_output_row)
 
-    log_file = os.path.join(DATAIO_DIR, "Location_Extract_Wikipedia_Closed_Stations.logfile")
+    log_file = os.path.join(DATAIO_DIR, "Location_Stations_Closed_Wikipedia_Extract.logfile")
     csvLogfile = open(log_file, 'wt+', newline='', encoding='utf-8')
     outputLogfile= csv.writer(csvLogfile)
 

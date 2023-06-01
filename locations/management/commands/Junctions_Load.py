@@ -20,8 +20,8 @@ class Command(BaseCommand):
                 l = Location()
                 l.type = 'Junction'
                 l.geometry = f"POINT ({row['@lon']} {row['@lat']})"
-                l.stationname = row['name']
-                l.stationnamealt = row['alt_name']
+                l.name = row['name']
+                l.namealt = row['alt_name']
                 l.osm_node = row['@id']
                 l.save()
                 count += 1

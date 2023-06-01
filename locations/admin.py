@@ -21,10 +21,11 @@ class ELRAdmin(admin.ModelAdmin):
 
 
 class LocationAdmin(admin.ModelAdmin):
-    # class LocationAdmin(OSMGeoAdmin):
-    list_display = ['osm_node', 'stationname', 'wikiname', 'wikislug', 'elr_fk']
+# class LocationAdmin(OSMGeoAdmin):
+    list_display = ['name',
+                    'wikiname', 'wikislug', 'osm_node', 'elr_fk']
     list_filter = ['type']
-    search_fields = ['wikiname', 'stationname']
+    search_fields = ['wikiname', 'name']
     ordering = ['wikiname']
     verbose_name = "Railway Locations"
     formfield_overrides = {models.TextField: {
@@ -82,7 +83,7 @@ class ELRLocationAdmin(admin.ModelAdmin):
     # class ELRLocationAdmin(OSMGeoAdmin):
     list_display = ['elr_fk', 'location_fk', 'distance']
     search_fields = ['elr_fk__itemLabel', 'elr_fk__itemAltLabel',
-                     'location_fk__wikiname', 'location_fk__stationname']
+                     'location_fk__wikiname', 'location_fk__name']
     ordering = ['elr_fk', 'distance', 'location_fk']
 
 

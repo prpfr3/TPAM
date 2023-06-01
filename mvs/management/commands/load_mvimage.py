@@ -4,22 +4,23 @@ from csv import DictReader
 from django.core.management import BaseCommand
 from mvs.models import MVImage, MilitaryVehicleClass
 from django.core.exceptions import ObjectDoesNotExist
-import csv, os
+import csv
+import os
 from pathlib import Path
 
 # !!! WARNING - Running this may change the ids of records that are referred to with foreign keys in other tables
 
-#Set up a CSV file and write a Header Row
+# Set up a CSV file and write a Header Row
 csv_file = os.path.join("D:\\Data\\TPAM\\ETL_Wiki_MVImages_Saumur.csv")
-#csvFile = open(csv_file, 'wt+', newline='', encoding='utf-8')
-#output = csv.writer(csvFile)
-#output.writerow(['image_name', 'image', 'mvclass_id', 'location_id', 'visit_id', 'notes'])
+# csvFile = open(csv_file, 'wt+', newline='', encoding='utf-8')
+# output = csv.writer(csvFile)
+# output.writerow(['image_name', 'image', 'mvclass_id', 'location_id', 'visit_id', 'notes'])
 
-##Get the filenames of all the image files
-#allfiles = Path(os.path.join("D:\\Pictures\ZZMilitaryVehicles\ZZMilitaryVehicles800x600")).glob('**/*.jpg')
-#flist = sorted(allfiles)
+# Get the filenames of all the image files
+# allfiles = Path(os.path.join("D:\\Pictures\ZZMilitaryVehicles\ZZMilitaryVehicles800x600")).glob('**/*.jpg')
+# flist = sorted(allfiles)
 
-#for f in flist:
+# for f in flist:
 #    csvrow = []
 #    b = os.path.basename(f)
 #    csvrow.append(b)
@@ -56,29 +57,31 @@ csv_file = os.path.join("D:\\Data\\TPAM\\ETL_Wiki_MVImages_Saumur.csv")
 #    csvrow.append('Enter Notes here:')
 #    output.writerow(csvrow)
 
-#csvFile.close()
+# csvFile.close()
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         if MVImage.objects.exists():
             print('Military Vehicle images already loaded...but continuing.')
-            pass
-        print("Creating Military Vehicle Images")
-        with open(csv_file, encoding="utf-8-sig") as file:   
+
+        with open(csv_file, encoding="utf-8-sig") as file:
             for row in DictReader(file):
 
                 print(row)
                 c = MVImage()
 
-                c.image_name = row['image_name'] 
+                c.image_name = row['image_name']
                 c.image = row['image']
                 try:
-                    mvclass = MilitaryVehicleClass.objects.get(mvclass=row['image_name'] )
+                    mvclass = MilitaryVehicleClass.objects.get(
+                        mvclass=row['image_name'])
                 except ObjectDoesNotExist:
-                    print(row['image_name'], ' is not in the Military Vehicle Class table')
+                    print(row['image_name'],
+                          ' is not in the Military Vehicle Class table')
                 except Exception as e:
                     print(row['image_name'], e)
-                else:            
+                else:
                     c.mvclass = mvclass
                 c.location_id = int(row['location_id'])
                 c.visit_id = int(row['visit_id'])
