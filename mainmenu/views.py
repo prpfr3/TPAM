@@ -2,13 +2,15 @@ from django.shortcuts import render
 from .models import MyDjangoApp
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 
+
 def index(request):
-  mydjangoapps = MyDjangoApp.objects.all().order_by('order')
-  return render(request, 'mainmenu/index.html',{'mydjangoapps':mydjangoapps})
+    mydjangoapps = MyDjangoApp.objects.all().order_by("order")
+    return render(request, "mainmenu/index.html", {"mydjangoapps": mydjangoapps})
+
 
 def pagination(request, queryset):
-    paginator = Paginator(queryset, 20)
-    page = request.GET.get('page')
+    paginator = Paginator(queryset, 15)
+    page = request.GET.get("page")
     try:
         queryset = paginator.page(page)
     except PageNotAnInteger:
@@ -18,4 +20,4 @@ def pagination(request, queryset):
         # If page is out of range deliver last page of results
         queryset = paginator.page(paginator.num_pages)
 
-    return(queryset, page)
+    return (queryset, page)

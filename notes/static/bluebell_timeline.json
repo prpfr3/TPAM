@@ -1,0 +1,142 @@
+{
+    "title": {
+        "media": {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/British_Railways_Class_Standard_Four_No_80151_Horsted_Keynes_1.jpg/398px-British_Railways_Class_Standard_Four_No_80151_Horsted_Keynes_1.jpg",
+          "caption": "British Railways Class Standard Four No. 80151 and its train are seen at Horsted Keynes",
+          "credit": "Wikipedia"
+        },
+        "text": {
+          "headline": "Bluebell Railway Timeline",
+          "text": "Celebrating 60 Years of Britain's Favourite Heritage Railway"
+        }
+    },
+    "events": [
+      {
+        "media": {
+          "url": "https://www.bluebell-railway-museum.co.uk/archive/photos2/045/738.jpg",
+          "caption": "Horsted Keynes looking North in 1959",
+          "credit": "Bluebell Archive 045738; John J Smith"
+        },
+        "start_date": {
+          "year": "1960",
+          "month": "1"
+        },
+        "text": {
+          "headline": "Four Students decide to save a Sussex branchine and the Bluebell Railway is born",
+          "text": "<p>On 15 March 1959 a group that included the future president of the society, Bernard Holden, met in Ardingly and formed the Lewes and East Grinstead Railway Preservation Society. The society elected John Leroy as the first chairman, and £940 was raised in donations to start the society. On a vote at the meeting, the society changed its name to the Bluebell Railway Preservation Society.</p><p>The society's initial aim was to reopen the whole line from East Grinstead to Culver Junction as a commercial service, using a two-car DMU. The plans came to nothing: the society failed to buy the whole line, and most local residents were not interested. The committee then recommended that the stretch of track between Sheffield Park and Horsted Keynes could be run as a tourist attraction, with vintage locomotives and stock operated by unpaid volunteer staff.</p>"
+        }
+      },
+      {
+        "media": {
+          "url": "https://www.bluebell-railway.co.uk/bluebell/pic2/wn/2015b/stepney3_martinl_7jun15m.jpg",
+          "caption": "'Stepney' repainted back to LBSCR colours",
+          "credit": "Martin Lawrence - 7 June 2015"
+        },
+        "start_date": {
+          "month": "05",
+          "year": "1960"
+        },
+        "text": {
+          "headline": "Stepney arrives",
+          "text": "<p>'Stepney' arrives with our first coaches coming from the Brighton mainline to the Bluebell</p>"
+        }
+      },
+      {
+        "media": {
+          "url": "https://heritagemachines.com/wp-content/uploads/Pic-10-6.jpg",
+          "caption": "Bluebell Halt",
+          "credit": "Bluebell Archive https://heritagemachines.com/nostalgia/the-bluebell-railway/"
+        },
+        "start_date": {
+          "month": "05",
+          "year": "1960"
+        },
+        "text": {
+          "headline": "The Interim Line Opens from Sheffield Park to Bluebell Halt",
+          "text": "As BR still ran an electrified line from Horsted Keynes to Ardingly, the society leased a stretch of track from BR just south of this. In 1960 the interim line was opened, running from Sheffield Park to Bluebell Halt, 100 yards (91 m) south of Horsted Keynes."
+        }
+      },
+
+      {
+        "media": {
+          "url": "",
+          "caption": "",
+          "credit": ""
+        },
+        "start_date": {
+          "month": "",
+          "year": "1962"
+        },
+        "text": {
+          "headline": "The Bluebell arrives at Horsted Keynes",
+          "text": "In 1962 the society extended services to Horsted Keynes. Also in 1962 a halt was opened at Holywell (Waterworks). However, this was closed the following year. BR withdrew passenger services from Horsted Keynes to Haywards Heath in 1963; and with complete closure of the line north of Horsted Keynes, the Bluebell Line was severed from the BR system."
+        }
+      },
+
+      {
+        "media": {
+          "url": "",
+          "caption": "",
+          "credit": ""
+        },
+        "start_date": {
+          "month": "01",
+          "year": "1985"
+        },
+        "text": {
+          "headline": "Kingscote Station Purchased and the East Grinstead extension is approved",
+          "text": "In 1974 the society purchased the freehold of the demolished West Hoathly station, allowing the first steps to be taken towards an extension northwards towards East Grinstead station. It then purchased the freehold of the site of Kingscote station in January 1985. These efforts culminated in a public inquiry, with the Secretaries of State for the Environment and Transport giving planning permission and a Light Railway Order for an extension to East Grinstead in 1985."
+        }
+      },
+
+      {
+        "media": {
+          "url": "https://www.bluebell-railway.co.uk/bluebell/pics/viaduct_mike_esaue.jpg",
+          "caption": "The Imberhorne Viaduct",
+          "credit": "https://www.bluebell-railway.co.uk/bluebell/extend.html"
+        },
+        "start_date": {
+          "day": "08",
+          "month": "09",
+          "year": "1992"
+        },
+        "text": {
+          "headline": "Hill Place Viaduct Purchased",
+          "text": "The Imberhorne (or Hill Place) Viaduct, just south of East Grinstead, was purchased by the Bluebell for a nominal sum from British Rail just at the time of de-nationalisation. As a maintenance liability, the quid-pro-quo was an agreement to sell us the required station site for a nominal sum at a later date"
+        }
+      },
+
+      {
+        "media": {
+          "url": "",
+          "caption": "",
+          "credit": ""
+        },
+        "start_date": {
+          "month": "04",
+          "year": "1994"
+        },
+        "text": {
+          "headline": "Extension to Kingscote Completed",
+          "text": "The extension was completed in April 1994 re-laying track through Sharpthorne Tunnel, which at 731 yards or 668 metres is the longest on a UK heritage railway. At the north end of Sharpthorne Tunnel, the line passes through the site of the former West Hoathly railway station. It was demolished in 1967, but remains of the platforms and goods dock are still visible."
+        }
+      },
+
+      {
+        "media": {
+          "url": "",
+          "caption": "",
+          "credit": ""
+        },
+        "start_date": {
+          "month": "03",
+          "year": "2013",
+          "day": "23"
+        },
+        "text": {
+          "headline": "The Extension to East Grinstead Opens",
+          "text": "The last section of track to East Grinstead was formally joined using a white fishplate, with the honour of tightening the four bolts being given to Barbara Watkins, a long-standing Bluebell Railway volunteer. The extension to East Grinstead was officially opened on Saturday 23 March, with a two-week opening festival starting that day."
+        }
+      }
+    ]
+}

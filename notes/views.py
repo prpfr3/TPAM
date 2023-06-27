@@ -1,22 +1,29 @@
+import configparser
+import os
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core import serializers
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  UpdateView)
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
 
 from mainmenu.models import Profile
+from mainmenu.views import pagination
 
-from .forms import EmailPostForm, PostForm
-from .models import Post, Topic
-
-import os
-import configparser
+from .forms import EmailPostForm, PostForm, ReferenceSelectionForm
+from .models import Post, Reference, Topic
 
 """
 # Explanatory notes for the Owner views
@@ -64,7 +71,7 @@ class OwnerUpdateView(LoginRequiredMixin, UpdateView):
     """
 
     def get_queryset(self):
-        """ Limit a User to only modifying their own data. """
+        """Limit a User to only modifying their own data."""
         qs = super(OwnerUpdateView, self).get_queryset()
 
         return qs.filter(owner=get_object_or_404(Profile, user=self.request.user))
@@ -82,7 +89,7 @@ class OwnerDeleteView(LoginRequiredMixin, DeleteView):
 
 
 def index(request):
-    return render(request, 'notes/index.html')
+    return render(request, "notes/index.html")
 
 
 class TopicListView(OwnerListView):
@@ -95,33 +102,38 @@ class TopicDetailView(OwnerDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['posts'] = context['topic'].post_set.all()
+        context["posts"] = context["topic"].post_set.all()
 
         if strval := self.request.GET.get("search", False):
             query = Q(title__icontains=strval)
             query.add(Q(body__icontains=strval), Q.OR)
-            post_list = Post.objects.filter(
-                query).select_related().order_by('-updated')[:10]
-            context['posts'] = context['topic'].post_set.filter(
-                query).select_related().order_by('-updated')[:10]
+            post_list = (
+                Post.objects.filter(query).select_related().order_by("-updated")[:10]
+            )
+            context["posts"] = (
+                context["topic"]
+                .post_set.filter(query)
+                .select_related()
+                .order_by("-updated")[:10]
+            )
         else:
-            context['posts'] = context['topic'].post_set.all()
+            context["posts"] = context["topic"].post_set.all()
         return context
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class TopicCreateView(OwnerCreateView):  # Convention: topic_form.html
     model = Topic
-    fields = ['type', 'text']
+    fields = ["type", "text"]
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class TopicUpdateView(OwnerUpdateView):  # Convention: topic_form.html
     model = Topic
-    fields = ['type', 'text']
+    fields = ["type", "text"]
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class TopicDeleteView(OwnerDeleteView):  # Convention: topic_confirm_delete.html
     model = Topic
 
@@ -129,17 +141,16 @@ class TopicDeleteView(OwnerDeleteView):  # Convention: topic_confirm_delete.html
 class PostDetailView(OwnerDetailView):
     model = Post
 
-    # NEW
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['references'] = context['post'].references.all()
+        context["references"] = context["post"].references.all()
         return context
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class PostCreateView(OwnerCreateView):  # Convention: post_form.html
     model = Post
-    fields = ['title', 'body', 'status', 'url']
+    fields = ["title", "body", "status", "url"]
 
     def post(self, request, pk):
         form = PostForm(data=request.POST)
@@ -149,13 +160,13 @@ class PostCreateView(OwnerCreateView):  # Convention: post_form.html
             new_post.topic = get_object_or_404(Topic, id=pk)
             new_post.save()
             messages.success(request, ("Post Has Been Added"))
-            return redirect(reverse('notes:topic_detail', args=[pk]))
+            return redirect(reverse("notes:topic_detail", args=[pk]))
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class PostUpdateView(OwnerUpdateView):  # Convention: post_form.html
     model = Post
-    fields = ['title', 'body', 'status', 'url']
+    fields = ["title", "body", "status", "url"]
 
     def post(self, request, pk):
         post = Post.objects.get(id=pk)
@@ -164,15 +175,15 @@ class PostUpdateView(OwnerUpdateView):  # Convention: post_form.html
         if form.is_valid():
             form.save()
             messages.success(request, ("Post Has Been Updated"))
-            return redirect(reverse('notes:topic_detail', args=[topic.id]))
+            return redirect(reverse("notes:topic_detail", args=[topic.id]))
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 # Convention: post_confirm_delete.html
 class PostDeleteView(SuccessMessageMixin, OwnerDeleteView):
     model = Post
     # But returnes to topic list. How can we add the topic id to this.
-    success_url = reverse_lazy('notes:topic_detail')
+    success_url = reverse_lazy("notes:topic_detail")
     success_message = "Post Has Been Deleted"
 
     def delete(self, request, *args, **kwargs):
@@ -183,10 +194,10 @@ class PostDeleteView(SuccessMessageMixin, OwnerDeleteView):
 @login_required
 def post_share(request, post_id):
     # Retrieve post by id
-    post = get_object_or_404(Post, id=post_id, status='published')
+    post = get_object_or_404(Post, id=post_id, status="published")
     sent = False
 
-    if request.method == 'POST':
+    if request.method == "POST":
         # Form was submitted
         form = EmailPostForm(request.POST)
         if form.is_valid():
@@ -194,22 +205,119 @@ def post_share(request, post_id):
             cd = form.cleaned_data
             post_url = request.build_absolute_uri(post.get_absolute_url())
             subject = f"{cd['name']} recommends you read {post.title}"
-            message = f"Read {post.title} at {post_url}\n\n" \
-                      f"{cd['name']}\'s comments: {cd['comments']}"
+            message = (
+                f"Read {post.title} at {post_url}\n\n"
+                f"{cd['name']}'s comments: {cd['comments']}"
+            )
             cwd = os.getcwd()
-            if cwd == '/app' or cwd[:4] == '/tmp':
-                app_id = os.environ['EMAIL_ADDRESS']
+            if cwd == "/app" or cwd.startswith("/tmp"):
+                app_id = os.environ["EMAIL_ADDRESS"]
             else:
                 config = configparser.ConfigParser()
                 config.read(os.path.join("D:\\Data", "API_Keys", "TPAMWeb.ini"))
-                address = config['Email']['address']
-            send_mail(subject, message, address, [cd['to']])
+                address = config["Email"]["address"]
+            send_mail(subject, message, address, [cd["to"]])
             sent = True
 
     else:
         form = EmailPostForm()
-    return render(request, 'notes/share.html', {'post': post, 'form': form, 'sent': sent})
+    return render(
+        request, "notes/share.html", {"post": post, "form": form, "sent": sent}
+    )
 
 
-def enamel_signs(request):
-    return render(request, 'notes/enamel_signs.html')
+def references(request):
+    errors = None
+    page = None
+
+    if request.method == "POST":
+        selection_criteria = ReferenceSelectionForm(request.POST)
+
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data != None:
+            conditions = Q()
+            cleandata = selection_criteria.cleaned_data
+
+            if "title" in cleandata and cleandata["title"]:
+                conditions &= Q(title__icontains=cleandata["title"])
+
+            if "year" in cleandata and cleandata["year"]:
+                conditions &= Q(year__icontains=str(cleandata["year"]))
+
+            if "month" in cleandata and cleandata["month"]:
+                conditions &= Q(month__icontains=str(cleandata["month"]))
+
+            if "authors" in cleandata and cleandata["authors"]:
+                conditions &= Q(authors__icontains=cleandata["authors"])
+
+            if "editors" in cleandata and cleandata["editors"]:
+                conditions &= Q(editors__icontains=cleandata["editors"])
+
+            if "journal" in cleandata and cleandata["journal"]:
+                conditions &= Q(journal__icontains=cleandata["journal"])
+
+            if "volume" in cleandata and cleandata["volume"]:
+                conditions &= Q(volume__icontains=cleandata["volume"])
+
+            if "issue" in cleandata and cleandata["issue"]:
+                conditions &= Q(issue__icontains=cleandata["issue"])
+
+            conditions &= ~Q(type=6)
+
+            queryset = Reference.objects.filter(conditions)
+
+            # Convert the QuerySet to a list before storing in session
+            queryset_data = serializers.serialize("json", queryset)
+            request.session["ref_criteria"] = queryset_data
+        else:
+            errors = selection_criteria.errors or None
+            queryset = (
+                Reference.objects.exclude(type=6)
+                .prefetch_related("person_set")
+                .order_by("name")
+            )
+
+    else:
+        previous_criteria_data = request.session.pop("ref_criteria", None)
+        if previous_criteria_data:
+            # Load the previous criteria from session and convert back to a QuerySet
+            previous_criteria = list(
+                serializers.deserialize("json", previous_criteria_data)
+            )
+        else:
+            previous_criteria = None
+
+        selection_criteria = ReferenceSelectionForm(
+            initial=previous_criteria, clear_previous_criteria=True
+        )
+        errors = selection_criteria.errors
+        queryset = Reference.objects.exclude(type=6).order_by("title")
+
+    queryset, page = pagination(request, queryset)
+
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "references": queryset,
+        "page": page,
+    }
+
+    return render(request, "notes/references.html", context)
+
+
+def reference(request, reference_id):
+    reference = Reference.objects.get(id=reference_id)
+
+    context = {
+        "reference": reference,
+        "references": references,
+    }
+    return render(request, "notes/reference.html", context)
+
+
+def timeline(request):
+    # import json
+    # timeline_dict = {}
+    # timeline_json = json.dumps(timeline_dict)
+    # return render(request, 'notes/timeline.html', {timeline_json: timeline_json})
+
+    return render(request, "notes/timeline.html")

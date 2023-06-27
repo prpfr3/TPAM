@@ -38,7 +38,6 @@ class Command(BaseCommand):
                         print(
                             f"{row['elr']} has multiple entries in the ELR table")
 
-                    # Check if the route already has the elr mapped to it. If not add it.
+                    # Add the route to the ELR (This does not seem to add duplicates where the record already exists)
                     else:
-
                         route_fk.elrs.add(elr_fk)

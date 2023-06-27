@@ -4,27 +4,44 @@
 {% block content_desc %}{% endblock %}
 
 {% block content %}
-
     <form method='POST' action="" enctype="multipart/form-data">
       <p>
       {% csrf_token %}
-      {{ selection_criteria }}
+      <table>{{ selection_criteria }}</table>
       <input type="submit" name="submit_input" value="Submit">
       </p>
     </form>
-          
-    {% for row in loco_class_list %}
-      <h4>
-        <a href="{% url 'locos:loco_class' row.lococlass_fk.id %}">{{row.name}}</a>
-        <a href="https://en.wikipedia.org//wiki/{{row.wikislug}}" target="_blank" rel="noopener noreferrer" 
-          class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
-        {% if row.brdslug %}
-          <a href="https://www.brdatabase.info/locoqry.php?{{row.brdslug}}" target="_blank" class="btn btn-primary"><i class="fa">BRD</i></a>
-        {% endif %}
-      </h4>
-    {% empty %}
-      <h2>No classes have been loaded yet.</h2>
-    {% endfor %}
     
-    {% include "mainmenu/pagination.html" with page=loco_class_list %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Wikipedia<br>Link</th>
+          <th scope="col">Name</th>
+          <th scope="col">Designer</th>
+        </tr>
+      </thead>
+      <tbody>
+    {% for row in loco_class_list %}
+      {{ row.lococlass_fk_id }}
+      <tr>
+        <td>
+          <a href="https://en.wikipedia.org//wiki/{{row.wikislug}}" target="_blank" rel="noopener noreferrer" 
+          class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
+        </td>
+        <td>
+          <a href="{% url 'locos:loco_class' row.id %}">{{row.wikiname}}</a>
+        </td>
+        <td>
+          {% if row.designer_person %}
+            {{row.designer_person}}
+          {% endif %}
+        </td>
+    {% empty %}
+      <h2>No Records Found</h2>
+    {% endfor %}
+    </tr>
+  </tbody>
+</table>
+    
+{% include "mainmenu/pagination.html" with page=loco_class_list %}
 {% endblock content %}

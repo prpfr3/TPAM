@@ -4,16 +4,15 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0003_auto_20230325_1512'),
-        ('locations', '0003_location_references'),
+        ("companies", "0002_company_company_category_fk"),
+        ("locations", "0003_location_references"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='route',
-            name='route_owneroperator',
-            field=models.ManyToManyField(blank=True, to='companies.Company'),
+            model_name="route",
+            name="route_owneroperator",
+            field=models.ManyToManyField(blank=True, to="companies.Company"),
         ),
     ]

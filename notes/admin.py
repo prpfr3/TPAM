@@ -14,12 +14,13 @@ class PostAdmin(admin.ModelAdmin):
     raw_id_fields = ('owner',)
     date_hierarchy = 'publish'
     formfield_overrides = {models.TextField: {'widget': TinyMCE()}, }
+    # Add this line to enable a search box for the references field
+    filter_horizontal = ['references']
 
 
 @admin.register(Reference)
 class ReferenceAdmin(admin.ModelAdmin):
-    formfield_overrides = {models.TextField: {'widget': TinyMCE()}, }
-    search_fields = ['citation', 'image']
+    search_fields = ['full_reference', 'image']
     list_filter = ["type"]
 
 

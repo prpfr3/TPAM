@@ -21,42 +21,58 @@ from .utils import *
 
 def home(request):
     assert isinstance(request, HttpRequest)
-    return render(request, 'locations/index.html', {'title': 'Home Page', 'year': datetime.now().year, })
+    return render(
+        request,
+        "locations/index.html",
+        {
+            "title": "Home Page",
+            "year": datetime.now().year,
+        },
+    )
 
 
 def index(request):
-    return render(request, 'locations/index.html')
+    return render(request, "locations/index.html")
 
 
 def locations(request):
-
-    if request.method == 'POST':
+    if request.method == "POST":
         selection_criteria = LocationSelectionForm(request.POST)
-        if selection_criteria.is_valid() and selection_criteria.cleaned_data['wikiname'] != None:
+        if (
+            selection_criteria.is_valid()
+            and selection_criteria.cleaned_data["wikiname"] != None
+        ):
             queryset = Location.objects.filter(
-                wikiname__icontains=selection_criteria.cleaned_data['wikiname']).order_by('wikiname', 'name')
+                wikiname__icontains=selection_criteria.cleaned_data["wikiname"]
+            ).order_by("wikiname", "name")
             errors = None
-        elif selection_criteria.is_valid() and str(selection_criteria.cleaned_data['type']) != None:
+        elif (
+            selection_criteria.is_valid()
+            and str(selection_criteria.cleaned_data["type"]) != None
+        ):
             queryset = Location.objects.filter(
-                type__icontains=selection_criteria.cleaned_data['type']).order_by('wikiname', 'name')
+                type__icontains=selection_criteria.cleaned_data["type"]
+            ).order_by("wikiname", "name")
             errors = None
         else:
             errors = selection_criteria.errors or None
-            queryset = Location.objects.order_by('wikiname', 'name')
+            queryset = Location.objects.order_by("wikiname", "name")
     else:
         selection_criteria = LocationSelectionForm()
         errors = selection_criteria.errors or None
-        queryset = Location.objects.order_by('wikiname', 'name')
+        queryset = Location.objects.order_by("wikiname", "name")
 
     queryset, page = pagination(request, queryset)
 
-    context = {'selection_criteria': selection_criteria,
-               'errors': errors, 'locations': queryset}
-    return render(request, 'locations/locations.html', context)
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "locations": queryset,
+    }
+    return render(request, "locations/locations.html", context)
 
 
 def location(request, location_id):
-
     location = Location.objects.get(id=location_id)
 
     sql = """ 
@@ -69,7 +85,7 @@ def location(request, location_id):
     y_coord = coords[0][0]
     x_coord = coords[0][1]
     #  = f'https://maps.nls.uk/geo/explore/print/#zoom=15&lat={location.geometry.y}&lon={location.geometry.x}&layers=168&b=5'
-    nls_url = f'https://maps.nls.uk/geo/explore/print/#zoom=15&lat={y_coord}&lon={x_coord}&layers=168&b=5'
+    nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=15&lat={y_coord}&lon={x_coord}&layers=168&b=5"
 
     # Get text describing the location either from a custom post, else Wikipedia, else none
     if location.post_fk:
@@ -77,48 +93,63 @@ def location(request, location_id):
         description_type = "Notes"
     elif location.wikislug:
         wiki_wiki = wikipediaapi.Wikipedia(
-            language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
-        slug = location.wikislug.replace('/wiki/', '')
-        slug = urllib.parse.unquote(slug, encoding='utf-8', errors='replace')
+            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+        )
+        slug = location.wikislug.replace("/wiki/", "")
+        slug = urllib.parse.unquote(slug, encoding="utf-8", errors="replace")
         description = wiki_wiki.page(slug).text
         description_type = "From Wikipedia:-"
     else:
         description = None
         description_type = None
 
-    context = {'location': location, 'description_type': description_type,
-               'description': description, 'nls_url': nls_url}
-    return render(request, 'locations/location.html', context)
+    context = {
+        "location": location,
+        "description_type": description_type,
+        "description": description,
+        "nls_url": nls_url,
+    }
+    return render(request, "locations/location.html", context)
 
 
 def routes(request):
-
     errors = None
 
-    if request.method == 'POST':
+    if request.method == "POST":
         selection_criteria = RouteSelectionForm(request.POST)
 
-        if selection_criteria.is_valid() and str(selection_criteria.cleaned_data['name']):
+        if selection_criteria.is_valid() and str(
+            selection_criteria.cleaned_data["name"]
+        ):
             queryset = Route.objects.filter(
-                name__icontains=selection_criteria.cleaned_data['name']).order_by('name')
-        elif selection_criteria.is_valid() and str(selection_criteria.cleaned_data['wikipedia_categories']) != 'None':
+                name__icontains=selection_criteria.cleaned_data["name"]
+            ).order_by("name")
+        elif (
+            selection_criteria.is_valid()
+            and str(selection_criteria.cleaned_data["wikipedia_categories"]) != "None"
+        ):
             queryset = Route.objects.filter(
-                wikipedia_categories__in=selection_criteria.cleaned_data['wikipedia_categories']).order_by('name')
+                wikipedia_categories__in=selection_criteria.cleaned_data[
+                    "wikipedia_categories"
+                ]
+            ).order_by("name")
         else:
             errors = selection_criteria.errors or None
-            queryset = Route.objects.order_by('name')
+            queryset = Route.objects.order_by("name")
     else:
         selection_criteria = RouteSelectionForm()
         errors = selection_criteria.errors
-        queryset = Route.objects.order_by('name')
+        queryset = Route.objects.order_by("name")
 
-    context = {'selection_criteria': selection_criteria,
-               'errors': errors, 'routes': queryset}
-    return render(request, 'locations/routes.html', context)
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "routes": queryset,
+    }
+    return render(request, "locations/routes.html", context)
 
 
 def route(request, route_id):
-
     import urllib
     import wikipediaapi
 
@@ -130,21 +161,21 @@ def route(request, route_id):
         description = route.post_fk.body
         description_type = "Notes"
     elif route.wikipedia_slug:
-
         import sys
+
         wikipediaapi.log.setLevel(level=wikipediaapi.logging.DEBUG)
 
         # Set handler if you use Python in interactive mode
         out_hdlr = wikipediaapi.logging.StreamHandler(sys.stderr)
-        out_hdlr.setFormatter(
-            wikipediaapi.logging.Formatter('%(asctime)s %(message)s'))
+        out_hdlr.setFormatter(wikipediaapi.logging.Formatter("%(asctime)s %(message)s"))
         out_hdlr.setLevel(wikipediaapi.logging.DEBUG)
         wikipediaapi.log.addHandler(out_hdlr)
 
         wiki_wiki = wikipediaapi.Wikipedia(
-            language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
-        slug = route.wikipedia_slug.replace('/wiki/', '')
-        slug = urllib.parse.unquote(slug, encoding='utf-8', errors='replace')
+            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+        )
+        slug = route.wikipedia_slug.replace("/wiki/", "")
+        slug = urllib.parse.unquote(slug, encoding="utf-8", errors="replace")
         page_html = wiki_wiki.page(slug)
         description = page_html.text
         description_type = "From Wikipedia:-"
@@ -156,9 +187,10 @@ def route(request, route_id):
     events_json = None
     locations = None
 
-    if routemaps := route.wikipedia_routemaps.all():  # i.e. If the route has any wikipedia routemaps
-
-        """ THIS DJANGO ORM CODE SUPERSEDED BY SUBSEQUENT SQL TO REMOVE GDAL DEPENDENCIES WHICH COMPLICATE PRODUCTION DEPLOY
+    if (
+        routemaps := route.wikipedia_routemaps.all()
+    ):  # i.e. If the route has any wikipedia routemaps
+        """THIS DJANGO ORM CODE SUPERSEDED BY SUBSEQUENT SQL TO REMOVE GDAL DEPENDENCIES WHICH COMPLICATE PRODUCTION DEPLOY
         if locations := Location.objects.filter(
             routelocation__routemap=routemaps[0].id):
             figure = generate_folium_map(None, route.name, locations)
@@ -176,7 +208,6 @@ def route(request, route_id):
         """
 
         if locations := execute_sql(sql, [routemaps[0].id]):
-
             # Calculate the Boundary Box from the Locations
             sql = """ 
             SELECT max(ST_Ymax(geometry)), max(ST_Xmax(geometry)), min(ST_Ymin(geometry)), min(ST_Xmin(geometry))
@@ -190,37 +221,38 @@ def route(request, route_id):
             south = bounds[0][2]
             east = bounds[0][1]
             north = bounds[0][0]
-            bound_box = [[south, west], [north, west],
-                         [north, east], [south, east]]
+            bound_box = [[south, west], [north, west], [north, east], [south, east]]
 
     elr_geojsons = None
 
     if elrs := route.elrs.all():
-
         elr_geojsons = []
         for elr in elrs:
             elr = ELR.objects.get(id=elr.id)
             elr_geojson = osm_elr_fetch(elr.itemAltLabel)
             elr_geojsons.append(elr_geojson)
-            # Boundary box calculated from locations above for now
-            # Giving precedence to an ELR boundary box as per below could yield problems where there are multiple ELRs
-            # (Would need to calculate the aggregate boundary box from multiple ELR geojson boundary boxes)
+            # Boundary box is currently calculated above based on the locations in scope
+            # Alternative would be to calculate boudary box from the ELR but complicated if multiple ELRs
             # bound_box = geojson_boundbox(elr_geojson['features'])
 
     if locations or elr_geojsons:
-        figure = generate_folium_map_sql(
-            elr_geojsons, route.name, locations, bound_box)
+        figure = generate_folium_map_sql(elr_geojsons, route.name, locations, bound_box)
 
     if route_events := LocationEvent.objects.filter(route_fk_id=route_id):
         events_json = events_timeline(route_events)
 
-    context = {"map": figure, "route": route.name, "references": references,
-               "description_type": description_type, "description": description, 'timeline_json': events_json}
-    return render(request, 'locations/route.html', context)
+    context = {
+        "map": figure,
+        "route": route.name,
+        "references": references,
+        "description_type": description_type,
+        "description": description,
+        "timeline_json": events_json,
+    }
+    return render(request, "locations/route.html", context)
 
 
 def events_timeline(events_in):
-
     events_out = []
     count = 0
 
@@ -228,25 +260,27 @@ def events_timeline(events_in):
         if event.datefield:
             count += 1
             # https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format
-            event = {"id": count,
-                     "content": event.description,
-                     "start": event.datefield.strftime("%Y/%m/%d"),
-                     "event.type": 'point'}
+            event = {
+                "id": count,
+                "content": event.description,
+                "start": event.datefield.strftime("%Y/%m/%d"),
+                "event.type": "point",
+            }
             events_out.append(event)
 
     return json.dumps(events_out)
 
 
 def route_storymap(request, route_id):
-
     import urllib
     import wikipediaapi
 
     storymap_json = None
     route = Route.objects.get(id=route_id)
 
-    if routemaps := route.wikipedia_routemaps.all():  # i.e. If the route has any wikipedia routemaps
-
+    if (
+        routemaps := route.wikipedia_routemaps.all()
+    ):  # i.e. If the route has any wikipedia routemaps
         sql = """
             SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
                 ST_Y(ST_CENTROID(a.geometry)),
@@ -265,46 +299,53 @@ def route_storymap(request, route_id):
             header_title = route.name or None
             wikislug = route.wikipedia_slug or None
 
-            # If the route has some notes these should be used in preference to the wikipedia page for the route description
+            # If the route has a post recorded for it, it should be used in preference to the wikipedia page for the route description
             if route.post_fk:
                 header_text = route.post_fk.body
             else:
-                wikislug = wikislug.replace('/wiki/', '')
-                pagename = wikislug.replace('_', ' ')
+                wikislug = wikislug.replace("/wiki/", "")
+                pagename = wikislug.replace("_", " ")
                 pagename = urllib.parse.unquote(
-                    pagename, encoding='utf-8', errors='replace')
+                    pagename, encoding="utf-8", errors="replace"
+                )
                 wiki_wiki = wikipediaapi.Wikipedia(
-                    language='en', extract_format=wikipediaapi.ExtractFormat.HTML)
+                    language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+                )
 
                 if wikislug and wiki_wiki.page(wikislug).exists:
-                    text_array = wiki_wiki.page(
-                        wikislug).text.split('<h2>References</h2>')
+                    text_array = wiki_wiki.page(wikislug).text.split(
+                        "<h2>References</h2>"
+                    )
                     header_text = text_array[0]
 
             storymap_json = generate_storymap(
-                header_title, header_text, slide_locations)
+                header_title, header_text, slide_locations
+            )
 
-    return render(request, 'locations/storymap.html', {'storymap_json': storymap_json})
+    return render(request, "locations/storymap.html", {"storymap_json": storymap_json})
 
 
 def osm_railmap_county_select(request):
-
-    if request.method == 'POST':
+    if request.method == "POST":
         location_list = LocationChoiceField(request.POST)
 
         if location_list.is_valid():
-            selected_location = location_list.cleaned_data['locations']
+            selected_location = location_list.cleaned_data["locations"]
             county = str(selected_location)
-            return HttpResponseRedirect(reverse('locations:osm_railmap_county', args=[county]))
+            return HttpResponseRedirect(
+                reverse("locations:osm_railmap_county", args=[county])
+            )
     else:
         location_list = LocationChoiceField()
         errors = location_list.errors or None
-        context = {'location_list': location_list, 'errors': errors, }
-        return render(request, 'locations/county_select.html', context)
+        context = {
+            "location_list": location_list,
+            "errors": errors,
+        }
+        return render(request, "locations/county_select.html", context)
 
 
 def osm_railmap_county(request, county):
-
     import osm2geojson
     import requests
 
@@ -361,7 +402,7 @@ def osm_railmap_county(request, county):
         way({south}, {west}, {north}, {east})["railway"];
         out geom;
         """
-    response = requests.get(overpass_url, params={'data': overpass_query})
+    response = requests.get(overpass_url, params={"data": overpass_query})
     data = response.json()
     # Convert OSM json to Geojson. Warning ! The osm2geojson utility is still under development
     geojsons = [osm2geojson.json2geojson(data)]
@@ -383,45 +424,45 @@ def osm_railmap_county(request, county):
     locations = execute_sql(sql, [county])
 
     if geojsons:
-        figure = generate_folium_map_sql(
-            geojsons, county, locations, bound_box_sql)
+        figure = generate_folium_map_sql(geojsons, county, locations, bound_box_sql)
     else:
         figure = None
     context = {"map": figure, "title": county}
-    return render(request, 'locations/folium_map.html', context)
+    return render(request, "locations/folium_map.html", context)
 
 
 def elrs(request):
-
-    if request.method == 'POST':
+    if request.method == "POST":
         selection_criteria = OSMRailMapSelectForm(request.POST)
 
         if selection_criteria.is_valid():
-            if str(selection_criteria.cleaned_data['itemAltLabel']):
-                elrs = ELR.objects.filter(itemAltLabel__icontains=selection_criteria.cleaned_data['itemAltLabel']) \
-                    .order_by('itemAltLabel')
+            if str(selection_criteria.cleaned_data["itemAltLabel"]):
+                elrs = ELR.objects.filter(
+                    itemAltLabel__icontains=selection_criteria.cleaned_data[
+                        "itemAltLabel"
+                    ]
+                ).order_by("itemAltLabel")
                 errors = None
-            elif str(selection_criteria.cleaned_data['itemLabel']) != 'None':
-                elrs = ELR.objects.filter(itemLabel__icontains=selection_criteria.cleaned_data['itemLabel']) \
-                    .order_by('itemAltLabel')
+            elif str(selection_criteria.cleaned_data["itemLabel"]) != "None":
+                elrs = ELR.objects.filter(
+                    itemLabel__icontains=selection_criteria.cleaned_data["itemLabel"]
+                ).order_by("itemAltLabel")
                 errors = None
         else:
             errors = selection_criteria.errors or None
-            elrs = ELR.objects.order_by('itemAltLabel')
+            elrs = ELR.objects.order_by("itemAltLabel")
 
     else:
         selection_criteria = OSMRailMapSelectForm()
         errors = selection_criteria.errors or None
-        elrs = ELR.objects.order_by('itemAltLabel')
+        elrs = ELR.objects.order_by("itemAltLabel")
 
-    context = {'selection_criteria': selection_criteria,
-               'errors': errors, 'elrs': elrs}
+    context = {"selection_criteria": selection_criteria, "errors": errors, "elrs": elrs}
 
-    return render(request, 'locations/elrs.html', context)
+    return render(request, "locations/elrs.html", context)
 
 
 def elr_map(request, elr_id):
-
     elr = ELR.objects.get(id=elr_id)
 
     elr_geojsons = [osm_elr_fetch(elr.itemAltLabel)]
@@ -444,16 +485,17 @@ def elr_map(request, elr_id):
 
     locations_sql = execute_sql(sql, [elr_id])
 
-    if elr_geojsons:  # i.e. If OSM has some geodata relating to the ELR then generate the map
-        title = f'{elr.itemAltLabel}: {elr.itemLabel}'
-        bound_box = geojson_boundbox(elr_geojsons[0]['features'])
-        figure = generate_folium_map_sql(
-            elr_geojsons, title, locations_sql, bound_box)
+    if (
+        elr_geojsons
+    ):  # i.e. If OSM has some geodata relating to the ELR then generate the map
+        title = f"{elr.itemAltLabel}: {elr.itemLabel}"
+        bound_box = geojson_boundbox(elr_geojsons[0]["features"])
+        figure = generate_folium_map_sql(elr_geojsons, title, locations_sql, bound_box)
     else:
         figure = None
 
     context = {"map": figure, "title": title}
-    return render(request, 'locations/folium_map.html', context)
+    return render(request, "locations/folium_map.html", context)
 
 
 def elr_storymap(request, elr_id):
@@ -477,26 +519,25 @@ def elr_storymap(request, elr_id):
     """
 
     if slide_locations := execute_sql(sql, [elr_id]):
-
-        header_title = f'{route.itemAltLabel}: {route.itemLabel}'
+        header_title = f"{route.itemAltLabel}: {route.itemLabel}"
 
         # If the elr has some notes
-        header_text = route.post_fk.body if route.post_fk else ''
-        storymap_json = generate_storymap(
-            header_title, header_text, slide_locations)
-    return render(request, 'locations/storymap.html', {'storymap_json': storymap_json})
+        header_text = route.post_fk.body if route.post_fk else ""
+        storymap_json = generate_storymap(header_title, header_text, slide_locations)
+    return render(request, "locations/storymap.html", {"storymap_json": storymap_json})
 
 
 class HeritageSiteListView(ListView):
     model = HeritageSite
-    queryset = HeritageSite.objects.order_by(
-        'country', 'type', 'name').exclude(name='N/A')
+    queryset = HeritageSite.objects.order_by("country", "type", "name").exclude(
+        name="N/A"
+    )
 
 
 def heritage_site(request, heritage_site_id):
     heritage_site = HeritageSite.objects.get(id=heritage_site_id)
-    context = {'heritage_site': heritage_site}
-    return render(request, 'locations/heritage_site.html', context)
+    context = {"heritage_site": heritage_site}
+    return render(request, "locations/heritage_site.html", context)
 
 
 class VisitListView(ListView):
@@ -506,9 +547,9 @@ class VisitListView(ListView):
 @login_required
 def visit(request, visit_id):
     visit = Visit.objects.get(id=visit_id)
-    images = Reference.objects.filter(visit=visit_id).order_by('id')
+    images = Reference.objects.filter(visit=visit_id).order_by("id")
     paginator = Paginator(images, 20)
-    page = request.GET.get('page')
+    page = request.GET.get("page")
     try:
         images = paginator.page(page)
     except PageNotAnInteger:
@@ -518,5 +559,5 @@ def visit(request, visit_id):
         # If page is out of range deliver last page of results
         images = paginator.page(paginator.num_pages)
 
-    context = {'visit': visit, 'page': page, 'images': images}
-    return render(request, 'maps/visit.html', context)
+    context = {"visit": visit, "page": page, "images": images}
+    return render(request, "maps/visit.html", context)

@@ -1,22 +1,79 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
-{% block content_title %}{{ person }}{% endblock %}
-{% block content_desc %}{% endblock %}
+{% block content_title %}{{ person }}
+  {% if person.wikitextslug %}
+    <a href="https://en.wikipedia.org//wiki/{{person.wikitextslug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i
+    ></a>
+  {% endif %}
+  {% if person.gracetextslug %}
+    <a href="https://gracesguide.co.uk/{{person.gracetextslug}}" class="btn btn-primary">G</i
+    ></a>
+  {% endif %}   
+{% endblock %}
+
+{% block content_desc %}
+{% endblock %}
 
 {% block content %}
   <div class="panel panel-default">
-    <div class="panel-heading">
-      <small>
-        <a href="{% url 'people:edit_person' person.id %}">
-          Edit</a>
-      </small>
-    </div>
     <div class="panel-body">
-      <ul>
-      <li>{{ person.wikislug }}</li>
-      <li>{{ person.url }}</li>
-      <li>{{ person.notes|linebreaks }}<li/>
-      </ul>
-    </div>
+
+      <h4>
+      {% if person.birthdate %}
+        Born:- {{person.birthdate}}
+      {% endif %}
+      {% if person.birthplace %}
+        at {{person.birthplace}}
+      {% endif %}
+      </h4>
+
+      <h4>
+      {% if person.dieddate %}
+        Died:- {{person.dieddate}}
+      {% endif %}
+      {% if person.diedplace %}
+        at {{person.diedplace}}
+      {% endif %}
+      </h4>
+
+      <h3 class="text-primary">References</h3>
+      {% for reference in references %}
+
+      <h4>{{reference.full_reference}}</h4>
+
+      {% empty %}
+        <p>None recorded</p>
+      {% endfor %}
+    
+      {% if designed_loco_classes %}
+        <h3 class="text-primary">Designed Loco Classes</h3>
+        {% for designed_loco_class in designed_loco_classes %}
+          <h4>{{ designed_loco_class }}</h4>
+        {% empty %}
+          <p>None recorded</p>
+        {% endfor %}
+      {% endif %}
+
+      <h3 class="text-primary">Roles</h3>
+      {% for person_role in person.personrole_set.all %}
+        <h4>{{ person_role.role }} 
+          {% if person_role.date_from %}
+            from {{ person_role.date_from }}
+          {% endif %}
+          {% if person_role.date_to %}
+            to {{ person_role.date_to }}
+          {% endif %}
+        </h4>
+      {% empty %}
+        <p>None recorded</p>
+      {% endfor %}
+
+      {% if description_type %}
+        <h3 class="text-primary">{{description_type}}</h3>
+        {% autoescape off %}
+        <div>{{ description }}</div>
+        {% endautoescape %}
+      {% endif %}
+    </div> <!-- panel body -->
   </div> <!-- panel -->
 {% endblock content %}

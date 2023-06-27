@@ -1,6 +1,9 @@
-﻿{% extends "../mainmenu/base.html" %} {% block content_title %}Railway
-Locations{% endblock %} {% block content_desc %}{% endblock %} {% block content
-%}
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}Railway Locations{% endblock %}
+{% block content_desc %}{% endblock %}
+
+{% block content %}
 
 <form method="POST" action="" enctype="multipart/form-data">
   <p>
@@ -13,34 +16,40 @@ Locations{% endblock %} {% block content_desc %}{% endblock %} {% block content
 <h4>
   {% if location.type == 'Closed Station' %}
   <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a
-  >(Closed Station) {% endif %} {% if location.type == 'Current Station' %}
+  >(Closed Station) {% endif %} 
+  
+  {% if location.type == 'Current Station' %}
   <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
-  {% endif %} {% if location.type == 'Junction' and location. %}
+  {% endif %} 
+  
+  {% if location.type == 'Junction' and location. %}
   <a href="{% url 'locations:location' location.id %}">{{location.}}</a>
-  {% endif %} {% if location.type == 'Junction' and not location. %}
-  <a href="{% url 'locations:location' location.id %}"
-    >OpenStreetMaps node {{location.osm_node}}</a
-  >
-  {% endif %} {% if location.wikislug %}
-  <a
-    href="https://en.wikipedia.org//wiki/{{location.wikislug}}"
-    class="btn btn-primary"
-    ><i class="fa fa-wikipedia-w"></i
+  {% endif %} 
+  
+  {% if location.type == 'Junction' and not location. %}
+  <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
+  {% endif %} 
+  
+  {% if location.wikislug %}
+  <a href="https://en.wikipedia.org//wiki/{{location.wikislug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i
   ></a>
-  {% endif %} {% if location.disused_stations_slug %}
-  <a
-    href="http://disused-stations.org.uk/{{location.disused_stations_slug}}"
-    class="btn btn-primary"
-    >DS</a
-  >
-  {% endif %} {% comment %} {% if location.atcocode %}
-  <a href="{% url 'rtt:getlocation' location.crscode %}" class="btn btn-primary"
-    >RTT</a
-  >
-  {% endif %} {% endcomment %}
+  {% endif %} 
+  
+  {% if location.disused_stations_slug %}
+  <a href="http://disused-stations.org.uk/{{location.disused_stations_slug}}" class="btn btn-primary">DS</a>
+  {% endif %} 
+  
+  {% comment %} 
+  {% if location.atcocode %}
+  <a href="{% url 'rtt:getlocation' location.crscode %}" class="btn btn-primary">RTT</a>
+  {% endif %} 
+  {% endcomment %}
 </h4>
 
 {% empty %}
 <h2>No locations found.</h2>
-{% endfor %} {% include "mainmenu/pagination.html" with page=locations %} {%
-endblock content %}
+{% endfor %} 
+
+{% include "mainmenu/pagination.html" with page=locations %} 
+
+{%endblock content %}

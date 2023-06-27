@@ -8,6 +8,7 @@ class CompanyAdmin(admin.ModelAdmin):
     list_display = ["name", "wikislug", "code", ]
     search_fields = ["name"]
     ordering = ('name',)
+    raw_id_fields = ['post_fk',]
 
 
 class ManufacturerAdmin(admin.ModelAdmin):
@@ -15,6 +16,7 @@ class ManufacturerAdmin(admin.ModelAdmin):
                     "date_opened", "date_closed", "railuk_manufacturer_code", "railuk_manufacturer_code", ]
     search_fields = ["name"]
     ordering = ["name"]
+    raw_id_fields = ['post_fk',]
 
 
 class ClassManufacturerAdmin(admin.ModelAdmin):

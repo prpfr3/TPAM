@@ -5,16 +5,14 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('companies', '0001_initial'),
+        ("companies", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='company',
-            name='company_category_fk',
-            field=models.ForeignKey(blank=True, default=None, null=True,
-                                    on_delete=django.db.models.deletion.SET_NULL, to='companies.companycategory'),
+            model_name="company",
+            name="company_category_fk",
+            field=models.ManyToManyField(blank=True, to="companies.CompanyCategory"),
         ),
     ]

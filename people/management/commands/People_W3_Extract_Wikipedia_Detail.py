@@ -1,4 +1,7 @@
-import requests, csv, os, time
+import requests
+import csv
+import os
+import time
 from bs4 import BeautifulSoup
 from csv import DictReader
 
@@ -13,7 +16,7 @@ with open(output_file, 'wt+', newline='', encoding='utf-8') as csvFile:
 
     slugcount = 0
     for row in DictReader(open(input_file)):
-        wikislug=row['wikitextslug']
+        wikislug = row['wikitextslug']
         url = f"https://en.wikipedia.org{wikislug}"
         if url in unique_urls:
             continue
@@ -30,7 +33,7 @@ with open(output_file, 'wt+', newline='', encoding='utf-8') as csvFile:
             raise SystemExit(err) from err
         except requests.exceptions.HTTPError as err:
             # eg, url, server and other errors
-            raise SystemExit(err)
+            raise SystemExit(err) from err
 
         soup = BeautifulSoup(res.text, 'html.parser')
 
@@ -41,15 +44,17 @@ with open(output_file, 'wt+', newline='', encoding='utf-8') as csvFile:
                 if rowcount > 10:
                     break
                 csvRow = [wikislug, rowcount]
-                for cellcount, cell in enumerate(row.find_all(['td','th']), start=1):
+                for cellcount, cell in enumerate(row.find_all(['td', 'th']), start=1):
                     csvRow.append(cell.get_text())
                     if cell.find('a', class_="image"):
-                            csvRow.append(cell.find('a', class_="image").get('href'))
+                        csvRow.append(
+                            cell.find('a', class_="image").get('href'))
                     if cellcount != 1:
-                        csvRow.extend(link.get('href') for link in cell.find_all('a'))
+                        csvRow.extend(link.get('href')
+                                      for link in cell.find_all('a'))
                 output.writerow(csvRow)
 
-                for cell in row.find_all(['td','th']):
+                for cell in row.find_all(['td', 'th']):
 
                     if cell.find('span', class_="bday"):
                         print('found a birthday')
@@ -95,4 +100,5 @@ with open(output_file, 'wt+', newline='', encoding='utf-8') as csvFile:
                         csvRow = []
                         csvRow.extend((wikislug, rowcount, 'deathplace'))
                         output.writerow(csvRow)
-                        csvRow.append(cell.find('div', class_="deathplace").get_text())
+                        csvRow.append(
+                            cell.find('div', class_="deathplace").get_text())

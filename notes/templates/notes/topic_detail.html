@@ -29,7 +29,7 @@
   {% for post in posts %}
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h2><a href="{% url 'notes:post_detail' post.id %}">{{ post.title }}</a></h2>
+        <h2><a href="{% url 'notes:post_detail' post.slug %}">{{ post.title }}</a></h2>
         <cite>{{ post.publish|date:'M d, Y H:i' }}</cite>
       </div> <!-- panel-heading -->
 

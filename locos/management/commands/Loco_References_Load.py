@@ -1,4 +1,5 @@
-import os, datetime
+import os
+import datetime
 from csv import DictReader
 from django.core.management import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
@@ -7,7 +8,8 @@ from locos.models import LocoClass, LocoClassSighting, Location, Reference
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 INPUT_FILES = ['References_Peak.csv',]
 
-def inserter(s,a,n):
+
+def inserter(s, a, n):
     """
     s: The original string
     a: The characters you want to append
@@ -15,20 +17,21 @@ def inserter(s,a,n):
     """
     return s[:n]+a+s[n:]
 
-def dateformatter(dt):
 
+def dateformatter(dt):
     """
     Takes a partial or full date in various formats and returns:-
 
     recorded_date: In format DD/MM/YYYY with the character ? where parts of the date were not supplied
     datetime_date: A datetime format date with 01 substituted where the day or date was not known. Allows partial dates to be used in calculations of ages, graphing etc.
     """
-    if len(dt) == 4: # Assumes that the four digits are a year, adding unknown day and month
-            dt = f"??/??/{dt}"
-    elif len(dt) == 7: # Assumes that the date is MM/YYYY, adding unknown day
-            dt = f"??/{dt}"
-    elif len(dt) == 6: # Assumes that the format is MMM-YY or MMM YY and insert 19 to give a four digit year:
-        dt = inserter(dt,"19",4)
+    if len(dt) == 4:  # Assumes that the four digits are a year, adding unknown day and month
+        dt = f"??/??/{dt}"
+    elif len(dt) == 7:  # Assumes that the date is MM/YYYY, adding unknown day
+        dt = f"??/{dt}"
+    # Assumes that the format is MMM-YY or MMM YY and insert 19 to give a four digit year:
+    elif len(dt) == 6:
+        dt = inserter(dt, "19", 4)
         dt = dt.replace("Jan-", "??/01/")
         dt = dt.replace("Feb-", "??/02/")
         dt = dt.replace("Mar-", "??/03/")
@@ -53,7 +56,7 @@ def dateformatter(dt):
         dt = dt.replace("Oct ", "??/10/")
         dt = dt.replace("Nov ", "??/11/")
         dt = dt.replace("Dec ", "??/12/")
-    elif len(dt) == 8: # Assumes that the format is MMM-YYYY or MMM YYYY, converting the 3 alpha month to 2 numerics
+    elif len(dt) == 8:  # Assumes that the format is MMM-YYYY or MMM YYYY, converting the 3 alpha month to 2 numerics
         dt = dt.replace("Jan-", "??/01/")
         dt = dt.replace("Feb-", "??/02/")
         dt = dt.replace("Mar-", "??/03/")
@@ -102,7 +105,8 @@ def dateformatter(dt):
     except Exception:
         datetime_date = None
 
-    return(recorded_date, datetime_date )
+    return (recorded_date, datetime_date)
+
 
 class Command(BaseCommand):
     help = "Load Sightings"
@@ -113,13 +117,17 @@ class Command(BaseCommand):
 
         for INPUT_FILE in INPUT_FILES:
 
-            with open(os.path.join(DATAIO_DIR, INPUT_FILE), encoding="utf-8") as file:   
+            with open(os.path.join(DATAIO_DIR, INPUT_FILE), encoding="utf-8") as file:
                 for row in DictReader(file):
 
-                    s, created = Reference.objects.get_or_create(ref=row['\ufeffid'])
-                    if row['type']: s.type = row['type']
-                    if row['url']: s.url = row['url']
-                    if row['notes'] : s.notes = row['notes']
+                    s, created = Reference.objects.get_or_create(
+                        ref=row['\ufeffid'])
+                    if row['type']:
+                        s.type = row['type']
+                    if row['url']:
+                        s.url = row['url']
+                    if row['notes']:
+                        s.notes = row['notes']
                     # COMMENTED OUT AWAITING CLARITY ON DEFINITION OF UNIQUE NUMBER
                     # if row['locos']:
                     #     try:
@@ -130,26 +138,32 @@ class Command(BaseCommand):
                     #         ls.save()
                     #     except ObjectDoesNotExist:
                     #         print(row['locos'], ' not found in the Locomotive table')
-                    if row['locos']: s.loco = row['locos']
+                    if row['locos']:
+                        s.loco = row['locos']
                     if row['lococlass']:
                         try:
-                            lococlass_fk = LocoClass.objects.get(wikiname=row['lococlass'])
+                            lococlass_fk = LocoClass.objects.get(
+                                wikiname=row['lococlass'])
                             lcs = LocoClassSighting()
                             lcs.loco_class = lococlass_fk
                             lcs.reference = s
                             lcs.save()
                         except ObjectDoesNotExist:
-                            print(row['lococlass'], ' not found in the LocoClass table')
+                            print(row['lococlass'],
+                                  ' not found in the LocoClass table')
                     if row['date']:
                         s.date, s.date_datetime = dateformatter(row['date'])
-                    if row['location_description']: 
+                    if row['location_description']:
                         s.location_description = row['location_description']
                         try:
-                            s.location_fk = Location.objects.get(wikiname=row['location_description'])
+                            s.location_fk = Location.objects.get(
+                                wikiname=row['location_description'])
                         except ObjectDoesNotExist:
-                            print(row['location_description'], ' not found in the Location table. Location added as description rather than foreign key')
+                            print(
+                                row['location_description'], ' not found in the Location table. Location added as description rather than foreign key')
                             s.location_description = row['location_description']
                         except MultipleObjectsReturned:
-                            print(row['location_description'], ' found multiple times in the Location table')
-                    s.citation = row['citation'] or ""
+                            print(row['location_description'],
+                                  ' found multiple times in the Location table')
+                    s.full_reference = row['full_reference'] or ""
                     s.save()

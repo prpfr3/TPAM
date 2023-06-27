@@ -34,8 +34,7 @@ class Command(BaseCommand):
 
                 try:
                     if row['wikislug']:
-                        l = Location.objects.get(
-                            wikislug=row['wikislug'])
+                        l = Location.objects.get(wikislug=row['wikislug'])
                         rl.location_fk = l
                 except ObjectDoesNotExist:
                     missing = row['wikislug']
@@ -66,6 +65,6 @@ class Command(BaseCommand):
                 if rl_created:
                     print(
                         f'New route location created for {row}/n')
-                # else:
-                #     print(
-                #         f'Existing route location adjusted for {row}/n')
+                else:
+                    print(
+                        f'Existing route location adjusted for {row}/n')

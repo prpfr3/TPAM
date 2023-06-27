@@ -51,7 +51,7 @@
 
       <h2>Manufacturer(s)</h2>
       {% for manufacturer in manufacturers %}
-        <li><a href="https://en.wikipedia.org/{{manufacturer.wikitextslug}}">{{manufacturer.name}}</a></li>
+        <li><a href="https://en.wikipedia.org/{{manufacturer.wikislug}}">{{manufacturer.name}}</a></li>
       {% empty %}
         <li>None recorded for this class.</li>
       {% endfor %}
@@ -59,7 +59,7 @@
       <h2>References</h2>
       {% for reference in references %}
         {% autoescape off %}
-        <li>{{reference.citation}}</li>
+        <li>{{reference.full_reference}}</li>
         {% endautoescape %}
       {% empty %}
         <li>None recorded for this locomotive.</li>

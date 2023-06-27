@@ -8,10 +8,11 @@ An option will arise which allows the images to be resized.
 from csv import DictReader
 from django.core.management import BaseCommand
 from locations.models import Reference
-import csv, os
+import csv
+import os
 from pathlib import Path
 
-#Open the csv input file and write a header record
+# Open the csv input file and write a header record
 csv_file = os.path.join("D:\\Data", "TPAM", "RailwayPhotos.csv")
 
 """
@@ -47,31 +48,32 @@ for f in flist:
 csvFile.close()
 """
 
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        #if Image.objects.exists():
+        # if Image.objects.exists():
         #    print('Railway Heritage images already loaded...exiting.')
         #    return
         print("Creating Railway Heritage Images")
         ref = 10000
-        with open(csv_file, encoding="utf-8") as file:   
-          for row in DictReader(file):
-              print(row)
-              ref = ref + 1
-              c = Reference()
-              c.ref = ref
-              c.type = 6
-              c.citation = row['image_name'] 
-              c.image = row['image']
-              # c.visit_fk = int(row['visit_fk '])
-              c.notes = row['image_name']
-              c.save()
+        with open(csv_file, encoding="utf-8") as file:
+            for row in DictReader(file):
+                print(row)
+                ref = ref + 1
+                c = Reference()
+                c.ref = ref
+                c.type = 6
+                c.full_reference = row['image_name']
+                c.image = row['image']
+                # c.visit_fk = int(row['visit_fk '])
+                c.notes = row['image_name']
+                c.save()
 
-              # c = Image()
-              # c.image_name = row['image_name'] 
-              # c.image = row['image']
-              # c.loco_class_id = int(row['loco_class_id'])
-              # c.location_id = int(row['location_id'])
-              # c.visit_id = int(row['visit_id'])
-              # c.notes = row['notes']
-              # c.save()
+                # c = Image()
+                # c.image_name = row['image_name']
+                # c.image = row['image']
+                # c.loco_class_id = int(row['loco_class_id'])
+                # c.location_id = int(row['location_id'])
+                # c.visit_id = int(row['visit_id'])
+                # c.notes = row['notes']
+                # c.save()

@@ -40,43 +40,45 @@
 
     <h1 class="text-primary">Owners/Operators</h1>
     {% for operator in operators %}
-      <li><a href="https://en.wikipedia.org//{{operator.wikislug}}">{{operator.name}}</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/{{operator.wikislug}}">{{operator.name}}</a></li>
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %} 
 
-    <h1 class="text-primary">Designer(s)</h1>
-    {% for designer in designers %}
-      <li><a href="https://en.wikipedia.org/{{designer.wikitextslug}}">{{designer.name}}</a></li>
+    {% if loco_class.designer_person %}
+      <h1 class="text-primary">Designer</h1>
+      {% if loco_class.designer_person.wikitextslug %}
+      <li><a href="https://en.wikipedia.org//wiki/{{loco_class.designer_person.wikitextslug}}">{{loco_class.designer_person}}</a></li>
+      {% else %}
+      <li>{{loco_class.designer_person}}</li>
+      {% endif %}
+    {% endif %}
+
+    <h1 class="text-primary">Manufacturer(s)</h1>
+    {% for manufacturer in manufacturers %}
+      <li><a href="https://en.wikipedia.org/wiki/{{manufacturer.wikislug}}">{{manufacturer.name}}</a></li>
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %}
 
-    <h1 class="text-primary">Manufacturer(s)</h1>
-    {% for manufacturer in manufacturers %}
-      <li><a href="https://en.wikipedia.org/{{manufacturer.wikitextslug}}">{{manufacturer.name}}</a></li>
+    <h1 class="text-primary">References</h1>
+    {% for reference in references %}
+      {% autoescape off %}
+      <li>{{reference.full_reference}}</li>
+      {% endautoescape %}
     {% empty %}
       <li>None recorded for this class.</li>
     {% endfor %}
 
     {% comment %}
-    <h1 class="text-primary">References</h1>
-    {% for reference in references %}
-      {% autoescape off %}
-      <li>{{reference.citation}}</li>
-      {% endautoescape %}
-    {% empty %}
-      <li>None recorded for this class.</li>
-    {% endfor %}
+      <h1 class="text-primary">Images</h1>
+      {% for image in images %}
+        <img src="{{ image.image.url }}" >
+        <p><a href="{% url 'locos:image' image.id %}">{{image.image_name}}</a></p>
+      {% empty %}
+        <li>None recorded for this class.</li>
+      {% endfor %}
     {% endcomment %}
-
-    <h1 class="text-primary">Images</h1>
-    {% for image in images %}
-      <img src="{{ image.image.url }}" >
-      <p><a href="{% url 'locos:image' image.id %}">{{image.image_name}}</a></p>
-    {% empty %}
-      <li>None recorded for this class.</li>
-    {% endfor %}
 
   </div> <!-- panel-body-->
     </div> <!-- panel -->

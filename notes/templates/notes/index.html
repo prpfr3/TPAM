@@ -1,14 +1,15 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
-{% block content_title %}Notes and Timelines{% endblock %}
+{% block content_title %}Research Articles and Timelines{% endblock %}
 {% block content_desc %}{% endblock %}
 
 {% block content %}
 
 <div class="bd-example">
-    <ul class="list-group">
-        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:topics' %}">Blog Articles</a>
-        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:enamel_signs' %}">Temporary:Enamel Signs Article</a>
+    <ul class="list-group">      
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:topics' %}">Research Articles</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:references' %}">References</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:timeline' %}">Bluebell Railway Timeline</a>
         {% comment %}
         <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
         <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:county_select' %}">Closed Lines Map</a>
