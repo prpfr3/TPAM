@@ -7,7 +7,7 @@
     <form method='POST' action="" enctype="multipart/form-data">
       <p>
       {% csrf_token %}
-      {{ selection_criteria }}
+      <table>{{ selection_criteria }}</table>
       <input type="submit" name="submit_input" value="Submit">
       </p>
     </form>

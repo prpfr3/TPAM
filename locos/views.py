@@ -33,46 +33,8 @@ def loco_classes(request):
     if request.method == "POST":
         selection_criteria = LocoClassSelectionForm(request.POST)
 
-        if selection_criteria.is_valid() and selection_criteria.cleaned_data != None:
-            conditions = Q()
-            cleandata = selection_criteria.cleaned_data
-
-            if "name" in cleandata and cleandata["name"]:
-                # COMMENTED CODE FOR WHEN DROPDOWN LIST PREFERRED TO FREE TEXT
-                #     fk = cleandata["name"]
-                #     conditions &= Q(id=fk.lococlass_fk_id)
-                fk_ids = [fk.lococlass_fk_id for fk in cleandata["name"]]
-                conditions &= Q(id__in=fk_ids)
-
-            if "wikiname" in cleandata and cleandata["wikiname"]:
-                conditions &= Q(wikiname__icontains=cleandata["wikiname"])
-
-            if "wheel_body_type" in cleandata and cleandata["wheel_body_type"]:
-                conditions &= Q(wheel_body_type__icontains=cleandata["wheel_body_type"])
-
-            if "wheel_arrangement" in cleandata and cleandata["wheel_arrangement"]:
-                conditions &= Q(
-                    wheel_arrangement__icontains=cleandata["wheel_arrangement"]
-                )
-
-            if "designer_person" in cleandata and cleandata["designer_person"]:
-                fk = cleandata["designer_person"]
-                conditions &= Q(designer_person_id=fk)
-
-            if "owner_operators" in cleandata and cleandata["owner_operators"]:
-                fk = cleandata["owner_operators"]
-                conditions &= Q(owner_operators=fk)
-
-            if "manufacturers" in cleandata and cleandata["manufacturers"]:
-                fk = cleandata["manufacturers"]
-                conditions &= Q(manufacturers=fk)
-
-            if "manufacturers" in cleandata and cleandata["manufacturers"]:
-                fk = cleandata["manufacturers"]
-                conditions &= Q(manufacturers=fk)
-
-            queryset = (LocoClass.objects.filter(conditions)).order_by("wikiname")
-
+        if selection_criteria.is_valid() and selection_criteria.cleaned_data:
+            queryset = loco_classes_query_build(selection_criteria.cleaned_data)
         else:
             errors = selection_criteria.errors or None
             queryset = LocoClass.objects.order_by("wikiname")
@@ -81,7 +43,9 @@ def loco_classes(request):
         selection_criteria = LocoClassSelectionForm()
         queryset = LocoClass.objects.order_by("wikiname")
 
-    queryset, page = pagination(request, queryset)
+    queryset, page = pagination(
+        request, queryset
+    )  # Pass the selected queryset to pagination
 
     context = {
         "selection_criteria": selection_criteria,
@@ -91,6 +55,38 @@ def loco_classes(request):
     }
 
     return render(request, "locos/loco_class_list.html", context)
+
+
+def loco_classes_query_build(selection_criteria):
+    conditions = Q()
+    cleandata = selection_criteria
+
+    if "name" in cleandata and cleandata["name"]:
+        fk_ids = [fk.lococlass_fk_id for fk in cleandata["name"]]
+        conditions &= Q(id__in=fk_ids)
+
+    if "wikiname" in cleandata and cleandata["wikiname"]:
+        conditions &= Q(wikiname__icontains=cleandata["wikiname"])
+
+    if "wheel_body_type" in cleandata and cleandata["wheel_body_type"]:
+        conditions &= Q(wheel_body_type__icontains=cleandata["wheel_body_type"])
+
+    if "wheel_arrangement" in cleandata and cleandata["wheel_arrangement"]:
+        conditions &= Q(wheel_arrangement__icontains=cleandata["wheel_arrangement"])
+
+    if "designer_person" in cleandata and cleandata["designer_person"]:
+        fk = cleandata["designer_person"]
+        conditions &= Q(designer_person_id=fk)
+
+    if "owner_operators" in cleandata and cleandata["owner_operators"]:
+        fk = cleandata["owner_operators"]
+        conditions &= Q(owner_operators=fk)
+
+    if "manufacturers" in cleandata and cleandata["manufacturers"]:
+        fk = cleandata["manufacturers"]
+        conditions &= Q(manufacturers=fk)
+
+    return LocoClass.objects.filter(conditions).order_by("wikiname")
 
 
 def loco_class(request, loco_class_id):

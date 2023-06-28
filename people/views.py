@@ -29,39 +29,7 @@ def people(request):
             selection_criteria.is_valid()
             and selection_criteria.cleaned_data is not None
         ):
-            conditions = Q()
-            cleandata = selection_criteria.cleaned_data
-
-            if "name" in cleandata and cleandata["name"]:
-                conditions &= Q(name__icontains=cleandata["name"])
-
-            if "role" in cleandata and cleandata["role"]:
-                fk = cleandata["role"].id  # Store the role ID
-                conditions &= Q(personrole__role_id=fk)
-
-            if "source" in cleandata and cleandata["source"]:
-                conditions &= Q(source=cleandata["source"])
-
-            if "birthyear" in cleandata and cleandata["birthyear"]:
-                conditions &= Q(birthdate__startswith=cleandata["birthyear"])
-
-            if "diedyear" in cleandata and cleandata["diedyear"]:
-                conditions &= Q(dieddate__startswith=cleandata["diedyear"])
-
-            queryset = (
-                Person.objects.filter(conditions)
-                .prefetch_related("references")
-                .order_by("surname", "firstname")
-            )
-
-            # Save the selection criteria values in the session
-            request.session["name"] = cleandata.get("name")
-            request.session["role_id"] = (
-                cleandata.get("role").id if cleandata.get("role") else None
-            )
-            request.session["source"] = cleandata.get("source")
-            request.session["birthyear"] = cleandata.get("birthyear")
-            request.session["diedyear"] = cleandata.get("diedyear")
+            queryset = people_query_build(selection_criteria, request)
         else:
             errors = selection_criteria.errors
             queryset = Person.objects.prefetch_related("references").order_by(
@@ -103,6 +71,43 @@ def people(request):
     }
 
     return render(request, "people/people.html", context)
+
+
+def people_query_build(selection_criteria, request):
+    conditions = Q()
+    cleandata = selection_criteria.cleaned_data
+
+    if "name" in cleandata and cleandata["name"]:
+        conditions &= Q(name__icontains=cleandata["name"])
+
+    if "role" in cleandata and cleandata["role"]:
+        fk = cleandata["role"].id  # Store the role ID
+        conditions &= Q(personrole__role_id=fk)
+
+    if "source" in cleandata and cleandata["source"]:
+        conditions &= Q(source=cleandata["source"])
+
+    if "birthyear" in cleandata and cleandata["birthyear"]:
+        conditions &= Q(birthdate__startswith=cleandata["birthyear"])
+
+    if "diedyear" in cleandata and cleandata["diedyear"]:
+        conditions &= Q(dieddate__startswith=cleandata["diedyear"])
+
+    result = (
+        Person.objects.filter(conditions)
+        .prefetch_related("references")
+        .order_by("surname", "firstname")
+    )
+
+    # Save the selection criteria values in the session
+    request.session["name"] = cleandata.get("name")
+    request.session["role_id"] = (
+        cleandata.get("role").id if cleandata.get("role") else None
+    )
+    request.session["source"] = cleandata.get("source")
+    request.session["birthyear"] = cleandata.get("birthyear")
+    request.session["diedyear"] = cleandata.get("diedyear")
+    return result
 
 
 def person(request, person_id):

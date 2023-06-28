@@ -9,7 +9,7 @@ def index(request):
 
 
 def pagination(request, queryset):
-    paginator = Paginator(queryset, 15)
+    paginator = Paginator(queryset, 40)
     page = request.GET.get("page")
     try:
         queryset = paginator.page(page)

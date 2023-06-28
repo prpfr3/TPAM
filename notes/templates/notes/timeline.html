@@ -30,6 +30,8 @@
     <link title="timeline-styles" rel="stylesheet" 
         href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
     <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+
+    {% load static %}
   </head>
 
 <body>
@@ -45,7 +47,8 @@
             var embed = document.getElementById('timeline-embed');
             embed.style.height = getComputedStyle(document.body).height;
 
-            var items = '/static/bluebell_timeline.json';
+            var items ="{% static 'bluebell_timeline.json' %}"
+            // var items = '/static/bluebell_timeline.json';
             console.log(items);
             window.timeline = new TL.Timeline('timeline-embed', items, {
                 hash_bookmark: true,

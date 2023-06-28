@@ -1,6 +1,5 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from tinymce.widgets import TinyMCE
 
 from .models import *
 
@@ -12,13 +11,12 @@ class SingleSelectWidget(forms.Select):
 
 
 class LocoClassSelectionForm(forms.ModelForm):
-    # STRING SEARCH BELOW FAVOURED OVER THIS DROP DOWN SEARCH
-    # name = forms.ModelChoiceField(
-    #     queryset=LocoClassList.objects.all(),
-    #     required=False,
-    #     widget=forms.Select(attrs={"class": "search-select2"}),
-    # )
-
+    # The following two ways of setting name are alternatives, the second being the more logical as it does not make sense to select one class on a page designed to list many classes
+    name = forms.ModelChoiceField(
+        queryset=LocoClassList.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={"class": "search-select2"}),
+    )
     name = forms.CharField(
         required=False, widget=forms.TextInput(attrs={"class": "search-input"})
     )
@@ -44,10 +42,9 @@ class LocoClassSelectionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # self.fields["name"].queryset = LocoClassList.objects.order_by("name")
-
-        # STRING SEARCH BELOW FAVOURED OVER THIS DROP DOWN SEARCH
-        self.fields["name"].label = "Class Name"  # Optional: Customize the field label
+        # The following two ways of setting name are alternatives, see above
+        self.fields["name"].queryset = LocoClassList.objects.order_by("name")
+        self.fields["name"].label = "Class Name"
 
     def clean_name(self):
         if name := self.cleaned_data.get("name"):
@@ -57,21 +54,21 @@ class LocoClassSelectionForm(forms.ModelForm):
     class Meta:
         model = LocoClass
         fields = (
-            "wheel_body_type",
+            # "wheel_body_type", # Not fully populated as yet
             "wheel_arrangement",
             "designer_person",
             "owner_operators",
             "manufacturers",
         )
         widgets = {
-            "wheel_body_type": forms.Select(attrs={"class": "search-select2"}),
+            # "wheel_body_type": forms.Select(attrs={"class": "search-select2"}), # Not fully populated as yet
             "wheel_arrangement": forms.Select(attrs={"class": "search-select2"}),
             "designer_person": forms.Select(attrs={"class": "search-select2"}),
             "owner_operators": forms.Select(attrs={"class": "search-select2"}),
             "manufacturers": forms.Select(attrs={"class": "search-select2"}),
         }
         labels = {
-            "wheel_body_type": "Type",
+            # "wheel_body_type": "Type", # Not fully populated as yet
             "wheel_arrangement": "Wheel Arrangement",
             "designer_person": "Designer",
             "owner_operators": "Owner Operator",
