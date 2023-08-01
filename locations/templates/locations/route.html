@@ -50,7 +50,7 @@
     <div id="visualization">
       <script type="text/javascript">
         var container = document.getElementById('visualization');
-        var jsonObject = JSON.parse('{{ timeline_json | escapejs }}');
+        var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
         var items = new vis.DataSet(jsonObject);
         var options = {orientation: 'top'};
         var timeline = new vis.Timeline(container, items, options);

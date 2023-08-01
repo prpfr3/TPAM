@@ -206,6 +206,8 @@ class LocationEvent(models.Model):
         choices=EVENT_TYPE,
         default=1,
     )
+    group = models.CharField(max_length=50, blank=True, null=True)
+    subgroup = models.CharField(max_length=50, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     date = models.CharField(max_length=10, blank=True, null=True)
     datefield = models.DateField(blank=True, null=True)

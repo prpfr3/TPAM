@@ -4,7 +4,7 @@
 {% block content_desc %}Select a Route to view a StoryMap{% endblock %}
 {% block content %}
     {% for storymap in storymaps %}
-      <h2><a href="{% url 'storynotes:storymap' storymap.id %}"> {{ storymap }}</a></h2>
+      <h2><a href="{% url 'storymaps:storymap' storymap.id %}"> {{ storymap }}</a></h2>
     {% empty %}
       <h2>No storymaps have been loaded yet.</h2>
     {% endfor %}

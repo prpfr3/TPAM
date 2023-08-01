@@ -13,6 +13,91 @@
     "events": [
       {
         "media": {
+          "url": "https://django-tpam-paulf.s3.eu-west-2.amazonaws.com/media/LEGR_Act.png",
+          "caption": "",
+          "credit": ""
+        },
+        "start_date": {
+          "year": "1876"
+        },
+        "end_date": {
+          "year": "1879"
+        },
+        "text": {
+          "headline": "In the Beginning - Promotion of the Lewes and East Grinstead Railway (L&EGR)",
+          "text": "<p>By 1876 a group of local sponsors in the area of East Grinstead who were disenchanted with the failure of the <a href='https://en.wikipedia.org/wiki/London,_Brighton_and_South_Coast_Railway'>London & Brighton South Coast Railway (LBSCR)</a>  to the west and the <a href='https://en.wikipedia.org/wiki/South_Eastern_Railway_(England)'>South Eastern Railway (SER)</a> to the East to provide a railway with good connections to London, joined together to develop a proposal for the L&EGR. By 1877 a bill had been passed through parliament authorising the construction of the railway. Local sponsors included <a href='https://en.wikipedia.org/wiki/Henry_Holroyd,_3rd_Earl_of_Sheffield'>the Earl of Sheffield</a>, whilst <a href='https://en.wikipedia.org/wiki/John_Wolfe_Barry'>John Wolfe Barry</a> developed the initial design for the railway and <a href='https://en.wikipedia.org/wiki/Joseph_Firbank'>Joseph Firbank</a> was engaged as the Construction Contractor. However, funding became an issue and it was therefore agreed with the LBSCR and formalised by a further act of parliament in 1878 that the LBSCR would fund the constuction and takeover the line on completion. The LBSCR chaired by <a href='https://en.wikipedia.org/wiki/Samuel_Laing_(science_writer)'>Samuel Laing</a> therefore maintained a close interest and control over the construction with <a href='https://en.wikipedia.org/wiki/Frederick_Banister'>Frederik Dale Banister</a> being assigned as their Chief Engineer overseeing the work</p>"
+        }
+      },
+      {
+        "media": {
+          "url": "https://django-tpam-paulf.s3.eu-west-2.amazonaws.com/media/Imberhome_Viaduct_Construction.png",
+          "caption": "Imberhorne Viaduct under construction",
+          "credit": "The Life of Joseph Firbank, Google Books"
+        },
+        "start_date": {
+          "year": "1878"
+        },
+        "end_date": {
+          "year": "1884"
+        },
+        "text": {
+          "headline": "Construction, Opening and Handover of the Line",
+          "text": "<p>By late 1878 Joseph Firbank had started construction. The initial focus was on the major engineering works starting with the construction of the West Hoathly tunnel and then the Haywards Heath connection and the Imberhorne viaduct. By January 1881, a train organised by the contractor was able to run from Imberhorne to West Hoathly but eventual opening of the full line was to be delayed by the late start to the construction of stations and the additional provision for a double track. After a failed and then successful line inspection on July 21st 1882, the line opened on August 1st 1882 with a train departing East Grinstead southbound at 06.57 and a northbound train departing Lewes at 08:12. The Haywards Heath extension was well behind plan though only opening on September 3rd 1883. With the line constructed, the company seal and associated documentation of the L&EGR were handed over to the LBSCR who from thereon owned and operated the railway.</p><p>Mention should also be made of the 'Northern Extension' of the Croydon, Oxted and East Grinstead railway on which the line depended for its London connection. This was only opened by March 10th 1884, being further deplayed by a landslip at Croydon on the day after opening. </p>"
+        }
+      },
+      {
+        "media": {
+          "url": "https://en.wikipedia.org/wiki/London,_Brighton_and_South_Coast_Railway#/media/File:Lbscr1922.jpg",
+          "caption": "",
+          "credit": ""
+        },
+        "start_date": {
+          "year": "1883"
+        },
+        "end_date": {
+          "year": "1922"
+        },
+        "text": {
+          "headline": "The Brighton Period - Initial Design and Operation of the Line",
+          "text": "<p>The line had six stations but only Barcombe was within walking distance of a village. Chailey parish had two stations, one at Sheffield Park and the other at Newick and Chailey. It was customary for a rural line supported by a company or individuals to have stations close to the residences of its sponsors. Thus Sheffield Park station was built for the Earl of Sheffield, and Newick and Chailey for Newick Park and Reedens, the homes of two other sponsors. The other stations were at Kingscote, West Hoathly and Horsted Keynes. A branch ran from a junction at Horsted Keynes to Ardingly and Haywards Heath on the LB&SCR main line.</p><p>The 1877 and 1878 acts included a clause that:</p><p>Four passenger trains each way daily to run on this line with through connections at East Grinstead to London and to stop at Sheffield Bridges, Newick and West Hoathly</p><p>This imposed a legal requirement to provide a service and the only way to remove this obligation was to pass another act.</p><p>Designed under instructions from <a href='https://en.wikipedia.org/wiki/Frederick_Banister'>Banister</a>, the line was constructed to take double track. However, only the section between East Grinstead and Horsted Keynes (and thence to Haywards Heath via Ardingly) was laid as such; south of the junction at Horsted Keynes the line was single track with passing loops at stations. The line was opened in 1882.</p>"
+        }
+      },
+      {
+        "media": {
+          "url": "",
+          "caption": "",
+          "credit": ""
+        },
+        "start_date": {
+          "year": "1923"
+        },
+        "end_date": {
+          "year": "1945"
+        },
+        "text": {
+          "headline": "The Southern Period",
+          "text": "<p></p>"
+        }
+      },
+      {
+        "media": {
+          "url": "",
+          "caption": "",
+          "credit": ""
+        },
+        "start_date": {
+          "year": "1946"
+        },
+        "end_date": {
+          "year": "1959"
+        },
+        "text": {
+          "headline": "The British Railways Period",
+          "text": "<p></p>"
+        }
+      },
+      {
+        "media": {
           "url": "https://www.bluebell-railway-museum.co.uk/archive/photos2/045/738.jpg",
           "caption": "Horsted Keynes looking North in 1959",
           "credit": "Bluebell Archive 045738; John J Smith"
@@ -22,7 +107,7 @@
           "month": "1"
         },
         "text": {
-          "headline": "Four Students decide to save a Sussex branchine and the Bluebell Railway is born",
+          "headline": "Four Students decide to save a Sussex branchline and the Bluebell Railway is born",
           "text": "<p>On 15 March 1959 a group that included the future president of the society, Bernard Holden, met in Ardingly and formed the Lewes and East Grinstead Railway Preservation Society. The society elected John Leroy as the first chairman, and £940 was raised in donations to start the society. On a vote at the meeting, the society changed its name to the Bluebell Railway Preservation Society.</p><p>The society's initial aim was to reopen the whole line from East Grinstead to Culver Junction as a commercial service, using a two-car DMU. The plans came to nothing: the society failed to buy the whole line, and most local residents were not interested. The committee then recommended that the stretch of track between Sheffield Park and Horsted Keynes could be run as a tourist attraction, with vintage locomotives and stock operated by unpaid volunteer staff.</p>"
         }
       },

@@ -47,9 +47,24 @@
             var embed = document.getElementById('timeline-embed');
             embed.style.height = getComputedStyle(document.body).height;
 
+            // A Django static call to AWS S3 requires bucket permission settings of 
+            //         [
+            // {
+            //     "AllowedHeaders": [
+            //         "*"
+            //     ],
+            //     "AllowedMethods": [
+            //         "GET"
+            //     ],
+            //     "AllowedOrigins": [
+            //         "https://tpam-production.up.railway.app"
+            //     ],
+            //     "ExposeHeaders": []
+            // }
+            // ]
             var items ="{% static 'bluebell_timeline.json' %}"
             // var items = '/static/bluebell_timeline.json';
-            console.log(items);
+
             window.timeline = new TL.Timeline('timeline-embed', items, {
                 hash_bookmark: true,
                 scale_factor: 1,

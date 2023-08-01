@@ -10,13 +10,13 @@
 
     {% load static %}
     {% load django_bootstrap5 %}
-
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     {% bootstrap_messages %}
 
     <link rel="stylesheet" href="{% static 'scss/bootstrap.css' %}">
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="{% static 'scss/style.css' %}">
+    <link rel="stylesheet" href="{% static 'styles.css' %}"><!--- styles.css is empty @ 31/07/23 -->
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
@@ -66,9 +66,9 @@
       </div><!-- Container -->
     </header>
 
-    <div class="container-fluid position-absolute">
+    <div class="container-fluid " >
       <div class="row">
-        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse mt-12" style="z-index: 99;">
+        <nav id="sidebarMenu" class="position-fixed col-md-3 col-lg-2 d-md-block bg-light sidebar collapse mt-12" style="z-index: 99; margin-top: 25px;">
           <div class="position-sticky pt-3">
        
             <div class="nav-item dropdown">
@@ -86,8 +86,8 @@
               <b>P</b>eople</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <a class="dropdown-item nav-link" href="{% url 'people:people' %}">Famous People</a>
-                <a class="dropdown-item nav-link" href="{% url 'people:people_timeline' %}">Timeline 1</a>
-                <a class="dropdown-item nav-link" href="{% url 'people:people_vis_timeline' %}">Timeline 2</a>
+                <a class="dropdown-item nav-link" href="{% url 'people:people_storyline' %}">People Storyline</a>
+                <a class="dropdown-item nav-link" href="{% url 'people:people_vis_timeline' %}">People Timeline</a>
               </div>
             </div>
 
@@ -121,7 +121,9 @@
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <b>R</b>esearch Articles</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item nav-link" href="{% url 'notes:topics' %}">Research Articles</a>
+                <a class="dropdown-item nav-link" href="{% url 'notes:topics' %}">Notes</a>
+                <a class="dropdown-item nav-link" href="{% url 'timelines:timelines' %}">Custom Timelines</a>
+                <a class="dropdown-item nav-link" href="{% url 'storymaps:storymaps' %}">Custom Storymaps</a>
                 <a class="dropdown-item nav-link" href="{% url 'notes:references' %}">References</a>
                 <a class="dropdown-item nav-link" href="{% url 'notes:timeline' %}">Bluebell Railway Timeline</a>
               </div>
@@ -170,7 +172,7 @@
 
         {% block header %}{% endblock %}
 
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mt-3">
+        <main class="position-relative col-md-9 ms-sm-auto col-lg-10 px-md-4 mt-3" >
 
           <section class="py-3 text-center container">
             <div class="row py-lg-3">

@@ -41,7 +41,15 @@ class LocationAdmin(admin.ModelAdmin):
 
 
 class LocationEventAdmin(admin.ModelAdmin):
-    list_display = ["route_fk", "date", "datefield", "type", "description"]
+    list_display = [
+        "route_fk",
+        "group",
+        "subgroup",
+        "date",
+        "datefield",
+        "type",
+        "description",
+    ]
     ordering = ["route_fk", "datefield"]
     search_fields = ["route_fk", "date"]
 

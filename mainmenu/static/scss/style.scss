@@ -1,14 +1,15 @@
-$primary: #3292a6;
-$primary-overlay: rgba(50, 146, 166, 0.8);
+$primary: #0e5323;
+$primary-overlay: #0e5323;
+@import "bootstrap.scss";
 
 body {
-  margin-top: 105px;
+  margin-top: 10px;
 }
 
 .navbar {
   box-shadow: 2px 2px 5px $primary;
   opacity: 0.9;
-  background: #fff;
+  background:$primary;
 
   .nav-item {
     font-size: 1.4rem;

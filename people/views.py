@@ -1,6 +1,6 @@
 import json
 import urllib
-
+import markdown
 import wikipediaapi
 from django.forms.models import model_to_dict
 from django.db.models import Q
@@ -142,17 +142,95 @@ def person(request, person_id):
     return render(request, "people/person.html", context)
 
 
-def people_timeline(request):
-    import markdown
+def people_storyline(request):
+    errors = None
+    page = None
 
-    people = Person.objects.filter(personrole__role_id=167).order_by("name")
+    if request.method == "POST":
+        selection_criteria = PersonTimelineSelectionForm(request.POST)
+
+        if (
+            selection_criteria.is_valid()
+            and selection_criteria.cleaned_data is not None
+        ):
+            timeline_json = people_storyline_build(selection_criteria, request)
+            return render(
+                request, "people/people_timeline.html", {"timeline_json": timeline_json}
+            )
+        else:
+            errors = selection_criteria.errors
+            queryset = Person.objects.prefetch_related("references").order_by(
+                "surname", "firstname"
+            )
+
+    else:
+        previous_criteria = {
+            "role_id": request.session.get("role_id"),
+            "birthyear": request.session.get("birthyear"),
+            "diedyear": request.session.get("diedyear"),
+        }
+
+        if previous_criteria["role_id"]:
+            previous_criteria["role"] = Role.objects.get(
+                id=previous_criteria["role_id"]
+            )
+        else:
+            previous_criteria["role"] = None
+
+        selection_criteria = PersonTimelineSelectionForm(
+            initial=previous_criteria, clear_previous_criteria=True
+        )
+        queryset = Person.objects.prefetch_related("references").order_by(
+            "surname", "firstname"
+        )
+
+    queryset, page = pagination(
+        request, queryset
+    )  # Pass the updated queryset to the pagination function
+
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "page": page,
+        "people": queryset,
+    }
+
+    return render(request, "people/people_timeline_selection.html", context)
+
+
+def people_storyline_build(selection_criteria, request):
+    conditions = Q()
+    header = ""
+    cleandata = selection_criteria.cleaned_data
+
+    if "name" in cleandata and cleandata["name"]:
+        conditions &= Q(name__icontains=cleandata["name"])
+
+    if "role" in cleandata and cleandata["role"]:
+        fk = cleandata["role"].id  # Store the role ID
+        conditions &= Q(personrole__role_id=fk)
+        header += str(cleandata["role"])
+
+    if "birthyear" in cleandata and cleandata["birthyear"]:
+        conditions &= Q(birthdate__startswith=cleandata["birthyear"])
+        header += "Born In " + str(cleandata["birthyear"])
+
+    if "diedyear" in cleandata and cleandata["diedyear"]:
+        conditions &= Q(dieddate__startswith=cleandata["diedyear"])
+        header += "Died In " + str(cleandata["diedyear"])
+
+    people = (
+        Person.objects.filter(conditions)
+        .prefetch_related("references")
+        .order_by("surname", "firstname")
+    )
 
     tdict = {
         "title": {
             "media": {"url": "", "caption": "", "credit": ""},
             "text": {
-                "headline": "LSWR Chief Mechanical Engineers Timeline",
-                "text": "<p>Timeline and the Wikipedia entries for Chief Mechanical Engineers / Locomotive Superintendents of the London and South Western Railway</p>",
+                "headline": "Biographies",
+                "text": header,
             },
         },
         "events": [],
@@ -195,10 +273,7 @@ def people_timeline(request):
 
             tdict["events"].append(event)
 
-    timeline_json = json.dumps(tdict)
-    return render(
-        request, "people/people_timeline.html", {"timeline_json": timeline_json}
-    )
+    return json.dumps(tdict)
 
 
 def people_vis_timeline(request):
@@ -220,6 +295,7 @@ def people_vis_timeline(request):
             }
             events.append(event)
 
+    print(json.dumps(events))
     return render(
         request,
         "people/people_vis_timeline.html",

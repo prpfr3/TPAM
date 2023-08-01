@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "rtt",
     "storages",
     "storymaps",
+    "timelines",
     "TPAM",
     "users",
     "vehicles",

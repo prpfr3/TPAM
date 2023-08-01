@@ -24,6 +24,7 @@ urlpatterns = [
     path("vehicles/", include("vehicles.urls", namespace="vehicles")),
     path("storymaps/", include("storymaps.urls", namespace="storymaps")),
     path("locations/", include("locations.urls", namespace="locations")),
+    path("timelines/", include("timelines.urls", namespace="timelines")),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
