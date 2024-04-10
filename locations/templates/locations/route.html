@@ -5,6 +5,7 @@
 {{map.header.render|safe}}
 <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
 <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+<link href="https://en.wikipedia.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=vector-2022" rel="stylesheet">
 <style type="text/css">
   #visualization {
     border: 5px solid rgb(52, 14, 241);
@@ -14,49 +15,78 @@
     background-color: rgb(99, 151, 230);
     font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
   }
+
+  figcaption {display: table-caption; caption-side: bottom; line-height: 1.4em; word-break: break-word; text-align: left; padding: 0px 10px 10px; border-width: 0px 1px 1px; border-image: initial; font-size: 12.376px; border-color: initial #c8ccd1 #c8ccd1 #c8ccd1; border-style: initial solid solid solid}
+
 </style>
+
 {% endblock header %}
 
-{% block content_title %}Route:- {{route}}{% endblock %}
+{% block content_title %}{{route}}{% endblock %}
 {% block content %}
 
-  {% if map.html %}
-    <h1 class="text-primary">Map</h1>
-    {{map.html.render|safe}}
-  {% endif %}
-  
-  {% if description_type %}
-  <h1 class="text-primary">{{description_type}}</h1>
-    {% autoescape off %}
-    <div>{{ description }}</div>
-    {% endautoescape %}
-    {% endif %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-12 col-lg-12">
 
-  {{wikipage|safe}}
+      {% if map.html %}
+        {{map.html.render|safe}}
+      {% endif %}
 
-  {% autoescape off %}
-  {% if references %}
-    <h3>References</h3>
-    {% for reference in references %}
-        <li>{{reference.full_reference}}</li>         
-    {% empty %}
-    {% endfor %}
-  {% endif %}
-  {% endautoescape %}
+      {% if elrs %}
+        <h1 class="text-primary">Engineering Line References covered by this route</h1>
+        {% for elr in elrs %}
+            <li>{{elr.itemAltLabel}} {{elr.itemLabel}}</li>
+        {% endfor %}  
+      {% endif %}
 
+      {% if route.post_fk.body %}
+        <h1 class="text-primary">Notes</h1>
+        {% autoescape off %}
+        {{route.post_fk.body}}
+        {% endautoescape %}
+      {% endif %}
 
-  {% if timeline_json %}
-    <h1 class="text-primary">Timeline</h1>
-    <div id="visualization">
-      <script type="text/javascript">
-        var container = document.getElementById('visualization');
-        var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
-        var items = new vis.DataSet(jsonObject);
-        var options = {orientation: 'top'};
-        var timeline = new vis.Timeline(container, items, options);
-      </script>
+      {% comment %}
+      <div class="col-3 d-flex align-items-center justify-content-center">
+        {% if route.wikipedia_routemaps %}
+        <a href="{% url 'locations:route_storymap' route.slug %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a>
+        {% else %}
+        -
+        {% endif %}
+      </div>
+      {% endcomment %}
+
+      <h1 class="text-primary text-center mt-3">Wikipedia Page</h1>
+      <iframe src='https://en.wikipedia.org/wiki/{{route.wikipedia_slug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">"<p>Your browser does not support iframes - open map using 'Open Popup' on left</p>"
+        </iframe>
+
+      {% autoescape off %}
+        {% if references %}
+          <h3>References</h3>
+          {% for reference in references %}
+              <li>{{reference.full_reference}}</li>         
+          {% empty %}
+          {% endfor %}
+        {% endif %}
+      {% endautoescape %}
+
+      {% if timeline_json %}
+        <h1 class="text-primary">Timeline</h1>
+        <div id="visualization">
+          <script type="text/javascript">
+            var container = document.getElementById('visualization');
+            var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
+            var items = new vis.DataSet(jsonObject);
+            var options = {orientation: 'top'};
+            var timeline = new vis.Timeline(container, items, options);
+          </script>
+        </div>
+      {% endif %}
+
     </div>
-  {% endif %}
+  </div>
+</div>
 
   <script>{{map.script.render|safe}}</script>
 

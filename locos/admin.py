@@ -32,19 +32,23 @@ class LocoClassListAdmin(admin.ModelAdmin):
 
 class LocomotiveAdmin(admin.ModelAdmin):
     list_display = [
+        "lococlass",
+        "number_as_built",
         "identifier",
-        "number_pregrouping",
-        "number_grouping",
-        "number_postgrouping",
+        "number_pregrouping_1",
+        "number_grouping_1",
+        "number_postgrouping_1",
     ]
     list_filter = ["company_pregrouping_code", "company_grouping_code", "manufacturer"]
     search_fields = (
+        "number_as_built",
         "identifier",
-        "number_pregrouping",
-        "number_grouping",
-        "number_postgrouping",
+        "number_pregrouping_1",
+        "number_grouping_1",
+        "number_postgrouping_1",
+        "lococlass__wikiname",
     )
-    ordering = ("identifier",)
+    ordering = ("number_as_built",)
 
 
 class WheelArrangementAdmin(admin.ModelAdmin):

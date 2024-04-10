@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from locations.models import Location, ELR, ELRLocation
 
 """
-# Run the following Wikidata SPARQL query and save to a csv file called WIkidata_Railway_Stations
+# Run the following Wikidata SPARQL query and save to a csv file called "Locations_Stations_Wikidata.csv"
 # Project Webscraping, file Wikidata_SPARQLWrapper.ipynb has an example of how to do this using Python
 
 SELECT DISTINCT ?item ?itemLabel ?operator ?operatorLabel ?geo ?openedLabel ?closedLabel ?image ?adminareaLabel ?countyLabel ?elrnameLabel ?disused ?railscot ?adjacentLabel ?towards ?interchangeLabel ?elr ?distance ?inceptionLabel ?elevationLabel ?ownedby ?ownedbyLabel ?architectLabel
@@ -36,57 +36,68 @@ WHERE
 }
     """
 import os
+
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 
 
 class Command(BaseCommand):
     # Show this when the user types help
-    help = "Loads data from RailReferences.csv into our NaPTAN Rail References table"
+    help = "Loads data from Locations_Stations_Wikidata.csv into the LocationsELR Table"
 
     def handle(self, *args, **options):
 
-        with open(os.path.join(DATAIO_DIR, "Locations_Stations_Wikidata.csv"), encoding="utf-8") as file:
+        with open(
+            os.path.join(DATAIO_DIR, "Location_Stations_Wikidata.csv"),
+            encoding="utf-8",
+        ) as file:
 
             elrloc = ELRLocation()
 
             count = 0
             saved_count = 0
             for row in DictReader(file):
+
                 count = count + 1
                 # if count > 20:
                 #     break
-                location_slug = row['itemLabel'].replace(' ', '_')
+                location_slug = row["itemLabel"].replace(" ", "_")
 
                 try:
                     locations = Location.objects.filter(wikislug=location_slug)
                 except ObjectDoesNotExist:
-                    print(location_slug, ' not found in the Location table')
+                    print(location_slug, " not found in the Location table")
                 except MultipleObjectsReturned:
-                    print(location_slug, ' multiple instances returned')
+                    print(location_slug, " multiple instances returned")
                 except Exception as e:
                     print(location_slug, e)
                 else:
                     try:
-                        elr_fk = ELR.objects.get(itemAltLabel=row['elr'])
+                        elr = ELR.objects.get(itemAltLabel=row["elr"])
                     except ObjectDoesNotExist:
-                        print(row['elr'], ' not found in the ELR table')
+                        print(row["elr"], " not found in the ELR table")
                     except MultipleObjectsReturned:
-                        print(row['elr'], ' multiple instances returned')
+                        print(row["elr"], " multiple instances returned")
                     except Exception as e:
-                        print(elr_fk, e)
+                        print(elr, e)
                     else:
                         for location in locations:
-                            elrloc = ELRLocation()
-                            elrloc.location_fk = location
-                            elrloc.elr_fk = elr_fk
                             try:
-                                elrloc.distance = float(row['distance'])
+                                elrloc, elrloc_created = (
+                                    ELRLocation.objects.get_or_create(
+                                        location_fk=location, elr_fk=elr
+                                    )
+                                )
                             except Exception as e:
                                 print(
-                                    f'error {e} on distance setting of {row["distance"]} for {location_slug}')
+                                    f"error {e} getting or creating elr location {location} {elr}"
+                                )
+
+                            if row["distance"] != "":
+                                elrloc.distance = float(row["distance"])
                             else:
-                                try:
-                                    elrloc.save()
-                                except Exception as e:
-                                    print(
-                                        f'error {e} saving {location_slug} {row["elr"]}')
+                                elrloc.distance = None
+                            try:
+                                elrloc.save()
+                                print(f"{elrloc} saved")
+                            except Exception as e:
+                                print(f"error {e} saving {elrloc}")

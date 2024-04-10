@@ -22,6 +22,11 @@ class Company(models.Model):
         Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
     )
     company_category_fk = models.ManyToManyField(CompanyCategory, blank=True)
+    successor_company = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, blank=True, null=True, default=None
+    )
+    date_formed = models.CharField(max_length=200, blank=True, null=True)
+    date_succeeded = models.CharField(max_length=200, blank=True, null=True)
 
     def get_absolute_url(self):
         # Enables "View on Site" link in Admin to go to detail view on (non-admin) site
@@ -38,12 +43,10 @@ class Company(models.Model):
 
 class Manufacturer(models.Model):
     name = models.CharField(max_length=200, blank=True, null=True)
-    wikislug = models.SlugField(
-        max_length=250, allow_unicode=True, default=None, blank=True, null=True
-    )
-    railuk_manufacturer_code = models.CharField(max_length=3, blank=True, null=True)
-    brd_manufacturer_code = models.CharField(max_length=3, blank=True, null=True)
-    brsl_manufacturer_code = models.CharField(max_length=10, blank=True, null=True)
+    wikislug = models.CharField(max_length=250, default=None, blank=True, null=True)
+    railuk_code = models.CharField(max_length=3, blank=True, null=True)
+    brd_code = models.CharField(max_length=3, blank=True, null=True)
+    brsl_code = models.CharField(max_length=10, blank=True, null=True)
     location = models.CharField(max_length=200, blank=True, null=True)
     pre_grouping_owner = models.CharField(
         max_length=10, blank=True, default=""

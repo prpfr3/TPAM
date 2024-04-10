@@ -1,0 +1,126 @@
+﻿{% comment %}
+{% extends "../mainmenu/base.html" %}
+{% endcomment %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}TPAM{% endblock title %}</title>
+
+    {% load static %}
+    {% load django_bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% bootstrap_messages %}
+
+    <link rel="stylesheet" href="{% static 'scss/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'scss/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css">
+
+
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Montserrat" >  
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
+    <!-- <link rel="stylesheet" type="text/css" href="https://www.bluebell-railway-museum.co.uk/css/additionalA.css"> -->
+
+<style type="text/css">
+
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+}
+
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("https://django-tpam-paulf.s3.eu-west-2.amazonaws.com/media/Map_of_Southern_Railway_1926.jpg") repeat;
+  background-size: cover;
+}
+
+.container {
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  margin: 20px auto; /* Adjust the margin as needed to ensure the content doesn't cover the map */
+  max-width: 90%; /* Adjust the max-width as needed */
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: calc(100% - 20px); /* Adjust the max-height to fit within the viewport */
+}
+
+.container h1 {
+  position: fixed; /* Fix the position of the h1 element */
+  top: 20px; /* Adjust the top position as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px 10px;
+  z-index: 2; /* Ensure the h1 stays above the content */
+}
+
+.row-container {
+  margin-top: 120px; /* Adjust the top margin to create space below the fixed h1 */
+}
+</style>
+</head>
+
+
+{% block content %}
+<body>
+    <div class="background">
+        <div class="container opaque-container">
+            <h1 class="text-center"><a href="https://en.wikipedia.org/wiki/Southern_Railway_(UK)"> The Southern Railway Constituent Companies and their Routes</a></h1>
+            <div class="row-container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4><a href="https://en.wikipedia.org/wiki/London_and_Brighton_Railway">London and Brighton Railway</a></h4>
+                        {% for route in queryset %}
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                                <div class="row mb-1 d-flex align-items-stretch row-height">
+                                    <div class="col-3 d-flex align-items-center justify-content-center">
+                                        <a href="https://en.wikipedia.org//wiki/{{route.wikipedia_slug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
+                                    </div>
+                                    <div class="col-3 d-flex align-items-center justify-content-center">
+                                        <a href="{% url 'locations:route_storymap' route.slug %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="{% url 'locations:route' route.slug %}">{{route.name}}</a>
+                                    </div>
+                                </div>
+                            {% empty %}
+                            <h2>No routes found.</h2>
+                            {% endfor %}                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+    {% comment %}
+    <div class="bd-example">
+        <ul class="list-group">
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:locations' %}">Locations</a>    
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:routes' %}">Routes</a>
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:route_sections' %}">Route Sections</a>
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:elrs' %}">ELRs</a>
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:regional_map_select' %}">Regional Railway Map</a>
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:heritage_sites' %}">Museums & Heritage Sites </a>       
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:visits' %}">Heritage Site Visits</a>
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:regional_map_select' %}">Closed Lines Map</a>
+            <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:location_timeline' %}">Location Timeline</a>
+        </ul>
+    </div>
+
+    {% endcomment %}
+
+{% endblock %}

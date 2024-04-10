@@ -1,9 +1,13 @@
+import sys
+import datetime
+
 from django.db import models
 from notes.models import Post, Reference
 from people.models import Person
 from companies.models import Company, Manufacturer
 
-import datetime
+sys.path.append("..")
+from utils.utils import custom_slugify
 
 
 class WheelArrangement(models.Model):
@@ -23,11 +27,14 @@ class WheelArrangement(models.Model):
 
 
 class LocoClass(models.Model):
-    SOURCE_TYPE = (
+    SOURCE = (
         (1, "Wikipedia"),
         (2, "Custom"),
     )
 
+    slug = models.CharField(
+        default=None, null=True, blank=True, max_length=255, unique=True, editable=False
+    )
     wikiname = models.CharField(max_length=1000, blank=True, default="")
     brdslug = models.CharField(default=None, blank=True, null=True, max_length=255)
 
@@ -74,6 +81,7 @@ class LocoClass(models.Model):
     displacement = models.CharField(max_length=200, blank=True, default="")
     disposition = models.CharField(max_length=200, blank=True, default="")
     driver_diameter = models.CharField(max_length=200, blank=True, default="")
+    driving_unit_wheelbase = models.CharField(max_length=200, blank=True, default="")
     electric_systems = models.CharField(max_length=200, blank=True, default="")
     engine_maximum_rpm = models.CharField(max_length=50, blank=True, default="")
     engine_type = models.CharField(max_length=100, blank=True, default="")
@@ -96,6 +104,7 @@ class LocoClass(models.Model):
     high_pressure_cylinder = models.CharField(max_length=200, blank=True, default="")
     leading_diameter = models.CharField(max_length=200, blank=True, default="")
     length_over_beams = models.CharField(max_length=200, blank=True, default="")
+    length_over_buffers = models.CharField(max_length=200, blank=True, default="")
     length = models.CharField(max_length=200, blank=True, default="")
     loco_brake = models.CharField(max_length=200, blank=True, default="")
     loco_weight = models.CharField(max_length=250, blank=True, default="")
@@ -109,9 +118,11 @@ class LocoClass(models.Model):
     number_in_class = models.CharField(max_length=200, blank=True, default="")
     number_rebuilt = models.CharField(max_length=200, blank=True, default="")
     numbers = models.CharField(max_length=700, blank=True, default="")
+    number_of_tubes = models.CharField(max_length=700, blank=True, default="")
     official_name = models.CharField(max_length=200, blank=True, default="")
     order_number = models.CharField(max_length=200, blank=True, default="")
     pivot_centres = models.CharField(max_length=200, blank=True, default="")
+    pony_wheel_diameter = models.CharField(max_length=200, blank=True, default="")
     power_class = models.CharField(max_length=200, blank=True, default="")
     power_output = models.CharField(max_length=200, blank=True, default="")
     power_output_one_hour = models.CharField(max_length=200, blank=True, default="")
@@ -126,6 +137,7 @@ class LocoClass(models.Model):
     safety_systems = models.CharField(max_length=200, blank=True, default="")
     serial_number = models.CharField(max_length=250, blank=True, default="")
     superheater_type = models.CharField(max_length=200, blank=True, default="")
+    superheater_elements = models.CharField(max_length=200, blank=True, default="")
     tender_capacity = models.CharField(max_length=200, blank=True, default="")
     tender_type = models.CharField(max_length=200, blank=True, default="")
     tender_weight = models.CharField(max_length=300, blank=True, default="")
@@ -136,6 +148,8 @@ class LocoClass(models.Model):
     train_brakes = models.CharField(max_length=200, blank=True, default="")
     train_heating = models.CharField(max_length=200, blank=True, default="")
     transmission = models.CharField(max_length=200, blank=True, default="")
+    tube_length = models.CharField(max_length=200, blank=True, default="")
+    tube_diameter_outside = models.CharField(max_length=200, blank=True, default="")
     UIC = models.CharField(max_length=200, blank=True, default="")
     valve_gear = models.CharField(max_length=200, blank=True, default="")
     valve_type = models.CharField(max_length=200, blank=True, default="")
@@ -165,6 +179,7 @@ class LocoClass(models.Model):
     references = models.ManyToManyField(
         Reference, related_name="lococlass_references", blank=True
     )
+
     owner_operators = models.ManyToManyField(
         Company, related_name="lococlass_owner_operators", blank=True
     )
@@ -180,6 +195,10 @@ class LocoClass(models.Model):
 
     def __str__(self):
         return self.wikiname
+
+    def save(self, *args, **kwargs):
+        self.slug = self.wikiname.replace(" ", "_").replace("/", "%2F")
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Locomotive Class"
@@ -207,10 +226,20 @@ class LocoClassList(models.Model):
 
 class Locomotive(models.Model):
     identifier = models.CharField(max_length=500, blank=True, null=True)
+
     number_as_built = models.CharField(max_length=20, blank=True, null=True)
-    number_pregrouping = models.CharField(max_length=20, blank=True, null=True)
-    number_grouping = models.CharField(max_length=20, blank=True, null=True)
-    number_postgrouping = models.CharField(max_length=20, blank=True, null=True)
+    number_pregrouping_1 = models.CharField(max_length=20, blank=True, null=True)
+    number_pregrouping_1_date = models.CharField(max_length=10, blank=True, null=True)
+    number_pregrouping_2 = models.CharField(max_length=20, blank=True, null=True)
+    number_pregrouping_2_date = models.CharField(max_length=10, blank=True, null=True)
+    number_grouping_1 = models.CharField(max_length=20, blank=True, null=True)
+    number_grouping_1_date = models.CharField(max_length=10, blank=True, null=True)
+    number_grouping_2 = models.CharField(max_length=20, blank=True, null=True)
+    number_grouping_2_date = models.CharField(max_length=10, blank=True, null=True)
+    number_postgrouping_1 = models.CharField(max_length=20, blank=True, null=True)
+    number_postgrouping_1_date = models.CharField(max_length=10, blank=True, null=True)
+    number_postgrouping_2 = models.CharField(max_length=20, blank=True, null=True)
+    number_postgrouping_2_date = models.CharField(max_length=10, blank=True, null=True)
     brd_slug = models.CharField(max_length=250, blank=True, null=True)
     order_number = models.CharField(max_length=30, blank=True, null=True)
     brd_order_number_slug = models.CharField(max_length=250, blank=True, null=True)
@@ -225,6 +254,7 @@ class Locomotive(models.Model):
     manufacturer = models.CharField(max_length=50, blank=True, null=True)
     withdrawn_date = models.CharField(max_length=10, blank=True, null=True)
     withdrawn_datetime = models.DateField(blank=True, null=True)
+    mileage = models.IntegerField(blank=True, null=True)
     scrapped_date = models.CharField(max_length=10, blank=True, null=True)
     scrapped_datetime = models.DateField(blank=True, null=True)
     company_grouping_code = models.CharField(max_length=10, blank=True, null=True)
@@ -240,9 +270,15 @@ class Locomotive(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
 
     references = models.ManyToManyField(Reference, blank=True)
+    notes = models.TextField(blank=True, null=True)
     post_fk = models.ForeignKey(
         Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
     )
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        return reverse("locos:locomotive", kwargs={"locomotive_id": self.pk})
 
     def __str__(self):
         return f"{self.company_grouping_code} \

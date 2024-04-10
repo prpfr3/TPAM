@@ -1,0 +1,13 @@
+{% extends "../mainmenu/base.html" %}
+{% block title %}Region Select{% endblock %}
+{% block header %}{% load django_bootstrap5 %}{% endblock %}
+{% block content_title %}Choose a Region{% endblock %}
+{% block content_desc %}{% endblock %}
+{% block content %}
+  <form method='POST' action="">
+      {% csrf_token %}
+      {{regions}}
+      <p></p><p></p>
+      {% bootstrap_button "Generate Map" button_type="submit" button_class="btn-primary" %}
+  </form>
+{% endblock content %}

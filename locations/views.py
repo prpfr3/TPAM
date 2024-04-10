@@ -1,79 +1,86 @@
-import datetime
 import json
 import urllib
 import wikipediaapi
+import folium
+from folium.plugins import MarkerCluster
+
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-
-from django.http import HttpRequest, HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, QueryDict
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.generic import ListView, TemplateView
+from django.db.models import Q
 
 from notes.models import Reference
 from mainmenu.views import pagination
+
+# from ukheritage.views import map_points
 
 from .forms import *
 from .models import *
 from .utils import *
 
 
-def home(request):
-    assert isinstance(request, HttpRequest)
-    return render(
-        request,
-        "locations/index.html",
-        {
-            "title": "Home Page",
-            "year": datetime.now().year,
-        },
-    )
-
-
 def index(request):
-    return render(request, "locations/index.html")
+
+    query = Q()
+
+    # if "owner_operators" in cleandata and cleandata["owner_operators"]:
+    #     fk = cleandata["owner_operators"]
+    #     query &= Q(owneroperators=fk)
+
+    # queryset = Route.objects.filter(query).order_by("name")
+    queryset = None
+
+    return render(request, "locations/index.html", {"queryset": queryset})
 
 
 def locations(request):
+    errors = None
+    queryset = Location.objects.order_by("name")
+    selection_criteria = LocationSelectionForm(request.GET or None)
+
     if request.method == "POST":
-        selection_criteria = LocationSelectionForm(request.POST)
-        if (
-            selection_criteria.is_valid()
-            and selection_criteria.cleaned_data["wikiname"] != None
-        ):
-            queryset = Location.objects.filter(
-                wikiname__icontains=selection_criteria.cleaned_data["wikiname"]
-            ).order_by("wikiname", "name")
-            errors = None
-        elif (
-            selection_criteria.is_valid()
-            and str(selection_criteria.cleaned_data["type"]) != None
-        ):
-            queryset = Location.objects.filter(
-                type__icontains=selection_criteria.cleaned_data["type"]
-            ).order_by("wikiname", "name")
-            errors = None
-        else:
-            errors = selection_criteria.errors or None
-            queryset = Location.objects.order_by("wikiname", "name")
-    else:
-        selection_criteria = LocationSelectionForm()
-        errors = selection_criteria.errors or None
-        queryset = Location.objects.order_by("wikiname", "name")
+        # Use GET method for form submission
+        return redirect(request.path_info + "?" + request.POST.urlencode())
+
+    if not selection_criteria.is_valid():
+        errors = selection_criteria.errors
+
+    if selection_criteria.is_valid():
+        query = Q()
+        name_query = selection_criteria.cleaned_data.get("name", "")
+        categories_query = selection_criteria.cleaned_data.get("categories", "")
+
+        if name_query:
+            query &= Q(name__icontains=name_query)
+
+        if categories_query:
+            query &= Q(categories=categories_query)
+
+        queryset = Location.objects.filter(query).order_by("name")
 
     queryset, page = pagination(request, queryset)
+
+    # Retain existing query parameters for pagination
+    query_params = QueryDict("", mutable=True)
+    query_params.update(request.GET)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
-        "locations": queryset,
+        "queryset": queryset,
+        "query_params": query_params.urlencode(),
     }
     return render(request, "locations/locations.html", context)
 
 
 def location(request, location_id):
     location = Location.objects.get(id=location_id)
+    categories = location.categories.all()
+    posts = location.posts.all()
 
     sql = """ 
     SELECT ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry))
@@ -82,174 +89,143 @@ def location(request, location_id):
     WHERE a.id = %s;
     """
     coords = execute_sql(sql, [location_id])
-    y_coord = coords[0][0]
-    x_coord = coords[0][1]
+    y_coord = coords[0].get("st_y")
+    x_coord = coords[0].get("st_x")
     #  = f'https://maps.nls.uk/geo/explore/print/#zoom=15&lat={location.geometry.y}&lon={location.geometry.x}&layers=168&b=5'
-    nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=15&lat={y_coord}&lon={x_coord}&layers=168&b=5"
-
-    # Get text describing the location either from a custom post, else Wikipedia, else none
-    if location.post_fk:
-        description = location.post_fk.body
-        description_type = "Notes"
-    elif location.wikislug:
-        wiki_wiki = wikipediaapi.Wikipedia(
-            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
-        )
-        slug = location.wikislug.replace("/wiki/", "")
-        slug = urllib.parse.unquote(slug, encoding="utf-8", errors="replace")
-        description = wiki_wiki.page(slug).text
-        description_type = "From Wikipedia:-"
-    else:
-        description = None
-        description_type = None
+    nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=16&lat={y_coord}&lon={x_coord}&layers=168&b=5"
 
     context = {
         "location": location,
-        "description_type": description_type,
-        "description": description,
         "nls_url": nls_url,
+        "categories": categories,
     }
     return render(request, "locations/location.html", context)
 
 
 def routes(request):
+    figure = None
     errors = None
+    queryset = Route.objects.order_by("name")
+    selection_criteria = RouteSelectionForm(request.GET or None)
 
     if request.method == "POST":
-        selection_criteria = RouteSelectionForm(request.POST)
+        # Use GET method for form submission
+        return redirect(request.path_info + "?" + request.POST.urlencode())
 
-        if selection_criteria.is_valid() and str(
-            selection_criteria.cleaned_data["name"]
-        ):
-            queryset = Route.objects.filter(
-                name__icontains=selection_criteria.cleaned_data["name"]
-            ).order_by("name")
-        elif (
-            selection_criteria.is_valid()
-            and str(selection_criteria.cleaned_data["wikipedia_categories"]) != "None"
-        ):
-            queryset = Route.objects.filter(
-                wikipedia_categories__in=selection_criteria.cleaned_data[
-                    "wikipedia_categories"
-                ]
-            ).order_by("name")
-        else:
-            errors = selection_criteria.errors or None
-            queryset = Route.objects.order_by("name")
-    else:
-        selection_criteria = RouteSelectionForm()
+    if not selection_criteria.is_valid():
         errors = selection_criteria.errors
-        queryset = Route.objects.order_by("name")
+
+    if selection_criteria.is_valid():
+        query = Q()
+        cleandata = selection_criteria.cleaned_data
+
+        if "name" in cleandata and cleandata["name"]:
+            query &= Q(name__icontains=cleandata["name"])
+
+        if "owner_operators" in cleandata and cleandata["owner_operators"]:
+            fk = cleandata["owner_operators"]
+            query &= Q(owneroperators=fk)
+
+        if "categories" in cleandata and cleandata["categories"]:
+            fk = cleandata["categories"]
+            query &= Q(categories=fk)
+
+        queryset = Route.objects.filter(query).order_by("name")
+
+        # Check the value of the "action" parameter
+        if "action" in request.GET:
+            action = request.GET["action"]
+
+            if action == "map":  # Defaults to "list" if not map
+                figure = routes_mapdata_extract(queryset)
+
+    queryset, page = pagination(request, queryset)
+
+    # Retain existing query parameters for pagination links
+    query_params = QueryDict("", mutable=True)
+    query_params.update(request.GET)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
-        "routes": queryset,
+        "queryset": queryset,
+        "query_params": query_params.urlencode(),  # Pass query_params to the template
+        "map": figure,
     }
     return render(request, "locations/routes.html", context)
 
 
-def route(request, route_id):
-    import urllib
-    import wikipediaapi
+def route(request, slug):
 
-    route = Route.objects.get(id=route_id)
-    references = route.references.all()
+    route = Route.objects.get(slug=slug)
+    references = route.references.all
+    elrs = route.elrs.all
+    routes = [route]
+    figure = routes_mapdata_extract(routes)
 
-    # # Get either a customised post or otherwise a wikipedia page
-    if route.post_fk:
-        description = route.post_fk.body
-        description_type = "Notes"
-    elif route.wikipedia_slug:
-        import sys
-
-        wikipediaapi.log.setLevel(level=wikipediaapi.logging.DEBUG)
-
-        # Set handler if you use Python in interactive mode
-        out_hdlr = wikipediaapi.logging.StreamHandler(sys.stderr)
-        out_hdlr.setFormatter(wikipediaapi.logging.Formatter("%(asctime)s %(message)s"))
-        out_hdlr.setLevel(wikipediaapi.logging.DEBUG)
-        wikipediaapi.log.addHandler(out_hdlr)
-
-        wiki_wiki = wikipediaapi.Wikipedia(
-            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
-        )
-        slug = route.wikipedia_slug.replace("/wiki/", "")
-        slug = urllib.parse.unquote(slug, encoding="utf-8", errors="replace")
-        page_html = wiki_wiki.page(slug)
-        description = page_html.text
-        description_type = "From Wikipedia:-"
-    else:
-        description = None
-        description_type = None
-
-    figure = None
     events_json = None
-    locations = None
-
-    if (
-        routemaps := route.wikipedia_routemaps.all()
-    ):  # i.e. If the route has any wikipedia routemaps
-        """THIS DJANGO ORM CODE SUPERSEDED BY SUBSEQUENT SQL TO REMOVE GDAL DEPENDENCIES WHICH COMPLICATE PRODUCTION DEPLOY
-        if locations := Location.objects.filter(
-            routelocation__routemap=routemaps[0].id):
-            figure = generate_folium_map(None, route.name, locations)
-        """
-
-        sql = """
-            SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
-                ST_Y(ST_CENTROID(a.geometry)),
-                ST_X(ST_CENTROID(a.geometry)),
-                a."media_url"
-            FROM "locations_location" AS a
-            INNER JOIN "locations_routelocation" AS b
-                ON (a."id" = b."location_fk_id")
-            WHERE a."geometry" IS NOT NULL AND b."routemap_id" = %s;
-        """
-
-        if locations := execute_sql(sql, [routemaps[0].id]):
-            # Calculate the Boundary Box from the Locations
-            sql = """ 
-            SELECT max(ST_Ymax(geometry)), max(ST_Xmax(geometry)), min(ST_Ymin(geometry)), min(ST_Xmin(geometry))
-            FROM "locations_location"
-            INNER JOIN "locations_routelocation"
-                ON ("locations_location"."id" = "locations_routelocation"."location_fk_id")
-            WHERE "locations_routelocation"."routemap_id" = %s;
-            """
-            bounds = execute_sql(sql, [routemaps[0].id])
-            west = bounds[0][3]
-            south = bounds[0][2]
-            east = bounds[0][1]
-            north = bounds[0][0]
-            bound_box = [[south, west], [north, west], [north, east], [south, east]]
-
-    elr_geojsons = None
-
-    if elrs := route.elrs.all():
-        elr_geojsons = []
-        for elr in elrs:
-            elr = ELR.objects.get(id=elr.id)
-            elr_geojson = osm_elr_fetch(elr.itemAltLabel)
-            elr_geojsons.append(elr_geojson)
-            # Boundary box is currently calculated above based on the locations in scope
-            # Alternative would be to calculate boudary box from the ELR but complicated if multiple ELRs
-            # bound_box = geojson_boundbox(elr_geojson['features'])
-
-    if locations or elr_geojsons:
-        figure = generate_folium_map_sql(elr_geojsons, route.name, locations, bound_box)
-
-    if route_events := LocationEvent.objects.filter(route_fk_id=route_id):
+    if route_events := LocationEvent.objects.filter(route_fk_id=route.id):
         events_json = events_timeline(route_events)
 
     context = {
         "map": figure,
-        "route": route.name,
+        "route": route,
+        "elrs": elrs,
         "references": references,
-        "description_type": description_type,
-        "description": description,
         "timeline_json": events_json,
     }
     return render(request, "locations/route.html", context)
+
+
+def route_sections(request):
+    if request.method == "POST":
+        selection_criteria = RouteSectionSelectionForm(request.POST)
+
+        if selection_criteria.is_valid():
+            if str(selection_criteria.cleaned_data["name"]):
+                queryset = RouteSection.objects.filter(
+                    name__icontains=selection_criteria.cleaned_data["name"]
+                ).order_by("name")
+                errors = None
+        else:
+            errors = selection_criteria.errors or None
+            queryset = RouteSection.objects.order_by("name")
+
+    else:
+        selection_criteria = RouteSectionSelectionForm()
+        errors = selection_criteria.errors or None
+        queryset = RouteSection.objects.order_by("name")
+
+    queryset, page = pagination(request, queryset)
+
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "queryset": queryset,
+    }
+    return render(request, "locations/route_sections.html", context)
+
+
+def route_section(request, route_section_id):
+
+    # Temporarily built to generate a route page rather than route_section
+
+    route_section = RouteSection.objects.get(id=route_section_id)
+    route = Route.objects.get(id=route_section.route_fk.id)
+    figure = route_section_mapdata_extract(route, route_section)
+
+    # events_json = None
+    # if route_events := LocationEvent.objects.filter(route_fk_id=route.id):
+    #     events_json = events_timeline(route_events)
+
+    context = {
+        "map": figure,
+        "route_section": route_section,
+        "elrs": None,
+        "references": None,
+        "timeline_json": None,
+    }
+    return render(request, "locations/route_section.html", context)
 
 
 def events_timeline(events_in):
@@ -271,12 +247,12 @@ def events_timeline(events_in):
     return json.dumps(events_out)
 
 
-def route_storymap(request, route_id):
-    import urllib
-    import wikipediaapi
+def route_storymap(request, slug):
+
+    from storymaps.views import get_wikipage_html
 
     storymap_json = None
-    route = Route.objects.get(id=route_id)
+    route = Route.objects.get(slug=slug)
 
     if (
         routemaps := route.wikipedia_routemaps.all()
@@ -301,133 +277,119 @@ def route_storymap(request, route_id):
 
             # If the route has a post recorded for it, it should be used in preference to the wikipedia page for the route description
             if route.post_fk:
+                header_title = route.post_fk.title
                 header_text = route.post_fk.body
             else:
-                wikislug = wikislug.replace("/wiki/", "")
-                pagename = wikislug.replace("_", " ")
-                pagename = urllib.parse.unquote(
+                pagename = route.wikipedia_slug.replace("_", " ")
+                wikipage = urllib.parse.unquote(
                     pagename, encoding="utf-8", errors="replace"
                 )
+                header_title = wikipage
                 wiki_wiki = wikipediaapi.Wikipedia(
                     language="en", extract_format=wikipediaapi.ExtractFormat.HTML
                 )
 
-                if wikislug and wiki_wiki.page(wikislug).exists:
-                    text_array = wiki_wiki.page(wikislug).text.split(
-                        "<h2>References</h2>"
-                    )
-                    header_text = text_array[0]
+                # VARIANTS FOR THE TEXT TO APPEAR ON THE STORYMAP FRONT PAGE
+                # This variant gets only the text up to the Notes or References section
+                if wiki_wiki.page(wikipage).exists:
+                    text_array = wiki_wiki.page(wikipage).text.split("<h2>Notes</h2>")
+                    header_text = text_array[0].split("<h2>References</h2>")
+
+                # This variant gets only the summary text
+                if wiki_wiki.page(wikipage).exists:
+                    header_text = wiki_wiki.page(wikipage).summary
+
+                # This variant gets the routemap template page rather than the route page
+                routemaps = route.wikipedia_routemaps.all()
+                url = f"https://en.wikipedia.org/wiki/Template:{str(routemaps[0])}"
+                header_text = get_wikipage_html(url)
+
+                # This variant gets all the html
+                url = f"https://en.wikipedia.org/wiki/{wikipage}"
+                header_text = get_wikipage_html(url)
 
             storymap_json = generate_storymap(
                 header_title, header_text, slide_locations
             )
 
+            # Specify the file path where you want to save the JSON file
+            output_file_path = (
+                "D:\OneDrive\Source\FE Projects\BRMTimeline\\bluebell_storymap.json"
+            )
+
+            # Write the storymap_json to the JSON file
+            # with open(output_file_path, "w") as json_file:
+            #     json_file.write(json.dumps(storymap_json, indent=2))
+
     return render(request, "locations/storymap.html", {"storymap_json": storymap_json})
 
 
-def osm_railmap_county_select(request):
-    if request.method == "POST":
-        location_list = LocationChoiceField(request.POST)
-
-        if location_list.is_valid():
-            selected_location = location_list.cleaned_data["locations"]
-            county = str(selected_location)
-            return HttpResponseRedirect(
-                reverse("locations:osm_railmap_county", args=[county])
-            )
-    else:
-        location_list = LocationChoiceField()
-        errors = location_list.errors or None
-        context = {
-            "location_list": location_list,
-            "errors": errors,
-        }
-        return render(request, "locations/county_select.html", context)
+class ClosedLinesRegionSelectView(RegionSelectView):
+    redirect_view_name = "locations:map_closed_lines"
 
 
-def osm_railmap_county(request, county):
-    import osm2geojson
-    import requests
+class RegionalMapSelectView(RegionSelectView):
+    redirect_view_name = "locations:regional_map"
 
-    # Get the county record to calculate the centre of the map
-    """ THIS IS GEOPANDAS CODE SUPERSEDED BY NATIVE SQL CODE BELOW TO REMOVE GDAL DEPENDENCIES
 
-    import os
-    import geopandas as gpd
-    from django.conf import settings
-    from sqlalchemy import create_engine, text
-    
-    db_connection_url = os.environ.get('DATABASE_URL') or settings.DATABASE_URL
-    con = create_engine(db_connection_url)
-    sql = text('SELECT * FROM public."locations_UK_admin_boundaries" WHERE ctyua19nm = :county')
-    df_county = gpd.GeoDataFrame.from_postgis(sql, con, geom_col="geometry", params={"county":county}, crs="EPSG:4326")
-    df_bounds = df_county.bounds
+def regional_map(request, geo_area):
 
-    south = df_bounds.miny[0]
-    west = df_bounds['minx'][0]
-    north = df_bounds['maxy'][0]
-    east = df_bounds['maxx'][0]
-    """
-
-    # Calculate the boundary box from the County Geometry
+    # Calculate the boundary box from the Region Geometry
     sql = """SELECT ST_XMin(geometry), ST_YMin(geometry), ST_XMax(geometry), ST_YMax(geometry),
     ST_Y(ST_CENTROID(geometry)), ST_X(ST_CENTROID(geometry))
-    FROM public."locations_UK_admin_boundaries" WHERE ctyua19nm = %s;"""
-    bounds = execute_sql(sql, [county])
-    west = bounds[0][0]
-    south = bounds[0][1]
-    east = bounds[0][2]
-    north = bounds[0][3]
-    bound_box_sql = [[south, west], [north, west], [north, east], [south, east]]
+    FROM public."locations_ukarea" WHERE "ITL121NM" = %s;"""
+    ukarea_bounds = execute_sql(sql, [geo_area])
+    west = ukarea_bounds[0]["st_xmin"]
+    south = ukarea_bounds[0]["st_ymin"]
+    east = ukarea_bounds[0]["st_xmax"]
+    north = ukarea_bounds[0]["st_ymax"]
 
-    # Calculate the Boundary Box from the Locations
-    sql = """ 
-    SELECT max(ST_Ymax(a.geometry)), max(ST_Xmax(a.geometry)), min(ST_Ymin(a.geometry)), min(ST_Xmin(a.geometry))
-    FROM 
-    public."locations_location" AS a JOIN public."locations_UK_admin_boundaries" as b 
-    ON ST_WITHIN(a.geometry, b.geometry) 
-    WHERE b.ctyua19nm = %s;
-    """
-    bounds = execute_sql(sql, [county])
-    west = bounds[0][3]
-    south = bounds[0][2]
-    north = bounds[0][0]
-    bound_box_sql = [[south, west], [north, west], [north, east], [south, east]]
-
-    # Get all the OSM data within the county
-    overpass_url = "http://overpass-api.de/api/interpreter"
-    overpass_query = f"""
-        [out:json];
-        node({south}, {west}, {north}, {east})["railway"];
-        way({south}, {west}, {north}, {east})["railway"];
-        out geom;
-        """
-    response = requests.get(overpass_url, params={"data": overpass_query})
-    data = response.json()
-    # Convert OSM json to Geojson. Warning ! The osm2geojson utility is still under development
-    geojsons = [osm2geojson.json2geojson(data)]
-    # Get all the locations within the county
-    """ THIS IS DJANGO ORM CODE SUPERSEDED BY NATIVE SQL CODE BELOW TO REMOVE GDAL DEPENDENCIES
-    county_record = UkAdminBoundaries.objects.filter(ctyua19nm=county)
-    locations_orm = Location.objects.filter(geometry__within=county_record[0].geometry)
+    sql = """
+    SELECT 
+        *
+    FROM
+        public."locations_elr" AS a 
+    JOIN
+        (SELECT ST_MakeEnvelope(%s, %s, %s, %s, 4326) AS geometry) AS b
+    ON
+        ST_Within(a.geometry, b.geometry);
     """
 
-    sql = """ 
-    SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
-    ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry)),
-    a."media_url"
-    FROM 
-    public."locations_location" AS a JOIN public."locations_UK_admin_boundaries" as b 
-    ON ST_WITHIN(a.geometry, b.geometry) 
-    WHERE a."geometry" IS NOT NULL AND b.ctyua19nm = %s;
-    """
-    locations = execute_sql(sql, [county])
+    elrs = execute_sql(sql, [west, south, east, north])
 
-    if geojsons:
-        figure = generate_folium_map_sql(geojsons, county, locations, bound_box_sql)
-    else:
-        figure = None
-    context = {"map": figure, "title": county}
+    locations = None
+
+    sql = """
+    SELECT 
+        a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        ST_Y(ST_CENTROID(a.geometry)),
+        ST_X(ST_CENTROID(a.geometry)),
+        a."media_url"
+    FROM
+        public."locations_location" AS a 
+    JOIN
+        (SELECT ST_MakeEnvelope(%s, %s, %s, %s, 4326) AS geometry) AS b
+    ON
+        ST_Intersects(a.geometry, b.geometry);
+    """
+
+    locations = execute_sql(sql, [west, south, east, north])
+
+    elr_geojsons = None
+
+    for elr in elrs:
+        if elr["geodata"]:
+            if elr_geojsons is None:
+                elr_geojsons = []
+            geojson = json.loads(elr["geodata"])
+            elr_geojsons.append(geojson)
+
+    figure = None
+    if locations or elr_geojsons:
+        figure = generate_folium_map(elr_geojsons, locations)
+
+    title = f"Map for the {geo_area} Region of the UK"
+    context = {"map": figure, "title": title}
     return render(request, "locations/folium_map.html", context)
 
 
@@ -464,46 +426,32 @@ def elrs(request):
 
 def elr_map(request, elr_id):
     elr = ELR.objects.get(id=elr_id)
+    if elr.geodata:
+        elr_geojsons = []
+        elr_geojsons.append(elr.geodata)
 
-    elr_geojsons = [osm_elr_fetch(elr.itemAltLabel)]
-    """ THIS IS DJANGO ORM CODE SUPERSEDED BY NATIVE SQL CODE BELOW TO REMOVE GDAL DEPENDENCIES
-    locations_orm = Location.objects.filter(elr_fk__itemAltLabel=elr.itemAltLabel)
+        sql = """
+        SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry)), a."media_url", b."itemAltLabel", b."itemLabel"
+        FROM "locations_location" AS a
+        INNER JOIN "locations_elrlocation" AS c ON a."id" = c."location_fk_id"
+        INNER JOIN "locations_elr" AS b ON c."elr_fk_id" = b."id"
+        WHERE b."id" = %s;
+        """
+        locations = execute_sql(sql, [elr_id])
 
-    if len(geojson['features']) != 0:
-        figure = generate_folium_map(geojson, title, locations_orm)
-    else:
-        figure = None
-    """
-
-    sql = """ 
-    SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
-    ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry)), b."itemAltLabel", b."itemLabel"
-    FROM "locations_location" AS a INNER JOIN "locations_elr" AS b
-    ON (a."elr_fk_id" = b."id" ) 
-    WHERE b."id" = %s;
-    """
-
-    locations_sql = execute_sql(sql, [elr_id])
-
-    if (
-        elr_geojsons
-    ):  # i.e. If OSM has some geodata relating to the ELR then generate the map
         title = f"{elr.itemAltLabel}: {elr.itemLabel}"
-        bound_box = geojson_boundbox(elr_geojsons[0]["features"])
-        figure = generate_folium_map_sql(elr_geojsons, title, locations_sql, bound_box)
+        figure = generate_folium_map(elr_geojsons, locations)
     else:
         figure = None
+        title = None
 
     context = {"map": figure, "title": title}
     return render(request, "locations/folium_map.html", context)
 
 
 def elr_storymap(request, elr_id):
-    import urllib
-    import wikipediaapi
-
-    storymap_json = None
-    route = ELR.objects.get(id=elr_id)
+    elr = ELR.objects.get(id=elr_id)
 
     sql = """ 
     SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
@@ -511,20 +459,37 @@ def elr_storymap(request, elr_id):
         ST_X(ST_CENTROID(a.geometry)),
         a."media_caption",
         a."media_credit",
-        a."media_url"
+        a."media_url",
+        c."distance"
     FROM "locations_location" AS a 
-    INNER JOIN "locations_elr" AS b
-        ON (a."elr_fk_id" = b."id" ) 
-    WHERE b."id" = %s;
+    INNER JOIN "locations_elrlocation" AS c ON a."id" = c."location_fk_id"
+    INNER JOIN "locations_elr" AS b ON c."elr_fk_id" = b."id"
+    WHERE b."id" = %s
+    ORDER BY c."distance";
     """
+    storymap_json = None
 
     if slide_locations := execute_sql(sql, [elr_id]):
-        header_title = f"{route.itemAltLabel}: {route.itemLabel}"
+        header_title = f"{elr.itemAltLabel}: {elr.itemLabel}"
 
         # If the elr has some notes
-        header_text = route.post_fk.body if route.post_fk else ""
+        header_text = elr.post_fk.body if elr.post_fk else ""
         storymap_json = generate_storymap(header_title, header_text, slide_locations)
     return render(request, "locations/storymap.html", {"storymap_json": storymap_json})
+
+
+def elr_display_osmdata(request, elr_id):
+    elr = ELR.objects.get(id=elr_id)
+
+    elr_geojson = [osm_elr_fetch(elr.itemAltLabel, None)]
+
+    if elr_geojson:  # i.e. If OSM has some geodata relating to the ELR then display it
+        title = f"{elr.itemAltLabel}: {elr.itemLabel}"
+    else:
+        figure = None
+
+    context = {"elr_geojson": elr_geojson[0]["features"], "title": title}
+    return render(request, "locations/elr_display_osmdata.html", context)
 
 
 class HeritageSiteListView(ListView):
@@ -561,3 +526,117 @@ def visit(request, visit_id):
 
     context = {"visit": visit, "page": page, "images": images}
     return render(request, "maps/visit.html", context)
+
+
+# class MapClosedLines(TemplateView):
+
+#     template_name = "locations/folium_map.html"
+
+#     def get_context_data(self, **kwargs):
+#         geo_area = self.kwargs["geo_area"]
+
+#         sql = """SELECT ST_Y(ST_CENTROID(geometry)), ST_X(ST_CENTROID(geometry)) FROM public."locations_ukarea" WHERE "ITL121NM" = %s;"""
+#         centroid = execute_sql_nofieldnames(sql, [geo_area])
+
+#         basemap = folium.Map(
+#             centroid[0],
+#             zoom_start=10,
+#             tiles="cartodb positron",
+#             prefer_canvas=True,
+#             height=500,
+#         )
+#         marker_cluster = MarkerCluster().add_to(basemap)
+
+#         sql = """
+#         SELECT a."name", NULL, ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry)), ST_AsGeoJSON(a.geometry)
+#         FROM
+#         public."locations_routes_geo_closed" AS a JOIN public."locations_ukarea" as b
+#         ON ST_WITHIN(a.geometry, b.geometry)
+#         WHERE b."ITL121NM" = %s ;
+#         """
+#         results = execute_sql_nofieldnames(sql, [geo_area])
+
+#         map_points(results, marker_cluster, basemap)
+
+#         figure = folium.Figure()
+#         basemap.add_to(figure)
+#         figure.render()
+#         return {"map": figure, "title": geo_area}
+
+
+# def calculate_centroid(coordinates):
+#     total_x = total_y = 0
+#     num_points = len(coordinates)
+
+#     # Calculate the centroid using the mean of x and y coordinates
+#     for point in coordinates:
+#         total_x += point[0]
+#         total_y += point[1]
+
+#     centroid_x = total_x / num_points
+#     centroid_y = total_y / num_points
+
+#     return centroid_x, centroid_y
+
+
+class Trackmap(TemplateView):
+    template_name = "locations/folium_map.html"
+
+    def get_context_data(self, **kwargs):
+
+        file = "D:\Data\TPAM\ElhamValleyRailway.geojson"
+
+        try:
+            with open(file, "r") as f:
+                geojson_data = json.load(f)
+        except FileNotFoundError:
+            print(f"Error: File '{file}' not found.")
+        except Exception as e:
+            print("An error occurred while loading the GeoJSON file:", e)
+
+        # Accumulate LineString coordinates
+        line_coordinates = []
+
+        # Iterate over features
+        for feature in geojson_data["features"]:
+            if feature["geometry"]["type"] == "LineString":
+                line_coordinates.extend(feature["geometry"]["coordinates"])
+
+        # Calculate centroid for all LineString features combined
+        centroid_x, centroid_y = calculate_centroid(line_coordinates)
+
+        m = folium.Map(
+            [centroid_y, centroid_x],
+            height=500,
+            zoom_start=12,
+            prefer_canvas=True,
+        )
+
+        folium.TileLayer("openstreetmap", name="OpenStreet Map").add_to(m)
+
+        folium.TileLayer(
+            "http://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+            attr='<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>, \
+            Style: <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA 2.0</a> \
+            <a href="http://www.openrailwaymap.org/">OpenRailwayMap</a> and OpenStreetMap',
+            min_zoom=12,
+            max_zoom=19,
+        ).add_to(m)
+
+        # Iterate over features
+        for feature in geojson_data["features"]:
+            geometry = feature.get("geometry")
+            properties = feature.get("properties")
+
+            # Check if geometry and properties are not None
+            if geometry and properties:
+                feature_name = properties.get("name") or None
+
+            # Add GeoJson with popup if feature_id is not None
+            if geometry:
+                folium.GeoJson(data=geometry, tooltip=feature_name).add_to(m)
+
+        figure = folium.Figure()
+        m.add_to(figure)
+        figure.render()
+        return {"map": figure, "title": f"Map of file {file}"}

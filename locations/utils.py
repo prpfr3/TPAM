@@ -1,23 +1,79 @@
-def osm_elr_fetch(elr):
+from .forms import *
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.urls import reverse, resolve
+from django.views import View
+
+
+class RegionSelectView(View):
+    template_name = "locations/region_select.html"
+    redirect_view_name = None
+
+    def get_redirect_view_name(self):
+        if self.redirect_view_name is None:
+            raise NotImplementedError("Subclasses must provide a redirect_view_name.")
+        return self.redirect_view_name
+
+    def get(self, request):
+        region_form = RegionChoiceForm()
+        context = {"region_form": region_form}
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        region_form = RegionChoiceForm(request.POST)
+        if region_form.is_valid():
+            geo_area = region_form.cleaned_data["regions"]
+            redirect_view_name = self.get_redirect_view_name()
+            redirect_url = reverse(redirect_view_name, args=[geo_area])
+
+            # This class can be called by a function or a class, either of which
+            # provides a redirect view. If called by a CBV then kwargs needs to be returned
+            # Check if the redirect_view is a class-based view
+            if callable(redirect_view_name):
+                view_name = redirect_view_name.__name__
+                view_args = ()
+                view_kwargs = {}
+                url = reverse(view_name, args=view_args, kwargs=view_kwargs)
+                redirect_view_name = resolve(url).url_name
+
+            return HttpResponseRedirect(redirect_url)
+        else:
+            context = {"region_form": region_form}
+            return render(request, self.template_name, context)
+
+
+def osm_elr_fetch(elr, bbox):
     import osm2geojson
     import requests
 
-    """
-    Overpass Turbo query gets the Way relating to the Engineer's Line Reference
-    and then uses the "around" statement to get nodes such as stations and ways
-    not labelled as the Engineer's Line Reference within x (e.g. 500) metres of the
-    ELR way
-    """
-
     overpass_url = "http://overpass-api.de/api/interpreter"
+
+    # Use this query to get nearby features as well as the ELR Geojson itself
 
     overpass_query = f"""
         [out:json];
-        area["ISO3166-1"="GB"][admin_level=2];
-        way(area)["ref"="{elr}"];
+        area["ISO3166-1"="GB"][admin_level=2]->.a;
+        way(area.a)[ref="{elr}"]->.w;
+        node(around.w:50)["railway"];
+        (._; .w;);
         out geom;
         """
 
+    # If a bounding box has been pre-specified restrict the overpass ELR query to that bounding box. Otherwise get the whole of the ELR but restricting it to Great Britain so as not to pick up none British ELRs
+    if bbox:
+        overpass_query = f"""
+            [out:json];
+            (way["ref"="{elr}"]["railway"]{bbox};
+            );
+            out geom;
+            """
+    else:
+        overpass_query = f"""
+            [out:json];    
+            area["ISO3166-1"="GB"][admin_level=2]->.a;
+            way(area.a)["ref"="{elr}"]["railway"];
+            out geom;
+            """
     response = requests.get(overpass_url, params={"data": overpass_query})
     data = response.json()
 
@@ -45,31 +101,24 @@ def generate_storymap(headline, text, locations):
             location_slide = {
                 "background": {"url": ""},
                 "location": {
-                    "lat": location[
-                        5
-                    ],  # location.geometry.y, # when using ORM rather than SQL
-                    # location.geometry.x, # when using ORM rather than SQL
-                    "lon": location[6],
+                    "lat": location.get("st_y"),
+                    "lon": location.get("st_x"),
                     "zoom": "12",
                 },
                 "media": {
-                    "caption": location[7],
-                    "credit": location[8],
-                    "url": location[9],
+                    "caption": location.get("media_caption"),
+                    "credit": location.get("media_credit"),
+                    "url": location.get("media_url"),
                 },
-                "text":
-                # location.wikiname # when using ORM rather than SQL
-                {"headline": location[0]},
+                "text": {"headline": location.get("wikiname")},
             }
 
-            # location.wikislug # when using ORM rather than SQL
             html_string = markdown.markdown(
-                f"https://en.wikipedia.org/wiki/{location[1]}"
+                f"https://en.wikipedia.org/wiki/{location.get('wikislug')}"
             )
             location_slide["text"]["text"] = html_string.replace('"', "'")
 
-            # location.wikislug # when using ORM rather than SQL
-            wikislug = location[1].replace("/wiki/", "")
+            wikislug = location.get("wikislug").replace("/wiki/", "")
             pagename = wikislug.replace("_", " ")
             wiki_wiki = wikipediaapi.Wikipedia(
                 language="en", extract_format=wikipediaapi.ExtractFormat.HTML
@@ -104,7 +153,7 @@ def generate_storymap(headline, text, locations):
     return json.dumps(routemap_dict)
 
 
-def execute_sql(sql, parameters):
+def execute_sql_nofieldnames(sql, parameters):
     from django.db import connection
 
     try:
@@ -118,85 +167,103 @@ def execute_sql(sql, parameters):
     return result
 
 
-"""
-Function for use when using ORM & GeoDjango which required GDAL
-An alternative to  function generate_folium_map sql
-"""
-# def generate_folium_map(geojson, title, locations ):
+def execute_sql(sql, parameters):
+    from django.db import connection
 
-#     import folium
-#     from django.contrib.gis.db.models import Extent
-#     from folium.plugins import MarkerCluster
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(sql, parameters)
 
-#     # By default folium will use OpenStreetMap as the baselayer. 'tiles=None' switches the default off
-#     m = folium.Map(zoom_start= 13, prefer_canvas=True, height=500)
+            # Get the column names from the description attribute
+            columns = [col[0] for col in cursor.description]
 
-#     """
-#     Use OpenRailwayMap as the baselayer to give a better rendering of the line
-#     Minimum zoom setting of 12 gives about 40 miles/60 kms across the screen
-#     """
-#     folium.TileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png',
-#         attr='<a href="https://www.openstreetmap.org/copyright"> \
-#             © OpenStreetMap contributors</a>, \
-#             Style: <a href="http://creativecommons.org/licenses/by-sa/2.0/"> \
-#             CC-BY-SA 2.0</a> <a href="http://www.openrailwaymap.org/">OpenRailwayMap</a> and OpenStreetMap', \
-#         name = "OpenRailwayMap", \
-#         min_zoom = 2, max_zoom = 19).add_to(m)
+            # Fetch all rows from the result
+            rows = cursor.fetchall()
+            # Create a list of dictionaries where each dictionary represents a row
+            result = [dict(zip(columns, row)) for row in rows]
 
-#     # If there is geojson (i.e. OSM) input then use it to calculate the boundary box.
-#     # If not calculate the boundary box from the locations co-ordinates
-#     if geojson:
-#         folium.GeoJson(geojson, name=title).add_to(m)
-#         bound_box = geojson_boundbox(geojson['features'])
-#     else:
-#         extent = locations.aggregate(Extent('geometry'))
-#         bound_box = [[extent['geometry__extent'][1],
-#             extent['geometry__extent'][0]],
-#             [extent['geometry__extent'][3],
-#             extent['geometry__extent'][2]]]
+    except Exception as e:
+        print(e)
 
-#     folium.FitBounds(bound_box).add_to(m)
-
-#     marker_cluster = MarkerCluster(name="Locations").add_to(m)
-
-#     for location in locations:
-#         if location.geometry:
-
-#             if str(location.opened) != 'None':
-#                 opened = f'<br>Opened {str(location.opened)}'
-#             else:
-#                 opened = ''
-
-#             if str(location.closed) != 'None':
-#                 closed = f'<br>Closed {str(location.closed)}'
-#             else:
-#                 closed = ''
-
-#             if str(location.wikislug) != 'None':
-#                 name = f'<a href="https://en.wikipedia.org//wiki/{str(location.wikislug)}"target="_blank"> \
-#                 {str(location.wikiname)}</a>'
-#             else:
-#                 name = f'{str(location.name)}'
-
-#             label_html = folium.Html(f'{name}{opened}{closed}', script=True)
-#             label = folium.Popup(label_html, max_width=2650)
-#             coords_tuple = (location.geometry.y, location.geometry.x)
-#             folium.Marker(location = coords_tuple, popup= label, tooltip=str(name)).add_to(marker_cluster)
-
-#     folium.LayerControl().add_to(m)
-#     figure = folium.Figure()
-#     m.add_to(figure)
-#     figure.render()
-
-#     return figure
+    return result
 
 
-def generate_folium_map_sql(geojsons, title, locations, bound_box):
+# Function to format tags as an HTML list
+def format_tags_as_list(tags_dict):
+    formatted_tags = "<ul>"
+    for key, value in tags_dict.items():
+        formatted_tags += f"<li>{key}: {value}</li>"
+    formatted_tags += "</ul>"
+    return formatted_tags
+
+
+def fetch_locations(route):
+    routemaps = route.wikipedia_routemaps.all()
+
+    if len(routemaps) == 0:
+        return None  # No routemaps found, return None
+
+    sql = """
+        SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+            ST_Y(ST_CENTROID(a.geometry)),
+            ST_X(ST_CENTROID(a.geometry)),
+            a."media_url"
+        FROM "locations_location" AS a
+        INNER JOIN "locations_routelocation" AS b
+            ON (a."id" = b."location_fk_id")
+        WHERE a."geometry" IS NOT NULL AND b."routemap_id" = %s;
+    """
+
+    return execute_sql(sql, [routemaps[0].id])
+
+
+def routes_mapdata_extract(routes):
+    elr_geojsons = None
+    locations = None
+    figure = None
+    for route in routes:
+        route_locations = fetch_locations(route)
+        if route_locations and locations is None:
+            locations = []
+        if route_locations:
+            locations.extend(route_locations)
+
+        if elrs := route.elrs.all():
+            for elr in elrs:
+                if elr.geodata:
+                    if elr_geojsons is None:
+                        elr_geojsons = []
+                    elr_geojsons.append(elr.geodata)
+
+        if locations or elr_geojsons:
+            figure = generate_folium_map(elr_geojsons, locations)
+
+    return figure
+
+
+def route_section_mapdata_extract(route, route_section):
+    locations = None
+    figure = None
+
+    route_locations = fetch_locations(route)
+    if route_locations:
+        for route_location in route_locations:
+            if locations is None:
+                locations = []
+            locations.extend(route_location)
+
+    if locations or route_section.geodata:
+        figure = generate_folium_map(route_section.geodata, locations)
+
+    return figure
+
+
+def generate_folium_map(geojsons, locations):
     import folium
-    from folium.plugins import MarkerCluster
+    from folium.plugins import MarkerCluster, MiniMap
 
     # By default folium will use OpenStreetMap as the baselayer. 'tiles=None' switches the default off
-    m = folium.Map(zoom_start=13, prefer_canvas=True, height=500)
+    m = folium.Map(zoom_start=13, prefer_canvas=True, height=600, width=1000)
 
     """
     Use OpenRailwayMap as the baselayer to give a better rendering of the line
@@ -213,84 +280,131 @@ def generate_folium_map_sql(geojsons, title, locations, bound_box):
         max_zoom=19,
     ).add_to(m)
 
+    all_features = []
+    bounding_box = None
+
     if geojsons:
         for geojson in geojsons:
-            folium.GeoJson(geojson, name=title).add_to(m)
+            # Iterate through features and collapse tags to properties
+            for feature in geojson["features"]:
+                properties = feature["properties"]
+                tags = properties.pop("tags", {})  # Remove 'tags' key and get its value
+                properties.pop("nodes", {})
+                properties.update(tags)  # Add tags to properties
 
-    folium.FitBounds(bound_box).add_to(m)
+                # Accumulate features
+                all_features.append(feature)
 
-    marker_cluster = MarkerCluster(name="Locations").add_to(m)
+            # Code to export geojson which can be used in other mapping tools
+            # import json
+            # output_file_path = "YOUR PATHNAME"
+            # with open(output_file_path, "w") as json_file:
+            #     json_file.write(json.dumps(all_features, indent=2))
 
-    for location in locations:
-        # i.e. if a y-coordinate is present (if not then it can't be mapped)
-        if location[5]:
-            if str(location[2]) != "None":
-                opened = f"<br>Opened {str(location[2])}"
-            else:
-                opened = ""
+        # Set "name" property to "No Name" for features without a name
+        # Without this the folium tooltip feature throws an error
+        for feature in all_features:
+            properties = feature.get("properties", {})
+            if "name" not in properties:
+                properties["name"] = "No Name"
 
-            if str(location[3]) != "None":
-                closed = f"<br>Closed {str(location[3])}"
-            else:
-                closed = ""
+        geojson_layer = folium.GeoJson(
+            {"type": "FeatureCollection", "features": all_features},
+            tooltip=folium.GeoJsonTooltip(
+                fields=["name"],
+                aliases=[""],
+                labels=True,
+                localize=True,
+                sticky=False,
+            ),
+            popup=folium.GeoJsonPopup(fields=["name"], aliases=[""], localize=True),
+            name="OpenRailwayMap data",
+            # style_function=lambda x: {
+            #     "color": "#78491c"
+            #     if x["properties"].get("ref") == "NHB"
+            #     else "#c94f1a"
+            # },
+            # Weight determines the width of lines, fillColor has no effect on ways
+            highlight_function=lambda x: {"weight": 6, "fillColor": "yellow"},
+            smooth_factor=2,
+        ).add_to(m)
 
-            if str(location[1]) != "None":
-                name = f'<a href="https://en.wikipedia.org//wiki/{str(location[1])}"target="_blank"> \
-                {str(location[0])}</a>'
-            elif str(location[4]) != "None":
-                name = f"{str(location[4])}"
-            else:
-                name = f"{str(location[5])}"
+        # Calculate the bounding box of the GeoJSON data
+        bounding_box = geojson_layer.get_bounds()
 
-            label_html = folium.Html(f"{name}{opened}{closed}", script=True)
+    if locations:
+        marker_cluster = MarkerCluster(name="Locations").add_to(m)
 
-            if location[7]:  # i.e. if there is a media_url
-                img_html = f'<img src="{location[7]}" width="230" height="172">' or None
-            else:
-                img_html = ""
+        for location in locations:
+            # i.e. if a y-coordinate is present (if not then it can't be mapped)
+            if location["st_y"]:
+                opened = (
+                    f'<br>Opened {str(location["opened"])}'
+                    if str(location["opened"]) != "None"
+                    else ""
+                )
+                closed = (
+                    f'<br>Closed {str(location["closed"])}'
+                    if str(location["closed"]) != "None"
+                    else ""
+                )
 
-            label_html = f"""
-            <div>{img_html}<br/><span>{name}{opened}{closed}</span></div>"""
+                if location["wikislug"] != None:
+                    name = f'<a href="https://en.wikipedia.org//wiki/{str(location["wikislug"])}"target="_blank"> \
+                    {str(location["wikiname"])}</a>'
+                elif location["name"] != None:
+                    name = f'{location["name"]}'
+                else:
+                    name = f'{str(location["st_y"])," ",str(location["st_x"])}'
 
-            label = folium.Popup(label_html, max_width=2650)
-            coords_tuple = (location[5], location[6])
-            folium.Marker(location=coords_tuple, popup=label, tooltip=str(name)).add_to(
-                marker_cluster
-            )
+                label_html = folium.Html(f"{name}{opened}{closed}", script=True)
 
+                if location["media_url"]:  # i.e. if there is a media_url
+                    img_html = (
+                        f'<img src="{location["media_url"]}" width="230" height="172">'
+                        or None
+                    )
+                else:
+                    img_html = ""
+
+                label_html = f"""
+                    <div>{img_html}<br/><span>{name}{opened}{closed}</span></div>
+                    """
+
+                label = folium.Popup(label_html, max_width=2650)
+                coords_tuple = (location["st_y"], location["st_x"])
+                # Note that tooltip does not accept images, only text
+                folium.Marker(
+                    location=coords_tuple, popup=label, tooltip=str(name)
+                ).add_to(marker_cluster)
+
+                coords_tuple = (location["st_y"], location["st_x"])
+
+                if bounding_box:
+                    min_lat, min_lon = bounding_box[0]
+                    max_lat, max_lon = bounding_box[1]
+
+                    min_lat, min_lon = min(coords_tuple[0], min_lat), min(
+                        coords_tuple[1], min_lon
+                    )
+                    max_lat, max_lon = max(coords_tuple[0], max_lat), max(
+                        coords_tuple[1], max_lon
+                    )
+
+                    bounding_box = [
+                        (min_lat, min_lon),
+                        (max_lat, max_lon),
+                    ]
+                else:  # For first set of location co-ordinates where there is no ELR Geojson data
+                    bounding_box = [coords_tuple, coords_tuple]
+
+    # format of bound_box is [(minimum latitude, minimum longitude]), [(maximum latitude, maximum longitude)]) i.e. south west, north east
+    m.fit_bounds(bounding_box)
     folium.LayerControl().add_to(m)
+    minimap = MiniMap()
+    m.add_child(minimap)
+
     figure = folium.Figure()
     m.add_to(figure)
     figure.render()
     return figure
-
-
-def geojson_boundbox(features):
-    #  Calculates the boundary box
-    #  the following may provide a simpler method
-    #  https://gis.stackexchange.com/questions/166863/how-to-calculate-the-bounding-box-of-a-geojson-object-using-python-or-javascript
-
-    xcoords = []
-    ycoords = []
-
-    for f in features:
-        geom = f["geometry"]
-        for coord in geom["coordinates"]:
-            if type(coord) == float:  # then its a point feature
-                xcoords.append(geom["coordinates"][0])
-                ycoords.append(geom["coordinates"][1])
-            elif type(coord) == list:
-                for c in coord:
-                    if type(c) == float:  # then its a linestring feature
-                        xcoords.append(coord[0])
-                        ycoords.append(coord[1])
-                    elif type(c) == list:  # then its a polygon feature
-                        xcoords.append(c[0])
-                        ycoords.append(c[1])
-
-    return [
-        [min(ycoords), min(xcoords)],
-        [max(ycoords), min(xcoords)],
-        [max(ycoords), max(xcoords)],
-        [min(ycoords), max(xcoords)],
-    ]

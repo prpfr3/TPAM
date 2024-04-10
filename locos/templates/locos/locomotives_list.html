@@ -11,45 +11,59 @@
       </p>
     </form>
 
-    <table>
-    {% for locomotive in locomotives_list %}
-      <tr>
-        <td>
+    <div class="container">
+      <div class="row mb-1">
+        <div class="col-3 d-flex align-items-center justify-content-center" style="font-weight: bold;">Class</div>
 
-          <a href="{% url 'locos:locomotive' locomotive.id %}">{{ locomotive.identifier }}</a>
+        <div class="col-3 d-flex align-items-center justify-content-center" style="font-weight: bold;">Grouping Company</div>
 
-          {% if locomotive.brd_number_as_built %}
-            {{locomotive.brd_number_as_built}}
-          {% endif %}
+        <div class="col-3 d-flex align-items-center justify-content-center" style="font-weight: bold;">Pre=Grouping Company</div>
 
-          {% if locomotive.brd_company_grouping_code %}
-            {{locomotive.brd_company_grouping_code}}
-          {% endif %}
+        <div class="col-1 d-flex align-items-center justify-content-center" style="font-weight: bold;">No. As Built</div>
 
-          {% if locomotive.brd_company_pregrouping_code %}   
-            {{locomotive.brd_company_pregrouping_code}}
-          {% endif %}
+        <div class="col-1 d-flex align-items-center justify-content-center" style="font-weight: bold;">Age</div>
 
-          {% if locomotive.brd_class_name %}
-            {{locomotive.brd_class_name}}
+
+    </div>
+
+    {% for row in queryset %}
+    <div class="container">
+      <div class="row mb-1 d-flex align-items-stretch row-height">
+        <div class="col-3 d-flex align-items-center justify-content-center">
+          {% if row.brd_class_name %}
+            {{row.brd_class_name}}
           {% endif %}
-        </td>
-        <td>
-          {% if locomotive.total %}
-            {{locomotive.total}}
+        </div>
+
+        <div class="col-3 d-flex align-items-center justify-content-center">
+          {% if row.company_grouping_code %}
+            {{row.company_grouping_code}}
           {% endif %}
-        </td>
-        <td>
-          {% if locomotive.age %}
-            {{locomotive.age}}
+        </div>
+
+        <div class="col-3 d-flex align-items-center justify-content-center">
+          {% if row.company_pregrouping_code %}   
+            {{row.company_pregrouping_code}}
           {% endif %}
-        </td>
-      </tr>
+        </div>
+
+        <div class="col-1 d-flex align-items-center justify-content-center">
+          <a href="{% url 'locos:locomotive' row.id %}">
+          {% if row.number_as_built %}
+            {{row.number_as_built}}
+          {% endif %}
+          </a>
+        </div>
+        
+        <div class="col-1 d-flex align-items-center justify-content-center">
+          {% if row.age %}
+            {{row.age}}
+          {% endif %}
+        </div>
       
       {% empty %}
-        <tr>No locomotives have been loaded yet.</tr>
+        <div>None Found for the Selection</div>
       {% endfor %}
-    </table>
-
-    {% include "mainmenu/pagination.html" with page=locomotives_list %}
+<br>
+    {% include "mainmenu/pagination.html" with page=queryset %}
 {% endblock content %}

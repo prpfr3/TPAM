@@ -4,6 +4,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import *
 import json
 import wikipediaapi
+import urllib
 
 
 def storymaps(request):
@@ -20,9 +21,50 @@ def storymaps(request):
     return render(request, "storymaps/storymaps.html", context)
 
 
-def storymap(request, storymap_id):
-    slideheader = SlideHeader.objects.get(id=storymap_id)
-    slides = Slide.objects.filter(slideheader__id=storymap_id).order_by(
+import requests
+from bs4 import BeautifulSoup
+
+
+def get_wikipage_html(url):
+    # Fetch the HTML content of the webpage
+    response = requests.get(url)
+    html_content = response.text
+
+    # Parse the HTML content using BeautifulSoup
+    soup = BeautifulSoup(html_content, "html.parser")
+
+    # Find the <div> tag with id=bodyContent
+    body_content_div = soup.find("div", id="bodyContent")
+
+    if body_content_div:
+
+        # Remove mw-editsection and its descendants
+        for element in body_content_div.select(".mw-editsection"):
+            element.decompose()
+
+        # Remove mw-editsection and its descendants
+        for element in body_content_div.select(".box-More_citations_needed"):
+            element.decompose()
+
+        # Split the HTML content within the bodyContent div at the point where <div class="navbox-styles"> occurs
+        split_html = str(body_content_div).split('<div class="navbox-styles">')
+
+        # Keep only the first part of the split, which contains the content before navbox-styles
+        html_within_body_content = (
+            split_html[0]
+            .replace("<span>edit<span>", "")
+            .replace("/wiki/", "https://en.wikipedia.org/wiki/")
+        )
+
+        return html_within_body_content
+    else:
+        print("No <div> tag with id=bodyContent found.")
+        return None
+
+
+def storymap(request, slug):
+    slideheader = SlideHeader.objects.get(slug=slug)
+    slides = Slide.objects.filter(slideheader__id=slideheader.id).order_by(
         "slidepack__slide_order"
     )
 
@@ -32,22 +74,31 @@ def storymap(request, storymap_id):
     slide_dict["media"]["credit"] = slideheader.media_credit
     slide_dict["media"]["url"] = slideheader.media_url
     slide_dict["text"] = {}
-    wiki_wiki = wikipediaapi.Wikipedia(
-        language="en", extract_format=wikipediaapi.ExtractFormat.HTML
-    )
-    page_name = slideheader.wikipedia_name.replace(" ", "_")
 
-    if page_name and wiki_wiki.page(page_name).exists:
-        # Retain only the Wikipedia page down to Notes and then add any stored additional text
-        text_array = wiki_wiki.page(page_name).text.split("<h2>Notes</h2>")
-        text_array = text_array[0].split("<h2>References</h2>")
-        slide_dict["text"][
-            "text"
-        ] = f"<p>From Wikipedia:-</p>{text_array[0]}{slideheader.text_text}"
+    slide_dict["text"]["headline"] = slideheader.text_headline or None
+    slide_dict["text"]["text"] = None
+
+    if slideheader.post_fk:
+        slide_dict["text"]["text"] = slideheader.post_fk.body
+        slide_dict["text"]["headline"] = slideheader.post_fk.title
+    elif slideheader.wikipedia_name:
+        wikipage = urllib.parse.unquote(
+            slideheader.wikipedia_name, encoding="utf-8", errors="replace"
+        )
+        wiki_wiki = wikipediaapi.Wikipedia(
+            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+        )
+        if wiki_wiki.page(wikipage).exists:
+            # text_array = wiki_wiki.page(wikipage).text.split("<h2>Notes</h2>")
+            # header_text = text_array[0].split("<h2>References</h2>")
+            header_text = wiki_wiki.page(wikipage).summary
+
         slide_dict["text"]["headline"] = slideheader.wikipedia_name
-    else:
-        slide_dict["text"]["headline"] = slideheader.text_headline
-        slide_dict["text"]["text"] = slideheader.text_text
+        slide_dict["text"]["text"] = f"<p>From Wikipedia:-</p>{header_text}"
+
+        # This overrides the previous lines with the full html
+        url = f"https://en.wikipedia.org/wiki/{wikipage}"
+        slide_dict["text"]["text"] = get_wikipage_html(url)
 
     slide_dict["type"] = slideheader.type
     slide_list = [slide_dict]
@@ -94,8 +145,8 @@ def storymap(request, storymap_id):
             "call_to_action_text": "Travel the Route",
             "map_as_image": False,
             "map_subdomains": "",
-            "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
-            # "map_type": "osm:standard",
+            # "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+            "map_type": "osm:standard",
             "slides": slide_list,
             "zoomify": False,
         }

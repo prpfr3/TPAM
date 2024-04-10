@@ -4,7 +4,7 @@
 {% block content_desc %}{% endblock %}
 {% block content %}
     {% for timeline in timelines %}
-      <h2><a href="{% url 'timelines:timeline' timeline.id %}"> {{ timeline }}</a></h2>
+      <h2><a href="{% url 'timelines:timeline' timeline.slug %}"> {{ timeline }}</a></h2>
     {% empty %}
       <h2>No timelines have been loaded yet.</h2>
     {% endfor %}

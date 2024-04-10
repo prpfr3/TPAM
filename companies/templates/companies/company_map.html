@@ -1,0 +1,17 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block header %}
+  {{map.header.render|safe}}
+{% endblock header %}
+
+{% block content_title %}
+  LBSCR Map
+{% endblock %}
+
+{% block content %}
+  {% if map.html %}
+    {{map.html.render|safe}}
+  {% endif %}
+
+  <script>{{map.script.render|safe}}</script> 
+{% endblock %}

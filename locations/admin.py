@@ -1,32 +1,34 @@
 from django.contrib import admin
 
-# from django.contrib.gis.admin import OSMGeoAdmin
+# from django.contrib.gis.admin import OSMGeoAdmin # For GDAL
 from locations.models import *
 from tinymce.widgets import TinyMCE
 from django.db import models
 
 
-class DepotAdmin(admin.ModelAdmin):
-    list_display = ["depot", "code", "date_start", "date_end"]
-    list_filter = ["br_region"]
-    search_fields = ("depot", "code")
-    ordering = ("depot", "date_start")
-    formfield_overrides = {
-        models.TextField: {"widget": TinyMCE()},
-    }
-
-
 class ELRAdmin(admin.ModelAdmin):
-    list_display = ["item", "itemLabel", "itemAltLabel"]
+    list_display = ["slug", "item", "itemLabel", "itemAltLabel"]
     ordering = ["itemAltLabel"]
     search_fields = ["itemLabel", "itemAltLabel"]
 
 
-class LocationAdmin(admin.ModelAdmin):
-    # class LocationAdmin(OSMGeoAdmin):
-    list_display = ["name", "wikiname", "wikislug", "osm_node", "elr_fk"]
-    list_filter = ["type"]
-    search_fields = ["wikiname", "name"]
+class CategoriesFilter(admin.SimpleListFilter):
+    title = "Categories"
+    parameter_name = "categories"
+
+    def lookups(self, request, model_admin):
+        categories = LocationCategory.objects.all()
+        return [(category.id, category.category) for category in categories]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(categories__id=self.value())
+
+
+class LocationAdmin(admin.ModelAdmin):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
+    list_display = ["slug", "name", "wikiname", "wikislug", "osm_node"]
+    list_filter = ["source", CategoriesFilter]
+    search_fields = ["wikiname", "name", "osm_node"]
     ordering = ["wikiname"]
     verbose_name = "Railway Locations"
     formfield_overrides = {
@@ -36,8 +38,23 @@ class LocationAdmin(admin.ModelAdmin):
             )
         },
     }
-    filter_horizontal = ["references"]
-    raw_id_fields = ["elr_fk", "post_fk"]
+    filter_horizontal = [
+        "posts",
+        "references",
+        "owner_operators",
+        "categories",
+    ]
+
+
+class LocationCodeAdmin(admin.ModelAdmin):
+    list_display = [
+        "location_fk",
+        "location_code",
+        "from_date",
+        "to_date",
+    ]
+    ordering = ["location_fk", "from_date"]
+    search_fields = ["location_fk", "location_code"]
 
 
 class LocationEventAdmin(admin.ModelAdmin):
@@ -64,8 +81,9 @@ class LocationEventAdmin(admin.ModelAdmin):
 
 
 @admin.register(RouteGeoOsm)
-class RouteGeoOsmAdmin(admin.ModelAdmin):
-    # class RouteGeoOsmAdmin(OSMGeoAdmin):
+class RouteGeoOsmAdmin(
+    admin.ModelAdmin
+):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
     list_display = ["name"]
     search_fields = ["name", "type"]
     ordering = ["name"]
@@ -73,8 +91,9 @@ class RouteGeoOsmAdmin(admin.ModelAdmin):
 
 
 @admin.register(RouteGeoOsmhistory)
-class RouteGeoOsmAdmin(admin.ModelAdmin):
-    # class RouteGeoOsmhistoryAdmin(OSMGeoAdmin):
+class RouteGeoOsmhistoryAdmin(
+    admin.ModelAdmin
+):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
     list_display = ["name"]
     search_fields = ["name"]
     ordering = ["name"]
@@ -82,7 +101,10 @@ class RouteGeoOsmAdmin(admin.ModelAdmin):
 
 
 class RouteAdmin(admin.ModelAdmin):
-    list_display = ["name", "wikipedia_slug"]
+    list_display = ["name"]
+    list_filter = [
+        ("owneroperators", admin.RelatedOnlyFieldListFilter),
+    ]
     search_fields = ["name"]
     ordering = ["name"]
     formfield_overrides = {
@@ -94,16 +116,37 @@ class RouteAdmin(admin.ModelAdmin):
     filter_horizontal = ["wikipedia_routemaps", "elrs", "references", "owneroperators"]
 
 
-class RouteLocationAdmin(admin.ModelAdmin):
-    # class RouteLocationAdmin(OSMGeoAdmin):
-    list_display = ["routemap", "loc_no", "label", "location_fk"]
+class RouteSectionAdmin(admin.ModelAdmin):
+    list_display = ["route_fk", "name"]
+    search_fields = ["route_fk", "name"]
+    ordering = ["name"]
+    formfield_overrides = {
+        models.TextField: {"widget": TinyMCE()},
+    }
+
+
+class RouteLocationAdmin(
+    admin.ModelAdmin
+):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
+    list_display = ["routemap", "loc_no", "label", "get_location_fk_field"]
     search_fields = ["routemap__name", "label"]
     ordering = ["routemap", "loc_no"]
     raw_id_fields = ["routemap", "location_fk"]
 
+    def get_location_fk_field(self, obj):
+        if obj.location_fk:  # Check if location_fk is not None
+            return obj.location_fk.opened
+        else:
+            return None
 
-class ELRLocationAdmin(admin.ModelAdmin):
-    # class ELRLocationAdmin(OSMGeoAdmin):
+    get_location_fk_field.short_description = (
+        "Opened"  # Optional: Customizing column header
+    )
+
+
+class ELRLocationAdmin(
+    admin.ModelAdmin
+):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
     list_display = ["elr_fk", "location_fk", "distance"]
     search_fields = [
         "elr_fk__itemLabel",
@@ -141,11 +184,16 @@ class VisitAdmin(admin.ModelAdmin):
     raw_id_fields = ["location"]
 
 
-admin.site.register(Depot, DepotAdmin)
 admin.site.register(ELR, ELRAdmin)
 admin.site.register(ELRLocation, ELRLocationAdmin)
 admin.site.register(Location, LocationAdmin)
+admin.site.register(LocationCategory)
+admin.site.register(LocationCode, LocationCodeAdmin)
 admin.site.register(LocationEvent, LocationEventAdmin)
 admin.site.register(Route, RouteAdmin)
 admin.site.register(RouteLocation, RouteLocationAdmin)
 admin.site.register(RouteMap, RouteMapAdmin)
+admin.site.register(RouteSection, RouteSectionAdmin)
+admin.site.register(RouteCategory)
+admin.site.register(RouteSectionELR)
+admin.site.register(UKArea)

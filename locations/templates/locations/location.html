@@ -1,6 +1,8 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
 {% block header %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
+</script>
 {% endblock header %}
 
 {% block content_title %}{{ location }}</td></tr>{% endblock %}
@@ -8,68 +10,97 @@
 
 {% block content %}
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
-</script>
 <script>
-    $(document).ready(function() {
-  if (window.localStorage.getItem('cookies-accepted') === '1') {
-    $('#CookieBanner').hide();
-  } else {
-    $("#Accept").click(function() {
-      $('#CookieBanner').hide();
-      window.localStorage.setItem('cookies-accepted', '1');
-    });
-  }
+$(document).ready(function() {
+    // Check if cookies are accepted
+    if (window.localStorage.getItem('cookies-accepted') !== '1') {
+        // If not accepted, show the cookie banner
+        $('#CookieBanner').show();
+
+        // Add an event listener for the iframe button to accept cookies
+        $("#NLSiframe").on("load", function() {
+            var iframeDocument = $("#NLSiframe").contents();
+
+            iframeDocument.find("#ccc-notify-accept").on("click", function() {
+                $('#CookieBanner').hide();
+                window.localStorage.setItem('cookies-accepted', '1');
+            });
+        });
+    }
+    // Add an event listener for the iframe mouseleave event
+    // $("#NLSiframe").on("mouseleave", function() {
+    //     // Perform actions when the mouse leaves the iframe
+    //     // For example, you can refresh the parent page
+    //     location.reload();
+    // });
 });
+
+    // Add an event listener for the iframe mouseleave event
+    // $("#NLSiframe").on("mouseleave", function() {
+    //     // Perform actions when the mouse leaves the iframe
+    //     // For example, you can refresh the parent page
+    //     location.reload();
+    // });
 </script>
 
-    <div class="panel panel-default">
-      <div class="panel-heading"></div>
-      <div class="panel-body">
+<div class="panel panel-default">
+  <div class="panel-heading"></div>
+  <div class="panel-body">
 
-        <table class="border-primary" width="99%" frame="box" id="depot">
-          <h1 class="text-primary">Location Details</h1>
-          <tbody>                   
-            <tr><td width="35%"><strong>Type</strong></td><td>{{location.type }}</td></tr>
-            {% if location.postcode %}
-              <tr><td width="35%"><strong>Postcode:</strong></td><td>{{location.postcode }}</td></tr>
-            {% endif %}
-            {% if location.opened %}
-              <tr><td width="35%"><strong>Opened:</strong></td><td>{{location.opened }}</td></tr>
-            {% endif %}
-            {% if location.closed %}
-              <tr><td width="35%"><strong>Closed:</strong></td><td>{{location.closed }}</td></tr>
-            {% endif %}
-            {% if location.atcocode %}
-              <tr><td width="35%"><strong>ATCO code:</strong></td><td>{{location.atcocode }}</td></tr>
-            {% endif %}
-            {% if location.tiploccode %}
-              <tr><td width="35%"><strong>Tiploc Code:</strong></td><td>{{location.tiploccode }}</td></tr>
-            {% endif %}
-            {% if location.crscode %}
-              <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
-            {% endif %}
-            {% if location.geometry.x %}
-              <tr><td width="35%"><strong>Longitude/Latitude:</strong></td><td>{{location.geometry.x}} {{location.geometry.y}}</td></tr>
-            {% endif %}
-            {% if location.easting %}
-              <tr><td width="35%"><strong>Eastings/Northings:</strong></td><td>{{location.easting }} {{ location.northing }}</td></tr>
-            {% endif %}
-          </tbody>
-        </table>
-
-        <h1 class="text-primary">Map</h1>
-        <h3 class="text-primary">National Library of Scotland, Ordnance Survey 1892-1915 24-inch-to-the-mile series</h3>
-          <iframe src={{nls_url}} width="100%" height="700" marginwidth="300">
-            " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
-            </iframe>
-        
-        {% if description_type %}
-            <h1 class="text-primary">{{description_type}}</h1>
-          {% autoescape off %}
-          <div>{{ description }}</div>
-          {% endautoescape %}
+    <table class="border-primary" width="99%" frame="box" id="depot">
+      <h1 class="text-primary">Location Details</h1>
+      <tr>
+        <tr><td><strong>Categories:</strong></td><td>
+          {% for category in categories %}
+          {{category}} 
+          {% endfor %}
+        </td>
+        </tr>
+        {% if location.postcode %}
+          <tr><td width="35%"><strong>Postcode:</strong></td><td>{{location.postcode }}</td></tr>
         {% endif %}
-      </div> <!-- panel body -->
-    </div> <!-- panel -->
+        {% if location.opened %}
+          <tr><td width="35%"><strong>Opened:</strong></td><td>{{location.opened }}</td></tr>
+        {% endif %}
+        {% if location.closed %}
+          <tr><td width="35%"><strong>Closed:</strong></td><td>{{location.closed }}</td></tr>
+        {% endif %}
+        {% if location.atcocode %}
+          <tr><td width="35%"><strong>ATCO code:</strong></td><td>{{location.atcocode }}</td></tr>
+        {% endif %}
+        {% if location.tiploccode %}
+          <tr><td width="35%"><strong>Tiploc Code:</strong></td><td>{{location.tiploccode }}</td></tr>
+        {% endif %}
+        {% if location.crscode %}
+          <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
+        {% endif %}
+        {% if location.geometry.x %}
+          <tr><td width="35%"><strong>Longitude/Latitude:</strong></td><td>{{location.geometry.x|floatformat:4}} {{location.geometry.y|floatformat:4}}</td></tr>
+        {% endif %}
+        {% if location.easting %}
+          <tr><td width="35%"><strong>Eastings/Northings:</strong></td><td>{{location.easting }} {{ location.northing }}</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    {% if location.custom_post.body %}
+      <h1 class="text-primary">Notes</h1>
+      {% autoescape off %}
+      {{location.custom_post.body}}
+      {% endautoescape %}
+    {% endif %}
+
+    <h1 class="text-primary mt-3">Wikipedia Page</h1>
+      <iframe src='https://en.wikipedia.org/wiki/{{location.wikislug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
+        " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
+        </iframe>
+
+    <h1 class="text-primary">Historic Map</h1>
+    <h3 class="text-primary">National Library of Scotland, Ordnance Survey 1892-1915 24-inch-to-the-mile series</h3>
+    <cite>'Reproduced with the permission of the National Library of Scotland under a Creative Commons Attribution (CC-BY) licence'</cite>
+      <iframe src={{nls_url}} id="NLSiframe" width="100%" height="700" marginwidth="300">
+        " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
+        </iframe>
+  </div> <!-- panel body -->
+</div> <!-- panel -->
 {% endblock content %}

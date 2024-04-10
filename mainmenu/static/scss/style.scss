@@ -1,6 +1,7 @@
 $primary: #0e5323;
 $primary-overlay: #0e5323;
-@import "bootstrap.scss";
+@import 'bootstrap.scss';
+$enabled-rounded: false;
 
 body {
   margin-top: 10px;
@@ -9,7 +10,7 @@ body {
 .navbar {
   box-shadow: 2px 2px 5px $primary;
   opacity: 0.9;
-  background:$primary;
+  background: $primary;
 
   .nav-item {
     font-size: 1.4rem;

@@ -11,12 +11,6 @@ class SingleSelectWidget(forms.Select):
 
 
 class LocoClassSelectionForm(forms.ModelForm):
-    # The following two ways of setting name are alternatives, the second being the more logical as it does not make sense to select one class on a page designed to list many classes
-    name = forms.ModelChoiceField(
-        queryset=LocoClassList.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={"class": "search-select2"}),
-    )
     name = forms.CharField(
         required=False, widget=forms.TextInput(attrs={"class": "search-input"})
     )
@@ -41,13 +35,11 @@ class LocoClassSelectionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # The following two ways of setting name are alternatives, see above
-        self.fields["name"].queryset = LocoClassList.objects.order_by("name")
         self.fields["name"].label = "Class Name"
 
     def clean_name(self):
         if name := self.cleaned_data.get("name"):
+            results = LocoClassList.objects.filter(name__icontains=name)
             return LocoClassList.objects.filter(name__icontains=name)
         return LocoClassList.objects.all()
 

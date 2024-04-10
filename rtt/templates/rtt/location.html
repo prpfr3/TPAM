@@ -1,0 +1,22 @@
+﻿{% extends "../mainmenu/base.html" %}
+{% load django_bootstrap5 %}
+{% block content_title %}{{ location }}</td></tr>{% endblock %}
+{% block content %}
+
+<form action="{% url 'rtt:times' location.id %}" method="post">
+
+  {% csrf_token %}
+  {% bootstrap_form form %}
+
+  <!-- Note the two different ways of coding buttons. Does the first (pure bootstrap) rely on static files
+  being downloaded or a CRN url ? A test without both suggested not -->
+  <a class="btn btn-primary" type="button" href="{% url 'rtt:livefreight' location.crscode %}">Current Freight Movements</a>
+
+  {% url 'rtt:times' location.crscode as button_url %}
+  {% bootstrap_button "Current Timetable" button_type="link" href=button_url  button_class="btn btn-primary" %}
+
+  {% url 'rtt:livepassenger' location.crscode as button_url %}
+  {% bootstrap_button "Current Passenger Movements" button_type="link" href=button_url button_class="btn btn-primary" %}
+</form>
+
+{% endblock content %}

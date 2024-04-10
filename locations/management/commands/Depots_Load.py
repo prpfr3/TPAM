@@ -1,103 +1,52 @@
 # Extracts a list of sheds from Wikipedia and loads into the TPAM database
 
 import os
-import requests
-import datetime
-import pandas as pd
 from csv import DictReader
 
 from django.core.management import BaseCommand
-from locations.models import Depot
-   
+from locations.models import Location, LocationCategory
+from OSGridConverter import grid2latlong
+
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
-INPUTFILE = 'Depots_Cleansed.csv'
-def inserter(s,a,n):
-    """
-    s: The original string
-    a: The characters you want to append
-    n: The position you want to append the characters
-    """
-    return s[:n]+a+s[n:]
+INPUTFILE = "Depots_Cleansed.csv"
 
-def dateformatter(dt):
-
-    """
-    Takes a partial or full date in various formats and returns:-
-
-    recorded_date: In format DD/MM/YYYY with the character ? where parts of the date were not supplied
-    datetime_date: A datetime format date with 01 substituted where the day or date was not known. Allows partial dates to be used in calculations of ages, graphing etc.
-    """
-
-    if len(dt) == 4: # Assumes that the four digits are a year, adding unknown day and month
-            dt = f"??/??/{dt}"
-    elif len(dt) == 7: # Assumes that the date is MM/YYYY, adding unknown day
-            dt = f"??/{dt}"
-    elif len(dt) == 6: # Assumes that the format is MMM-YY or MMM YY and insert 19 to give a four digit year:
-        dt = inserter(dt,"19",4)
-    elif len(dt) == 8: # Assumes that the format is MMM-YYYY or MMM YYYY, converting the 3 alpha month to 2 numerics
-        dt = dt.replace("Jan-", "??/01/")
-        dt = dt.replace("Feb-", "??/02/")
-        dt = dt.replace("Mar-", "??/03/")
-        dt = dt.replace("Apr-", "??/04/")
-        dt = dt.replace("May-", "??/05/")
-        dt = dt.replace("Jun-", "??/06/")
-        dt = dt.replace("Jul-", "??/07/")
-        dt = dt.replace("Aug-", "??/08/")
-        dt = dt.replace("Sep-", "??/09/")
-        dt = dt.replace("Oct-", "??/10/")
-        dt = dt.replace("Nov-", "??/11/")
-        dt = dt.replace("Dec-", "??/12/")
-        dt = dt.replace("Jan ", "??/01/")
-        dt = dt.replace("Feb ", "??/02/")
-        dt = dt.replace("Mar ", "??/03/")
-        dt = dt.replace("Apr ", "??/04/")
-        dt = dt.replace("May ", "??/05/")
-        dt = dt.replace("Jun ", "??/06/")
-        dt = dt.replace("Jul ", "??/07/")
-        dt = dt.replace("Aug ", "??/08/")
-        dt = dt.replace("Sep ", "??/09/")
-        dt = dt.replace("Oct ", "??/10/")
-        dt = dt.replace("Nov ", "??/11/")
-        dt = dt.replace("Dec ", "??/12/")
-
-    recorded_date = dt
-
-    """
-        Having stored the recorded date with ? for unknowns,
-        convert the ?s to the best edited precise date, 
-        taking the first day of the month or first month of the year
-        """
-    dt = dt.replace("??/??/", "01/01/")
-    dt = dt.replace("??", "01")
-
-    # Take 1 or 2 characters of the day or month depending on leading zeros which the int function does not accept
-    print(f'{dt=}')
-    month = int(dt[4]) if dt[3] == '0' else int(dt[3:5])
-    day = int(dt[1]) if dt[0] == '0' else int(dt[:2])
-
-    try:
-        datetime_date = datetime.date(int(dt[6:10]), month, day)
-    except Exception:
-        datetime_date = None
-
-    return(recorded_date, datetime_date )
 
 class Command(BaseCommand):
     # Show this when the user types help
     help = "Loads data a manually cleansed file of depots into the Depot table"
 
     def handle(self, *args, **options):
-        if Depot.objects.exists():
-            print('Depot data already exists but continuing.')
+        if Location.objects.exists():
+            print("Depot data already exists but continuing.")
         else:
             print("Creating Depots for the first time")
 
-        with open(os.path.join(DATAIO_DIR, INPUTFILE), encoding="utf-8-sig") as file:   
+        category_4, _ = LocationCategory.objects.get_or_create(id=4)
 
+        with open(os.path.join(DATAIO_DIR, INPUTFILE), encoding="utf-8-sig") as file:
             for row in DictReader(file):
-                depot = Depot()
-                depot.code = row['code'] 
-                depot.depot = row['name']
-                depot.date_start, depot.datefield_start = dateformatter(row['from_text'])
-                depot.date_end, depot.datefield_end = dateformatter(row['to_text'])
+                depot = Location()
+                depot, _ = Location.objects.get_or_create(name=row["name"])
+
+                depot.name = row["name"]
+
+                # Check if the Location is associated with the required category 4
+                if category_4 not in depot.categories.all():
+                    # If not, associate the Location with category 4
+                    depot.categories.add(category_4)
+
+                depot.opened = row["opened"]
+                depot.closed = row["closed"]
+                depot.closed_to_steam = row["closed to steam"]
+                if row["coordinates"]:
+                    l = grid2latlong(row["coordinates"])
+                    depot.northing = l.latitude
+                    depot.easting = l.longitude
+                from django.contrib.gis.geos import Point
+
+                if depot.easting is not None and depot.northing is not None:
+                    srid = 4326
+                    point = Point(depot.easting, depot.northing, srid=srid)
+                    depot.geometry = point
+
                 depot.save()

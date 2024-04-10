@@ -2,9 +2,9 @@ import json
 import urllib
 import markdown
 import wikipediaapi
-from django.forms.models import model_to_dict
-from django.db.models import Q
-from django.shortcuts import render
+from django.db.models import Q, F
+from django.shortcuts import render, redirect
+from django.core.cache import cache
 
 from locos.models import LocoClass
 
@@ -30,20 +30,14 @@ def people(request):
             and selection_criteria.cleaned_data is not None
         ):
             queryset = people_query_build(selection_criteria, request)
+            return redirect("people:people")
+
         else:
             errors = selection_criteria.errors
-            queryset = Person.objects.prefetch_related("references").order_by(
-                "surname", "firstname"
-            )
 
     else:
-        previous_criteria = {
-            "name": request.session.get("name"),
-            "role_id": request.session.get("role_id"),
-            "source": request.session.get("source"),
-            "birthyear": request.session.get("birthyear"),
-            "diedyear": request.session.get("diedyear"),
-        }
+        keys = ["name", "role_id", "source", "birthyear", "diedyear"]
+        previous_criteria = {key: request.session.get(key) for key in keys}
 
         if previous_criteria["role_id"]:
             previous_criteria["role"] = Role.objects.get(
@@ -53,15 +47,18 @@ def people(request):
             previous_criteria["role"] = None
 
         selection_criteria = PersonSelectionForm(
-            initial=previous_criteria, clear_previous_criteria=True
+            initial=previous_criteria, clear_previous_criteria=False
         )
+
+    # Check if the queryset is already cached and, if not, retrieve and cache it
+    queryset = cache.get("cached_queryset")
+    if queryset is None:
         queryset = Person.objects.prefetch_related("references").order_by(
             "surname", "firstname"
         )
+        cache.set("cached_queryset", queryset, timeout=None)  # Cache it indefinitely
 
-    queryset, page = pagination(
-        request, queryset
-    )  # Pass the updated queryset to the pagination function
+    queryset, page = pagination(request, queryset)
 
     context = {
         "selection_criteria": selection_criteria,
@@ -107,13 +104,16 @@ def people_query_build(selection_criteria, request):
     request.session["source"] = cleandata.get("source")
     request.session["birthyear"] = cleandata.get("birthyear")
     request.session["diedyear"] = cleandata.get("diedyear")
+
+    cache.set("cached_queryset", result, timeout=None)  # Cache it indefinitely
+
     return result
 
 
-def person(request, person_id):
-    person = Person.objects.get(id=person_id)
-    references = Reference.objects.filter(person=person_id)
-    designed_loco_classes = LocoClass.objects.filter(designer_person=person_id)
+def person(request, slug):
+    person = Person.objects.get(slug=slug)
+    references = Reference.objects.filter(person=person.id)
+    designed_loco_classes = LocoClass.objects.filter(designer_person=person.id)
 
     # Get text describing the person either from a notes app research article, else Wikipedia, else none
     if person.post_fk:
@@ -222,6 +222,9 @@ def people_storyline_build(selection_criteria, request):
     people = (
         Person.objects.filter(conditions)
         .prefetch_related("references")
+        .annotate(
+            date_from=F("personrole__date_from"), date_to=F("personrole__date_to")
+        )
         .order_by("surname", "firstname")
     )
 
@@ -239,8 +242,21 @@ def people_storyline_build(selection_criteria, request):
     forlooplimiter = 0
 
     for person in people:
-        if forlooplimiter < 20 and person.birthdate and person.dieddate:
-            forlooplimiter += 1
+        print(
+            person, person.date_from, person.date_to, person.birthdate, person.dieddate
+        )
+        if (person.date_from and person.date_to) or (
+            person.birthdate and person.dieddate
+        ):
+
+            if (
+                person.date_from and person.date_to
+            ):  # i.e. the date range should be for the role rather than born/died
+                start_date = person.date_from[:4]
+                end_date = person.date_to[:4]
+            else:
+                start_date = person.birthdate[:4]
+                end_date = person.dieddate[:4]
 
             event = {
                 "media": {
@@ -248,8 +264,8 @@ def people_storyline_build(selection_criteria, request):
                     "caption": person.wikiimagetext,
                     "credit": "Caption Credit: All credit to Wikipedia",
                 },
-                "start_date": {"year": person.birthdate[:4]},
-                "end_date": {"year": person.dieddate[:4]},
+                "start_date": {"year": start_date},
+                "end_date": {"year": end_date},
                 "text": {"headline": person.name, "text": ""},
             }
 
@@ -273,6 +289,9 @@ def people_storyline_build(selection_criteria, request):
 
             tdict["events"].append(event)
 
+        with open("CMEs.json", "w") as output_file:
+            json.dump(tdict, output_file, indent=4)
+
     return json.dumps(tdict)
 
 
@@ -295,7 +314,6 @@ def people_vis_timeline(request):
             }
             events.append(event)
 
-    print(json.dumps(events))
     return render(
         request,
         "people/people_vis_timeline.html",

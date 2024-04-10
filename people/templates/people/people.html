@@ -40,7 +40,7 @@
               ></a>
               {% endif %}     
             </td>
-            <td><a href="{% url 'people:person' person.id %}">{{ person.name }}</a></td>
+            <td><a href="{% url 'people:person' person.slug %}">{{ person.name }}</a></td>
             <td>{{ person.birthdate}}</td>
             <td>{{ person.dieddate }}</td>
             {% comment %}

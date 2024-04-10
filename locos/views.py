@@ -4,8 +4,8 @@ import wikipediaapi
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, ExpressionWrapper, F, fields
-from django.http import HttpRequest, HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpRequest, HttpResponseRedirect, QueryDict
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
@@ -28,36 +28,39 @@ def loco_class(request, loco_class_id):
 
 def loco_classes(request):
     errors = None
-    page = None
+    queryset = LocoClass.objects.order_by("wikiname")
+    selection_criteria = LocoClassSelectionForm(request.GET or None)
 
     if request.method == "POST":
-        selection_criteria = LocoClassSelectionForm(request.POST)
+        # Use GET method for form submission
+        return redirect(request.path_info + "?" + request.POST.urlencode())
 
-        if selection_criteria.is_valid() and selection_criteria.cleaned_data:
-            queryset = loco_classes_query_build(selection_criteria.cleaned_data)
-        else:
-            errors = selection_criteria.errors or None
-            queryset = LocoClass.objects.order_by("wikiname")
+    if not selection_criteria.is_valid():
+        errors = selection_criteria.errors
 
-    else:
-        selection_criteria = LocoClassSelectionForm()
-        queryset = LocoClass.objects.order_by("wikiname")
+    if selection_criteria.is_valid():
+        queryset = loco_classes_query_build(selection_criteria.cleaned_data)
 
-    queryset, page = pagination(
-        request, queryset
-    )  # Pass the selected queryset to pagination
+    queryset, page = pagination(request, queryset)
+
+    # Retain existing query parameters for pagination
+    query_params = QueryDict("", mutable=True)
+    query_params.update(request.GET)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
-        "page": page,
-        "loco_class_list": queryset,
+        "queryset": queryset,
+        "query_params": query_params.urlencode(),
     }
-
     return render(request, "locos/loco_class_list.html", context)
 
 
 def loco_classes_query_build(selection_criteria):
+    import urllib
+    from django.db.models import F, Value
+    from django.db.models.functions import Replace
+
     conditions = Q()
     cleandata = selection_criteria
 
@@ -86,33 +89,39 @@ def loco_classes_query_build(selection_criteria):
         fk = cleandata["manufacturers"]
         conditions &= Q(manufacturers=fk)
 
-    return LocoClass.objects.filter(conditions).order_by("wikiname")
+    queryset = (
+        LocoClass.objects.filter(conditions)
+        # .annotate(wikislug=Replace(F("slug"), Value(" "), Value("_")))
+        .order_by("wikiname")
+    )
+
+    # Fetch the queryset and then decode the URLs
+    # for obj in queryset:
+    #     obj.wikislug = urllib.parse.unquote(
+    #         obj.wikislug, encoding="utf-8", errors="replace"
+    #     )
+
+    return queryset
 
 
-def loco_class(request, loco_class_id):
+def loco_class(request, slug):
     import urllib
+    from django.db.models import F, Value
+    from django.db.models.functions import Concat, Replace
 
-    loco_class = LocoClass.objects.get(id=loco_class_id)
-    locomotives = Locomotive.objects.filter(lococlass=loco_class_id)
+    loco_class = (
+        LocoClass.objects.filter(slug=slug)
+        # .annotate(wikislug=Replace(F("slug"), Value(" "), Value("_")))
+        .order_by("wikiname").first()  # Retrieve the first object from the queryset
+    )
+    # loco_class.wikislug = urllib.parse.unquote(
+    #     loco_class.wikislug, encoding="utf-8", errors="replace"
+    # )
+
+    locomotives = Locomotive.objects.filter(lococlass=loco_class.id)
     references = loco_class.references.all()
     operators = loco_class.owner_operators.all()
     manufacturers = loco_class.manufacturers.all()
-
-    # # Get either a customised post or otherwise a wikipedia page
-    if loco_class.post_fk:
-        description = loco_class.post_fk.body
-        description_type = "Notes"
-    elif loco_class.wikiname:
-        wiki_wiki = wikipediaapi.Wikipedia(
-            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
-        )
-        slug = loco_class.wikiname.replace(" ", "_").replace("/wiki/", "")
-        slug = urllib.parse.unquote(slug, encoding="utf-8", errors="replace")
-        description = wiki_wiki.page(slug).text
-        description_type = "From Wikipedia:-"
-    else:
-        description = None
-        description_type = None
 
     context = {
         "loco_class": loco_class,
@@ -120,69 +129,65 @@ def loco_class(request, loco_class_id):
         "operators": operators,
         "references": references,
         "manufacturers": manufacturers,
-        "description_type": description_type,
-        "description": description,
     }
 
     return render(request, "locos/loco_class.html", context)
 
 
 def locomotives(request):
-    if request.method == "POST":
-        selection_criteria = LocomotiveSelectionForm(request.POST)
+    errors = None
+    queryset = Locomotive.objects.order_by("name")
+    selection_criteria = LocomotiveSelectionForm(request.GET or None)
 
-        if selection_criteria.is_valid() and selection_criteria.cleaned_data != None:
+    if request.method == "POST":
+        # Use GET method for form submission
+        return redirect(request.path_info + "?" + request.POST.urlencode())
+
+    if not selection_criteria.is_valid():
+        errors = selection_criteria.errors
+
+    if selection_criteria.is_valid():
+        if selection_criteria.cleaned_data["identifier"]:
             queryset = (
                 Locomotive.objects.filter(
-                    identifier__icontains=selection_criteria.cleaned_data["identifier"]
+                    identifier__icontains=selection_criteria.cleaned_data.get(
+                        "identifier", ""
+                    )
                 )
                 .values("brd_class_name")
                 .annotate(total=Count("brd_class_name"))
                 .order_by("total")
             )
-            # age = ExpressionWrapper(F('withdrawn_datetime')-F('build_datetime'), \
-            #   output_field=fields.DurationField())
-            # queryset = Locomotive.objects \
-            #   .filter(identifier__icontains=selection_criteria.cleaned_data['identifier']) \
-            #   .annotate(age=age) \
-            #   .order_by('age')
-            errors = None
-            context = {
-                "selection_criteria": selection_criteria,
-                "errors": errors,
-                "locomotives_list": queryset,
-            }
-            return render(request, "locos/locomotives_list.html", context)
 
-    else:
-        selection_criteria = LocomotiveSelectionForm()
-
-    queryset = Locomotive.objects.order_by("identifier")
-    errors = selection_criteria.errors or None
     queryset, page = pagination(request, queryset)
+
+    # Retain existing query parameters for pagination
+    query_params = QueryDict("", mutable=True)
+    query_params.update(request.GET)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
-        "page": page,
-        "locomotives_list": queryset,
+        "queryset": queryset,
+        "query_params": query_params.urlencode(),
     }
     return render(request, "locos/locomotives_list.html", context)
 
 
 def locomotive(request, locomotive_id):
+    lococlass = None
+    operators = None
+    class_designers = None
+    class_designers2 = None
+    class_designers3 = None
+    class_manufacturers = None
+    class_manufacturers2 = None
+    class_manufacturers3 = None
     locomotive = Locomotive.objects.get(id=locomotive_id)
     try:
         lococlass = LocoClass.objects.get(id=locomotive.lococlass)
     except ObjectDoesNotExist:
-        lococlass = None
-        operators = None
-        class_designers = None
-        class_designers2 = None
-        class_designers3 = None
-        class_manufacturers = None
-        class_manufacturers2 = None
-        class_manufacturers3 = None
+        pass
     except Exception as e:
         print(f"{e=}")
     else:

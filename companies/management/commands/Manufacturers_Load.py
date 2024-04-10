@@ -23,8 +23,8 @@ class Command(BaseCommand):
                 m.name = row['Builder_Name'] 
                 m.wikislug = row['Wikipedia_slug'].replace("/wiki/","")
                 m.railuk_manufacturer_code = row['RailUK_Builder_Code']
-                m.brd_manufacturer_code = row['BRD_Builder_Code']
-                m.brsl_manufacturer_code = row['BRSL_Builder_Code'] #OPC British Railway Steam Locomotives 1948-1968 
+                m.brd_code = row['BRD_Builder_Code']
+                m.brsl_code = row['BRSL_Builder_Code'] #OPC British Railway Steam Locomotives 1948-1968 
                 m.date_opened = row['date_built_BRW'] #British Railway Works book
                 m.date_closed = row['date_closure_BRW']
                 m.pre_grouping_owner = row['pre_grouping_owner']

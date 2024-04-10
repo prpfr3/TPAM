@@ -1,6 +1,7 @@
 from django.contrib import admin
-
 from .models import SlideHeader, Slide, Slidepack
+from tinymce.widgets import TinyMCE
+from django.db import models
 
 
 class SlidepackAdmin(admin.ModelAdmin):
@@ -12,6 +13,9 @@ class SlidepackAdmin(admin.ModelAdmin):
 class SlideAdmin(admin.ModelAdmin):
     ordering = ["text_headline"]
     search_fields = ["text_headline"]
+    formfield_overrides = {
+        models.TextField: {"widget": TinyMCE()},
+    }
 
 
 admin.site.register(SlideHeader)

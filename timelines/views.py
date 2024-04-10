@@ -22,9 +22,9 @@ def timelines(request):
     return render(request, "timelines/timelines.html", context)
 
 
-def timeline(request, timeline_id):
-    slideheader = TimelineSlideHeader.objects.get(id=timeline_id)
-    slides = TimelineSlide.objects.filter(slideheader__id=timeline_id).order_by(
+def timeline(request, slug):
+    slideheader = TimelineSlideHeader.objects.get(slug=slug)
+    slides = TimelineSlide.objects.filter(slideheader__id=slideheader.id).order_by(
         "timelineslidepack__slide_order"
     )
 
@@ -101,6 +101,5 @@ def timeline(request, timeline_id):
         tdict["events"].append(event)
 
     timeline_json = json.dumps(tdict)
-    print(timeline_json)
 
     return render(request, "timelines/timeline.html", {"timeline_json": timeline_json})

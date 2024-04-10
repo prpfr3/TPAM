@@ -6,6 +6,13 @@ from tinymce.widgets import TinyMCE
 from .models import *
 
 
+class RoleInline(admin.TabularInline):  # or StackedInline
+    model = (
+        PersonRole  # This refers to the intermediate model for ManyToMany relationship
+    )
+    extra = 0
+
+
 class PersonAdmin(admin.ModelAdmin):
     list_display = [
         "id",
@@ -19,7 +26,8 @@ class PersonAdmin(admin.ModelAdmin):
     search_fields = ("name", "post_fk__title")
     formfield_overrides = {models.TextField: {"widget": TinyMCE()}}
     raw_id_fields = ["post_fk"]
-    filter_horizontal = ["references", "roles"]
+    filter_horizontal = ["references"]
+    inlines = [RoleInline]
 
     def get_post_fk(self, obj):
         return obj.post_fk.title if obj.post_fk is not None else None
@@ -35,6 +43,13 @@ class PersonAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class PersonInline(admin.TabularInline):  # or StackedInline
+    model = (
+        Person.roles.through
+    )  # This refers to the intermediate model for ManyToMany relationship
+    extra = 0
+
+
 class RoleAdmin(admin.ModelAdmin):
     list_display = [
         "id",
@@ -44,6 +59,8 @@ class RoleAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {"widget": TinyMCE()},
     }
+    inlines = [PersonInline]
+    # filter_horizontal = ["persons"]
 
 
 class PersonRoleAdmin(admin.ModelAdmin):

@@ -1,0 +1,221 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}TPAM{% endblock title %}</title>
+
+    {% load static %}
+    {% load django_bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% bootstrap_messages %}
+
+    <link rel="stylesheet" href="{% static 'scss/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'scss/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css">
+
+
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Montserrat" >  
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
+    <!-- <link rel="stylesheet" type="text/css" href="https://www.bluebell-railway-museum.co.uk/css/additionalA.css"> -->
+
+    {% block head %}{% endblock %}
+  </head>
+  
+  <body>  
+
+    <header class="navbar navbar-expand-lg navbar-dark bg-primary flex-md-nowrap p-0 shadow fixed-top" style="z-index: 100;">
+
+      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="{% url 'mainmenu:index' %}" >TPAM Home</a>
+
+      <div class="container">
+        
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="d-flex ms-auto navbar-nav">    
+          {% if user.is_authenticated %}
+            <div class="nav-item text-nowrap">  
+              <a class="nav-link px-3">Hello {{ user.username }}</a>
+            </div>
+            <div class="nav-item text-nowrap"> 
+              <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+            </div>
+          {% else %}
+            <div class="nav-item text-nowrap"> 
+              <a class="nav-link ms-auto px-3" href="{% url 'users:register' %}">Register</a>
+            </div>
+            <div class="nav-item text-nowrap"> 
+              <a class="nav-link px-3" href="{% url 'users:login' %}">Login</a>
+            </div>
+          {% endif %}
+        </div>
+
+      </div><!-- Container -->
+    </header>
+
+    <div class="container-fluid " >
+      <div class="row">
+        <nav id="sidebarMenu" class="position-fixed col-md-3 col-lg-2 d-md-block bg-light sidebar collapse mt-12" style="z-index: 99; margin-top: 25px;">
+          <div class="position-sticky pt-3">
+       
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>R</b>olling Stock</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'locos:loco_classes' %}">Locomotive Classes</a>
+                <a class="dropdown-item nav-link" href="{% url 'locos:locomotives' %}">Locomotives</a>
+                <a class="dropdown-item nav-link" href="{% url 'locos:photos' %}">Photo Album</a>
+              </div>
+            </div>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>P</b>eople</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'people:people' %}">Famous People</a>
+                <a class="dropdown-item nav-link" href="{% url 'people:people_storyline' %}">People Storyline</a>
+                <a class="dropdown-item nav-link" href="{% url 'people:people_vis_timeline' %}">People Timeline</a>
+              </div>
+            </div>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><b>L</b>ocations</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'locations:locations' %}">Locations</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:routes' %}">Routes</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:route_sections' %}">Route Sections</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:elrs' %}">Engineers Line References</a>              
+                <a class="dropdown-item nav-link" href="{% url 'locations:regional_map_select' %}">Regional Railmap</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:heritage_sites' %}">Museums & Heritage Sites </a>
+                {% comment %}
+                <a class="dropdown-item nav-link" href="{% url 'locations:visits' %}">Heritage Site Visits</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:region_select' %}">Closed Lines Map</a>
+                <a class="dropdown-item nav-link" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
+                {% endcomment %}
+              </div>
+            </div>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>C</b>ompanies</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'companies:manufacturers' %}">Manufacturers</a>
+                <a class="dropdown-item nav-link" href="{% url 'companies:companies' %}">Owner Operators</a>
+              </div>
+            </div>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>R</b>esearch Articles</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'notes:topics' %}">Notes</a>
+                <a class="dropdown-item nav-link" href="{% url 'timelines:timelines' %}">Custom Timelines</a>
+                <a class="dropdown-item nav-link" href="{% url 'storymaps:storymaps' %}">Custom Storymaps</a>
+                <a class="dropdown-item nav-link" href="{% url 'notes:references' %}">References</a>
+                <a class="dropdown-item nav-link" href="{% url 'notes:timeline' %}">Bluebell Railway Timeline</a>
+              </div>
+            </div>
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>L</b>ive Train Times</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'rtt:locations' %}">Live Train Times</a>
+              </div>
+            </div>
+
+
+            {% comment %}
+
+            <div class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>UK</b> Heritage Sites</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'ukheritage:region_select' %}">UK Heritage Map</a>
+              </div>
+            </div>
+
+            <div class="nav-item dropdown"> <!--Aircraft-->
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>P</b>lanes</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item nav-link" href="{% url 'aircraft:airimages' %}">Photos</a>
+                  <a class="dropdown-item nav-link" href="{% url 'aircraft:aircraft_classes' %}">Classes</a>
+              </div>
+            </div> <!--Aircraft-->
+
+            <div class="nav-item dropdown"><!--Vehicle Licensing-->
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>A</b>utomobiles</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'vehicles:licensed_vehicles_list' %}">Database of UK Licensed Vehicles</a>
+                <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_models_list' %}">UK Most Popular Models</a>
+                <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_makes' %}">UK Most Popular Makes</a>
+              </div>
+            </div><!--Vehicle Licensing-->
+
+            <div class="nav-item dropdown"> <!--Military Vehicles-->
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <b>M</b>ilitary Vehicles</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item nav-link" href="{% url 'mvs:mvimages' %}">Photos</a>
+                <a class="dropdown-item nav-link" href="{% url 'mvs:military_vehicle_classes' %}">Classes</a>
+              </div>
+            </div> <!--Military Vehicles-->
+            {% endcomment %}
+
+          </div>
+        </nav>
+
+        {% block header %}{% endblock %}
+
+        <main class="position-relative col-md-9 ms-sm-auto col-lg-10 px-md-4 mt-3" >
+
+          <section class="py-3 text-center container">
+            <div class="row py-lg-3">
+              <div class="col-lg-6 col-md-8 mx-auto">
+                <h1 class="text-primary">
+                {% block content_title %}{% endblock %}             
+                </h1>
+                <p class="text-primary">
+                {% block content_desc %}{% endblock %}               
+                </p>
+              </div>
+            </div>
+
+            {% if messages %}
+              {% for message in messages %}
+
+              <div class="alert alert-warning alert-dismissible" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">             
+                </button>
+
+              </div>
+              {% endfor %}
+            {% endif %}
+
+          </section>
+
+          {% block content %}
+          {% endblock %}
+
+        </main>
+      </div>
+    </div>
+
+    <!-- Theoretically not needed. bootstrap5 does not use jquery and popper is bundled with javascript -->
+      <script src="{% static 'jquery-3.6.0.min.js' %}"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+
+  </body>
+</html>

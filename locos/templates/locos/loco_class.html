@@ -1,36 +1,18 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
+{% block head %}
+  <style>
+    .row-height {
+        min-height: 35px; /* Adjust the height as needed */
+    }
+  </style>
+{% endblock %}
+
 {% block content_title %}{{ loco_class }}{% endblock %}
 {% block content_desc %}{% endblock %}
 
 {% block content %}
   
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <small>
-        </small>
-      </div>
-
-      <div class="panel-body">
-        {% if description_type %}
-        <h1 class="text-primary">{{description_type}}</h1>
-          {% autoescape off %}
-          <div>{{ description }}</div>
-          {% endautoescape %}
-          {% endif %}
-
-<h1 class="text-primary">Class Specification</h1>
-      <!-- Template tags https://docs.djangoproject.com/en/2.0/howto/custom-template-tags/ -->
-      <!-- Template tags https://stackoverflow.com/questions/2217478/django-templates-loop-through-and-print-all-available-properties-of-an-object -->     
-      {% load my_tags %}
-      <ul>
-      {% for key, val in loco_class|get_fields %}
-        {% if val %}
-          <li>{{ key }}: {{ val }}</li>
-        {% endif %}
-      {% endfor %}
-      </ul>
-
     <h1 class="text-primary">Locos in Class</h1>
     {% for locomotive in locomotives %}
       {{locomotive.number_as_built}},
@@ -80,7 +62,17 @@
       {% endfor %}
     {% endcomment %}
 
-  </div> <!-- panel-body-->
-    </div> <!-- panel -->
+    {% if loco_class.post_fk.body %}
+      <h1 class="text-primary">Notes</h1>
+      {% autoescape off %}
+      {{loco_class.post_fk.body}}
+      {% endautoescape %}
+    {% endif %}
+
+    <h1 class="text-primary mt-3">Wikipedia Page</h1>
+    <iframe src='https://en.wikipedia.org/wiki/{{loco_class.slug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
+      " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
+    </iframe>
+
 
 {% endblock content %}

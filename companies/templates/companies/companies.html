@@ -1,0 +1,29 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}Railway Companies{% endblock %}
+{% block content_desc %}{% endblock %}
+
+
+
+{% block content %}
+
+    <form method='POST' action="" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ selection_criteria }}
+      <input type="submit" name="submit_input" value="Submit">
+    </form>
+
+    {% for company in company_list %}
+      {% if company.post_fk %}
+        <h4><a href="{% url 'notes:post_detail' company.post_fk.slug %}">{{company.name}}</a></h4>
+      {% elif company.wikislug %}
+        <h4><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></h4>
+      {% else %}
+        <h4>{{ company.name }}</h4>
+      {% endif %}
+    {% empty %}
+      No companies have been loaded yet.
+    {% endfor %}
+
+    {% include "mainmenu/pagination.html" with page=company_list %}
+{% endblock content %}

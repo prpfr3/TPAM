@@ -1,8 +1,7 @@
 """
-Django settings for TPAM solution.
 More info on settings:-
-https://docs.djangoproject.com/en/4.2/topics/settings/
-https://docs.djangoproject.com/en/4.2/ref/settings/
+https://docs.djangoproject.com/en/5.0/topics/settings/
+https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
@@ -20,6 +19,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 INSTALLED_APPS = [
+    "djangocms_admin_style",  # django-cms requirement. Must be before django.contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -28,7 +28,39 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_extensions",
     "smart_selects",
-    # Third Party Apps
+    # django-cms requirements
+    "django.contrib.sites",
+    "cms",  # A core CMS module
+    "menus",  # A core CMS module
+    "treebeard",  # Used for CMS page tree structures
+    "sekizai",
+    "filer",
+    "easy_thumbnails",
+    "djangocms_frontend",
+    "djangocms_frontend.contrib.accordion",
+    "djangocms_frontend.contrib.alert",
+    "djangocms_frontend.contrib.badge",
+    "djangocms_frontend.contrib.card",
+    "djangocms_frontend.contrib.carousel",
+    "djangocms_frontend.contrib.collapse",
+    "djangocms_frontend.contrib.content",
+    "djangocms_frontend.contrib.grid",
+    "djangocms_frontend.contrib.image",
+    "djangocms_frontend.contrib.jumbotron",
+    "djangocms_frontend.contrib.link",
+    "djangocms_frontend.contrib.listgroup",
+    "djangocms_frontend.contrib.media",
+    "djangocms_frontend.contrib.tabs",
+    "djangocms_frontend.contrib.utilities",
+    "djangocms_text_ckeditor",
+    "djangocms_file",
+    "djangocms_picture",
+    "djangocms_video",
+    "djangocms_googlemap",
+    "djangocms_snippet",
+    "djangocms_style",
+    "djangocms_alias",
+    "djangocms_versioning",  # Third Party Apps
     "crispy_forms",
     "crispy_bootstrap5",
     "django_bootstrap5",
@@ -37,7 +69,6 @@ INSTALLED_APPS = [
     "sorl.thumbnail",
     "tinymce",
     # Myapps
-    "aircraft",
     "api",
     "companies",
     "locations",
@@ -51,9 +82,32 @@ INSTALLED_APPS = [
     "storymaps",
     "timelines",
     "TPAM",
+    # "ukheritage", "Commented out to remove GDAL dependencies"
     "users",
-    "vehicles",
+    # "vehicles", "Commented out because smart selects does not work with Django 5"
 ]
+
+# django cms requirements
+SITE_ID = 1  # Needed for django-cms use of django.contrib.sites
+CMS_CONFIRM_VERSION4 = True  # Makes sure you don't run migrate on a V3 cms project
+X_FRAME_OPTIONS = "SAMEORIGIN"
+CMS_TEMPLATES = [
+    ("base.html", "Home page template"),
+]
+THUMBNAIL_HIGH_RESOLUTION = True
+USE_I18N = False
+
+# Enable permissions
+# https://docs.django-cms.org/en/release-4.1.x/topics/permissions.html
+# https://docs.django-cms.org/en/latest/explanation/permissions.html
+CMS_PERMISSION = True
+
+THUMBNAIL_PROCESSORS = (
+    "easy_thumbnails.processors.colorspace",
+    "easy_thumbnails.processors.autocrop",
+    "filer.thumbnail_processors.scale_and_crop_with_subject_location",
+    "easy_thumbnails.processors.filters",
+)
 
 # Initiate token authentication for REST APIs
 REST_FRAMEWORK = {
@@ -75,7 +129,13 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    # "whitenoise.middleware.WhiteNoiseMiddleware",
+    "cms.middleware.utils.ApphookReloadMiddleware",  # Optional for django-cms
+    "django.middleware.locale.LocaleMiddleware",  # Required for django-cms
+    "cms.middleware.user.CurrentUserMiddleware",  # Required for django-cms
+    "cms.middleware.page.CurrentPageMiddleware",  # Required for django-cms
+    "cms.middleware.toolbar.ToolbarMiddleware",  # Required for django-cms
+    "cms.middleware.language.LanguageCookieMiddleware",  # Required for django-cms
 ]
 
 ROOT_URLCONF = "TPAM.urls"
@@ -86,7 +146,10 @@ CART_SESSION_ID = "cart"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        # "DIRS": [],
+        "DIRS": [
+            os.path.join(BASE_DIR, "TPAM", "templates"),
+        ],  # Amendment for django-cms
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -94,6 +157,9 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.i18n",  # Added for django-cms
+                "sekizai.context_processors.sekizai",  # Added for django-cms
+                "cms.context_processors.cms_settings",  # Added for django-cms as cms check says necessary
             ],
         },
     },
@@ -118,7 +184,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = "en-us"
+LANGUAGES = [
+    ("en", "English"),
+    # ("de", "German"),
+    # ("it", "Italian"),
+]
+LANGUAGE_CODE = "en"
+
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_L10N = True
@@ -132,6 +204,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
 TINYMCE_DEFAULT_CONFIG = {
+    "content_css": [
+        "https://use.fontawesome.com/releases/v5.15.4/css/all.css",
+        "https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css",
+        "https://fonts.googleapis.com/css?family=Montserrat",
+        "https://fonts.googleapis.com/css?family=Raleway",
+    ],
+    "font_formats": "Montserrat=montserrat,arial,sans-serif;Raleway=raleway,arial,sans-serif",
     "height": 360,
     "width": 1120,
     "cleanup_on_startup": True,
@@ -141,13 +220,13 @@ TINYMCE_DEFAULT_CONFIG = {
     # https://www.tiny.cloud/docs/migration-from-4x/#themes
     "theme": "silver",
     "plugins": """
-      textcolor save link image media preview codesample contextmenu table code lists fullscreen insertdatetime nonbreaking contextmenu directionality searchreplace wordcount visualblocks visualchars code fullscreen autolink lists charmap print hr anchor pagebreak
+      textcolor save link image media preview codesample contextmenu table code lists fullscreen insertdatetime nonbreaking contextmenu directionality searchreplace wordcount visualblocks visualchars code autolink lists charmap print hr anchor pagebreak
      """,
     "toolbar1": """
             fullscreen preview bold italic underline | fontselect,
             fontsizeselect  | forecolor backcolor | alignleft alignright |
             aligncenter alignjustify | indent outdent | bullist numlist table |
-            | link image media | codesample |
+            | link image media | codesample
             """,
     "toolbar2": """
             visualblocks visualchars |
@@ -157,6 +236,7 @@ TINYMCE_DEFAULT_CONFIG = {
     "menubar": True,
     "statusbar": True,
 }
+
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -251,7 +331,6 @@ else:  # DEVELOPMENT SETTINGS
     KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
     config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
     SECRET_KEY = config["Django"]["tpam_secret_key"]
-    # INSTALLED_APPS += ['django.contrib.gis',]
 
     DEBUG = True
 
@@ -280,12 +359,16 @@ else:  # DEVELOPMENT SETTINGS
     OTAPI_APP_ID = config["opentransport"]["app_id"]
     OTAPI_API_KEY = config["opentransport"]["api_key"]
 
-    DATABASE_URL = f"postgresql://postgres:{db_pswd}@localhost/TPAM"
+    # DATABASE_URL = f"postgresql://postgres:{db_pswd}@localhost/TPAM"
+
+    # INSTALLED_APPS += [
+    #     "django.contrib.gis",
+    # ]  # If GDAL: installed
 
     DATABASES = {
         "default": {
-            # "ENGINE": "django.contrib.gis.db.backends.postgis",
-            "ENGINE": "django.db.backends.postgresql",
+            # "ENGINE": "django.contrib.gis.db.backends.postgis",  # If GDAL installed
+            "ENGINE": "django.db.backends.postgresql",  # If GDAL not installed
             "NAME": "TPAM",
             "USER": "postgres",
             "PASSWORD": db_pswd,
@@ -293,3 +376,14 @@ else:  # DEVELOPMENT SETTINGS
             "PORT": "5432",
         }
     }
+
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.mysql",
+    #         "NAME": "tpam",
+    #         "USER": "root",
+    #         "PASSWORD": "",
+    #         "HOST": "localhost",
+    #         "PORT": "",
+    #     }
+    # }
