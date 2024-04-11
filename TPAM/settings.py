@@ -302,10 +302,8 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
     # Get Other API keys
-    app_id = config["opentransport"]["app_id"]
-    api_key = config["opentransport"]["api_key"]
-    # app_id = os.environ["OTAPI_APP_ID"]
-    # api_key = os.environ["OTAPI_API_KEY"]
+    OTAPI_APP_ID = config["opentransport"]["app_id"]
+    OTAPI_API_KEY = config["opentransport"]["api_key"]
 
     # AWS S3 settings
     AWS_STORAGE_BUCKET_NAME = "django-tpam-paulf"
