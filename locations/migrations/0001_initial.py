@@ -753,7 +753,7 @@ class Migration(migrations.Migration):
                 ("BNG_N", models.FloatField()),
                 ("LONG", models.FloatField()),
                 ("LAT", models.FloatField()),
-                ("geometry", models.TextField(srid=4326)),
+                ("geometry", models.TextField()),
                 ("bbox_longitude_min", models.FloatField(default=0.0)),
                 ("bbox_latitude_min", models.FloatField(default=0.0)),
                 ("bbox_longitude_max", models.FloatField(default=0.0)),
