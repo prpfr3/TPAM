@@ -263,6 +263,7 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
         # Retrieve the tpam_secret_key and database_key from the [Django] section
         # Retrieve the tpam_secret_key from the [Django] section
         SECRET_KEY = config["Django"]["tpam_secret_key"]
+        DATABASE_KEY = config["Django"]["database_key"]
     except FileNotFoundError:
         # Handle file not found error
         print("Error: .env file not found")
@@ -273,8 +274,8 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
         # Handle missing option error
         print("Error: tpam_secret_key not found in [Django] section of .env file")
 
-    SECRET_KEY = config.get("Django", "tpam_secret_key")
-    DATABASE_KEY = config.get("Django", "database_key")
+    # SECRET_KEY = config.get("Django", "tpam_secret_key")
+    # DATABASE_KEY = config.get("Django", "database_key")
 
     # SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
     DEBUG = False  # Always runs as False in Production
