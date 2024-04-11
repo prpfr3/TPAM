@@ -278,7 +278,7 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
                     ip_list.append(addrs[x][0]["addr"])
         return ip_list
 
-    print(ip_addresses)
+    print(ip_addresses())
     ALLOWED_HOSTS = ip_addresses()
 
     # DATABASES = {"default": dj_database_url.config(default="postgres://localhost")}
