@@ -246,13 +246,23 @@ cwd = os.getcwd()
 if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     print("Using production settings from settings.py")
 
-    DEBUG = False  # Always runs as False in Production
-
     config = configparser.ConfigParser()
-    config.read("/root/.env")
+    passwords_file = "/root/.env"
+    # Open the .env file in read mode
+    with open("/root/.env", "r") as file:
+        # Read the contents of the file
+        env_contents = file.read()
+
+    # Print the contents to the console
+    print(f"contents are {env_contents}")
+
+    config.read(passwords_file)
     # Retrieve the tpam_secret_key and database_key from the [Django] section
     SECRET_KEY = config.get("Django", "tpam_secret_key")
     DATABASE_KEY = config.get("Django", "database_key")
+
+    # SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+    DEBUG = False  # Always runs as False in Production
 
     # Find out what the IP addresses are at run time
     # This is necessary because otherwise Gunicorn will reject the connections
@@ -267,7 +277,14 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
                     ip_list.append(addrs[x][0]["addr"])
         return ip_list
 
+    print(ip_addresses())
     ALLOWED_HOSTS = ip_addresses()
+
+    # DATABASES = {"default": dj_database_url.config(default="postgres://localhost")}
+
+    # DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
+
+    # DATABASE_KEY = config["Django"]["database_key"]
 
     DATABASES = {
         "default": {
@@ -386,6 +403,8 @@ else:  # DEVELOPMENT SETTINGS
     OTAPI_APP_ID = config["opentransport"]["app_id"]
     OTAPI_API_KEY = config["opentransport"]["api_key"]
 
+    # DATABASE_URL = f"postgresql://postgres:{db_pswd}@localhost/TPAM"
+
     # INSTALLED_APPS += [
     #     "django.contrib.gis",
     # ]  # If GDAL: installed
@@ -401,3 +420,14 @@ else:  # DEVELOPMENT SETTINGS
             "PORT": "5432",
         }
     }
+
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.mysql",
+    #         "NAME": "tpam",
+    #         "USER": "root",
+    #         "PASSWORD": "",
+    #         "HOST": "localhost",
+    #         "PORT": "",
+    #     }
+    # }
