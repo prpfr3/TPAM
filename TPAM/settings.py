@@ -243,6 +243,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Establish the current working directory to determine whether settings should be for a production or local server.
 cwd = os.getcwd()
+print(f"{cwd=}")
 if cwd == "/app" or cwd.startswith("/tmp"):  # PRODUCTION SETTINGS
     print("Using production settings from settings.py")
 
