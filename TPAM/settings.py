@@ -249,15 +249,28 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     config = configparser.ConfigParser()
     passwords_file = "/root/.env"
     # Open the .env file in read mode
-    with open("/root/.env", "r") as file:
-        # Read the contents of the file
-        env_contents = file.read()
+    try:
+        with open(passwords_file, "r") as file:
+            # Read the contents of the file
+            env_contents = file.read()
 
-    # Print the contents to the console
-    print(f"contents are {env_contents}")
+        # Print the contents to the console
+        print(f"contents are {env_contents}")
 
-    config.read(passwords_file)
-    # Retrieve the tpam_secret_key and database_key from the [Django] section
+        config.read(passwords_file)
+        # Retrieve the tpam_secret_key and database_key from the [Django] section
+        # Retrieve the tpam_secret_key from the [Django] section
+        SECRET_KEY = config.get("Django", "tpam_secret_key")
+    except FileNotFoundError:
+        # Handle file not found error
+        print("Error: .env file not found")
+    except configparser.NoSectionError:
+        # Handle missing section error
+        print("Error: [Django] section not found in .env file")
+    except configparser.NoOptionError:
+        # Handle missing option error
+        print("Error: tpam_secret_key not found in [Django] section of .env file")
+
     SECRET_KEY = config.get("Django", "tpam_secret_key")
     DATABASE_KEY = config.get("Django", "database_key")
 
