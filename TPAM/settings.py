@@ -254,7 +254,7 @@ if cwd == "/app" or cwd.startswith("/tmp"):  # PRODUCTION SETTINGS
         env_contents = file.read()
 
     # Print the contents to the console
-    print(env_contents)
+    print(f"contents are {env_contents}")
 
     config.read(passwords_file)
     SECRET_KEY = config["Django"]["tpam_secret_key"]
