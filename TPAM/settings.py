@@ -246,27 +246,62 @@ cwd = os.getcwd()
 if cwd == "/app" or cwd.startswith("/tmp"):  # PRODUCTION SETTINGS
     print("Using production settings from settings.py")
 
-    SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+    config = configparser.ConfigParser()
+    passwords_file = "/root/.env"
+    config.read(passwords_file)
+    SECRET_KEY = config["Django"]["tpam_secret_key"]
+
+    # SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
     DEBUG = False  # Always runs as False in Production
-    ALLOWED_HOSTS = ["tpam-production.up.railway.app"]
 
-    DATABASES = {"default": dj_database_url.config(default="postgres://localhost")}
+    # Find out what the IP addresses are at run time
+    # This is necessary because otherwise Gunicorn will reject the connections
+    import netifaces
 
-    DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
+    def ip_addresses():
+        ip_list = []
+        for interface in netifaces.interfaces():
+            addrs = netifaces.ifaddresses(interface)
+            for x in (netifaces.AF_INET, netifaces.AF_INET6):
+                if x in addrs:
+                    ip_list.append(addrs[x][0]["addr"])
+        return ip_list
+
+    ALLOWED_HOSTS = ip_addresses()
+
+    # DATABASES = {"default": dj_database_url.config(default="postgres://localhost")}
+
+    # DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
+
+    DATABASE_KEY = config["Django"]["database_key"]
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": "django",
+            "USER": "django",
+            "PASSWORD": DATABASE_KEY,
+            "HOST": "localhost",
+            "PORT": "5432",
+            "OPTIONS": {"sslmode": "require"},
+        }
+    }
 
     # Honor the 'X-Forwarded-Proto' header for request.is_secure().
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-    # Get Other API Keys
-    app_id = os.environ["OTAPI_APP_ID"]
-    api_key = os.environ["OTAPI_API_KEY"]
+    # Get Other API keys
+    app_id = config["opentransport"]["app_id"]
+    api_key = config["opentransport"]["api_key"]
+    # app_id = os.environ["OTAPI_APP_ID"]
+    # api_key = os.environ["OTAPI_API_KEY"]
 
     # AWS S3 settings
     AWS_STORAGE_BUCKET_NAME = "django-tpam-paulf"
     AWS_S3_REGION_NAME = "eu-west-2"  # e.g. us-east-2
     AWS_DEFAULT_ACL = None
-    AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
-    AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
+    # AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+    # AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
 
     # Tell django-storages the domain to use to refer to static files.
     AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
