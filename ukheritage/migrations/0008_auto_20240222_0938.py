@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="gdukworldheritagesites",
             name="geometry",
-            field=models.TextField(blank=True, null=True, srid=4326),
+            field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
             model_name="myplaces",
             name="geometry",
-            field=models.TextField(blank=True, null=True, srid=4326),
+            field=models.TextField(blank=True, null=True),
         ),
     ]

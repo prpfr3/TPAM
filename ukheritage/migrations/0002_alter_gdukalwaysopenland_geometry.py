@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="gdukalwaysopenland",
             name="geometry",
-            field=models.TextField(blank=True, null=True, srid=4326),
+            field=models.TextField(blank=True, null=True),
         ),
     ]

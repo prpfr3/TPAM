@@ -21,11 +21,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="gduklistedbuildings",
             name="geometry",
-            field=models.TextField(blank=True, null=True, srid=4326),
+            field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
             model_name="gdukparksgardens",
             name="geometry",
-            field=models.TextField(blank=True, null=True, srid=4326),
+            field=models.TextField(blank=True, null=True),
         ),
     ]

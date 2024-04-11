@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                     "description",
                     models.TextField(blank=True, db_column="Description", null=True),
                 ),
-                ("geometry", models.TextField(blank=True, null=True, srid=4326)),
+                ("geometry", models.TextField(blank=True, null=True)),
             ],
             options={
                 "verbose_name": "Closed Route Geometries",
@@ -252,7 +252,7 @@ class Migration(migrations.Migration):
                     "field_relations",
                     models.TextField(blank=True, db_column="@relations", null=True),
                 ),
-                ("geometry", models.TextField(blank=True, null=True, srid=4326)),
+                ("geometry", models.TextField(blank=True, null=True)),
             ],
             options={
                 "verbose_name": "OSM Route Geometry",
@@ -443,7 +443,7 @@ class Migration(migrations.Migration):
                         blank=True, db_column="railway:yard:purpose", null=True
                     ),
                 ),
-                ("geometry", models.TextField(blank=True, null=True, srid=4326)),
+                ("geometry", models.TextField(blank=True, null=True)),
             ],
             options={
                 "verbose_name": "OSM History Route Geometry",
@@ -468,7 +468,7 @@ class Migration(migrations.Migration):
                 ("lat", models.FloatField(blank=True, null=True)),
                 ("st_areasha", models.FloatField(blank=True, null=True)),
                 ("st_lengths", models.FloatField(blank=True, null=True)),
-                ("geometry", models.TextField(blank=True, null=True, srid=4326)),
+                ("geometry", models.TextField(blank=True, null=True)),
             ],
             options={
                 "verbose_name": "UK Admin Area Geometry",
@@ -507,7 +507,7 @@ class Migration(migrations.Migration):
                     models.CharField(blank=True, default="", max_length=200),
                 ),
                 ("geodata", models.JSONField(blank=True, default=None, null=True)),
-                ("geometry", models.TextField(blank=True, null=True, srid=4326)),
+                ("geometry", models.TextField(blank=True, null=True)),
                 (
                     "post_fk",
                     models.ForeignKey(
@@ -636,7 +636,7 @@ class Migration(migrations.Migration):
                     "disused_stations_slug",
                     models.CharField(blank=True, max_length=200, null=True),
                 ),
-                ("geometry", models.TextField(blank=True, null=True, srid=4326)),
+                ("geometry", models.TextField(blank=True, null=True)),
                 ("atcocode", models.CharField(blank=True, max_length=20, null=True)),
                 ("tiploccode", models.CharField(blank=True, max_length=20, null=True)),
                 ("crscode", models.CharField(blank=True, max_length=10, null=True)),

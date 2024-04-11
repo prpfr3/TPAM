@@ -31,6 +31,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="routesection",
             name="geometry",
-            field=models.TextField(blank=True, null=True, srid=4326),
+            field=models.TextField(blank=True, null=True),
         ),
     ]
