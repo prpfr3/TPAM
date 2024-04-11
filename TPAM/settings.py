@@ -258,6 +258,7 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
         print(f"contents are {env_contents}")
 
         config.read(passwords_file)
+        config.sections()
         # Retrieve the tpam_secret_key and database_key from the [Django] section
         # Retrieve the tpam_secret_key from the [Django] section
         SECRET_KEY = config.get("Django", "tpam_secret_key")
