@@ -248,8 +248,19 @@ if cwd == "/app" or cwd.startswith("/tmp"):  # PRODUCTION SETTINGS
 
     config = configparser.ConfigParser()
     passwords_file = "/root/.env"
+    # Open the .env file in read mode
+    with open("/root/.env", "r") as file:
+        # Read the contents of the file
+        env_contents = file.read()
+
+    # Print the contents to the console
+    print(env_contents)
+
     config.read(passwords_file)
     SECRET_KEY = config["Django"]["tpam_secret_key"]
+    # Retrieve the tpam_secret_key and database_key from the [Django] section
+    SECRET_KEY = config.get("Django", "tpam_secret_key")
+    DATABASE_KEY = config.get("Django", "database_key")
 
     # SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
     DEBUG = False  # Always runs as False in Production
@@ -273,7 +284,7 @@ if cwd == "/app" or cwd.startswith("/tmp"):  # PRODUCTION SETTINGS
 
     # DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 
-    DATABASE_KEY = config["Django"]["database_key"]
+    # DATABASE_KEY = config["Django"]["database_key"]
 
     DATABASES = {
         "default": {

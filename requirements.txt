@@ -87,3 +87,5 @@ whitenoise==6.6.0; python_version >= '3.8'
 wikipedia-api==0.6.0
 xyzservices==2024.4.0; python_version >= '3.8'
 netifaces
+gunicorn
+psycopg2-binary
