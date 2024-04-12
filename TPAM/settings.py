@@ -246,24 +246,17 @@ cwd = os.getcwd()
 if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     print("Using production settings from settings.py")
 
+    # Get all the config variables
     config = configparser.ConfigParser()
     passwords_file = "/root/.env"
-    # Open the .env file in read mode
     try:
-        with open(passwords_file, "r") as file:
-            # Read the contents of the file
-            env_contents = file.read()
-
-        # Print the contents to the console
-        print(f"contents are {env_contents}")
-
         config.read(passwords_file)
-        print(f"contents are {config.read(passwords_file)}")
-        print(f"{config.sections()=}")
-        # Retrieve the tpam_secret_key and database_key from the [Django] section
-        # Retrieve the tpam_secret_key from the [Django] section
         SECRET_KEY = config["Django"]["tpam_secret_key"]
         DATABASE_KEY = config["Django"]["database_key"]
+        AWS_ACCESS_KEY_ID = config["Django"]["aws_access_key_id"]
+        AWS_SECRET_ACCESS_KEY = config["Django"]["aws_secret_access_key"]
+        OTAPI_APP_ID = config["opentransport"]["app_id"]
+        OTAPI_API_KEY = config["opentransport"]["api_key"]
     except FileNotFoundError:
         # Handle file not found error
         print("Error: .env file not found")
@@ -272,12 +265,8 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
         print("Error: [Django] section not found in .env file")
     except configparser.NoOptionError:
         # Handle missing option error
-        print("Error: tpam_secret_key not found in [Django] section of .env file")
+        print("Error: One of the keys not found in [Django] section of .env file")
 
-    # SECRET_KEY = config.get("Django", "tpam_secret_key")
-    # DATABASE_KEY = config.get("Django", "database_key")
-
-    # SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
     DEBUG = False  # Always runs as False in Production
 
     # Find out what the IP addresses are at run time
@@ -317,16 +306,10 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     # Honor the 'X-Forwarded-Proto' header for request.is_secure().
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-    # Get Other API keys
-    OTAPI_APP_ID = config["opentransport"]["app_id"]
-    OTAPI_API_KEY = config["opentransport"]["api_key"]
-
     # AWS S3 settings
     AWS_STORAGE_BUCKET_NAME = "django-tpam-paulf"
     AWS_S3_REGION_NAME = "eu-west-2"  # e.g. us-east-2
     AWS_DEFAULT_ACL = None
-    # AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
-    # AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
 
     # Tell django-storages the domain to use to refer to static files.
     AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
