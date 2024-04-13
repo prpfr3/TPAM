@@ -6,7 +6,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 import configparser
-import dj_database_url
+
+# import dj_database_url
 
 # My Settings
 LOGIN_URL = "/users/login"
