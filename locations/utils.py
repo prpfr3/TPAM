@@ -121,7 +121,9 @@ def generate_storymap(headline, text, locations):
             wikislug = location.get("wikislug").replace("/wiki/", "")
             pagename = wikislug.replace("_", " ")
             wiki_wiki = wikipediaapi.Wikipedia(
-                language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+                user_agent="github/prpfr3 TPAM",
+                language="en",
+                extract_format=wikipediaapi.ExtractFormat.HTML,
             )
 
             if wikislug and wiki_wiki.page(wikislug).exists:

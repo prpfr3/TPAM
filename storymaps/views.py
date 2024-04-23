@@ -86,7 +86,9 @@ def storymap(request, slug):
             slideheader.wikipedia_name, encoding="utf-8", errors="replace"
         )
         wiki_wiki = wikipediaapi.Wikipedia(
-            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+            user_agent="github/prpfr3 TPAM",
+            language="en",
+            extract_format=wikipediaapi.ExtractFormat.HTML,
         )
         if wiki_wiki.page(wikipage).exists:
             # text_array = wiki_wiki.page(wikipage).text.split("<h2>Notes</h2>")
@@ -119,7 +121,9 @@ def storymap(request, slug):
         }
 
         wiki_wiki = wikipediaapi.Wikipedia(
-            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+            user_agent="github/prpfr3 TPAM",
+            language="en",
+            extract_format=wikipediaapi.ExtractFormat.HTML,
         )
         page_name = slide.wikipedia_name.replace(" ", "_")
         if page_name and wiki_wiki.page(page_name).exists:

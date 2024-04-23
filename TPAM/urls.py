@@ -26,7 +26,7 @@ urlpatterns = [
     path("locations/", include("locations.urls", namespace="locations")),
     path("timelines/", include("timelines.urls", namespace="timelines")),
     path("ukheritage/", include("ukheritage.urls", namespace="ukheritage")),
-    path("blog/", include("cms.urls")),
+    # path("blog/", include("cms.urls")),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

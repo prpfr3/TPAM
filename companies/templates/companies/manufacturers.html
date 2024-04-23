@@ -13,7 +13,7 @@
     </p>
   </form>
 
-  {% for manufacturer in manufacturer_list %}
+  {% for manufacturer in queryset %}
     {% if manufacturer.post_fk %}
       <h4><a href="{% url 'notes:post_detail' manufacturer.post_fk.slug %}">{{manufacturer.name}}</a></h4>
     {% elif manufacturer.wikislug %}

@@ -43,7 +43,7 @@ def timeline(request, slug):
     tdict["title"]["media"]["credit"] = slideheader.media_credit
     tdict["title"]["media"]["url"] = slideheader.media_url
     tdict["title"]["text"] = {}
-    # wiki_wiki = wikipediaapi.Wikipedia(
+    # wiki_wiki = wikipediaapi.Wikipedia(user_agent="github/prpfr3 TPAM",
     #     # user_agent="TPAM Django Project @ https://github.com/prpfr3", #version 0.6.0 onwards
     #     language="en",
     #     extract_format=wikipediaapi.ExtractFormat.HTML,
@@ -84,7 +84,9 @@ def timeline(request, slug):
         }
 
         wiki_wiki = wikipediaapi.Wikipedia(
-            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+            user_agent="github/prpfr3 TPAM",
+            language="en",
+            extract_format=wikipediaapi.ExtractFormat.HTML,
         )
         page_name = slide.wikipedia_name.replace(" ", "_")
         if page_name and wiki_wiki.page(page_name).exists:

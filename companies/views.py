@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.http import QueryDict
 from .forms import *
 
 from mainmenu.views import pagination
@@ -8,6 +9,41 @@ from mainmenu.views import pagination
 
 def index(request):
     return render(request, "companies/index.html")
+
+
+def companies(request):
+    errors = None
+    queryset = Manufacturer.objects.order_by("name")
+    selection_criteria = ManufacturerSelectionForm(request.POST)
+
+    if request.method == "POST":
+        # Use GET method for form submission
+        return redirect(request.path_info + "?" + request.POST.urlencode())
+
+    if not selection_criteria.is_valid():
+        errors = selection_criteria.errors
+
+    if (
+        selection_criteria.is_valid()
+        and selection_criteria.cleaned_data["name"] != None
+    ):
+        queryset = Manufacturer.objects.filter(
+            name__icontains=selection_criteria.cleaned_data["name"]
+        ).order_by("name")
+
+    queryset, page = pagination(request, queryset)
+
+    # Retain existing query parameters for pagination
+    query_params = QueryDict("", mutable=True)
+    query_params.update(request.GET)
+
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "queryset": queryset,
+        "page": page,
+    }
+    return render(request, "companies/companies.html", context)
 
 
 def company(request, company_id):
@@ -28,7 +64,9 @@ def company(request, company_id):
 
         wikipediaapi.log.setLevel(level=wikipediaapi.logging.DEBUG)
         wiki_wiki = wikipediaapi.Wikipedia(
-            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+            user_agent="github/prpfr3 TPAM",
+            language="en",
+            extract_format=wikipediaapi.ExtractFormat.HTML,
         )
         slug = company.wikislug.replace("/wiki/", "")
         slug = urllib.parse.unquote(slug, encoding="utf-8", errors="replace")
@@ -50,69 +88,42 @@ def company(request, company_id):
     return render(request, "companies/company.html", context)
 
 
-def companies(request):
-    if request.method == "POST":
-        selection_criteria = CompanySelectionForm(request.POST)
+def manufacturers(request):
+    errors = None
+    queryset = Manufacturer.objects.order_by("name")
+    selection_criteria = ManufacturerSelectionForm(request.POST)
 
-        if (
-            selection_criteria.is_valid()
-            and selection_criteria.cleaned_data["name"] != None
-        ):
-            queryset = Company.objects.filter(
-                name__icontains=selection_criteria.cleaned_data["name"]
-            ).order_by("name")
-            errors = None
-        else:
-            errors = selection_criteria.errors or None
-            queryset = Company.objects.order_by("name")
-    else:
-        selection_criteria = CompanySelectionForm
-        errors = selection_criteria.errors or None
-        queryset = Company.objects.order_by("name")
+    if request.method == "POST":
+        # Use GET method for form submission
+        return redirect(request.path_info + "?" + request.POST.urlencode())
+
+    if not selection_criteria.is_valid():
+        errors = selection_criteria.errors
+
+    if (
+        selection_criteria.is_valid()
+        and selection_criteria.cleaned_data["name"] != None
+    ):
+        queryset = Manufacturer.objects.filter(
+            name__icontains=selection_criteria.cleaned_data["name"]
+        ).order_by("name")
 
     queryset, page = pagination(request, queryset)
+
+    # Retain existing query parameters for pagination
+    query_params = QueryDict("", mutable=True)
+    query_params.update(request.GET)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
-        "company_list": queryset,
+        "queryset": queryset,
         "page": page,
     }
-    return render(request, "companies/companies.html", context)
+    return render(request, "companies/manufacturers.html", context)
 
 
 def manufacturer(request, manufacturer_id):
     manufacturer = Manufacturer.objects.get(id=manufacturer_id)
     context = {"manufacturer": manufacturer}
     return render(request, "companies/manufacturer.html", context)
-
-
-def manufacturers(request):
-    if request.method == "POST":
-        selection_criteria = ManufacturerSelectionForm(request.POST)
-
-        if (
-            selection_criteria.is_valid()
-            and selection_criteria.cleaned_data["name"] != None
-        ):
-            queryset = Manufacturer.objects.filter(
-                name__icontains=selection_criteria.cleaned_data["name"]
-            ).order_by("name")
-            errors = None
-        else:
-            errors = selection_criteria.errors or None
-            queryset = Manufacturer.objects.order_by("name")
-    else:
-        selection_criteria = ManufacturerSelectionForm()
-        errors = selection_criteria.errors or None
-        queryset = Manufacturer.objects.order_by("name")
-
-    queryset, page = pagination(request, queryset)
-
-    context = {
-        "selection_criteria": selection_criteria,
-        "errors": errors,
-        "manufacturer_list": queryset,
-        "page": page,
-    }
-    return render(request, "companies/manufacturers.html", context)

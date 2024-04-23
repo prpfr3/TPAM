@@ -13,7 +13,7 @@
       <input type="submit" name="submit_input" value="Submit">
     </form>
 
-    {% for company in company_list %}
+    {% for company in queryset %}
       {% if company.post_fk %}
         <h4><a href="{% url 'notes:post_detail' company.post_fk.slug %}">{{company.name}}</a></h4>
       {% elif company.wikislug %}

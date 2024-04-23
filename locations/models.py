@@ -8,7 +8,10 @@ from django.db import (
 from django.urls import reverse
 from utils.utils import custom_slugify
 
-sys.path.append("..")
+# from .utils import *
+
+
+# sys.path.append("..")
 
 
 class UKArea(models.Model):

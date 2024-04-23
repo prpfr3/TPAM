@@ -5,11 +5,10 @@ import wikipediaapi
 from django.db.models import Q, F
 from django.shortcuts import render, redirect
 from django.core.cache import cache
+from django.http import QueryDict
 
 from locos.models import LocoClass
-
 from mainmenu.views import pagination
-
 from .forms import *
 from .models import *
 
@@ -20,35 +19,6 @@ def index(request):
 
 def people(request):
     errors = None
-    page = None
-
-    if request.method == "POST":
-        selection_criteria = PersonSelectionForm(request.POST)
-
-        if (
-            selection_criteria.is_valid()
-            and selection_criteria.cleaned_data is not None
-        ):
-            queryset = people_query_build(selection_criteria, request)
-            return redirect("people:people")
-
-        else:
-            errors = selection_criteria.errors
-
-    else:
-        keys = ["name", "role_id", "source", "birthyear", "diedyear"]
-        previous_criteria = {key: request.session.get(key) for key in keys}
-
-        if previous_criteria["role_id"]:
-            previous_criteria["role"] = Role.objects.get(
-                id=previous_criteria["role_id"]
-            )
-        else:
-            previous_criteria["role"] = None
-
-        selection_criteria = PersonSelectionForm(
-            initial=previous_criteria, clear_previous_criteria=False
-        )
 
     # Check if the queryset is already cached and, if not, retrieve and cache it
     queryset = cache.get("cached_queryset")
@@ -56,23 +26,38 @@ def people(request):
         queryset = Person.objects.prefetch_related("references").order_by(
             "surname", "firstname"
         )
-        cache.set("cached_queryset", queryset, timeout=None)  # Cache it indefinitely
+        cache.set("cached_queryset", queryset, timeout=None)  # Cache it
+    selection_criteria = PersonSelectionForm(request.GET or None)
 
-    queryset, page = pagination(request, queryset)
+    if request.method == "POST":
+        # Use GET method for form submission
+        return redirect(request.path_info + "?" + request.POST.urlencode())
+
+    if not selection_criteria.is_valid():
+        errors = selection_criteria.errors
+
+    if selection_criteria.is_valid():
+        queryset = people_query_build(selection_criteria.cleaned_data)
+
+    queryset, _ = pagination(request, queryset)
+
+    # Retain existing query parameters for pagination
+    query_params = QueryDict("", mutable=True)
+    query_params.update(request.GET)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
-        "page": page,
-        "people": queryset,
+        "queryset": queryset,
+        "query_params": query_params.urlencode(),
     }
 
     return render(request, "people/people.html", context)
 
 
-def people_query_build(selection_criteria, request):
+def people_query_build(selection_criteria):
     conditions = Q()
-    cleandata = selection_criteria.cleaned_data
+    cleandata = selection_criteria
 
     if "name" in cleandata and cleandata["name"]:
         conditions &= Q(name__icontains=cleandata["name"])
@@ -90,24 +75,15 @@ def people_query_build(selection_criteria, request):
     if "diedyear" in cleandata and cleandata["diedyear"]:
         conditions &= Q(dieddate__startswith=cleandata["diedyear"])
 
-    result = (
+    queryset = (
         Person.objects.filter(conditions)
         .prefetch_related("references")
         .order_by("surname", "firstname")
     )
 
-    # Save the selection criteria values in the session
-    request.session["name"] = cleandata.get("name")
-    request.session["role_id"] = (
-        cleandata.get("role").id if cleandata.get("role") else None
-    )
-    request.session["source"] = cleandata.get("source")
-    request.session["birthyear"] = cleandata.get("birthyear")
-    request.session["diedyear"] = cleandata.get("diedyear")
-
-    cache.set("cached_queryset", result, timeout=None)  # Cache it indefinitely
-
-    return result
+    # Cache it indefinitely
+    cache.set("cached_queryset", queryset, timeout=None)
+    return queryset
 
 
 def person(request, slug):
@@ -121,7 +97,9 @@ def person(request, slug):
         description_type = "Notes"
     elif person.wikitextslug:
         wiki_wiki = wikipediaapi.Wikipedia(
-            language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+            user_agent="github/prpfr3 TPAM",
+            language="en",
+            extract_format=wikipediaapi.ExtractFormat.HTML,
         )
         slug = urllib.parse.unquote(
             person.wikitextslug, encoding="utf-8", errors="replace"
@@ -242,9 +220,6 @@ def people_storyline_build(selection_criteria, request):
     forlooplimiter = 0
 
     for person in people:
-        print(
-            person, person.date_from, person.date_to, person.birthdate, person.dieddate
-        )
         if (person.date_from and person.date_to) or (
             person.birthdate and person.dieddate
         ):
@@ -276,7 +251,9 @@ def people_storyline_build(selection_criteria, request):
 
             pagename = person.wikitextslug.replace("_", " ")
             wiki_wiki = wikipediaapi.Wikipedia(
-                language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+                user_agent="github/prpfr3 TPAM",
+                language="en",
+                extract_format=wikipediaapi.ExtractFormat.HTML,
             )
 
             if person.wikitextslug and wiki_wiki.page(person.wikitextslug).exists:

@@ -74,6 +74,12 @@ class LocomotiveSelectionForm(forms.ModelForm):
         fields = ("identifier",)
 
 
+class LocomotiveImageForm(forms.ModelForm):
+    class Meta:
+        model = Reference
+        fields = ("full_reference",)
+
+
 class LocoClassForm(forms.ModelForm):
     class Meta:
         model = LocoClass

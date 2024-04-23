@@ -20,7 +20,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 INSTALLED_APPS = [
-    "djangocms_admin_style",  # django-cms requirement. Must be before django.contrib.admin
+    # "djangocms_admin_style",  # django-cms requirement. Must be before django.contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -30,44 +30,45 @@ INSTALLED_APPS = [
     "django_extensions",
     "smart_selects",
     # django-cms requirements
-    "django.contrib.sites",
-    "cms",  # A core CMS module
-    "menus",  # A core CMS module
-    "treebeard",  # Used for CMS page tree structures
-    "sekizai",
-    "filer",
-    "easy_thumbnails",
-    "djangocms_frontend",
-    "djangocms_frontend.contrib.accordion",
-    "djangocms_frontend.contrib.alert",
-    "djangocms_frontend.contrib.badge",
-    "djangocms_frontend.contrib.card",
-    "djangocms_frontend.contrib.carousel",
-    "djangocms_frontend.contrib.collapse",
-    "djangocms_frontend.contrib.content",
-    "djangocms_frontend.contrib.grid",
-    "djangocms_frontend.contrib.image",
-    "djangocms_frontend.contrib.jumbotron",
-    "djangocms_frontend.contrib.link",
-    "djangocms_frontend.contrib.listgroup",
-    "djangocms_frontend.contrib.media",
-    "djangocms_frontend.contrib.tabs",
-    "djangocms_frontend.contrib.utilities",
-    "djangocms_text_ckeditor",
-    "djangocms_file",
-    "djangocms_picture",
-    "djangocms_video",
-    "djangocms_googlemap",
-    "djangocms_snippet",
-    "djangocms_style",
-    "djangocms_alias",
-    "djangocms_versioning",  # Third Party Apps
+    # "django.contrib.sites",
+    # "cms",  # A core CMS module
+    # "menus",  # A core CMS module
+    # "treebeard",  # Used for CMS page tree structures
+    # "sekizai",
+    # "filer",
+    # "easy_thumbnails",
+    # "djangocms_frontend",
+    # "djangocms_frontend.contrib.accordion",
+    # "djangocms_frontend.contrib.alert",
+    # "djangocms_frontend.contrib.badge",
+    # "djangocms_frontend.contrib.card",
+    # "djangocms_frontend.contrib.carousel",
+    # "djangocms_frontend.contrib.collapse",
+    # "djangocms_frontend.contrib.content",
+    # "djangocms_frontend.contrib.grid",
+    # "djangocms_frontend.contrib.image",
+    # "djangocms_frontend.contrib.jumbotron",
+    # "djangocms_frontend.contrib.link",
+    # "djangocms_frontend.contrib.listgroup",
+    # "djangocms_frontend.contrib.media",
+    # "djangocms_frontend.contrib.tabs",
+    # "djangocms_frontend.contrib.utilities",
+    # "djangocms_text_ckeditor",
+    # "djangocms_file",
+    # "djangocms_picture",
+    # "djangocms_video",
+    # "djangocms_googlemap",
+    # "djangocms_snippet",
+    # "djangocms_style",
+    # "djangocms_alias",
+    # "djangocms_versioning",
+    # "cms.plugins.text",  # May be needed for TinyMCE in djangocms
+    # Third Party Apps
     "crispy_forms",
     "crispy_bootstrap5",
     "django_bootstrap5",
     "rest_framework",
     "rest_framework.authtoken",
-    "sorl.thumbnail",
     "tinymce",
     # Myapps
     "api",
@@ -89,26 +90,26 @@ INSTALLED_APPS = [
 ]
 
 # django cms requirements
-SITE_ID = 1  # Needed for django-cms use of django.contrib.sites
-CMS_CONFIRM_VERSION4 = True  # Makes sure you don't run migrate on a V3 cms project
-X_FRAME_OPTIONS = "SAMEORIGIN"
-CMS_TEMPLATES = [
-    ("base.html", "Home page template"),
-]
-THUMBNAIL_HIGH_RESOLUTION = True
-USE_I18N = False
+# SITE_ID = 1  # Needed for django-cms use of django.contrib.sites
+# CMS_CONFIRM_VERSION4 = True  # Makes sure you don't run migrate on a V3 cms project
+# X_FRAME_OPTIONS = "SAMEORIGIN"
+# CMS_TEMPLATES = [
+#     ("base.html", "Home page template"),
+# ]
+# THUMBNAIL_HIGH_RESOLUTION = True
+# USE_I18N = False
 
 # Enable permissions
 # https://docs.django-cms.org/en/release-4.1.x/topics/permissions.html
 # https://docs.django-cms.org/en/latest/explanation/permissions.html
-CMS_PERMISSION = True
+# CMS_PERMISSION = True
 
-THUMBNAIL_PROCESSORS = (
-    "easy_thumbnails.processors.colorspace",
-    "easy_thumbnails.processors.autocrop",
-    "filer.thumbnail_processors.scale_and_crop_with_subject_location",
-    "easy_thumbnails.processors.filters",
-)
+# THUMBNAIL_PROCESSORS = (
+#     "easy_thumbnails.processors.colorspace",
+#     "easy_thumbnails.processors.autocrop",
+#     "filer.thumbnail_processors.scale_and_crop_with_subject_location",
+#     "easy_thumbnails.processors.filters",
+# )
 
 # Initiate token authentication for REST APIs
 REST_FRAMEWORK = {
@@ -131,12 +132,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # "whitenoise.middleware.WhiteNoiseMiddleware",
-    "cms.middleware.utils.ApphookReloadMiddleware",  # Optional for django-cms
-    "django.middleware.locale.LocaleMiddleware",  # Required for django-cms
-    "cms.middleware.user.CurrentUserMiddleware",  # Required for django-cms
-    "cms.middleware.page.CurrentPageMiddleware",  # Required for django-cms
-    "cms.middleware.toolbar.ToolbarMiddleware",  # Required for django-cms
-    "cms.middleware.language.LanguageCookieMiddleware",  # Required for django-cms
+    # "cms.middleware.utils.ApphookReloadMiddleware",  # Optional for django-cms
+    # "django.middleware.locale.LocaleMiddleware",  # Required for django-cms
+    # "cms.middleware.user.CurrentUserMiddleware",  # Required for django-cms
+    # "cms.middleware.page.CurrentPageMiddleware",  # Required for django-cms
+    # "cms.middleware.toolbar.ToolbarMiddleware",  # Required for django-cms
+    # "cms.middleware.language.LanguageCookieMiddleware",  # Required for django-cms
 ]
 
 ROOT_URLCONF = "TPAM.urls"
@@ -148,9 +149,9 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         # "DIRS": [],
-        "DIRS": [
-            os.path.join(BASE_DIR, "TPAM", "templates"),
-        ],  # Amendment for django-cms
+        # "DIRS": [
+        #     os.path.join(BASE_DIR, "TPAM", "templates"),
+        # ],  # Amendment for django-cms
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -158,9 +159,9 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "django.template.context_processors.i18n",  # Added for django-cms
-                "sekizai.context_processors.sekizai",  # Added for django-cms
-                "cms.context_processors.cms_settings",  # Added for django-cms as cms check says necessary
+                # "django.template.context_processors.i18n",  # Added for django-cms
+                # "sekizai.context_processors.sekizai",  # Added for django-cms
+                # "cms.context_processors.cms_settings",  # Added for django-cms as cms check says necessary
             ],
         },
     },

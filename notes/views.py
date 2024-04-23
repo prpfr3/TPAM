@@ -8,6 +8,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core import serializers
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -302,6 +303,81 @@ def references(request):
     }
 
     return render(request, "notes/references.html", context)
+
+
+def references(request):
+    errors = None
+
+    queryset = (
+        Reference.objects.exclude(type=6)
+        .prefetch_related("person_set")
+        .order_by("full_reference")
+    )
+    selection_criteria = ReferenceSelectionForm(request.GET or None)
+
+    # This code changes the POST into GET which is a method of retaining the form selections
+    if request.method == "POST":
+        return redirect(request.path_info + "?" + request.POST.urlencode())
+
+    if not selection_criteria.is_valid():
+        errors = selection_criteria.errors
+
+    if selection_criteria.is_valid():
+        queryset = references_query_build(selection_criteria.cleaned_data)
+
+    queryset, page = pagination(request, queryset)
+
+    # Retain existing query parameters for pagination
+    query_params = QueryDict("", mutable=True)
+    query_params.update(request.GET)
+
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "queryset": queryset,
+        "query_params": query_params.urlencode(),
+    }
+    return render(request, "notes/references.html", context)
+
+
+def references_query_build(selection_criteria):
+
+    conditions = Q()
+    cleandata = selection_criteria
+
+    if "title" in cleandata and cleandata["title"]:
+        conditions &= Q(title__icontains=cleandata["title"])
+
+    if "year" in cleandata and cleandata["year"]:
+        conditions &= Q(year__icontains=str(cleandata["year"]))
+
+    if "month" in cleandata and cleandata["month"]:
+        conditions &= Q(month__icontains=str(cleandata["month"]))
+
+    if "authors" in cleandata and cleandata["authors"]:
+        conditions &= Q(authors__icontains=cleandata["authors"])
+
+    if "editors" in cleandata and cleandata["editors"]:
+        conditions &= Q(editors__icontains=cleandata["editors"])
+
+    if "journal" in cleandata and cleandata["journal"]:
+        conditions &= Q(journal__icontains=cleandata["journal"])
+
+    if "volume" in cleandata and cleandata["volume"]:
+        conditions &= Q(volume__icontains=cleandata["volume"])
+
+    if "issue" in cleandata and cleandata["issue"]:
+        conditions &= Q(issue__icontains=cleandata["issue"])
+
+    conditions &= ~Q(type=6)
+
+    queryset = (
+        Reference.objects.filter(conditions)
+        .prefetch_related("person_set")
+        .order_by("full_reference")
+    )
+
+    return queryset
 
 
 def reference(request, reference_id):

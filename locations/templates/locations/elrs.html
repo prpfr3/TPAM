@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    {% for elr in elrs %}
+    {% for elr in queryset %}
       {% if elr.itemAltLabel %}
         <div class="container">
           <div class="row mb-1 d-flex align-items-stretch row-height">
@@ -57,5 +57,7 @@
     {% empty %}
       <h2>No Engineer Line References found.</h2>
     {% endfor %}
+
+    {% include "mainmenu/pagination.html" with page=queryset %} 
 
 {% endblock content %}

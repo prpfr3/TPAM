@@ -286,7 +286,9 @@ def route_storymap(request, slug):
                 )
                 header_title = wikipage
                 wiki_wiki = wikipediaapi.Wikipedia(
-                    language="en", extract_format=wikipediaapi.ExtractFormat.HTML
+                    user_agent="github/prpfr3 TPAM",
+                    language="en",
+                    extract_format=wikipediaapi.ExtractFormat.HTML,
                 )
 
                 # VARIANTS FOR THE TEXT TO APPEAR ON THE STORYMAP FRONT PAGE
@@ -394,34 +396,45 @@ def regional_map(request, geo_area):
 
 
 def elrs(request):
-    if request.method == "POST":
-        selection_criteria = OSMRailMapSelectForm(request.POST)
+    errors = None
+    page = None
 
-        if selection_criteria.is_valid():
-            if str(selection_criteria.cleaned_data["itemAltLabel"]):
-                elrs = ELR.objects.filter(
-                    itemAltLabel__icontains=selection_criteria.cleaned_data[
-                        "itemAltLabel"
-                    ]
-                ).order_by("itemAltLabel")
-                errors = None
-            elif str(selection_criteria.cleaned_data["itemLabel"]) != "None":
-                elrs = ELR.objects.filter(
-                    itemLabel__icontains=selection_criteria.cleaned_data["itemLabel"]
-                ).order_by("itemAltLabel")
-                errors = None
-        else:
-            errors = selection_criteria.errors or None
-            elrs = ELR.objects.order_by("itemAltLabel")
+    queryset = ELR.objects.order_by("itemAltLabel")
+    selection_criteria = ELRSelectForm(request.GET or None)
 
-    else:
-        selection_criteria = OSMRailMapSelectForm()
-        errors = selection_criteria.errors or None
-        elrs = ELR.objects.order_by("itemAltLabel")
+    if selection_criteria.is_valid():
+        queryset = elrs_query_build(selection_criteria.cleaned_data)
 
-    context = {"selection_criteria": selection_criteria, "errors": errors, "elrs": elrs}
+    queryset, page = pagination(request, queryset)
+
+    # Retain existing query parameters for pagination
+    query_params = QueryDict("", mutable=True)
+    query_params.update(request.GET)
+
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "queryset": queryset,
+        "query_params": query_params.urlencode(),
+    }
 
     return render(request, "locations/elrs.html", context)
+
+
+def elrs_query_build(selection_criteria):
+
+    conditions = Q()
+    cleandata = selection_criteria
+
+    if "itemAltLabel" in cleandata and cleandata["itemAltLabel"]:
+        conditions &= Q(wikiname__icontains=cleandata["itemAltLabel"])
+
+    if "itemLabel" in cleandata and cleandata["itemLabel"]:
+        conditions &= Q(wikiname__icontains=cleandata["itemLabel"])
+
+    queryset = ELR.objects.filter(conditions).order_by("itemAltLable")
+
+    return queryset
 
 
 def elr_map(request, elr_id):

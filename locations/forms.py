@@ -20,7 +20,7 @@ class LocationOSMChoiceField(forms.Form):
     )
 
 
-class OSMRailMapSelectForm(forms.ModelForm):
+class ELRSelectForm(forms.ModelForm):
     class Meta:
         model = ELR
         fields = ["itemAltLabel", "itemLabel"]
