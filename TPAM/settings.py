@@ -310,7 +310,6 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
             "ENGINE": "django.db.backends.postgresql_psycopg2",
             "NAME": "django",
             "USER": "postgres",
-            "PASSWORD": DATABASE_KEY,
             "HOST": "localhost",
             "PORT": "5432",
             "OPTIONS": {"sslmode": "require"},
