@@ -293,11 +293,23 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
 
     # DATABASE_KEY = config["Django"]["database_key"]
 
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.postgresql_psycopg2",
+    #         "NAME": "django",
+    #         "USER": "django",
+    #         "PASSWORD": DATABASE_KEY,
+    #         "HOST": "localhost",
+    #         "PORT": "5432",
+    #         "OPTIONS": {"sslmode": "require"},
+    #     }
+    # }
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
             "NAME": "django",
-            "USER": "django",
+            "USER": "postgres",
             "PASSWORD": DATABASE_KEY,
             "HOST": "localhost",
             "PORT": "5432",

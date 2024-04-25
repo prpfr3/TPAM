@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        update_all = False
+        update_all = True
         refresh_from_OSM = True
 
         if update_all:
@@ -41,12 +41,15 @@ class Command(BaseCommand):
             else:
                 instance = elr
 
-            if refresh_from_OSM == True:
-                instance.geodata = osm_elr_fetch(instance.itemAltLabel, None)
+            # if refresh_from_OSM == True:
+            #     instance.geodata = osm_elr_fetch(instance.itemAltLabel, None)
 
-            if instance.geodata and len(instance.geodata["features"]) > 0:
-                instance.geometry = geojson_to_geometry(instance.geodata)
-            else:
-                print(f"{instance} has no geodata")
+            # if instance.geodata and len(instance.geodata["features"]) > 0:
+            #     instance.geometry = geojson_to_geometry(instance.geodata)
+            # else:
+            #     print(f"{instance} has no geodata")
+
+            instance.geodata = None
+            instance.geometry = None
 
             instance.save()
