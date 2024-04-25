@@ -40,10 +40,14 @@ class Command(BaseCommand):
             else:
                 instance = elr
 
-            if refresh_from_OSM == True:
+            if refresh_from_OSM == True and instance.geodata == None:
                 instance.geodata = osm_elr_fetch(instance.itemAltLabel, None)
 
-            if instance.geodata and len(instance.geodata["features"]) > 0:
+            if (
+                instance.geodata
+                and instance.geometry == None
+                and len(instance.geodata["features"]) > 0
+            ):
                 instance.geometry = geojson_to_geometry(instance.geodata)
             else:
                 print(f"{instance} has no geodata")
