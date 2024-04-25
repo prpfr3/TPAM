@@ -35,21 +35,17 @@ class Command(BaseCommand):
             elrs = ["RDG1", "RDG2"]
 
         for elr in elrs:
-
             if update_all == False:
                 instance = ELR.objects.get(itemAltLabel=elr)
             else:
                 instance = elr
 
-            # if refresh_from_OSM == True:
-            #     instance.geodata = osm_elr_fetch(instance.itemAltLabel, None)
+            if refresh_from_OSM == True:
+                instance.geodata = osm_elr_fetch(instance.itemAltLabel, None)
 
-            # if instance.geodata and len(instance.geodata["features"]) > 0:
-            #     instance.geometry = geojson_to_geometry(instance.geodata)
-            # else:
-            #     print(f"{instance} has no geodata")
-
-            instance.geodata = None
-            instance.geometry = None
+            if instance.geodata and len(instance.geodata["features"]) > 0:
+                instance.geometry = geojson_to_geometry(instance.geodata)
+            else:
+                print(f"{instance} has no geodata")
 
             instance.save()

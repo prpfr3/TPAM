@@ -287,24 +287,6 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     print(ip_addresses())
     ALLOWED_HOSTS = ip_addresses()
 
-    # DATABASES = {"default": dj_database_url.config(default="postgres://localhost")}
-
-    # DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
-
-    # DATABASE_KEY = config["Django"]["database_key"]
-
-    # DATABASES = {
-    #     "default": {
-    #         "ENGINE": "django.db.backends.postgresql_psycopg2",
-    #         "NAME": "django",
-    #         "USER": "django",
-    #         "PASSWORD": DATABASE_KEY,
-    #         "HOST": "localhost",
-    #         "PORT": "5432",
-    #         "OPTIONS": {"sslmode": "require"},
-    #     }
-    # }
-
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
@@ -416,8 +398,6 @@ else:  # DEVELOPMENT SETTINGS
     OTAPI_APP_ID = config["opentransport"]["app_id"]
     OTAPI_API_KEY = config["opentransport"]["api_key"]
 
-    # DATABASE_URL = f"postgresql://postgres:{db_pswd}@localhost/TPAM"
-
     # INSTALLED_APPS += [
     #     "django.contrib.gis",
     # ]  # If GDAL: installed
@@ -433,14 +413,3 @@ else:  # DEVELOPMENT SETTINGS
             "PORT": "5432",
         }
     }
-
-    # DATABASES = {
-    #     "default": {
-    #         "ENGINE": "django.db.backends.mysql",
-    #         "NAME": "tpam",
-    #         "USER": "root",
-    #         "PASSWORD": "",
-    #         "HOST": "localhost",
-    #         "PORT": "",
-    #     }
-    # }

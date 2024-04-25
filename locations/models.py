@@ -103,7 +103,6 @@ class ELR(models.Model):
     objects = ELRManager()
 
     def get_absolute_url(self):
-
         return reverse("locations:elr_map", kwargs={"slug": self.slug})
 
     def __str__(self):
@@ -112,7 +111,6 @@ class ELR(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = custom_slugify(self.itemLabel).replace("-", "_")
-
         super().save(*args, **kwargs)
 
     class Meta:
