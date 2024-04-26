@@ -390,7 +390,9 @@ else:  # DEVELOPMENT SETTINGS
         mimetypes.add_type("application/javascript", ".js", True)
 
     ALLOWED_HOSTS = []
-    # GDAL_LIBRARY_PATH = r'C:\\OSGeo4W64\\bin\\gdal301'
+    # If errors Try https://stackoverflow.com/questions/51833501/oserror-in-geodjango-winerror-127-the-specified-procedure-could-not-be-foun#:~:text=%22OSError%20in%20Geodjango%3A%20%5BWinError,of%20Supported%20G%2DDal%20version.
+    GDAL_LIBRARY_PATH = r"C:\\OSGeo4W64\\bin\\gdal301.dll"
+    GEOS_LIBRARY_PATH = r"C:\\OSGeo4W64\\bin\\geos_c.dll"
 
     db_pswd = config["MySQL"]["p"]
 

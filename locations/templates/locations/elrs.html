@@ -34,14 +34,14 @@
         <div class="container">
           <div class="row mb-1 d-flex align-items-stretch row-height">
             <div class="col-1 d-flex align-items-center justify-content-center">
-              {% if elr.geometry %}
+              {% if elr.itemAltLabel %}
                 <a href="{% url 'locations:elr_map' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-map"></i></a>
               {% else %}
               -
               {% endif %}
             </div>
             <div class="col-1 d-flex align-items-center justify-content-center">
-              {% if elr.geometry %}
+              {% if elr.itemAltLabel %}
                 <a href="{% url 'locations:elr_storymap' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a>
               {% else %}
               -

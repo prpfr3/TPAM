@@ -95,7 +95,7 @@ class ELR(models.Model):
     geodata = models.JSONField(blank=True, default=None, null=True)
     geometry = models.TextField(
         blank=True, null=True
-    )  # Textfield if no GDAL installed or MySQL; Otherwise TextField
+    )  # Geometryfield if no GDAL installed or MySQL; Otherwise TextField
     post_fk = models.ForeignKey(
         Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
     )

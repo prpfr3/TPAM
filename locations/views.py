@@ -432,13 +432,14 @@ def elrs_query_build(selection_criteria):
     if "itemLabel" in cleandata and cleandata["itemLabel"]:
         conditions &= Q(wikiname__icontains=cleandata["itemLabel"])
 
-    queryset = ELR.objects.filter(conditions).order_by("itemAltLable")
+    queryset = ELR.objects.filter(conditions).order_by("itemAltLabel")
 
     return queryset
 
 
 def elr_map(request, elr_id):
     elr = ELR.objects.get(id=elr_id)
+
     if elr.geodata:
         elr_geojsons = []
         elr_geojsons.append(elr.geodata)
