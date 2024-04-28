@@ -5,6 +5,40 @@ from django.utils.translation import gettext_lazy as _
 
 from .models import *
 
+from django.utils.safestring import mark_safe
+
+
+from django import forms
+from django.utils.safestring import mark_safe
+
+
+class Select2Widget(forms.Select):
+    class Media:
+        css = {
+            "all": (
+                "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css",
+            )
+        }
+        js = (
+            "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js",
+        )
+
+    def render(self, name, value, attrs=None, renderer=None):
+        output = super().render(name, value, attrs)
+        script = """
+            <script>
+                $(document).ready(function() {{
+                    $('#id_{name}').select2({{
+                        placeholder: 'Select an option',
+                        allowClear: true
+                    }});
+                }});
+            </script>
+        """.format(
+            name=name
+        )
+        return mark_safe(output + script)
+
 
 class RegionChoiceForm(forms.Form):
     regions = forms.ModelChoiceField(
@@ -61,14 +95,17 @@ class RouteSelectionForm(forms.ModelForm):
         required=False, widget=forms.TextInput(attrs={"class": "search-input"})
     )
 
-    owner_operators = forms.ModelMultipleChoiceField(
+    owner_operators = forms.ModelChoiceField(
         queryset=Company.objects.all(),
         required=False,
-        widget=forms.SelectMultiple(attrs={"class": "search-select2"}),
+        widget=Select2Widget(attrs={"class": "search-select2"}),
     )
 
     categories = forms.ModelChoiceField(
-        queryset=RouteCategory.objects.all(), required=False, label="Categories"
+        queryset=RouteCategory.objects.all(),
+        required=False,
+        label="Categories",
+        widget=Select2Widget(attrs={"class": "search-select2"}),
     )
 
     def __init__(self, *args, **kwargs):
@@ -79,11 +116,6 @@ class RouteSelectionForm(forms.ModelForm):
     class Meta:
         model = Route
         fields = ("name", "owner_operators", "categories")
-
-        widgets = {
-            "owner_operators": forms.SelectMultiple(attrs={"class": "search-select2"}),
-            "categories": forms.Select(attrs={"class": "search-select2"}),
-        }
 
         labels = {
             "name": "Route Name",

@@ -97,7 +97,6 @@ def person(request, slug):
         description_type = "Notes"
     elif person.wikitextslug:
         wiki_wiki = wikipediaapi.Wikipedia(
-            user_agent="github/prpfr3 TPAM",
             language="en",
             extract_format=wikipediaapi.ExtractFormat.HTML,
         )
@@ -251,7 +250,6 @@ def people_storyline_build(selection_criteria, request):
 
             pagename = person.wikitextslug.replace("_", " ")
             wiki_wiki = wikipediaapi.Wikipedia(
-                user_agent="github/prpfr3 TPAM",
                 language="en",
                 extract_format=wikipediaapi.ExtractFormat.HTML,
             )

@@ -7,21 +7,24 @@
   <div class="card text-center text-primary">
     <img class="card-img-top mx-auto" style="max-width:60%" src="{{ photo.image.url }}" alt="">
     <div class="card-body">
-      <h4 class="card-text text-primary">Location
-        {% for location in locations %}
-          <a href="https://en.wikipedia.org/wiki/{{location.wikislug}}">{{location}}</a>
-        {% empty %}
-          None Identified
-        {% endfor %}
-      </h4>
 
-      <h4 class="card-text text-primary">Description
-        {% for class in classes %}
-          <a href="https://en.wikipedia.org/wiki/{{class.wikiname}}">{{class}}</a>
-        {% empty %}
-          None Identified
-        {% endfor %}
-      </h4>
+      {% comment %}
+        <h4 class="card-text text-primary">Location
+          {% for location in locations %}
+            <a href="https://en.wikipedia.org/wiki/{{location.wikislug}}">{{location}}</a>
+          {% empty %}
+            None Identified
+          {% endfor %}
+        </h4>
+
+        <h4 class="card-text text-primary">Description
+          {% for class in classes %}
+            <a href="https://en.wikipedia.org/wiki/{{class.wikiname}}">{{class}}</a>
+          {% empty %}
+            None Identified
+          {% endfor %}
+        </h4>
+      {% endcomment %}
     </div><!-- card-body -->
 
     {% comment %}

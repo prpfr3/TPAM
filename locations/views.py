@@ -123,7 +123,9 @@ def routes(request):
             query &= Q(name__icontains=cleandata["name"])
 
         if "owner_operators" in cleandata and cleandata["owner_operators"]:
-            fk = cleandata["owner_operators"]
+            fk = cleandata[
+                "owner_operators"
+            ].pk  # Get the primary key of the selected owner operator
             query &= Q(owneroperators=fk)
 
         if "categories" in cleandata and cleandata["categories"]:
@@ -286,8 +288,8 @@ def route_storymap(request, slug):
                 )
                 header_title = wikipage
                 wiki_wiki = wikipediaapi.Wikipedia(
-                    user_agent="github/prpfr3 TPAM",
                     language="en",
+                    user_agent="prpfr3/Github TPAM",
                     extract_format=wikipediaapi.ExtractFormat.HTML,
                 )
 
@@ -357,7 +359,7 @@ def regional_map(request, geo_area):
         ST_Within(a.geometry, b.geometry);
     """
 
-    elrs = execute_sql(sql, [west, south, east, north])
+    # elrs = execute_sql(sql, [west, south, east, north])
 
     locations = None
 
@@ -379,12 +381,15 @@ def regional_map(request, geo_area):
 
     elr_geojsons = None
 
-    for elr in elrs:
-        if elr["geodata"]:
-            if elr_geojsons is None:
-                elr_geojsons = []
-            geojson = json.loads(elr["geodata"])
-            elr_geojsons.append(geojson)
+    # for elr in elrs:
+    #     try:
+    #         if elr["geodata"]:
+    #             if elr_geojsons is None:
+    #                 elr_geojsons = []
+    #             geojson = json.loads(elr["geodata"])
+    #             elr_geojsons.append(geojson)
+    #     except Exception as e:
+    #         print(f"Error {e}")
 
     figure = None
     if locations or elr_geojsons:
@@ -397,10 +402,15 @@ def regional_map(request, geo_area):
 
 def elrs(request):
     errors = None
-    page = None
-
     queryset = ELR.objects.order_by("itemAltLabel")
     selection_criteria = ELRSelectForm(request.GET or None)
+
+    if request.method == "POST":
+        # Use GET method for form submission
+        return redirect(request.path_info + "?" + request.POST.urlencode())
+
+    if not selection_criteria.is_valid():
+        errors = selection_criteria.errors
 
     if selection_criteria.is_valid():
         queryset = elrs_query_build(selection_criteria.cleaned_data)
@@ -427,10 +437,10 @@ def elrs_query_build(selection_criteria):
     cleandata = selection_criteria
 
     if "itemAltLabel" in cleandata and cleandata["itemAltLabel"]:
-        conditions &= Q(wikiname__icontains=cleandata["itemAltLabel"])
+        conditions &= Q(itemAltLabel__icontains=cleandata["itemAltLabel"])
 
     if "itemLabel" in cleandata and cleandata["itemLabel"]:
-        conditions &= Q(wikiname__icontains=cleandata["itemLabel"])
+        conditions &= Q(itemLabel__icontains=cleandata["itemLabel"])
 
     queryset = ELR.objects.filter(conditions).order_by("itemAltLabel")
 
@@ -440,7 +450,7 @@ def elrs_query_build(selection_criteria):
 def elr_map(request, elr_id):
     elr = ELR.objects.get(id=elr_id)
 
-    if elr.geodata:
+    if elr.geodata and len(elr.geodata["features"]) > 0:
         elr_geojsons = []
         elr_geojsons.append(elr.geodata)
 

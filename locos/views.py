@@ -181,7 +181,7 @@ def locomotive(request, locomotive_id):
     # references = Reference.objects.filter(loco=locomotive_id)
 
     wiki_wiki = wikipediaapi.Wikipedia(
-        user_agent="github/prpfr3 TPAM",
+        # user_agent="github/prpfr3 TPAM",
         language="en",
         extract_format=wikipediaapi.ExtractFormat.HTML,
     )
@@ -220,7 +220,6 @@ def photos(request):
         paginated_queryset = paginator.page(paginator.num_pages)
 
     context = {"page": page, "photos": paginated_queryset}
-    print(context)
     return render(request, "locos/photos.html", context)
 
 
@@ -272,7 +271,5 @@ def photos_query_build(selection_criteria):
 
 def photo(request, photo_id):
     photo = Reference.objects.get(id=photo_id)
-    loco_classes = photo.lococlass_set.all()
-    locations = photo.location_set.all()
-    context = {"photo": photo, "classes": loco_classes, "locations": locations}
+    context = {"photo": photo}
     return render(request, "locos/photo.html", context)

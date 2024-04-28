@@ -3,7 +3,7 @@
 {% block head %}
   <style>
     .row-height {
-        min-height: 38px; /* Adjust the height as needed */
+        min-height: 36px; /* Adjust the height as needed */
     }
   </style>
 {% endblock %}
@@ -20,24 +20,24 @@
 {% block content %}
   <div class="container-fluid">
 
-  <div class="row">
-    <div class="col-md-4 col-lg-4 col-xl-4">
-    <h1 class="text-primary">
-      Railway Routes             
-      </h1>
-    </div>
+    <div class="row">
+      <div class=" col-md-4 col-lg-4 col-xl-4">
+        <h1 class="text-primary">
+          Railway Routes             
+          </h1>
+      </div>
 
-    <div class="col-md-8 col-lg-8 col-xl-8">
-    <div class="text-center"> <!-- Added text-center class -->
-      <form method="POST" action="" enctype="multipart/form-data" class="mx-auto"> <!-- Added mx-auto class -->
-        {% csrf_token %}
-        <table class="mx-auto">{{ selection_criteria }}</table>
-        <button type="submit" class="btn btn-primary" name="action" value="list">List Only</button>
-        <button type="submit" class="btn btn-primary" name="action" value="map">List + Map</button>
-      </form>
+      <div class="col-md-8 col-lg-8 col-xl-8">
+        <div class="text-left"> <!-- Added text-center class -->
+          <form method="POST" action="" enctype="multipart/form-data" class="mx-auto"> <!-- Added mx-auto class -->
+            {% csrf_token %}
+            <table class="mx-auto">{{ selection_criteria }}</table>
+            <button type="submit" class="btn btn-primary" name="action" value="list">List Only</button>
+            <button type="submit" class="btn btn-primary" name="action" value="map">List + Map</button>
+          </form>
+        </div>
+      </div>
     </div>
-  </div>
-  </div>
   </div>
   
     <div class="row">

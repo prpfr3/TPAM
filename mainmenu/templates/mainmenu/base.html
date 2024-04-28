@@ -14,19 +14,20 @@
     {% bootstrap_javascript %}
     {% bootstrap_messages %}
 
+    {% block head %}{% endblock %}
+
     <link rel="stylesheet" href="{% static 'scss/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'scss/style.css' %}">
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css">
-
-
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Montserrat" >  
+    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Montserrat">  
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
     <!-- <link rel="stylesheet" type="text/css" href="https://www.bluebell-railway-museum.co.uk/css/additionalA.css"> -->
 
-    {% block head %}{% endblock %}
+
+
   </head>
   
   <body>  

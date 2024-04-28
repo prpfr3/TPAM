@@ -93,9 +93,6 @@ class ELR(models.Model):
     itemLabel = models.CharField(max_length=400, blank=True, default="")
     itemAltLabel = models.CharField(max_length=200, blank=True, default="")
     geodata = models.JSONField(blank=True, default=None, null=True)
-    geometry = models.TextField(
-        blank=True, null=True
-    )  # Geometryfield if no GDAL installed or MySQL; Otherwise TextField
     post_fk = models.ForeignKey(
         Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
     )

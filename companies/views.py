@@ -64,7 +64,7 @@ def company(request, company_id):
 
         wikipediaapi.log.setLevel(level=wikipediaapi.logging.DEBUG)
         wiki_wiki = wikipediaapi.Wikipedia(
-            user_agent="github/prpfr3 TPAM",
+            # user_agent="github/prpfr3 TPAM",
             language="en",
             extract_format=wikipediaapi.ExtractFormat.HTML,
         )

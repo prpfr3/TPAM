@@ -232,7 +232,7 @@ def routes_mapdata_extract(routes):
 
         if elrs := route.elrs.all():
             for elr in elrs:
-                if elr.geodata:
+                if elr.geodata and len(elr.geodata["features"]) > 0:
                     if elr_geojsons is None:
                         elr_geojsons = []
                     elr_geojsons.append(elr.geodata)

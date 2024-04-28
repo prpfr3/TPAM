@@ -43,11 +43,11 @@ def timeline(request, slug):
     tdict["title"]["media"]["credit"] = slideheader.media_credit
     tdict["title"]["media"]["url"] = slideheader.media_url
     tdict["title"]["text"] = {}
-    # wiki_wiki = wikipediaapi.Wikipedia(user_agent="github/prpfr3 TPAM",
-    #     # user_agent="TPAM Django Project @ https://github.com/prpfr3", #version 0.6.0 onwards
-    #     language="en",
-    #     extract_format=wikipediaapi.ExtractFormat.HTML,
-    # )
+    wiki_wiki = wikipediaapi.Wikipedia(
+        language="en",
+        user_agent="prpfr3/Github TPAM",
+        extract_format=wikipediaapi.ExtractFormat.HTML,
+    )
     page_name = slideheader.wikipedia_name.replace(" ", "_")
 
     if page_content := get_wikipedia_page_content(page_name):
@@ -83,11 +83,6 @@ def timeline(request, slug):
             "end_date": {"year": slide.end_date[:4]},
         }
 
-        wiki_wiki = wikipediaapi.Wikipedia(
-            user_agent="github/prpfr3 TPAM",
-            language="en",
-            extract_format=wikipediaapi.ExtractFormat.HTML,
-        )
         page_name = slide.wikipedia_name.replace(" ", "_")
         if page_name and wiki_wiki.page(page_name).exists:
             text_array = wiki_wiki.page(page_name).text.split("<h2>References</h2>")

@@ -90,10 +90,12 @@ $(document).ready(function() {
       {% endautoescape %}
     {% endif %}
 
+    {% if location.wikislug %}
     <h1 class="text-primary mt-3">Wikipedia Page</h1>
       <iframe src='https://en.wikipedia.org/wiki/{{location.wikislug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
         " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
         </iframe>
+    {% endif %}
 
     <h1 class="text-primary">Historic Map</h1>
     <h3 class="text-primary">National Library of Scotland, Ordnance Survey 1892-1915 24-inch-to-the-mile series</h3>

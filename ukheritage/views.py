@@ -194,7 +194,7 @@
 
 #             if selected["address"] != "":
 
-#                 geocoder = Nominatim(user_agent="Listed Buildings search")
+#                 geocoder = Nominatim(#user_agent="github/prpfr3 TPAM")
 #                 loc = geocoder.geocode(selected["address"])
 #                 selected["longitude"] = loc.longitude
 #                 selected["latitude"] = loc.latitude

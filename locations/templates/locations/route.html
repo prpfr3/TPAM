@@ -1,29 +1,29 @@
-﻿{% extends "../mainmenu/base.html" %}
+﻿
 
-{% block header %}
+{% block head %}
 
 {{map.header.render|safe}}
+
 <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
-<link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
-<link href="https://en.wikipedia.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=vector-2022" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css">
+<link rel="stylesheet" type="text/css" href="https://en.wikipedia.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=vector-2022">
+  <!-- Overrides for timeline and for figcaptions of Wikipedia -->
+  <style type="text/css">
+    #visualization {
+      border: 5px solid rgb(52, 14, 241);
+    }
+    .vis-item {
+      border-color: rgb(38, 13, 113);
+      background-color: rgb(99, 151, 230);
+      font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+    }
 
-<style type="text/css">
-  #visualization {
-    border: 5px solid rgb(52, 14, 241);
-  }
-  .vis-item {
-    border-color: rgb(38, 13, 113);
-    background-color: rgb(99, 151, 230);
-    font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
-  }
 
-  figcaption {display: table-caption; caption-side: bottom; line-height: 1.4em; word-break: break-word; text-align: left; padding: 0px 10px 10px; border-width: 0px 1px 1px; border-image: initial; font-size: 12.376px; border-color: initial #c8ccd1 #c8ccd1 #c8ccd1; border-style: initial solid solid solid}
+  </style>
+{% endblock head %}
 
-</style>
 
-{% endblock header %}
-
-{% block content_title %}{{route}}{% endblock %}
+{% block content_title %}<h1 class="text-primary text-center mt-3">{{ route }}</h1>{% endblock %}
 {% block content %}
 
 <div class="container">
@@ -32,7 +32,7 @@
 
       {% if map.html %}
         {{map.html.render|safe}}
-      {% endif %}
+      {% endif %} 
 
       {% if elrs %}
         <h1 class="text-primary">Engineering Line References covered by this route</h1>
@@ -48,19 +48,21 @@
         {% endautoescape %}
       {% endif %}
 
-      {% comment %}
+
       <div class="col-3 d-flex align-items-center justify-content-center">
         {% if route.wikipedia_routemaps %}
-        <a href="{% url 'locations:route_storymap' route.slug %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a>
+        <a href="{% url 'locations:route_storymap' route.slug %}" class="btn btn-primary"><i class="fa fa-solid"></i>Storymap</a>
         {% else %}
         -
         {% endif %}
       </div>
-      {% endcomment %}
 
-      <h1 class="text-primary text-center mt-3">Wikipedia Page</h1>
+
+      {% if route.wikipedia_slug %}  
+      <h2 class="text-primary text-center mt-3">Wikipedia Page</h2>
       <iframe src='https://en.wikipedia.org/wiki/{{route.wikipedia_slug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">"<p>Your browser does not support iframes - open map using 'Open Popup' on left</p>"
         </iframe>
+      {% endif %}
 
       {% autoescape off %}
         {% if references %}
@@ -89,6 +91,8 @@
   </div>
 </div>
 
+
 <script>{{map.script.render|safe}}</script>
+
 
 {% endblock %}
