@@ -286,6 +286,7 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
 
     print(ip_addresses())
     ALLOWED_HOSTS = ip_addresses()
+    ALLOWED_HOSTS = ["134.122.98.236", "localhost"]
 
     DATABASES = {
         "default": {
