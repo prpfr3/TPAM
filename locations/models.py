@@ -17,6 +17,8 @@ if settings.GDAL_INSTALLED:
 else:
     geometry_fieldtype = models.TextField
 
+geometry_fieldtype = models.TextField
+
 
 class UKArea(models.Model):
     ITL121CD = models.CharField(max_length=10)
@@ -144,8 +146,8 @@ class Location(models.Model):
     closed = models.CharField(max_length=200, blank=True, null=True)
     closed_to_steam = models.CharField(max_length=200, blank=True, null=True)
     disused_stations_slug = models.CharField(max_length=200, blank=True, null=True)
-
-    geometry = geometry_fieldtype(blank=True, null=True, srid=4326)
+    # geometry = geometry_fieldtype(blank=True, null=True, srid=4326)
+    geometry = geometry_fieldtype(blank=True, null=True)
     atcocode = models.CharField(max_length=20, blank=True, null=True)
     tiploccode = models.CharField(max_length=20, blank=True, null=True)
     crscode = models.CharField(max_length=10, blank=True, null=True)
