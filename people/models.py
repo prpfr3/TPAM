@@ -36,9 +36,19 @@ class Person(models.Model):
     firstname = models.CharField(max_length=100, default=None)
     surname = models.CharField(max_length=100, default=None)
     title = models.CharField(max_length=100, blank=True, null=True, default=None)
-    birthdate = models.CharField(max_length=10, blank=True, default="")
+    birthdate = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        help_text="Format YYYY-MM-DD with only YY mandatory; Leading zeros on mmy and yy; Can use ? for any unknown digit",
+    )
     birthplace = models.CharField(max_length=200, blank=True, default="")
-    dieddate = models.CharField(max_length=10, blank=True, default="")
+    dieddate = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        help_text="Format YYYY-MM-DD with only YY mandatory; Leading zeros on mmy and yy; Can use ? for any unknown digit",
+    )
     diedplace = models.CharField(max_length=200, blank=True, default="")
     nationality = models.CharField(max_length=200, blank=True, default="")
     occupation = models.CharField(max_length=200, blank=True, default="")

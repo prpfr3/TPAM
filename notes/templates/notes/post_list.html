@@ -1,0 +1,38 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block title %}Notes{% endblock %}
+{% block content_desc %}Where a Research article is based on a Wikipedia article, amendments are highlighted in yellow{% endblock %}
+
+{% block content %}
+
+<h1 class="text-primary text-center">Notes</h1>
+<div class="container-fluid">
+  {% if post_list %}
+
+  {% for post in post_list %}
+    <h2>
+        {% autoescape off %}
+        <h4><a href="{% url 'notes:post_detail' post.id %}">{{ post.title }}</a></h4>
+        {% endautoescape %}
+        {% comment %}
+        {% if post.owner == user %}
+        (<a href="{% url 'notes:post_update' post.id %}">Edit</a> |
+        <a href="{% url 'notes:post_delete' post.id %}">Delete</a>)
+        {% endif %}
+        {% endcomment %}
+    </h2>
+  {% endfor %}
+
+{% else %}
+  <p>There are no notes in the database.</p>
+{% endif %}
+
+<p>
+  {% comment %}
+  {% if user.is_authenticated %}
+  |<a href="{% url 'notes:post_create' %}">Add a note</a>|
+  {% endif %}
+  {% endcomment %}
+</p>
+{% endblock %}
+</div>

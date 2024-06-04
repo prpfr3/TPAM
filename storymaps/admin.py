@@ -14,7 +14,11 @@ class SlideAdmin(admin.ModelAdmin):
     ordering = ["text_headline"]
     search_fields = ["text_headline"]
     formfield_overrides = {
-        models.TextField: {"widget": TinyMCE()},
+        models.TextField: {
+            "widget": TinyMCE(
+                attrs={"cols": 80, "rows": 30},
+            )
+        },
     }
 
 

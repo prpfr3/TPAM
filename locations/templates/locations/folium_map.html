@@ -1,13 +1,37 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
-{% block header %}{{map.header.render|safe}}{% endblock header %}
-{% block content_title %}{{title}}{% endblock %}
+{% block title %}{{title}}{% endblock %}
+
 {% block content %}
-  {% if map %}
-    {{map.html.render|safe}}
-    <script>{{map.script.render|safe}}</script>
-  {% else %}
-    <h4>No co-ordinate data available for this selection to generate the map</h4>
-  {% endif %}
- 
+  <h1 class="text-primary text-center">{{title}}</h1>
+
+  <div class="container">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-12">
+          {% if map %}
+            {{map|safe}}
+          <script script>{{map.script.render|safe}}</script>
+          {% else %}
+            <h4>No co-ordinate data available for this selection to generate the map</h4>
+          {% endif %}
+        </div>
+    </div>
+
+    {% if nls_url %}
+      <h2 class="text-primary">National Library of Scotland, Ordnance Survey 1892-1915 24-inch-to-the-mile series</h2>
+      <cite>'Reproduced with the permission of the National Library of Scotland under a Creative Commons Attribution (CC-BY) licence'</cite>
+        <iframe src={{nls_url}} id="NLSiframe" width="100%" height="700" marginwidth="300">
+          "<p>Your browser does not support iframes - open map using 'Open Popup' on left</p>"
+          </iframe>
+    {% endif %}
+
+    {% if elrs %}
+      <h2>Engineering Line References covered by this route:-</h2>
+      {% for elr in elrs %}
+        <h4>{{elr.itemAltLabel}} {{elr.itemLabel}}</h4>
+      {% endfor %}
+    {% endif %}
+
+  </div>
+
 {% endblock %}

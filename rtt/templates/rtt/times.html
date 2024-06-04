@@ -1,9 +1,11 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
-{% block content_title %}{{ departures.station_name }}{% endblock %}
-{% block content_desc %}Timetabled Departures @   {{ departures.time_of_day }}{% endblock %}
+{% block title %}{{ departures.station_name }}{% endblock %}
 
 {% block content %}
+
+<h1 class="text-primary text-center">{{ departures.station_name }}</h1>
+<h2 class="text-primary text-center">Timetabled Departures @   {{ departures.time_of_day }}</h2>
 
 <table class="table">
   <thead>

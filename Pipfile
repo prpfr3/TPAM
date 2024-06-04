@@ -41,6 +41,7 @@ djangocms-alias = "*"
 djangocms-versioning = "*"
 wikipedia-api = "*"
 whitenoise = "*"
+shapely = "*"
 
 [dev-packages]
 django-debug-toolbar = "*"

@@ -21,7 +21,7 @@
         {% if search %} 
           value="{{ search }}" 
         {% endif %}>
-      <button type="submit"><i class="fa fa-search"></i></button>
+      <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
       <a href="{% url 'notes:topic_detail' topic.id %}"><i class="fa fa-undo"></i></a>
     </form>
   </div>

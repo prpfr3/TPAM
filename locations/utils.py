@@ -237,13 +237,10 @@ def routes_mapdata_extract(routes):
                         elr_geojsons = []
                     elr_geojsons.append(elr.geodata)
 
-        if locations or elr_geojsons:
-            figure = generate_folium_map(elr_geojsons, locations)
-
-    return figure
+    return elr_geojsons, locations
 
 
-def route_section_mapdata_extract(route, route_section):
+def route_section_locations_extract(route):
     locations = None
     figure = None
 
@@ -254,18 +251,24 @@ def route_section_mapdata_extract(route, route_section):
                 locations = []
             locations.extend(route_location)
 
-    if locations or route_section.geodata:
-        figure = generate_folium_map(route_section.geodata, locations)
-
-    return figure
+    return locations
 
 
-def generate_folium_map(geojsons, locations):
+def folium_map_geojson(geojsons, locations, height=600, width=1000):
     import folium
     from folium.plugins import MarkerCluster, MiniMap
 
     # By default folium will use OpenStreetMap as the baselayer. 'tiles=None' switches the default off
-    m = folium.Map(zoom_start=13, prefer_canvas=True, height=600, width=1000)
+    m = folium.Map(zoom_start=13, prefer_canvas=True, height=height, width=width)
+
+    folium.TileLayer(
+        "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
+        attr='<a href="https://maps.nls.uk/"> \
+            OS 25 1892-1914 maps Reproduced with the permission of the National Library of Scotland</a>',
+        name="NLS 25inch",
+        min_zoom=2,
+        max_zoom=19,
+    ).add_to(m)
 
     """
     Use OpenRailwayMap as the baselayer to give a better rendering of the line
@@ -297,18 +300,20 @@ def generate_folium_map(geojsons, locations):
                 # Accumulate features
                 all_features.append(feature)
 
-            # Code to export geojson which can be used in other mapping tools
-            # import json
-            # output_file_path = "YOUR PATHNAME"
-            # with open(output_file_path, "w") as json_file:
-            #     json_file.write(json.dumps(all_features, indent=2))
-
         # Set "name" property to "No Name" for features without a name
         # Without this the folium tooltip feature throws an error
         for feature in all_features:
             properties = feature.get("properties", {})
             if "name" not in properties:
                 properties["name"] = "No Name"
+
+        # filename = "SRR.geojson"
+        # # Write the GeoJSON to a file
+        # all_features = {"type": "FeatureCollection", "features": all_features}
+        # with open(filename, "w") as f:
+        #     # json.dumps(all_features)
+        #     json.dump(all_features, f, indent=4)
+        #     print("GeoJSON saved to", filename)
 
         geojson_layer = folium.GeoJson(
             {"type": "FeatureCollection", "features": all_features},
@@ -403,6 +408,59 @@ def generate_folium_map(geojsons, locations):
     # format of bound_box is [(minimum latitude, minimum longitude]), [(maximum latitude, maximum longitude)]) i.e. south west, north east
     m.fit_bounds(bounding_box)
     folium.LayerControl().add_to(m)
+
+    minimap = MiniMap()
+    m.add_child(minimap)
+
+    figure = folium.Figure()
+    m.add_to(figure)
+
+    figure.render()
+    map_html = figure._repr_html_()
+    return map_html
+
+
+def folium_map_latlong(latitude, longitude, tooltip_text, height=600, width=1000):
+    import folium
+    from folium.plugins import MarkerCluster, MiniMap
+
+    # By default folium will use OpenStreetMap as the baselayer. 'tiles=None' switches the default off
+    m = folium.Map(
+        location=[latitude, longitude],
+        zoom_start=17,
+        prefer_canvas=True,
+        height=height,
+        width=width,
+    )
+
+    folium.TileLayer(
+        "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
+        attr='<a href="https://maps.nls.uk/"> \
+            OS 25 1892-1914 maps Reproduced with the permission of the National Library of Scotland</a>',
+        name="NLS 25inch",
+        min_zoom=2,
+        max_zoom=19,
+    ).add_to(m)
+
+    """
+    Use OpenRailwayMap as the baselayer to give a better rendering of the line
+    Minimum zoom setting of 12 gives about 40 miles/60 kms across the screen
+    """
+    folium.TileLayer(
+        "https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+        attr='<a href="https://www.openstreetmap.org/copyright"> \
+            © OpenStreetMap contributors</a>, \
+            Style: <a href="http://creativecommons.org/licenses/by-sa/2.0/"> \
+            CC-BY-SA 2.0</a> <a href="http://www.openrailwaymap.org/">OpenRailwayMap</a> and OpenStreetMap',
+        name="OpenRailwayMap",
+        min_zoom=2,
+        max_zoom=19,
+    ).add_to(m)
+
+    folium.Marker([latitude, longitude], tooltip=tooltip_text).add_to(m)
+
+    folium.LayerControl().add_to(m)
+
     minimap = MiniMap()
     m.add_child(minimap)
 
@@ -410,3 +468,66 @@ def generate_folium_map(geojsons, locations):
     m.add_to(figure)
     figure.render()
     return figure
+
+
+# def merge_geojson_features():
+#         # THIS FUNCTION NOT YET WORKING - DOES NOT ORDER CO-ORDINATES IN THE RIGHT SEQUENCE
+#         import json
+
+#         # Define the filename
+#         # Group features based on "name" and "ref" properties
+#         grouped_features = {}
+#         for feature in all_features:
+#             key = (feature["properties"]["name"], feature["properties"]["ref"])
+#             if key not in grouped_features:
+#                 grouped_features[key] = {
+#                     "properties": feature["properties"],
+#                     "geometries": [],
+#                 }
+#             grouped_features[key]["geometries"].append(feature["geometry"])
+
+#         # Merge geometries and properties for features with the same "name" and "ref"
+#         from shapely.geometry import Point, LineString
+#         import numpy as np
+#         import math
+
+#         # Merge geometries and properties for features with the same "name" and "ref"
+#         merged_features = []
+#         for key, group in grouped_features.items():
+#             merged_geometry = {
+#                 "type": group["geometries"][0]["type"],
+#                 "coordinates": [],
+#             }
+#             prev_coordinate = None
+#             for geometry in group["geometries"]:
+#                 points = geometry["coordinates"]
+#                 if prev_coordinate is None:
+#                     # If it's the first geometry, add the coordinates directly
+#                     merged_geometry["coordinates"].extend(geometry["coordinates"])
+#                     prev_coordinate = points[
+#                         -1
+#                     ]  # Set the last point as the previous coordinate
+#                 else:
+#                     distances = [math.dist(prev_coordinate, point) for point in points]
+#                     min_distance_index = distances.index(min(distances))
+#                     # Add the next closest coordinate and the subsequent coordinates
+#                     merged_geometry["coordinates"].extend(
+#                         points[min_distance_index:] + points[:min_distance_index]
+#                     )
+#                     prev_coordinate = points[
+#                         -1
+#                     ]  # Set the last point as the previous coordinate
+#             merged_feature = {
+#                 "type": "Feature",
+#                 "geometry": merged_geometry,
+#                 "properties": {"name": key[0], "ref": key[1]},
+#             }
+#             merged_features.append(merged_feature)
+
+#         # Create a new GeoJSON FeatureCollection
+#         # merged_geojson = {"type": "FeatureCollection", "features": merged_features}
+
+#         # Save the merged GeoJSON to a file
+#         filename = "SRR_optimised.geojson"
+#         with open(filename, "w") as f:
+#             json.dump(merged_features, f, indent=4)

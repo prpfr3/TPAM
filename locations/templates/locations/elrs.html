@@ -8,56 +8,74 @@
   </style>
 {% endblock %}
 
-{% block content_title %}Engineer's Location References (ELRs){% endblock %}
-{% block content_desc %}{% endblock %}
-
 {% block content %}
+  <div class="container-fluid">
 
-    <form method='POST' action="" enctype="multipart/form-data">
-      <p>
-      {% csrf_token %}
-      {{ selection_criteria }}
-      <input type="submit" name="submit_input" value="Submit">
-      </p>
-    </form>
-    
-    <div class="container">
-      <div class="row mb-1">
-        <div class="col-1 d-flex align-items-center justify-content-center" style="font-weight: bold;">Map</div>
-        <div class="col-1 d-flex justify-content-center" style="font-weight: bold;">Storymap</div>      
-        <div class="col-10" style="font-weight: bold;">ELR Data</div>
+    <div class="row">
+      <div class=" col-md-4 col-lg-4 col-xl-4">
+        <h1 class="text-primary">
+          Engineer's Location References (ELRs)            
+          </h1>
+      </div>
+
+      <div class="col-md-8 col-lg-8 col-xl-8">
+        <div class="text-left">
+          <form method='POST' action="" enctype="multipart/form-data">
+            <p>
+            {% csrf_token %}
+            {{ selection_criteria }}
+            <input type="submit" class="btn btn-primary" name="submit_input" value="Submit">
+            </p>
+          </form>
+        </div>
       </div>
     </div>
+  </div>
 
-    {% for elr in queryset %}
-      {% if elr.itemAltLabel %}
-        <div class="container">
-          <div class="row mb-1 d-flex align-items-stretch row-height">
-            <div class="col-1 d-flex align-items-center justify-content-center">
-              {% if elr.itemAltLabel %}
-                <a href="{% url 'locations:elr_map' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-map"></i></a>
-              {% else %}
-              -
-              {% endif %}
+  {% with queryset|slice:":12" as first_third %}
+  {% with queryset|slice:"12:24" as second_third %}
+  {% with queryset|slice:"24:" as third_third %}
+  
+    <div class="row">
+      <div class="col-md-4">
+        {% for elr in first_third %}
+          {% if elr.itemAltLabel %}
+            <div class="row mb-1 d-flex align-items-stretch row-height">
+              <div class="col-12 d-flex align-items-left justify-content-left">
+                <h5><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></h5>
+              </div>
             </div>
-            <div class="col-1 d-flex align-items-center justify-content-center">
-              {% if elr.itemAltLabel %}
-                <a href="{% url 'locations:elr_storymap' elr.id %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a>
-              {% else %}
-              -
-              {% endif %}
-            </div>
-            <div class="col-10 ">
-                <a href="{% url 'locations:elr_display_osmdata' elr.id %}">{{elr.itemAltLabel}} : {{elr.itemLabel}}</a>
-            </div>
-          </div>
-        </div>
-      {% endif %}
- 
-    {% empty %}
-      <h2>No Engineer Line References found.</h2>
-    {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </div>
 
-    {% include "mainmenu/pagination.html" with page=queryset %} 
+      <div class="col-md-4">
+        {% for elr in second_third %}
+          {% if elr.itemAltLabel %}
+            <div class="row mb-1 d-flex align-items-stretch row-height">
+              <div class="col-12 d-flex align-items-left justify-content-left">
+                <h5><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></h5>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="col-md-4">
+        {% for elr in third_third %}
+          {% if elr.itemAltLabel %}
+            <div class="row mb-1 d-flex align-items-stretch row-height">
+              <div class="col-12 d-flex align-items-left justify-content-left">
+                <h5><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></h5>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endwith %}
+  {% endwith %}
+  {% endwith %}
+  {% include "mainmenu/pagination.html" with page=queryset %} 
 
 {% endblock content %}

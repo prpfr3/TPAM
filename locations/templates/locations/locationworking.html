@@ -1,0 +1,78 @@
+﻿{% extends "../mainmenu/base.html" %}
+{% block content_title %}{{ location }}{% endblock %}
+
+{% block content %}
+  <div class="panel panel-default">
+  <div class="panel-heading"></div>
+  <div class="panel-body">
+
+    <table class="border-primary" width="99%" frame="box" id="depot">
+      <h1 class="text-primary">Location Details</h1>
+      <tr>
+        <tr><td><strong>Categories:</strong></td><td>
+          {% for category in categories %}
+            {{category}} 
+          {% endfor %}
+        </td>
+        </tr>
+        {% if location.postcode %}
+          <tr><td width="35%"><strong>Postcode:</strong></td><td>{{location.postcode }}</td></tr>
+        {% endif %}
+        {% if location.opened %}
+          <tr><td width="35%"><strong>Opened:</strong></td><td>{{location.opened }}</td></tr>
+        {% endif %}
+        {% if location.closed %}
+          <tr><td width="35%"><strong>Closed:</strong></td><td>{{location.closed }}</td></tr>
+        {% endif %}
+        {% if location.atcocode %}
+          <tr><td width="35%"><strong>ATCO code:</strong></td><td>{{location.atcocode }}</td></tr>
+        {% endif %}
+        {% if location.tiploccode %}
+          <tr><td width="35%"><strong>Tiploc Code:</strong></td><td>{{location.tiploccode }}</td></tr>
+        {% endif %}
+        {% if location.crscode %}
+          <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
+        {% endif %}
+        {% if location.geometry.x %}
+          <tr><td width="35%"><strong>Longitude/Latitude:</strong></td><td>{{location.geometry.x|floatformat:4}} {{location.geometry.y|floatformat:4}}</td></tr>
+        {% endif %}
+        {% if location.easting %}
+          <tr><td width="35%"><strong>Eastings/Northings:</strong></td><td>{{location.easting }} {{ location.northing }}</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    {% if map %}
+      {{map|safe}}
+      <!-- {{map.html.render|safe}} -->
+      <script>{{map.script.render|safe}}</script>
+    {% endif %}
+ 
+    {% if location.custom_post.body %}
+      <h1 class="text-primary">Notes</h1>
+      {% autoescape off %}
+      {{location.custom_post.body}}
+      {% endautoescape %}
+    {% endif %}
+
+    {% if location.wikislug %}
+    <h1 class="text-primary mt-3">Wikipedia Page</h1>
+      <iframe src='https://en.wikipedia.org/wiki/{{location.wikislug}}' id="Wikiframe" width="100%" height="700" marginwidth="300">
+        " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
+        </iframe>
+    {% endif %}
+
+    {% comment %}
+      <h1 class="text-primary">Historic Map</h1>
+      <h3 class="text-primary">National Library of Scotland, Ordnance Survey 1892-1915 24-inch-to-the-mile series</h3>
+      <cite>'Reproduced with the permission of the National Library of Scotland under a Creative Commons Attribution (CC-BY) licence'</cite>
+        <iframe src={{nls_url}} id="NLSiframe" width="100%" height="700" marginwidth="300">
+          "<p>Your browser does not support iframes - open map using 'Open Popup' on left</p>"
+          </iframe>
+    {% endcomment %}
+
+  </div> <!-- panel body -->
+</div> <!-- panel -->
+
+<!-- <script>{{map.script.render|safe}}</script> -->
+{% endblock content %}

@@ -8,7 +8,7 @@
     {% csrf_token %}
     {{ selection_criteria.media.js }}
     {{ selection_criteria.as_p }}
-    <input type="submit" name="submit_input" value="Submit">
+    <input type="submit" class="btn btn-primary" name="submit_input" value="Submit">
     </p>
 
   {% if licensed_vehicles_list %}

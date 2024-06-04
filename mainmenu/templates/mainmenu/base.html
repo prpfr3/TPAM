@@ -14,8 +14,6 @@
     {% bootstrap_javascript %}
     {% bootstrap_messages %}
 
-    {% block head %}{% endblock %}
-
     <link rel="stylesheet" href="{% static 'scss/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'scss/style.css' %}">
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
@@ -26,7 +24,7 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
     <!-- <link rel="stylesheet" type="text/css" href="https://www.bluebell-railway-museum.co.uk/css/additionalA.css"> -->
 
-
+    {% block head %}{% endblock %}
 
   </head>
   
@@ -45,7 +43,7 @@
 
           <div class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Rolling Stock</a>
+            Motive Power</a>
             <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
               <a class="dropdown-item nav-link" href="{% url 'locos:loco_classes' %}">Locomotive Classes</a>
               <a class="dropdown-item nav-link" href="{% url 'locos:locomotives' %}">Locomotives</a>
@@ -68,6 +66,7 @@
             <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
               <a class="dropdown-item nav-link" href="{% url 'locations:locations' %}">Locations</a>
               <a class="dropdown-item nav-link" href="{% url 'locations:routes' %}">Routes</a>
+              <a class="dropdown-item nav-link" href="{% url 'locations:routes_southern' %}">Southern Railway Routes</a>
               <a class="dropdown-item nav-link" href="{% url 'locations:route_sections' %}">Route Sections</a>
               <a class="dropdown-item nav-link" href="{% url 'locations:elrs' %}">Engineers Line References</a>              
               <a class="dropdown-item nav-link" href="{% url 'locations:regional_map_select' %}">Regional Railmap</a>
@@ -92,13 +91,14 @@
     
           <div class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Research Articles</a>
+            Reference</a>
             <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'notes:topics' %}">Notes</a>
-              <a class="dropdown-item nav-link" href="{% url 'timelines:timelines' %}">Custom Timelines</a>
-              <a class="dropdown-item nav-link" href="{% url 'storymaps:storymaps' %}">Custom Storymaps</a>
+              <a class="dropdown-item nav-link" href="{% url 'notes:notes' %}">Notes</a>
               <a class="dropdown-item nav-link" href="{% url 'notes:references' %}">References</a>
-              <a class="dropdown-item nav-link" href="{% url 'notes:timeline' %}">Bluebell Railway Timeline</a>
+              <a class="dropdown-item nav-link" href="{% url 'notes:timeline' %}">Railway Timeline</a>
+              <a class="dropdown-item nav-link" href="{% url 'timelines:timelines' %}">Custom Storylines</a>
+              <a class="dropdown-item nav-link" href="{% url 'storymaps:storymaps' %}">Custom Storymaps</a>
+              <a class="dropdown-item nav-link" href="{% url 'storymaps:carousels' %}">Custom Storyboards</a>
             </div>
           </div>
     
@@ -171,36 +171,19 @@
 
     </nav>
 
-
-
     {% block header %}{% endblock %}
 
-    <main class="position-relative container-fluid ms-sm-auto px-md-4 mt-3" >
+    <main class="position-relative container-fluid ms-sm-auto pt-5">
 
-      <section class="container text-center py-3 ">
-        <div class="row py-lg-3">
-          <div class="col-12 mx-auto">
-            <h1 class="text-primary">
-            {% block content_title %}{% endblock %}             
-            </h1>
-            <p class="text-primary">
-            {% block content_desc %}{% endblock %}               
-            </p>
-          </div>
-        </div>
-
-        {% if messages %}
-          {% for message in messages %}
-
+      {% if messages %}
+        {% for message in messages %}
           <div class="alert alert-warning alert-dismissible" role="alert">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">             
             </button>
           </div>
-          {% endfor %}
-        {% endif %}
-
-      </section>
+        {% endfor %}
+      {% endif %}
 
       {% block content %}
       {% endblock %}

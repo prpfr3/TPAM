@@ -47,7 +47,7 @@ def loco_classes(request):
         "queryset": queryset,
         "query_params": query_params.urlencode(),
     }
-    return render(request, "locos/loco_class_list.html", context)
+    return render(request, "locos/motive_power_classes.html", context)
 
 
 def loco_classes_query_build(selection_criteria):
@@ -102,7 +102,7 @@ def loco_class(request, slug):
         "manufacturers": manufacturers,
     }
 
-    return render(request, "locos/loco_class.html", context)
+    return render(request, "locos/motive_power_class.html", context)
 
 
 def locomotives(request):
@@ -141,7 +141,7 @@ def locomotives(request):
         "queryset": queryset,
         "query_params": query_params.urlencode(),
     }
-    return render(request, "locos/locomotives_list.html", context)
+    return render(request, "locos/motive_power_list.html", context)
 
 
 def locomotive(request, locomotive_id):
@@ -181,7 +181,7 @@ def locomotive(request, locomotive_id):
     # references = Reference.objects.filter(loco=locomotive_id)
 
     wiki_wiki = wikipediaapi.Wikipedia(
-        # user_agent="github/prpfr3 TPAM",
+        user_agent="github/prpfr3 TPAM",
         language="en",
         extract_format=wikipediaapi.ExtractFormat.HTML,
     )
@@ -199,7 +199,7 @@ def locomotive(request, locomotive_id):
         # 'wikipedia_summary':wikipedia_summary,
     }
 
-    return render(request, "locos/locomotive.html", context)
+    return render(request, "locos/motive_power.html", context)
 
 
 def photos(request):

@@ -1,14 +1,19 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
-{% block content_title %}Photo Album{% endblock %}
-{% block content_desc %}{% endblock %}
-
 {% block content %}
   {% comment %}
   <p>
     <a href="{% url 'locos:new_photo'%}" class="btn btn-primary" >Add a New Image</a>
   </p>
   {% endcomment %}
+
+  <section class="container text-center py-3 mt-1">
+    <div class="row">
+      <div class="col-12 mx-auto">
+        <h1 class="text-primary">Photo Gallery</h1>                      
+      </div>
+    </div>
+  </section>
 
   <div class="album py-4 bg-light">
     <div class="container">

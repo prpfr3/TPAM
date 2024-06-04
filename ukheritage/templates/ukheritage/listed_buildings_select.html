@@ -6,7 +6,7 @@
 
   <form method="POST" action="" enctype="multipart/form-data">
     {% csrf_token %} {{ sc.as_p}}
-    <input type="submit" name="submit_input" value="Submit" />
+    <input type="submit" class="btn btn-primary" name="submit_input" value="Submit" />
   </form>
 
   {% for building in buildings %} 

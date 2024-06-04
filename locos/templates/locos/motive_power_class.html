@@ -1,0 +1,79 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block head %}
+  <style>
+    .row-height {
+        min-height: 35px; /* Adjust the height as needed */
+    }
+  </style>
+{% endblock %}
+
+{% block title %}{{ loco_class }}{% endblock %}
+
+{% block content %}
+  
+    <h1 class="text-primary text-center">{{ loco_class }}</h1>
+
+    <h2 class="text-primary">Locos in Class</h2>
+    {% for locomotive in locomotives %}
+      {{locomotive.number_as_built}},
+    {% empty %}
+      <li>None recorded for this class.</li>
+    {% endfor %} 
+
+    <h2 class="text-primary">Owners/Operators</h2>
+    {% for operator in operators %}
+      <li><a href="https://en.wikipedia.org/wiki/{{operator.wikislug}}">{{operator.name}}</a></li>
+    {% empty %}
+      <li>None recorded for this class.</li>
+    {% endfor %} 
+
+    {% if loco_class.designer_person %}
+      <h2 class="text-primary">Designer</h2>
+      {% if loco_class.designer_person.wikitextslug %}
+      <li><a href="https://en.wikipedia.org//wiki/{{loco_class.designer_person.wikitextslug}}">{{loco_class.designer_person}}</a></li>
+      {% else %}
+      <li>{{loco_class.designer_person}}</li>
+      {% endif %}
+    {% endif %}
+
+    <h2 class="text-primary">Manufacturer(s)</h2>
+    {% for manufacturer in manufacturers %}
+      <li><a href="https://en.wikipedia.org/wiki/{{manufacturer.wikislug}}">{{manufacturer.name}}</a></li>
+    {% empty %}
+      <li>None recorded for this class.</li>
+    {% endfor %}
+
+    <h2 class="text-primary">References</h2>
+    {% for reference in references %}
+      {% autoescape off %}
+      <li>{{reference.full_reference}}</li>
+      {% endautoescape %}
+    {% empty %}
+      <li>None recorded for this class.</li>
+    {% endfor %}
+
+    {% comment %}
+      <h2 class="text-primary">Images</h2>
+      {% for image in images %}
+        <img src="{{ image.image.url }}" >
+        <p><a href="{% url 'locos:image' image.id %}">{{image.image_name}}</a></p>
+      {% empty %}
+        <li>None recorded for this class.</li>
+      {% endfor %}
+    {% endcomment %}
+
+    {% if loco_class.post_fk.body %}
+      <h2 class="text-primary">Notes</h2>
+      {% autoescape off %}
+      {{loco_class.post_fk.body}}
+      {% endautoescape %}
+    {% endif %}
+
+    <h2 class="text-primary mt-3">Wikipedia Page</h2>
+    <iframe src='https://en.wikipedia.org/wiki/{{loco_class.slug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
+      " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
+    </iframe>
+
+
+{% endblock content %}

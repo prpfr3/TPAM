@@ -1,9 +1,11 @@
-{# Replace this with your base template #}
 {% extends "bootstrap5/base.html" %}
 
+{# Required for django-cms. Distorts admin search icon if left in without django-cms #}
+{% comment %}
 {% load djangocms_alias_tags %}
 
 {% load cms_tags sekizai_tags %}
+{% endcomment %}
 <html>
     <head>
         <title>{% page_attribute "page_title" %}</title>

@@ -8,8 +8,8 @@ def index(request):
     return render(request, "mainmenu/index.html", {"mydjangoapps": mydjangoapps})
 
 
-def pagination(request, queryset):
-    paginator = Paginator(queryset, 40)
+def pagination(request, queryset, instances=40):
+    paginator = Paginator(queryset, instances)
     page = request.GET.get("page")
 
     # Retain existing query parameters for pagination links

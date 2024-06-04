@@ -17,6 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 # Required as from Django 4.2
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+GDAL_INSTALLED = True
 
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 INSTALLED_APPS = [
@@ -237,8 +238,8 @@ TINYMCE_DEFAULT_CONFIG = {
     "contextmenu": "formats | link image",
     "menubar": True,
     "statusbar": True,
+    "editor_deselector": "mceNoEditor",
 }
-
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -392,8 +393,18 @@ else:  # DEVELOPMENT SETTINGS
 
     ALLOWED_HOSTS = []
     # If errors Try https://stackoverflow.com/questions/51833501/oserror-in-geodjango-winerror-127-the-specified-procedure-could-not-be-foun#:~:text=%22OSError%20in%20Geodjango%3A%20%5BWinError,of%20Supported%20G%2DDal%20version.
-    GDAL_LIBRARY_PATH = r"C:\\OSGeo4W64\\bin\\gdal301.dll"
-    GEOS_LIBRARY_PATH = r"C:\\OSGeo4W64\\bin\\geos_c.dll"
+
+    if GDAL_INSTALLED:
+        # GDAL_LIBRARY_PATH = r"C:\\OSGeo4W64\\bin\\gdal301.dll"
+        # GEOS_LIBRARY_PATH = r"C:\\OSGeo4W64\\bin\\geos_c.dll"
+        GDAL_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\gdal308.dll"
+        GEOS_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\geos_c.dll"
+        INSTALLED_APPS += [
+            "django.contrib.gis",
+        ]
+        engine = "django.contrib.gis.db.backends.postgis"
+    else:
+        engine = "django.db.backends.postgresql"
 
     db_pswd = config["MySQL"]["p"]
 
@@ -401,14 +412,9 @@ else:  # DEVELOPMENT SETTINGS
     OTAPI_APP_ID = config["opentransport"]["app_id"]
     OTAPI_API_KEY = config["opentransport"]["api_key"]
 
-    # INSTALLED_APPS += [
-    #     "django.contrib.gis",
-    # ]  # If GDAL: installed
-
     DATABASES = {
         "default": {
-            # "ENGINE": "django.contrib.gis.db.backends.postgis",  # If GDAL installed
-            "ENGINE": "django.db.backends.postgresql",  # If GDAL not installed
+            "ENGINE": engine,
             "NAME": "TPAM",
             "USER": "postgres",
             "PASSWORD": db_pswd,

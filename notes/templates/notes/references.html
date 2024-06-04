@@ -5,16 +5,32 @@
 
 {% block content %}
 
-    <form method='POST' action="" enctype="multipart/form-data">
-      {% csrf_token %}
-      <table>{{ selection_criteria }}</table>
-      <input type="submit" name="submit_input" value="Submit">
-    </form>
+<div class="container-fluid">
+
+    <div class="row">
+      <div class=" col-md-4 col-lg-4 col-xl-4">
+        <h1 class="text-primary text-center">
+          References            
+          </h1>
+      </div>
+
+      <div class="col-md-8 col-lg-8 col-xl-8">
+        <div class="text-left">
+          <form method='POST' action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>{{ selection_criteria }}</table>
+            <input type="submit" class="btn btn-primary" name="submit_input" value="Submit">
+          </form>
+        </div>
+      </div>
+    </div>
 
 
       {% for reference in queryset %}
       <li>
-        <a href="{% url 'notes:reference' reference.id %}">{{ reference.full_reference }}</a>
+        <!-- <a href="{% url 'notes:reference' reference.id %}"> -->
+          {{ reference.full_reference }}
+        <!-- </a> -->
   
         {% if reference.person_set.all %}
         

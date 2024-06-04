@@ -1,5 +1,7 @@
 from django.db import models
 from notes.models import Post
+from utils.utils import custom_slugify
+from django.core.validators import RegexValidator
 
 
 class CompanyCategory(models.Model):
@@ -12,10 +14,22 @@ class CompanyCategory(models.Model):
         managed = True
 
 
+custom_slug_validator = RegexValidator(
+    regex=r"^[a-zA-Z0-9'_,-]+$",
+    message="Enter a valid slug consisting of letters, numbers, apostrophes, commas, underscores, or hyphens.",
+    code="invalid_slug",
+)
+
+
 class Company(models.Model):
     name = models.CharField(max_length=200, blank=True, null=True)
-    wikislug = models.SlugField(
-        max_length=250, allow_unicode=True, default=None, blank=True, null=True
+    wikislug = models.CharField(
+        default=None,
+        db_index=True,
+        null=True,
+        blank=True,
+        max_length=100,
+        validators=[custom_slug_validator],  # Apply the custom slug validator
     )
     code = models.CharField(max_length=10, blank=True, null=True)
     post_fk = models.ForeignKey(

@@ -281,10 +281,21 @@ class Locomotive(models.Model):
         return reverse("locos:locomotive", kwargs={"locomotive_id": self.pk})
 
     def __str__(self):
-        return f"{self.company_grouping_code} \
-            {self.company_pregrouping_code} \
-            {self.brd_class_name} Number as Built: \
-            {self.number_as_built}"
+        parts = []
+
+        if self.company_grouping_code is not None:
+            parts.append(f"{self.company_grouping_code}")
+
+        if self.company_pregrouping_code is not None:
+            parts.append(f"{self.company_pregrouping_code}")
+
+        if self.brd_class_name is not None:
+            parts.append(f"{self.brd_class_name}")
+
+        if self.number_as_built is not None:
+            parts.append(f"Number as Built: {self.number_as_built}")
+
+        return " ".join(parts)
 
     @property
     def age(self):

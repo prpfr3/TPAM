@@ -24,33 +24,30 @@ from .utils import *
 
 
 def index(request):
+    return render(request, "locations/index.html")
 
-    query = Q()
 
-    # if "owner_operators" in cleandata and cleandata["owner_operators"]:
-    #     fk = cleandata["owner_operators"]
-    #     query &= Q(owneroperators=fk)
-
-    # queryset = Route.objects.filter(query).order_by("name")
-    queryset = None
-
-    return render(request, "locations/index.html", {"queryset": queryset})
+def routes_southern(request):
+    return render(request, "locations/routes_southern.html")
 
 
 def locations(request):
     errors = None
-    queryset = Location.objects.order_by("name")
+    letter = request.GET.get(
+        "letter", "A"
+    ).upper()  # Get the selected letter, default to 'A'
     selection_criteria = LocationSelectionForm(request.GET or None)
-
-    if request.method == "POST":
-        # Use GET method for form submission
-        return redirect(request.path_info + "?" + request.POST.urlencode())
 
     if not selection_criteria.is_valid():
         errors = selection_criteria.errors
 
+    # Base queryset filtered by the letter
+    queryset = Location.objects.filter(name__istartswith=letter).order_by("name")
+    # queryset = Location.objects.order_by("name")
+
+    query = Q()
+
     if selection_criteria.is_valid():
-        query = Q()
         name_query = selection_criteria.cleaned_data.get("name", "")
         categories_query = selection_criteria.cleaned_data.get("categories", "")
 
@@ -58,23 +55,35 @@ def locations(request):
             query &= Q(name__icontains=name_query)
 
         if categories_query:
-            query &= Q(categories=categories_query)
+            query &= Q(
+                categories__name__icontains=categories_query
+            )  # Assuming categories have a 'name' field
 
-        queryset = Location.objects.filter(query).order_by("name")
+        # Apply the letter filter only if no specific name or category is provided
+        if not name_query and not categories_query:
+            query &= Q(name__istartswith=letter)
+    else:
+        query &= Q(name__istartswith=letter)
 
-    queryset, page = pagination(request, queryset)
+    queryset = Location.objects.filter(query).order_by("name")
+    queryset, page = pagination(request, queryset, 36)
 
-    # Retain existing query parameters for pagination
-    query_params = QueryDict("", mutable=True)
-    query_params.update(request.GET)
+    query_params = QueryDict(mutable=True)
+    for key, value in request.GET.items():
+        if (
+            key != "page" and key != "letter"
+        ):  # Exclude page number and letter to reset it correctly
+            query_params[key] = value
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
+        "page": page,
         "query_params": query_params.urlencode(),
+        "letter": letter,  # Pass the current letter to the context
     }
-    return render(request, "locations/locations.html", context)
+    return render(request, "locations/locations_by_letter_prototype.html", context)
 
 
 def location(request, location_id):
@@ -83,27 +92,67 @@ def location(request, location_id):
     posts = location.posts.all()
 
     sql = """ 
-    SELECT ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry))
+    SELECT ST_Y(ST_CENTROID(a.geometry)) AS st_y, 
+           ST_X(ST_CENTROID(a.geometry)) AS st_x, 
+           a.name
     FROM 
     public."locations_location" AS a
     WHERE a.id = %s;
     """
     coords = execute_sql(sql, [location_id])
+
     y_coord = coords[0].get("st_y")
     x_coord = coords[0].get("st_x")
-    #  = f'https://maps.nls.uk/geo/explore/print/#zoom=15&lat={location.geometry.y}&lon={location.geometry.x}&layers=168&b=5'
+    map = folium_map_latlong(y_coord, x_coord, None)
+    map_html = map._repr_html_()
+    location_name = coords[0].get("name")
+
     nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=16&lat={y_coord}&lon={x_coord}&layers=168&b=5"
 
     context = {
+        "posts": posts,
         "location": location,
-        "nls_url": nls_url,
         "categories": categories,
+        "map": map_html,
+        "title": location_name,
+        "nls_url": nls_url,
     }
     return render(request, "locations/location.html", context)
 
 
+def location_map(request, location_id):
+    sql = """ 
+    SELECT ST_Y(ST_CENTROID(a.geometry)) AS st_y, 
+           ST_X(ST_CENTROID(a.geometry)) AS st_x, 
+           a.name
+    FROM 
+    public."locations_location" AS a
+    WHERE a.id = %s;
+    """
+    coords = execute_sql(sql, [location_id])
+
+    y_coord = coords[0].get("st_y")
+    x_coord = coords[0].get("st_x")
+    map = folium_map_latlong(y_coord, x_coord, None)
+    map_html = map._repr_html_()
+    location_name = coords[0].get("name")
+
+    nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=16&lat={y_coord}&lon={x_coord}&layers=168&b=5"
+
+    if coords:
+        context = {
+            "map": map_html,
+            "title": location_name,
+            "nls_url": nls_url,
+        }
+    else:
+        context = {"map": None, "title": f"{location_name} Location not found"}
+
+    return render(request, "locations/folium_map.html", context)
+
+
 def routes(request):
-    figure = None
+    map_html = None
     errors = None
     queryset = Route.objects.order_by("name")
     selection_criteria = RouteSelectionForm(request.GET or None)
@@ -135,13 +184,16 @@ def routes(request):
         queryset = Route.objects.filter(query).order_by("name")
 
         # Check the value of the "action" parameter
+
         if "action" in request.GET:
             action = request.GET["action"]
 
             if action == "map":  # Defaults to "list" if not map
-                figure = routes_mapdata_extract(queryset)
+                elr_geojsons, locations = routes_mapdata_extract(queryset)
+                if locations or elr_geojsons:
+                    map_html = folium_map_geojson(elr_geojsons, locations)
 
-    queryset, page = pagination(request, queryset)
+    queryset, page = pagination(request, queryset, 36)
 
     # Retain existing query parameters for pagination links
     query_params = QueryDict("", mutable=True)
@@ -152,7 +204,7 @@ def routes(request):
         "errors": errors,
         "queryset": queryset,
         "query_params": query_params.urlencode(),  # Pass query_params to the template
-        "map": figure,
+        "map": map_html,
     }
     return render(request, "locations/routes.html", context)
 
@@ -162,21 +214,44 @@ def route(request, slug):
     route = Route.objects.get(slug=slug)
     references = route.references.all
     elrs = route.elrs.all
-    routes = [route]
-    figure = routes_mapdata_extract(routes)
 
     events_json = None
     if route_events := LocationEvent.objects.filter(route_fk_id=route.id):
         events_json = events_timeline(route_events)
 
+    routes = [route]
+    elr_geojsons, locations = routes_mapdata_extract(routes)
+    if locations or elr_geojsons:
+        map_html = folium_map_geojson(elr_geojsons, locations)
+
     context = {
-        "map": figure,
+        "map": map_html,
         "route": route,
         "elrs": elrs,
         "references": references,
         "timeline_json": events_json,
     }
     return render(request, "locations/route.html", context)
+
+
+def route_map(request, slug):
+
+    route = Route.objects.get(slug=slug)
+    elrs = route.elrs.all
+    routes = [route]
+
+    elr_geojsons, locations = routes_mapdata_extract(routes)
+    if locations or elr_geojsons:
+        map_html = folium_map_geojson(elr_geojsons, locations)
+
+    context = {
+        "map": map_html,
+        "route": route,
+        "elrs": elrs,
+        "title": route.name,
+    }
+    print(elrs)
+    return render(request, "locations/folium_map.html", context)
 
 
 def route_sections(request):
@@ -214,14 +289,16 @@ def route_section(request, route_section_id):
 
     route_section = RouteSection.objects.get(id=route_section_id)
     route = Route.objects.get(id=route_section.route_fk.id)
-    figure = route_section_mapdata_extract(route, route_section)
+    locations = route_section_locations_extract(route)
+    if locations or route_section.geodata:
+        map_html = folium_map_geojson(route_section.geodata, locations)
 
     # events_json = None
     # if route_events := LocationEvent.objects.filter(route_fk_id=route.id):
     #     events_json = events_timeline(route_events)
 
     context = {
-        "map": figure,
+        "map": map_html,
         "route_section": route_section,
         "elrs": None,
         "references": None,
@@ -393,10 +470,10 @@ def regional_map(request, geo_area):
 
     figure = None
     if locations or elr_geojsons:
-        figure = generate_folium_map(elr_geojsons, locations)
+        map_html = folium_map_geojson(elr_geojsons, locations)
 
-    title = f"Map for the {geo_area} Region of the UK"
-    context = {"map": figure, "title": title}
+    title = f"UK {geo_area} Region"
+    context = {"map": map_html, "title": title}
     return render(request, "locations/folium_map.html", context)
 
 
@@ -415,7 +492,7 @@ def elrs(request):
     if selection_criteria.is_valid():
         queryset = elrs_query_build(selection_criteria.cleaned_data)
 
-    queryset, page = pagination(request, queryset)
+    queryset, page = pagination(request, queryset, 36)
 
     # Retain existing query parameters for pagination
     query_params = QueryDict("", mutable=True)
@@ -465,12 +542,12 @@ def elr_map(request, elr_id):
         locations = execute_sql(sql, [elr_id])
 
         title = f"{elr.itemAltLabel}: {elr.itemLabel}"
-        figure = generate_folium_map(elr_geojsons, locations)
+        map_html = folium_map_geojson(elr_geojsons, locations)
     else:
-        figure = None
+        map_html = None
         title = None
 
-    context = {"map": figure, "title": title}
+    context = {"map": map_html, "title": title}
     return render(request, "locations/folium_map.html", context)
 
 
@@ -514,6 +591,37 @@ def elr_display_osmdata(request, elr_id):
 
     context = {"elr_geojson": elr_geojson[0]["features"], "title": title}
     return render(request, "locations/elr_display_osmdata.html", context)
+
+
+def elr_history(request, elr_id):
+    # Function under development. Aims to show route sections over time
+    elr = ELR.objects.get(id=elr_id)
+
+    route_sections = RouteSection.objects.filter(routesectionelr__elr_fk=elr)
+    print(route_sections)
+
+    if elr.geodata and len(elr.geodata["features"]) > 0:
+        elr_geojsons = []
+        elr_geojsons.append(elr.geodata)
+
+        sql = """
+        SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry)), a."media_url", b."itemAltLabel", b."itemLabel"
+        FROM "locations_location" AS a
+        INNER JOIN "locations_elrlocation" AS c ON a."id" = c."location_fk_id"
+        INNER JOIN "locations_elr" AS b ON c."elr_fk_id" = b."id"
+        WHERE b."id" = %s;
+        """
+        locations = execute_sql(sql, [elr_id])
+
+        title = f"{elr.itemAltLabel}: {elr.itemLabel}"
+        map_html = folium_map_geojson(elr_geojsons, locations)
+    else:
+        map_html = None
+        title = None
+
+    context = {"map": map_html, "title": title}
+    return render(request, "locations/folium_historymap.html", context)
 
 
 class HeritageSiteListView(ListView):

@@ -16,6 +16,8 @@ class CompanyAdmin(admin.ModelAdmin):
         "post_fk",
     ]
 
+    filter_horizontal = ["company_category_fk"]
+
 
 class ManufacturerAdmin(admin.ModelAdmin):
     list_display = [

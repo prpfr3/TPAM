@@ -8,85 +8,90 @@
   </style>
 {% endblock %}
 
-{% block header %}
-  {{map.header.render|safe}}
-{% endblock header %}
-
-{% comment %}
-{% block content_title %}Railway Routes{% endblock %}
-{% block content_desc %}{% endblock %}
-{% endcomment %}
+{% block title %}Railway Routes{% endblock %}
 
 {% block content %}
   <div class="container-fluid">
 
     <div class="row">
       <div class=" col-md-4 col-lg-4 col-xl-4">
-        <h1 class="text-primary">
+        <h1 class="text-primary text-center">
           Railway Routes             
           </h1>
       </div>
 
       <div class="col-md-8 col-lg-8 col-xl-8">
-        <div class="text-left"> <!-- Added text-center class -->
-          <form method="POST" action="" enctype="multipart/form-data" class="mx-auto"> <!-- Added mx-auto class -->
+        <div class="text-left">
+          <form method="POST" action="" enctype="multipart/form-data" class="mx-auto">
             {% csrf_token %}
             <table class="mx-auto">{{ selection_criteria }}</table>
-            <button type="submit" class="btn btn-primary" name="action" value="list">List Only</button>
-            <button type="submit" class="btn btn-primary" name="action" value="map">List + Map</button>
+            <button type="submit" class="btn btn-primary"  name="action" value="list">List Only</button>
+            <button type="submit" class="btn btn-primary"  name="action" value="map">List + Map</button>
           </form>
         </div>
       </div>
     </div>
-  </div>
+
   
     <div class="row">
-      <div class="col-md-4 col-lg-4 col-xl-4"> <!-- Content Column -->
-        <div class="row mb-1">
-          <div class="col-3 d-flex align-items-center justify-content-center" style="font-weight: bold;">Wikipedia<br>Link</div>
-          <div class="col-3 d-flex justify-content-center" style="font-weight: bold;">Storymap</div>      
-          <div class="col-6" style="font-weight: bold;">Route</div>
-        </div>
+      {% if map %}
+        <div class="col-md-5 col-lg-5 col-xl-5"> <!-- Content Column -->
+      {% else %}
+        <div class="col-md-12 col-lg-12 col-xl-12"> <!-- Content Column -->
+      {% endif %}
   
-        {% for route in queryset %}
-        <div class="row mb-1 d-flex align-items-stretch row-height">
-          <div class="col-3 d-flex align-items-center justify-content-center">
-            {% if route.wikipedia_slug %}
-            <a href="https://en.wikipedia.org//wiki/{{route.wikipedia_slug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
-            {% else %}
-            -
-            {% endif %}
-          </div>
-          <div class="col-3 d-flex align-items-center justify-content-center">
-            {% if route.wikipedia_routemaps %}
-            <a href="{% url 'locations:route_storymap' route.slug %}" class="btn btn-primary"><i class="fa fa-solid fa-book"></i></a>
-            {% else %}
-            -
-            {% endif %}
-          </div>
-          <div class="col-6">
-            <a href="{% url 'locations:route' route.slug %}">{{route.name}}</a>
+        {% with queryset|slice:":12" as first_third %}
+        {% with queryset|slice:"12:24" as second_third %}
+        {% with queryset|slice:"24:" as third_third %}
+        <div class="container">
+    
+          <div class="row">
+            <div class="col-md-4">
+              {% for route in first_third %}
+                  <div class="row mb-1 d-flex align-items-stretch row-height">
+                    <div class="col-12 d-flex align-items-left justify-content-left">
+                      <h4><a href="{% url 'locations:route' route.slug %}">{{route.name}}</a></h4>
+                    </div>
+                  </div>
+              {% endfor %}
+            </div>
+    
+            <div class="col-md-4">
+              {% for route in second_third %}
+                  <div class="row mb-1 d-flex align-items-stretch row-height">
+                    <div class="col-12 d-flex align-items-left justify-content-left">
+                      <h4><a href="{% url 'locations:route' route.slug %}">{{route.name}}</a></h4>
+                    </div>
+                  </div>
+              {% endfor %}
+            </div>
+    
+            <div class="col-md-4">
+              {% for route in third_third %}
+                  <div class="row mb-1 d-flex align-items-stretch row-height">
+                    <div class="col-12 d-flex align-items-left justify-content-left">
+                      <h4><a href="{% url 'locations:route' route.slug %}">{{route.name}}</a></h4>
+                    </div>
+                  </div>
+              {% endfor %}
+            </div>
           </div>
         </div>
-        {% empty %}
-        <h2>No routes found.</h2>
-        {% endfor %}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
   
         {% include "mainmenu/pagination.html" with page=queryset %}
       </div> <!-- End of Content Column -->
-  
-      <div class="col-md-8 col-lg-8 col-xl-8"> <!-- Map Column -->
-        <div class="col-12">
-          <div id="map"></div>
-          {% if map %}
-          {{map.html.render|safe}}
+
+      {% if map %}
+        <div class="col-md-7 col-lg-7 col-xl-7"> <!-- Map Column -->
+          <div id="map">{{map|safe}}</div>          
           <script>{{map.script.render|safe}}</script>
-          {% endif %}
         </div>
-      </div> <!-- End of Map Column -->
+      {% endif %}
+
     </div> <!-- End of Row -->
   </div><!-- End of Container -->
-
-  <script>{{map.script.render|safe}}</script>
 
 {% endblock content %}

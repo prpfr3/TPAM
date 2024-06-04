@@ -1,4 +1,6 @@
 ﻿{% extends "../mainmenu/base.html" %}
+{% load custom_filters %}
+
 {% block head %}
   <style>
     .row-height {
@@ -6,74 +8,84 @@
     }
   </style>
 {% endblock %}
-{% block content_title %}Railway Locations{% endblock %}
-{% block content_desc %}{% endblock %}
+{% block title %}Railway Locations{% endblock %}
 
 {% block content %}
-
-<form method="POST" action="{% url 'locations:locations' %}" enctype="multipart/form-data">
-  <p>
-    {% csrf_token %} {{ selection_criteria }}
-    <input type="submit" name="submit_input" value="Submit" />
-  </p>
-</form>
-
-<div class="container">
-  <div class="row mb-1">
-    <div class="col-1 d-flex align-items-center justify-content-center" style="font-weight: bold;">Wikipedia<br>Link</div>
-    <div class="col-1 d-flex align-items-center justify-content-center" style="font-weight: bold;">Disused<br>Stations<br>link</div>
-    <div class="col-1 d-flex align-items-center justify-content-center" style="font-weight: bold;">Real<br>Time<br>Trains</div>        
-    <div class="col-9 d-flex align-items-center" style="font-weight: bold;">Location Name</div>
-  </div>
-</div>
-
-{% for location in queryset %}
-  <div class="container">
-    <div class="row mb-1 d-flex align-items-stretch row-height">
-      <div class="col-1 d-flex align-items-center justify-content-center">
-        {% if location.wikislug %}
-        <a href="https://en.wikipedia.org//wiki/{{location.wikislug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i></a>
-        {% else %}
-        -
-        {% endif %}
-      </div>
-      
-      <div class="col-1 d-flex align-items-center justify-content-center">
-        {% if location.disused_stations_slug %}
-        <a href="http://disused-stations.org.uk/{{location.disused_stations_slug}}" class="btn btn-primary">DS</a>
-        {% else %}
-        -
-        {% endif %}
-      </div>
-      
-      <div class="col-1 d-flex align-items-center justify-content-center">
-        {% if location.atcocode %}
-        <a href="{% url 'rtt:location' location.crscode %}" class="btn btn-primary">RTT</a>
-        {% else %}
-        -
-        {% endif %}
-      </div>
-      
-      <div class="col-9">
-        {% if location.wikiname %}
-        <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a
-        >{% endif %}
-      
-        {% if not location.wikiname and location.name %}
-        <a href="{% url 'locations:location' location.id %}">{{location.name}}</a>
-        {% endif %}
-        
-        {% if not location.wikiname and not location.name %}
-        <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
-        {% endif %}
+  <div class="row">
+    <div class="col-md-4 col-lg-4 col-xl-4">
+      <h1 class="text-primary text-center">Railway Locations</h1>
+    </div>
+    <div class="col-md-8 col-lg-8 col-xl-8">
+      <div class="text-left">
+        <form method="GET" action="{% url 'locations:locations' %}" enctype="multipart/form-data">
+          <p>
+            {% csrf_token %} {{ selection_criteria }}
+            <input type="submit" class="btn btn-primary" name="submit_input" value="Submit" />
+            <input type="hidden" name="letter" value="{{ letter }}"> <!-- Include the letter in the form -->
+          </p>
+        </form>
       </div>
     </div>
   </div>
 
-{% empty %}
-  <h2>No locations found.</h2>
-{% endfor %} 
+  {% with queryset.object_list|slice:":12" as first_third %}
+  {% with queryset.object_list|slice:"12:24" as second_third %}
+  {% with queryset.object_list|slice:"24:" as third_third %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        {% for location in first_third %}
+            <div class="row mb-1 d-flex align-items-stretch row-height">
+              <div class="col-12 d-flex align-items-left justify-content-left">
+                {% if location.wikiname %}
+                <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
+                {% elif location.name %}
+                <a href="{% url 'locations:location' location.id %}">{{location.name}}</a>
+                {% else %}
+                <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
+                {% endif %}
+              </div>
+            </div>
+        {% endfor %}
+      </div>
 
-{% include "mainmenu/pagination.html" with page=queryset %} 
+      <div class="col-md-4">
+        {% for location in second_third %}
+            <div class="row mb-1 d-flex align-items-stretch row-height">
+              <div class="col-12 d-flex align-items-left justify-content-left">
+                {% if location.wikiname %}
+                <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
+                {% elif location.name %}
+                <a href="{% url 'locations:location' location.id %}">{{location.name}}</a>
+                {% else %}
+                <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
+                {% endif %}
+              </div>
+            </div>
+        {% endfor %}
+      </div>
 
-{%endblock content %}
+      <div class="col-md-4">
+        {% for location in third_third %}
+            <div class="row mb-1 d-flex align-items-stretch row-height">
+              <div class="col-12 d-flex align-items-left justify-content-left">
+                {% if location.wikiname %}
+                <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
+                {% elif location.name %}
+                <a href="{% url 'locations:location' location.id %}">{{location.name}}</a>
+                {% else %}
+                <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
+                {% endif %}
+              </div>
+            </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+  {% endwith %}
+  {% endwith %}
+
+{% include "mainmenu/pagination.html" with page=queryset %}
+
+{% endblock content %}

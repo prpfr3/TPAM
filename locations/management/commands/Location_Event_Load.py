@@ -2,14 +2,16 @@
 Loads a CSV file of manually prepared data into the LocationEvent table.
 
 """
+
 import os, datetime
 from csv import DictReader
 from django.core.management import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
-from locations.models import LocationEvent, Location, Route
+from locations.models import LocationEvent, Location, Route, ELR
+from companies.models import Company
 
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
-input_filename = os.path.join(DATAIO_DIR, "Location_Events_Bluebell.csv")
+input_filename = os.path.join(DATAIO_DIR, "Location_Events.csv")
 
 ALREADY_LOADED_ERROR_MESSAGE = """
 Delete the current data from the table being loaded into BEFORE executing this command
@@ -102,40 +104,49 @@ class Command(BaseCommand):
         print("Loading LocationEvents")
         # Encoding of utf-8-sig will treat the Byte Order Mark of //ueff coming from the Excel csv file save as metadata rather than content
         with open(input_filename, encoding="utf-8-sig") as csvfile:
-            for row in DictReader(csvfile):
+            csvreader = DictReader(csvfile, skipinitialspace=True)
+            for row in csvreader:
                 print(f"{row=}")
                 le = LocationEvent()
-                le.type = row["type"]
-                le.description = row["description"]
-                le.date, le.datefield = dateformatter(row["date"])
+                le.type = row["Type"]
+                le.description = row["Description"]
+                le.date, le.datefield = dateformatter(row["Date"])
                 # An alternative if location_wikislug is not present
-                le.location_description = row["location_description"]
-                le.group = row["group"]
-                le.subgroup = row["subgroup"]
 
                 try:
-                    loc = Location.objects.get(wikislug=row["location_wikislug"])
+                    if row["Location ID"] != "":
+                        le.location_fk = Location.objects.get(id=row["Location ID"])
                 except ObjectDoesNotExist:
-                    print(
-                        f"Location Wikipedia Slug {row['location_wikislug']} cannot be found in the TPAM database"
-                    )
-                else:
-                    try:
-                        le.location_fk = loc
-                    except Exception as e:
-                        print(loc, e)
+                    print(f"Location id {row['Location ID']} not valid")
+                except Exception as e:
+                    print(f'row["Location ID"]=', e)
 
                 try:
-                    route = Route.objects.get(wikipedia_slug=row["route_wikislug"])
-                except ObjectDoesNotExist:
-                    print(
-                        f"Route Wikipedia Slug {row['route_wikislug']} cannot be found in the TPAM database"
-                    )
-                else:
-                    try:
+                    if row["Route ID"] != "":
+                        route = Route.objects.get(id=row["Route ID"])
                         le.route_fk = route
-                    except Exception as e:
-                        print(route, e)
+                except ObjectDoesNotExist:
+                    print(f"Route id {row['Route ID']} not valid")
+                except Exception as e:
+                    print(route, e)
+
+                try:
+                    if row["Company ID"] != "":
+                        company = Company.objects.get(id=row["Company ID"])
+                        le.company_fk = company
+                except ObjectDoesNotExist:
+                    print(f"Company id {row['Company ID']} not valid")
+                except Exception as e:
+                    print(company, e)
+
+                try:
+                    if row["ELR ID"] != "":
+                        elr = ELR.objects.get(id=row["ELR ID"])
+                        le.elr_fk = elr
+                except ObjectDoesNotExist:
+                    print(f"ELR id {row['ELR ID']} not valid")
+                except Exception as e:
+                    print(elr, e)
 
                 try:
                     le.save()

@@ -1,108 +1,220 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
-{% block header %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
-</script>
-{% endblock header %}
+{% block head %}
 
-{% block content_title %}{{ location }}</td></tr>{% endblock %}
-{% block content_desc %}{% endblock %}
+  <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css"> 
+  <link rel="stylesheet" type="text/css" href="https://en.wikipedia.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=vector-2022">
+
+  <!-- Timeline Overrides -->
+  <style type="text/css">
+    #visualization {
+      border: 5px solid rgb(52, 14, 241);
+    }
+    .vis-item {
+      border-color: rgb(38, 13, 113);
+      background-color: rgb(99, 151, 230);
+      font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+    }
+  </style>
+
+{% endblock head %}
+
+
+{% block title %}{{ location }}{% endblock %}
 
 {% block content %}
 
+  <h1 class="text-primary text-center mt-3">{{ location }}</h1>
+
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-lg-12">
+
+
+
+        <!-- Tab navigation -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+
+          <li class="nav-item">
+            <a class="nav-link active" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Location Details</a>
+          </li>
+
+          {% if location.wikislug %}
+            <li class="nav-item">
+              <a class="nav-link" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
+            </li>
+          {% endif %}
+
+          {% if location.disused_stations_slug %}
+            <li class="nav-item">
+              <a class="nav-link" id="disused-stations-tab" href="http://disused-stations.org.uk/{{location.disused_stations_slug}}" role="tab">Disused Stations Website</a>
+            </li>
+          {% endif %}
+
+          {% if location.atcocode %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'rtt:location' location.crscode %}">Real Time Train Movements</a>
+            </li>
+          {% endif %}
+
+          {% if timeline_json %}
+            <li class="nav-item">
+              <a class="nav-link" id="timeline-tab" data-bs-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Timeline</a>
+            </li>
+          {% endif %}
+          
+          {% if references %}
+            <li class="nav-item">
+              <a class="nav-link" id="references-tab" data-bs-toggle="tab" href="#references" role="tab" aria-controls="references" aria-selected="false">References</a>
+            </li>
+          {% endif %}
+
+          <!-- Tab turned off as map incorporated in location details -->
+            <li class="nav-item">
+              <a class="nav-link" href="{{nls_url}}" role="tab">National Library of Scotland Map</a>
+            </li>
+
+        </ul>
+
+        <!-- Tab content -->
+        <div class="tab-content" id="myTabContent">
+
+            <div class="tab-pane fade show active" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+              <table class="border-primary" width="99%" frame="box" id="depot">
+              
+                <tr>
+                  <tr><td><strong>Categories:</strong></td><td>
+                    {% for category in categories %}
+                      {{category}} 
+                    {% endfor %}
+                  </td>
+                  </tr>
+                  {% if location.postcode %}
+                    <tr><td width="35%"><strong>Postcode:</strong></td><td>{{location.postcode }}</td></tr>
+                  {% endif %}
+                  {% if location.opened %}
+                    <tr><td width="35%"><strong>Opened:</strong></td><td>{{location.opened }}</td></tr>
+                  {% endif %}
+                  {% if location.closed %}
+                    <tr><td width="35%"><strong>Closed:</strong></td><td>{{location.closed }}</td></tr>
+                  {% endif %}
+                  {% if location.atcocode %}
+                    <tr><td width="35%"><strong>ATCO code:</strong></td><td>{{location.atcocode }}</td></tr>
+                  {% endif %}
+                  {% if location.tiploccode %}
+                    <tr><td width="35%"><strong>Tiploc Code:</strong></td><td>{{location.tiploccode }}</td></tr>
+                  {% endif %}
+                  {% if location.crscode %}
+                    <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
+                  {% endif %}
+                  {% if location.geometry.x %}
+                    <tr><td width="35%"><strong>Longitude/Latitude:</strong></td><td>{{location.geometry.x|floatformat:4}} {{location.geometry.y|floatformat:4}}</td></tr>
+                  {% endif %}
+                  {% if location.easting %}
+                    <tr><td width="35%"><strong>Eastings/Northings:</strong></td><td>{{location.easting }} {{ location.northing }}</td></tr>
+                  {% endif %}
+                </tbody>
+              </table>
+
+              <div class="container">
+                <div class="row justify-content-center align-items-center">
+                    <div class="col-12">
+                      {% if map %}
+                        {{map|safe}}
+                      <script script>{{map.script.render|safe}}</script>
+                      {% else %}
+                        <h4>No co-ordinate data available for this selection to generate the map</h4>
+                      {% endif %}
+                    </div>
+                </div>
+
+                <!-- Given own tab due to scrolling and cookies issues within this tab -->
+                <!-- {% if nls_url %}
+                  <h2 class="text-primary">National Library of Scotland, Ordnance Survey 1892-1915 24-inch-to-the-mile series</h2>
+                  <cite>'Reproduced with the permission of the National Library of Scotland under a Creative Commons Attribution (CC-BY) licence'</cite>
+                    <iframe src={{nls_url}} id="NLSiframe" width="100%" height="700" marginwidth="300">
+                      "<p>Your browser does not support iframes - open map using 'Open Popup' on left</p>"
+                      </iframe>
+                {% endif %} -->
+            
+                {% if elrs %}
+                  <h2>Engineering Line References covered by this route:-</h2>
+                  {% for elr in elrs %}
+                    <h4>{{elr.itemAltLabel}} {{elr.itemLabel}}</h4>
+                  {% endfor %}
+                {% endif %}
+              </div>
+
+              {% if location.custom_post.body %}
+              <h1 class="text-primary">Notes</h1>
+              {% autoescape off %}
+              {{location.custom_post.body}}
+              {% endautoescape %}
+            {% endif %}
+            </div>
+
+          {% if location.wikislug %}
+            <div class="tab-pane fade" id="wikipedia" role="tabpanel" aria-labelledby="wikipedia-tab">
+              <iframe src='https://en.wikipedia.org/wiki/{{location.wikislug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
+                <p>Your browser does not support iframes - open map using 'Open Popup' on left</p>
+              </iframe>
+            </div>
+          {% endif %}
+
+
+          {% if timeline_json %}
+            <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+              <div id="visualization">
+                <script type="text/javascript">
+                  var container = document.getElementById('visualization');
+                  var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
+                  var items = new vis.DataSet(jsonObject);
+                  var options = {orientation: 'top', type: 'point'};
+                  var timeline = new vis.Timeline(container, items, options);
+                </script>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if references %}
+            <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
+              <ul>
+                {% for reference in references %}
+                  <li>{{reference.full_reference}}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
 <script>
-$(document).ready(function() {
-    // Check if cookies are accepted
-    if (window.localStorage.getItem('cookies-accepted') !== '1') {
-        // If not accepted, show the cookie banner
-        $('#CookieBanner').show();
-
-        // Add an event listener for the iframe button to accept cookies
-        $("#NLSiframe").on("load", function() {
-            var iframeDocument = $("#NLSiframe").contents();
-
-            iframeDocument.find("#ccc-notify-accept").on("click", function() {
-                $('#CookieBanner').hide();
-                window.localStorage.setItem('cookies-accepted', '1');
-            });
+      document.addEventListener('DOMContentLoaded', function() {
+      var tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
+      tabLinks.forEach(function(link) {
+        link.addEventListener('shown.bs.tab', function(event) {
+          var tabPaneId = event.target.getAttribute('href');
+          var tabPane = document.querySelector(tabPaneId);
+          var activeTabPane = document.querySelector('.tab-pane.active-tab-pane');
+          
+          if (activeTabPane) {
+            activeTabPane.classList.remove('active-tab-pane');
+          }
+          
+          tabPane.classList.add('active-tab-pane');
         });
-    }
-    // Add an event listener for the iframe mouseleave event
-    // $("#NLSiframe").on("mouseleave", function() {
-    //     // Perform actions when the mouse leaves the iframe
-    //     // For example, you can refresh the parent page
-    //     location.reload();
-    // });
-});
+      });
 
-    // Add an event listener for the iframe mouseleave event
-    // $("#NLSiframe").on("mouseleave", function() {
-    //     // Perform actions when the mouse leaves the iframe
-    //     // For example, you can refresh the parent page
-    //     location.reload();
-    // });
+      // Highlight the initially active tab pane
+      var initialActiveTabPane = document.querySelector('.tab-pane.show.active');
+      if (initialActiveTabPane) {
+        initialActiveTabPane.classList.add('active-tab-pane');
+      }
+    });
 </script>
 
-<div class="panel panel-default">
-  <div class="panel-heading"></div>
-  <div class="panel-body">
-
-    <table class="border-primary" width="99%" frame="box" id="depot">
-      <h1 class="text-primary">Location Details</h1>
-      <tr>
-        <tr><td><strong>Categories:</strong></td><td>
-          {% for category in categories %}
-          {{category}} 
-          {% endfor %}
-        </td>
-        </tr>
-        {% if location.postcode %}
-          <tr><td width="35%"><strong>Postcode:</strong></td><td>{{location.postcode }}</td></tr>
-        {% endif %}
-        {% if location.opened %}
-          <tr><td width="35%"><strong>Opened:</strong></td><td>{{location.opened }}</td></tr>
-        {% endif %}
-        {% if location.closed %}
-          <tr><td width="35%"><strong>Closed:</strong></td><td>{{location.closed }}</td></tr>
-        {% endif %}
-        {% if location.atcocode %}
-          <tr><td width="35%"><strong>ATCO code:</strong></td><td>{{location.atcocode }}</td></tr>
-        {% endif %}
-        {% if location.tiploccode %}
-          <tr><td width="35%"><strong>Tiploc Code:</strong></td><td>{{location.tiploccode }}</td></tr>
-        {% endif %}
-        {% if location.crscode %}
-          <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
-        {% endif %}
-        {% if location.geometry.x %}
-          <tr><td width="35%"><strong>Longitude/Latitude:</strong></td><td>{{location.geometry.x|floatformat:4}} {{location.geometry.y|floatformat:4}}</td></tr>
-        {% endif %}
-        {% if location.easting %}
-          <tr><td width="35%"><strong>Eastings/Northings:</strong></td><td>{{location.easting }} {{ location.northing }}</td></tr>
-        {% endif %}
-      </tbody>
-    </table>
-
-    {% if location.custom_post.body %}
-      <h1 class="text-primary">Notes</h1>
-      {% autoescape off %}
-      {{location.custom_post.body}}
-      {% endautoescape %}
-    {% endif %}
-
-    {% if location.wikislug %}
-    <h1 class="text-primary mt-3">Wikipedia Page</h1>
-      <iframe src='https://en.wikipedia.org/wiki/{{location.wikislug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
-        " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
-        </iframe>
-    {% endif %}
-
-    <h1 class="text-primary">Historic Map</h1>
-    <h3 class="text-primary">National Library of Scotland, Ordnance Survey 1892-1915 24-inch-to-the-mile series</h3>
-    <cite>'Reproduced with the permission of the National Library of Scotland under a Creative Commons Attribution (CC-BY) licence'</cite>
-      <iframe src={{nls_url}} id="NLSiframe" width="100%" height="700" marginwidth="300">
-        " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
-        </iframe>
-  </div> <!-- panel body -->
-</div> <!-- panel -->
-{% endblock content %}
+{% endblock %}

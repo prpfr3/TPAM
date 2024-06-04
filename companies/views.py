@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import QueryDict
+from django.db.models import Q
 from .forms import *
 
 from mainmenu.views import pagination
-
-# Create your views here.
 
 
 def index(request):
@@ -13,8 +12,8 @@ def index(request):
 
 def companies(request):
     errors = None
-    queryset = Manufacturer.objects.order_by("name")
-    selection_criteria = ManufacturerSelectionForm(request.POST)
+    queryset = Company.objects.order_by("name")
+    selection_criteria = CompanySelectionForm(request.GET or None)
 
     if request.method == "POST":
         # Use GET method for form submission
@@ -23,13 +22,14 @@ def companies(request):
     if not selection_criteria.is_valid():
         errors = selection_criteria.errors
 
-    if (
-        selection_criteria.is_valid()
-        and selection_criteria.cleaned_data["name"] != None
-    ):
-        queryset = Manufacturer.objects.filter(
-            name__icontains=selection_criteria.cleaned_data["name"]
-        ).order_by("name")
+    if selection_criteria.is_valid():
+        query = Q()
+        name_query = selection_criteria.cleaned_data.get("name", "")
+
+        if name_query:
+            query &= Q(name__icontains=name_query)
+
+        queryset = Company.objects.filter(query).order_by("name")
 
     queryset, page = pagination(request, queryset)
 
@@ -41,7 +41,7 @@ def companies(request):
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "page": page,
+        "query_params": query_params.urlencode(),
     }
     return render(request, "companies/companies.html", context)
 
@@ -64,7 +64,7 @@ def company(request, company_id):
 
         wikipediaapi.log.setLevel(level=wikipediaapi.logging.DEBUG)
         wiki_wiki = wikipediaapi.Wikipedia(
-            # user_agent="github/prpfr3 TPAM",
+            user_agent="github/prpfr3 TPAM",
             language="en",
             extract_format=wikipediaapi.ExtractFormat.HTML,
         )
@@ -91,7 +91,7 @@ def company(request, company_id):
 def manufacturers(request):
     errors = None
     queryset = Manufacturer.objects.order_by("name")
-    selection_criteria = ManufacturerSelectionForm(request.POST)
+    selection_criteria = ManufacturerSelectionForm(request.GET or None)
 
     if request.method == "POST":
         # Use GET method for form submission
@@ -100,13 +100,14 @@ def manufacturers(request):
     if not selection_criteria.is_valid():
         errors = selection_criteria.errors
 
-    if (
-        selection_criteria.is_valid()
-        and selection_criteria.cleaned_data["name"] != None
-    ):
-        queryset = Manufacturer.objects.filter(
-            name__icontains=selection_criteria.cleaned_data["name"]
-        ).order_by("name")
+    if selection_criteria.is_valid():
+        query = Q()
+        name_query = selection_criteria.cleaned_data.get("name", "")
+
+        if name_query:
+            query &= Q(name__icontains=name_query)
+
+        queryset = Manufacturer.objects.filter(query).order_by("name")
 
     queryset, page = pagination(request, queryset)
 
@@ -118,7 +119,7 @@ def manufacturers(request):
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "page": page,
+        "query_params": query_params.urlencode(),
     }
     return render(request, "companies/manufacturers.html", context)
 

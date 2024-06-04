@@ -22,15 +22,20 @@
 
 {% endblock header %}
 
-{% block content_title %}
-  <p> 
+{% block title %}
+  {{route_section.route_fk.name}}
+{% endblock %}
+
+{% block content %}
+
+  <h1 class="text-primary text-center"> 
     {{route_section}}
     {% if route_section.route_fk %}
       on the {{route_section.route_fk.name}} route
     {% endif %}
-  </p>
+  </h1>
 
-  <p>
+  <h2 class="text-primary text-center">
     {% if route_section.date_opened %}
       Opened:- {{route_section.date_opened}}
     {% endif %} 
@@ -38,16 +43,20 @@
     {% if route_section.date_closed %}
       Closed:- {{route_section.date_closed}}
     {% endif %}
-  </p>  
-{% endblock %}
+  </h2>  
 
-{% block content %}
+  
+  <div class="container">
+    <div class="row justify-content-center align-items-center vh-100">
+        <div class="col-12">
+            {% if map %}
+            {{map|safe}}
+            <script>{{map.script.render|safe}}</script>
+            {% else %}
+            <h4>No co-ordinate data available for this selection to generate the map</h4>
+            {% endif %}
+        </div>
+    </div>
+  </div>
 
-  {% if map.html %}
-    {{map.html.render|safe}}
-  {% endif %}
-  <div>
-
-  <script>{{map.script.render|safe}}</script>
- 
 {% endblock %}

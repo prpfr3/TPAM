@@ -43,8 +43,18 @@ class TimelineSlide(models.Model):
     text_headline = models.CharField(max_length=200, blank=True, null=True)
     text_text = models.TextField(blank=True, null=True)
     wikipedia_name = models.CharField(max_length=1000, blank=True, default="")
-    start_date = models.CharField(max_length=10, blank=True, default="")
-    end_date = models.CharField(max_length=10, blank=True, default="")
+    start_date = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        help_text="Format YYYY-MM-DD with only YY mandatory; Leading zeros on mmy and yy; Can use ? for any unknown digit",
+    )
+    end_date = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        help_text="Format YYYY-MM-DD with only YY mandatory; Leading zeros on mmy and yy; Can use ? for any unknown digit",
+    )
 
     def __str__(self):
         return self.text_headline

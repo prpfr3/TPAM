@@ -16,7 +16,7 @@ class Command(BaseCommand):
         for instance in instances:
 
             instance.geodata = None
-            instance.geometry = None
+            # instance.geometry = None
 
             route = Route.objects.get(slug="Brighton_to_Portsmouth_line")
             instance.route_fk = route
@@ -80,7 +80,7 @@ class Command(BaseCommand):
                             print(f"{instance} had an exception of {e}")
 
                     # Create a MultiLineString geometry from the list of LineStrings
-                instance.geometry = MultiLineString(line_strings)
+                # instance.geometry = MultiLineString(line_strings)
 
             instance.geodata = elrs_geojsons
             instance.save()

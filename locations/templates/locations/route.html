@@ -1,13 +1,14 @@
-﻿
+﻿{% extends "../mainmenu/base.html" %}
 
 {% block head %}
 
-{{map.header.render|safe}}
+  <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
 
-<script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css">
-<link rel="stylesheet" type="text/css" href="https://en.wikipedia.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=vector-2022">
-  <!-- Overrides for timeline and for figcaptions of Wikipedia -->
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css">
+  
+  <link rel="stylesheet" type="text/css" href="https://en.wikipedia.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=vector-2022">
+
+  <!-- Timeline Overrides -->
   <style type="text/css">
     #visualization {
       border: 5px solid rgb(52, 14, 241);
@@ -18,81 +19,159 @@
       font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
     }
 
-
   </style>
+
 {% endblock head %}
 
-
-{% block content_title %}<h1 class="text-primary text-center mt-3">{{ route }}</h1>{% endblock %}
 {% block content %}
 
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-md-12 col-lg-12">
+  <h1 class="text-primary text-center mt-3">{{ route }}</h1>
 
-      {% if map.html %}
-        {{map.html.render|safe}}
-      {% endif %} 
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-lg-12">
 
-      {% if elrs %}
-        <h1 class="text-primary">Engineering Line References covered by this route</h1>
-        {% for elr in elrs %}
-            <li>{{elr.itemAltLabel}} {{elr.itemLabel}}</li>
-        {% endfor %}  
-      {% endif %}
+        <!-- Tab navigation -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
 
-      {% if route.post_fk.body %}
-        <h1 class="text-primary">Notes</h1>
-        {% autoescape off %}
-        {{route.post_fk.body}}
-        {% endautoescape %}
-      {% endif %}
+          {% if route.post_fk %}
+            <li class="nav-item">
+              <a class="nav-link active" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">History</a>
+            </li>
+          {% endif %}
 
+          {% if route.wikipedia_slug %}
+            <li class="nav-item">
+              <a class="nav-link {% if not route.post_fk %}active{% endif %}" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
+            </li>
+          {% endif %}
+          
+          {% if route.wikipedia_routemaps %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'locations:route_storymap' route.slug %}">Route Description</a>
+            </li>
+          {% endif %}
 
-      <div class="col-3 d-flex align-items-center justify-content-center">
-        {% if route.wikipedia_routemaps %}
-        <a href="{% url 'locations:route_storymap' route.slug %}" class="btn btn-primary"><i class="fa fa-solid"></i>Storymap</a>
-        {% else %}
-        -
-        {% endif %}
-      </div>
+          {% if timeline_json %}
+            <li class="nav-item">
+              <a class="nav-link" id="timeline-tab" data-bs-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Timeline</a>
+            </li>
+          {% endif %}
+          
+          {% if references %}
+            <li class="nav-item">
+              <a class="nav-link" id="references-tab" data-bs-toggle="tab" href="#references" role="tab" aria-controls="references" aria-selected="false">References</a>
+            </li>
+          {% endif %}
 
+          {% if route.wikipedia_routemaps or elrs %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'locations:route_map' route.slug %}">Maps</a>
+            </li>
+          {% endif %}
 
-      {% if route.wikipedia_slug %}  
-      <h2 class="text-primary text-center mt-3">Wikipedia Page</h2>
-      <iframe src='https://en.wikipedia.org/wiki/{{route.wikipedia_slug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">"<p>Your browser does not support iframes - open map using 'Open Popup' on left</p>"
-        </iframe>
-      {% endif %}
+          <!-- Code Issue. Working other than start zoom level -->
+          <!-- {% if route.wikipedia_routemaps or elrs %}
+            <li class="nav-item">
+              <a class="nav-link" id="maps-tab" data-bs-toggle="tab" href="#maps" role="tab" aria-controls="references" aria-selected="false">Maps</a>
+            </li>
+          {% endif %} -->
+        </ul>
 
-      {% autoescape off %}
-        {% if references %}
-          <h3>References</h3>
-          {% for reference in references %}
-              <li>{{reference.full_reference}}</li>         
-          {% empty %}
-          {% endfor %}
-        {% endif %}
-      {% endautoescape %}
+        <!-- Tab content -->
+        <div class="tab-content" id="myTabContent">
 
-      {% if timeline_json %}
-        <h1 class="text-primary">Timeline</h1>
-        <div id="visualization">
-          <script type="text/javascript">
-            var container = document.getElementById('visualization');
-            var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
-            var items = new vis.DataSet(jsonObject);
-            var options = {orientation: 'top'};
-            var timeline = new vis.Timeline(container, items, options);
-          </script>
+          {% if route.post_fk.body %}
+            <div class="tab-pane fade show active" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+              {% autoescape off %}
+                {{route.post_fk.body}}
+              {% endautoescape %}
+            </div>
+          {% endif %}
+
+          {% if route.wikipedia_slug %}
+            <div class="tab-pane fade {% if not route.post_fk %}show active{% endif %}" id="wikipedia" role="tabpanel" aria-labelledby="wikipedia-tab">
+              <iframe src='https://en.wikipedia.org/wiki/{{route.wikipedia_slug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
+                <p>Your browser does not support iframes - open map using 'Open Popup' on left</p>
+              </iframe>
+            </div>
+          {% endif %}
+
+          {% if timeline_json %}
+            <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+              <div id="visualization">
+                <script type="text/javascript">
+                  var container = document.getElementById('visualization');
+                  var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
+                  var items = new vis.DataSet(jsonObject);
+                  var options = {orientation: 'top', type: 'point'};
+                  var timeline = new vis.Timeline(container, items, options);
+                </script>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if references %}
+            <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
+              <ul>
+                {% for reference in references %}
+                  <li>{{reference.full_reference}}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <!-- Code unused due to map zoom level issue. See above -->
+          {% if route.wikipedia_routemaps or elrs %}
+            <div class="tab-pane fade" id="maps" role="tabpanel" aria-labelledby="maps-tab">
+              <div class="container">
+                <div class="row justify-content-center align-items-center">
+                    <div class="col-12">
+                      {% if map %}
+                        {{map|safe}}
+                      <script script>{{map.script.render|safe}}</script>
+                      {% else %}
+                        <h4>No co-ordinate data available for this selection to generate the map</h4>
+                      {% endif %}
+                    </div>
+                </div>
+            
+                {% if elrs %}
+                  <h2>Engineering Line References covered by this route:-</h2>
+                  {% for elr in elrs %}
+                    <h4>{{elr.itemAltLabel}} {{elr.itemLabel}}</h4>
+                  {% endfor %}
+                {% endif %}
+            </div>
+          {% endif %}
         </div>
-      {% endif %}
-
+      </div>
     </div>
   </div>
-</div>
 
+<script>
+      document.addEventListener('DOMContentLoaded', function() {
+      var tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
+      tabLinks.forEach(function(link) {
+        link.addEventListener('shown.bs.tab', function(event) {
+          var tabPaneId = event.target.getAttribute('href');
+          var tabPane = document.querySelector(tabPaneId);
+          var activeTabPane = document.querySelector('.tab-pane.active-tab-pane');
+          
+          if (activeTabPane) {
+            activeTabPane.classList.remove('active-tab-pane');
+          }
+          
+          tabPane.classList.add('active-tab-pane');
+        });
+      });
 
-<script>{{map.script.render|safe}}</script>
-
+      // Highlight the initially active tab pane
+      var initialActiveTabPane = document.querySelector('.tab-pane.show.active');
+      if (initialActiveTabPane) {
+        initialActiveTabPane.classList.add('active-tab-pane');
+      }
+    });
+</script>
 
 {% endblock %}

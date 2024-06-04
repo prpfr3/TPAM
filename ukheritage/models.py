@@ -2,7 +2,14 @@ from django.utils.text import slugify
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.contrib.gis.db import models  # django.db or django.contrib.gis.db
+from django.db import models
+
+if settings.GDAL_INSTALLED:
+    from django.contrib.gis.db.models import GeometryField
+
+    geometry_fieldtype = GeometryField
+else:
+    geometry_fieldtype = models.TextField
 
 # class UkAdminBoundaries(models.Model):
 #     objectid = models.BigIntegerField(blank=True, null=True)
@@ -15,7 +22,7 @@ from django.contrib.gis.db import models  # django.db or django.contrib.gis.db
 #     lat = models.FloatField(blank=True, null=True)
 #     st_areasha = models.FloatField(blank=True, null=True)
 #     st_lengths = models.FloatField(blank=True, null=True)
-#     geometry = models.TextField(blank=True, null=True)
+#     geometry = geometry_fieldtype(blank=True, null=True)
 
 #     class Meta:
 #         managed = False
@@ -33,9 +40,7 @@ class GdUkAlwaysOpenLand(models.Model):
     lastupdate = models.FloatField(db_column="LastUpdate", blank=True, null=True)
     shape_are = models.FloatField(db_column="Shape__Are", blank=True, null=True)
     shape_len = models.FloatField(db_column="Shape__Len", blank=True, null=True)
-    geometry = models.TextField(
-        blank=True, null=True
-    )  # Textfield if no GDAL installed or MySQL; Otherwise TextField
+    geometry = geometry_fieldtype(blank=True, null=True)
     wikislug = models.SlugField(default=None, blank=True, null=True)
     mynotes = models.TextField(default=None, blank=True, null=True)
 
@@ -72,9 +77,7 @@ class GdUkListedBuildings(models.Model):
     hyperlink = models.URLField(
         db_column="Hyperlink", blank=True, null=True, max_length=300
     )
-    geometry = models.TextField(
-        blank=True, null=True
-    )  # Textfield if no GDAL installed or MySQL; Otherwise TextField
+    geometry = geometry_fieldtype(blank=True, null=True)
     wikislug = models.SlugField(default=None, blank=True, null=True)
     mynotes = models.TextField(default=None, blank=True, null=True)
     liked = models.ManyToManyField(User, blank=True)  # Used for the Like functionality
@@ -114,9 +117,7 @@ class GdUkParksGardens(models.Model):
     hyperlink = models.URLField(
         db_column="Hyperlink", blank=True, null=True, max_length=300
     )
-    geometry = models.TextField(
-        blank=True, null=True
-    )  # Textfield if no GDAL installed or MySQL; Otherwise TextField
+    geometry = geometry_fieldtype(blank=True, null=True)
     wikislug = models.SlugField(default=None, blank=True, null=True)
     mynotes = models.TextField(default=None, blank=True, null=True)
 
@@ -150,9 +151,7 @@ class GdUkScheduledMonuments(models.Model):
     hyperlink = models.URLField(
         db_column="Hyperlink", blank=True, null=True, max_length=300
     )
-    geometry = models.TextField(
-        blank=True, null=True
-    )  # Textfield if no GDAL installed or MySQL; Otherwise TextField
+    geometry = geometry_fieldtype(blank=True, null=True)
     wikislug = models.SlugField(default=None, blank=True, null=True)
     mynotes = models.TextField(default=None, blank=True, null=True)
 
@@ -187,7 +186,7 @@ class GdUkWorldHeritageSites(models.Model):
     hyperlink = models.URLField(
         db_column="Hyperlink", blank=True, null=True, max_length=300
     )
-    geometry = models.TextField(blank=True, null=True)
+    geometry = geometry_fieldtype(blank=True, null=True)
     wikislug = models.SlugField(default=None, blank=True, null=True)
     mynotes = models.TextField(default=None, blank=True, null=True)
 
@@ -206,7 +205,7 @@ class MyPlaces(models.Model):
     hyperlink = models.URLField(
         db_column="Hyperlink", blank=True, null=True, max_length=300
     )
-    geometry = models.TextField(blank=True, null=True)
+    geometry = geometry_fieldtype(blank=True, null=True)
     wikislug = models.SlugField(default=None, blank=True, null=True)
     mynotes = models.TextField(default=None, blank=True, null=True)
     favourite = models.ManyToManyField(

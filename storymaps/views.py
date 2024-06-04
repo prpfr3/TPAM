@@ -159,3 +159,27 @@ def storymap(request, slug):
     storymap_json = json.dumps(storymap_dict)
 
     return render(request, "storymaps/storymap.html", {"storymap_json": storymap_json})
+
+
+def carousels(request):
+    storymaps = SlideHeader.objects.order_by("text_headline")
+    paginator = Paginator(storymaps, 20)
+    page = request.GET.get("page")
+    try:
+        storymaps = paginator.page(page)
+    except PageNotAnInteger:
+        storymaps = paginator.page(1)
+    except EmptyPage:
+        storymaps = paginator.page(paginator.num_pages)
+    context = {"page": page, "storymaps": storymaps}
+    return render(request, "storymaps/carousels.html", context)
+
+
+def carousel(request, slug):
+
+    slideheader = SlideHeader.objects.get(slug=slug)
+    slides = Slide.objects.filter(slideheader__id=slideheader.id).order_by(
+        "slidepack__slide_order"
+    )
+
+    return render(request, "storymaps/carousel.html", {"slides": slides})

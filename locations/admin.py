@@ -1,9 +1,25 @@
-from django.contrib import admin
-
-# from django.contrib.gis.admin import OSMGeoAdmin # For GDAL
+# from django.contrib.gis.admin import OSMGeoAdmin # For GDAL. (OSMGeoAdmin deprecated, now GIS ModelAdmin)
 from locations.models import *
 from tinymce.widgets import TinyMCE
 from django.db import models
+from django.conf import settings
+from django.contrib import admin
+
+if settings.GDAL_INSTALLED:
+    from django.contrib.gis.admin import GISModelAdmin
+
+    class CustomGeoWidgetAdmin(GISModelAdmin):
+        gis_widget_kwargs = {
+            "attrs": {
+                "default_zoom": 8,
+                "default_lon": 0,
+                "default_lat": 51.5,
+            },
+        }
+
+    admin_class_for_geoclasses = CustomGeoWidgetAdmin
+else:
+    admin_class_for_geoclasses = admin.ModelAdmin
 
 
 class ELRAdmin(admin.ModelAdmin):
@@ -25,7 +41,7 @@ class CategoriesFilter(admin.SimpleListFilter):
             return queryset.filter(categories__id=self.value())
 
 
-class LocationAdmin(admin.ModelAdmin):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
+class LocationAdmin(admin_class_for_geoclasses):
     list_display = ["slug", "name", "wikiname", "wikislug", "osm_node"]
     list_filter = ["source", CategoriesFilter]
     search_fields = ["wikiname", "name", "osm_node"]
@@ -59,21 +75,27 @@ class LocationCodeAdmin(admin.ModelAdmin):
 
 class LocationEventAdmin(admin.ModelAdmin):
     list_display = [
+        "company_fk",
         "route_fk",
-        "group",
-        "subgroup",
+        "location_fk",
         "date",
         "datefield",
         "type",
         "description",
     ]
     ordering = ["route_fk", "datefield"]
-    search_fields = ["route_fk", "date"]
+    search_fields = [
+        "route_fk__name",
+        "company_fk__name",
+        "location_fk__name",
+        "elr_fk__name",
+        "date",
+    ]
+    raw_id_fields = ["route_fk", "company_fk", "location_fk", "elr_fk"]
 
 
 # @admin.register(RouteGeoClosed)
-# class RouteGeoClosedAdmin(admin.ModelAdmin):
-#     # class RouteGeoClosedAdmin(OSMGeoAdmin):
+# class RouteGeoClosedAdmin(admin_class_for_geoclasses):
 #     list_display = ['name', 'description']
 #     search_fields = ['name', 'description']
 #     ordering = ['name']
@@ -81,9 +103,7 @@ class LocationEventAdmin(admin.ModelAdmin):
 
 
 @admin.register(RouteGeoOsm)
-class RouteGeoOsmAdmin(
-    admin.ModelAdmin
-):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
+class RouteGeoOsmAdmin(admin_class_for_geoclasses):
     list_display = ["name"]
     search_fields = ["name", "type"]
     ordering = ["name"]
@@ -91,9 +111,7 @@ class RouteGeoOsmAdmin(
 
 
 @admin.register(RouteGeoOsmhistory)
-class RouteGeoOsmhistoryAdmin(
-    admin.ModelAdmin
-):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
+class RouteGeoOsmhistoryAdmin(admin_class_for_geoclasses):
     list_display = ["name"]
     search_fields = ["name"]
     ordering = ["name"]
@@ -125,9 +143,7 @@ class RouteSectionAdmin(admin.ModelAdmin):
     }
 
 
-class RouteLocationAdmin(
-    admin.ModelAdmin
-):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
+class RouteLocationAdmin(admin_class_for_geoclasses):
     list_display = ["routemap", "loc_no", "label", "get_location_fk_field"]
     search_fields = ["routemap__name", "label"]
     ordering = ["routemap", "loc_no"]
@@ -144,9 +160,7 @@ class RouteLocationAdmin(
     )
 
 
-class ELRLocationAdmin(
-    admin.ModelAdmin
-):  # GDAL OSMGeoAdmin or otherwise admin.ModelAdmin
+class ELRLocationAdmin(admin_class_for_geoclasses):
     list_display = ["elr_fk", "location_fk", "distance"]
     search_fields = [
         "elr_fk__itemLabel",

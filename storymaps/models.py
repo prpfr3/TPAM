@@ -1,4 +1,5 @@
 from django.db import models
+from django import forms
 from notes.models import Post
 
 import sys
@@ -49,7 +50,22 @@ class Slide(models.Model):
     media_url = models.URLField(blank=True, null=True, max_length=400)
     text_headline = models.CharField(max_length=200, blank=True, null=True)
     text_text = models.TextField(blank=True, null=True)
+    post_fk = models.ForeignKey(
+        Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
+    )
     wikipedia_name = models.CharField(max_length=1000, blank=True, default="")
+    start_date = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        help_text="Format YYYY-MM-DD with only YY mandatory; Leading zeros on mmy and yy; Can use ? for any unknown digit",
+    )
+    end_date = models.CharField(
+        max_length=10,
+        blank=True,
+        default="",
+        help_text="Format YYYY-MM-DD with only YY mandatory; Leading zeros on mmy and yy; Can use ? for any unknown digit",
+    )
 
     def __str__(self):
         return self.text_headline

@@ -98,6 +98,7 @@ def person(request, slug):
     elif person.wikitextslug:
         wiki_wiki = wikipediaapi.Wikipedia(
             language="en",
+            user_agent="github/prpfr3 TPAM",
             extract_format=wikipediaapi.ExtractFormat.HTML,
         )
         slug = urllib.parse.unquote(
@@ -132,7 +133,9 @@ def people_storyline(request):
         ):
             timeline_json = people_storyline_build(selection_criteria, request)
             return render(
-                request, "people/people_timeline.html", {"timeline_json": timeline_json}
+                request,
+                "people/people_storyline.html",
+                {"timeline_json": timeline_json},
             )
         else:
             errors = selection_criteria.errors
@@ -172,7 +175,7 @@ def people_storyline(request):
         "people": queryset,
     }
 
-    return render(request, "people/people_timeline_selection.html", context)
+    return render(request, "people/people_storyline_selection.html", context)
 
 
 def people_storyline_build(selection_criteria, request):
@@ -251,6 +254,7 @@ def people_storyline_build(selection_criteria, request):
             pagename = person.wikitextslug.replace("_", " ")
             wiki_wiki = wikipediaapi.Wikipedia(
                 language="en",
+                user_agent="github/prpfr3 TPAM",
                 extract_format=wikipediaapi.ExtractFormat.HTML,
             )
 

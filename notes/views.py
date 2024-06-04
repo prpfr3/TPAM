@@ -97,6 +97,11 @@ class TopicListView(OwnerListView):
     model = Topic
 
 
+class PostListView(OwnerListView):
+    model = Post
+    ordering = ["title"]
+
+
 class TopicDetailView(OwnerDetailView):
     model = Topic
 
@@ -391,9 +396,52 @@ def reference(request, reference_id):
 
 
 def timeline(request):
-    # import json
-    # timeline_dict = {}
-    # timeline_json = json.dumps(timeline_dict)
-    # return render(request, 'notes/timeline.html', {timeline_json: timeline_json})
+    from locations.models import LocationEvent
+    import json
 
-    return render(request, "notes/timeline.html")
+    location_events = LocationEvent.objects.order_by("description")
+    events = []
+    groups = []
+    group_set = set()
+    count = 0
+
+    for location_event in location_events:
+        if location_event.route_fk:
+            group = str(location_event.route_fk)
+        else:
+            group = "Other"
+
+        # Collect the group information
+        group_set.add(group)
+
+        # if location_event.date:
+        if location_event.datefield:
+            count += 1
+            # For format see https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format
+            event = {
+                "id": count,
+                "group": group,
+                "content": location_event.description,
+                "start": location_event.datefield.strftime("%Y/%m/%d"),
+                "event.type": "point",
+            }
+            events.append(event)
+
+    # Convert group_set to a sorted list
+    sorted_groups = sorted(list(group_set))
+
+    # Create group_id_mapping from the sorted list
+    group_id_mapping = {group: index + 1 for index, group in enumerate(sorted_groups)}
+    groups = [
+        {"id": group_id_mapping[group], "content": group} for group in sorted_groups
+    ]
+
+    # Update the items to use group IDs
+    for event in events:
+        event["group"] = group_id_mapping[event["group"]]
+
+    return render(
+        request,
+        "notes/timeline.html",
+        {"timeline_json": json.dumps(events), "groups": json.dumps(groups)},
+    )

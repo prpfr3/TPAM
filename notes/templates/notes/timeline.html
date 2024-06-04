@@ -1,83 +1,61 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿{% extends "../mainmenu/base.html" %}
 
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block head %}
 
-    <!--- Created using Knightlab's Javascript Timeline.
+  <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
 
-    Build the timeline in a JSON file, which here is stored in the static sub-directory
-    For documentation:-
-        http://timeline.knightlab.com/docs/instantiate-a-timeline.html
-    For configuration options:-
-        http://timeline.knightlab.com/docs/options.html
-    For Github, Whitney Houston JSON example:-
-        https://github.com/NUKnightLab/TimelineJS3/blob/master/website/templates/examples/houston/timeline3.json
-    -->
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>  
-    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
-     <link rel="stylesheet" type="text/css" href="https://www.bluebell-railway-museum.co.uk/css/additionalA.css">
-    
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <!-- Overrides for timeline -->
+  <style type="text/css">
+    #visualization {
+      border: 5px solid rgb(16, 65, 3);
+      height: 1600px; /* Adjust the height as needed */
+      /* overflow-y: scroll; Enable vertical scrolling */
+    }
+    .vis-item {
+      border-color: rgb(16, 65, 3);
+      background-color: rgb(99, 230, 101);
+      font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+    }
+  </style>
 
+{% endblock head %}
 
-    <link title="timeline-styles" rel="stylesheet" 
-        href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
-    <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+{% block title %}Timeline{% endblock %}
 
-    {% load static %}
-  </head>
+{% block content %}
 
-<body>
-    <div class="row">
-        <div class="col-sm heroFontColour botpad3 toppad3 text-center heroBgr baseFontSize">
-            <h1 class="text-center"><b>Bluebell Railway Timeline</b></h1>
-            <p></p>
-        </div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-lg-12">
+
+        {% if timeline_json %}
+        <h1 class="'text-primary text-center">Timeline</h1>
+          <div id="visualization">
+            <script type="text/javascript">
+              var container = document.getElementById('visualization');
+              var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
+              var items = new vis.DataSet(jsonObject);
+              var jsonObjectGroups = JSON.parse('{{ groups | safe | escapejs }}');
+              var groups = new vis.DataSet(jsonObjectGroups);
+              var options = {
+                orientation: {
+                  axis: 'top', // Keep the timeline axis at the top
+                  item: 'bottom' // Keep the items scrolling beneath the timeline
+                },
+                verticalScroll: true, // Enable vertical scrolling
+                maxHeight: 1600, // Maximum height of the timeline container
+                type: 'point',
+                showMajorLabels: false,
+              };
+              var timeline = new vis.Timeline(container, items, groups, options);
+            </script>
+          </div>
+        {% endif %}
+
+      </div>
     </div>
-    <div id='timeline-embed' style="width: 100%; height: 530px"></div> 
-    <script>
-        $(document).ready(function() {
-            var embed = document.getElementById('timeline-embed');
-            embed.style.height = getComputedStyle(document.body).height;
+  </div>
 
-            // A Django static call to AWS S3 requires bucket permission settings of 
-            //         [
-            // {
-            //     "AllowedHeaders": [
-            //         "*"
-            //     ],
-            //     "AllowedMethods": [
-            //         "GET"
-            //     ],
-            //     "AllowedOrigins": [
-            //         "https://tpam-production.up.railway.app"
-            //     ],
-            //     "ExposeHeaders": []
-            // }
-            // ]
-            var items ="{% static 'bluebell_timeline.json' %}"
-            // var items = '/static/bluebell_timeline.json';
-
-            window.timeline = new TL.Timeline('timeline-embed', items, {
-                hash_bookmark: true,
-                scale_factor: 1,
-                timenav_position: 'bottom',
-                timenav_height: 5,
-                debug: true,});
-            console.log(window.timeline);
-            window.addEventListener('resize', function() {
-                var embed = document.getElementById('timeline-embed');
-                embed.style.height = getComputedStyle(document.body).height;
-                timeline.updateDisplay();
-            })
-        });
-    </script>
-</body>
-</html>
+{% endblock %}
