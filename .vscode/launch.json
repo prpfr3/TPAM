@@ -7,7 +7,7 @@
         {
             "name": "Python: Django",
             // "python": "/Users/paulf/anaconda3/envs/GeoDjango/python3",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}\\manage.py",
             "args": [
@@ -15,7 +15,6 @@
             ],
             "console": "internalConsole",
             "django": true,
-            // "console": "internalConsole"
         }
     ]
 }

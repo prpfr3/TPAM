@@ -18,7 +18,7 @@ class Command(BaseCommand):
             instance.geodata = None
             # instance.geometry = None
 
-            route = Route.objects.get(slug="Brighton_to_Portsmouth_line")
+            route = Route.objects.get(slug="North_Midland_Railway_Derby_to_Leeds")
             instance.route_fk = route
 
             route_section_elrs = instance.routesectionelr_set.all()

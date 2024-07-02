@@ -55,17 +55,15 @@ def locations(request):
             query &= Q(name__icontains=name_query)
 
         if categories_query:
-            query &= Q(
-                categories__name__icontains=categories_query
-            )  # Assuming categories have a 'name' field
+            query &= Q(categories__category__icontains=categories_query.category)
 
         # Apply the letter filter only if no specific name or category is provided
-        if not name_query and not categories_query:
+        if not name_query:
             query &= Q(name__istartswith=letter)
     else:
         query &= Q(name__istartswith=letter)
 
-    queryset = Location.objects.filter(query).order_by("name")
+    queryset = Location.objects.filter(query).distinct().order_by("name")
     queryset, page = pagination(request, queryset, 36)
 
     query_params = QueryDict(mutable=True)
@@ -83,7 +81,7 @@ def locations(request):
         "query_params": query_params.urlencode(),
         "letter": letter,  # Pass the current letter to the context
     }
-    return render(request, "locations/locations_by_letter_prototype.html", context)
+    return render(request, "locations/locations.html", context)
 
 
 def location(request, location_id):
@@ -101,10 +99,18 @@ def location(request, location_id):
     """
     coords = execute_sql(sql, [location_id])
 
+    sql = """ 
+    SELECT ST_AsText(a.geometry), ST_Y(a.geometry), a.name
+    FROM 
+    public."locations_location" AS a
+    WHERE a.id = %s;
+    """
+    geometry = execute_sql(sql, [location_id])
+
     y_coord = coords[0].get("st_y")
     x_coord = coords[0].get("st_x")
-    map = folium_map_latlong(y_coord, x_coord, None)
-    map_html = map._repr_html_()
+    map_html = folium_map_latlong(y_coord, x_coord, None)
+    # map_html = map._repr_html_()
     location_name = coords[0].get("name")
 
     nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=16&lat={y_coord}&lon={x_coord}&layers=168&b=5"
@@ -133,8 +139,8 @@ def location_map(request, location_id):
 
     y_coord = coords[0].get("st_y")
     x_coord = coords[0].get("st_x")
-    map = folium_map_latlong(y_coord, x_coord, None)
-    map_html = map._repr_html_()
+    map_html = folium_map_latlong(y_coord, x_coord, None)
+    # map_html = map._repr_html_()
     location_name = coords[0].get("name")
 
     nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=16&lat={y_coord}&lon={x_coord}&layers=168&b=5"
@@ -219,13 +225,7 @@ def route(request, slug):
     if route_events := LocationEvent.objects.filter(route_fk_id=route.id):
         events_json = events_timeline(route_events)
 
-    routes = [route]
-    elr_geojsons, locations = routes_mapdata_extract(routes)
-    if locations or elr_geojsons:
-        map_html = folium_map_geojson(elr_geojsons, locations)
-
     context = {
-        "map": map_html,
         "route": route,
         "elrs": elrs,
         "references": references,
@@ -241,6 +241,7 @@ def route_map(request, slug):
     routes = [route]
 
     elr_geojsons, locations = routes_mapdata_extract(routes)
+    map_html = None
     if locations or elr_geojsons:
         map_html = folium_map_geojson(elr_geojsons, locations)
 
@@ -250,7 +251,6 @@ def route_map(request, slug):
         "elrs": elrs,
         "title": route.name,
     }
-    print(elrs)
     return render(request, "locations/folium_map.html", context)
 
 
@@ -284,8 +284,6 @@ def route_sections(request):
 
 
 def route_section(request, route_section_id):
-
-    # Temporarily built to generate a route page rather than route_section
 
     route_section = RouteSection.objects.get(id=route_section_id)
     route = Route.objects.get(id=route_section.route_fk.id)

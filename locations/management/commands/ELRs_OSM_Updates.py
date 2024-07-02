@@ -5,15 +5,15 @@ from locations.models import ELR
 # from django.contrib.gis.geos import LineString
 from ...utils import osm_elr_fetch
 
-"""
-Translate OSM Geojson data into Postgres Geometry
-Redundant as of 28/04/24 given that GeometryField on ELRS is not used by TPAM at present and has been removed to save space on the database (from 174 to 147Mb)
-Also django.contriib.gis.geos was encountering errors in the conda GeoDjango environment
-Retained here for potential future use
-"""
-
 
 def geojson_to_geometry(geojson):
+    """
+    Translates OSM Geojson data into Postgis Geometry
+    Redundant as of 28/04/24 given that GeometryField on ELRS is not used by TPAM at present and has been removed to save space on the database (from 174 to 147Mb)
+    Also django.contrib.gis.geos was encountering errors in the conda GeoDjango environment
+    Retained here for potential future use
+    """
+
     line_strings = []
 
     # Iterate through features and extract LineString geometries

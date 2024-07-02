@@ -239,6 +239,7 @@ TINYMCE_DEFAULT_CONFIG = {
     "menubar": True,
     "statusbar": True,
     "editor_deselector": "mceNoEditor",
+    "valid_elements": "*[*]",
 }
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

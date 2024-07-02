@@ -143,6 +143,7 @@ class LocationForm(forms.ModelForm):
             "crscode",
             "easting",
             "northing",
+            "slug",
         ]
         labels = {
             "wikiname": "Name",
@@ -154,4 +155,5 @@ class LocationForm(forms.ModelForm):
             "crscode": "CRS code",
             "easting": "Easting",
             "northing": "Northing",
+            "slug": "Slug",
         }

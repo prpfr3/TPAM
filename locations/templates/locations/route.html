@@ -19,6 +19,11 @@
       font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
     }
 
+    /* Add some separation around the tabs */
+    .nav-tabs .nav-item .nav-link {
+      margin-right: 2px;
+    }
+
   </style>
 
 {% endblock head %}
@@ -36,46 +41,39 @@
 
           {% if route.post_fk %}
             <li class="nav-item">
-              <a class="nav-link active" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">History</a>
+              <a class="nav-link {% if route.post_fk %}active text-primary bg-white{% else %}text-white bg-primary{% endif %}" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">History</a>
             </li>
           {% endif %}
 
           {% if route.wikipedia_slug %}
             <li class="nav-item">
-              <a class="nav-link {% if not route.post_fk %}active{% endif %}" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
+              <a class="nav-link {% if not route.post_fk %}active text-primary bg-white{% else %}text-white bg-primary{% endif %}" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
             </li>
           {% endif %}
           
           {% if route.wikipedia_routemaps %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'locations:route_storymap' route.slug %}">Route Description</a>
+              <a class="nav-link text-white bg-primary" href="{% url 'locations:route_storymap' route.slug %}">Route Description</a>
             </li>
           {% endif %}
 
           {% if timeline_json %}
             <li class="nav-item">
-              <a class="nav-link" id="timeline-tab" data-bs-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Timeline</a>
+              <a class="nav-link text-white bg-primary" id="timeline-tab" data-bs-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Timeline</a>
             </li>
           {% endif %}
           
           {% if references %}
             <li class="nav-item">
-              <a class="nav-link" id="references-tab" data-bs-toggle="tab" href="#references" role="tab" aria-controls="references" aria-selected="false">References</a>
+              <a class="nav-link text-white bg-primary" id="references-tab" data-bs-toggle="tab" href="#references" role="tab" aria-controls="references" aria-selected="false">References</a>
             </li>
           {% endif %}
 
           {% if route.wikipedia_routemaps or elrs %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'locations:route_map' route.slug %}">Maps</a>
+            <li class="nav-item text-white">
+              <a class="nav-link text-white bg-primary" href="{% url 'locations:route_map' route.slug %}">Maps</a>
             </li>
           {% endif %}
-
-          <!-- Code Issue. Working other than start zoom level -->
-          <!-- {% if route.wikipedia_routemaps or elrs %}
-            <li class="nav-item">
-              <a class="nav-link" id="maps-tab" data-bs-toggle="tab" href="#maps" role="tab" aria-controls="references" aria-selected="false">Maps</a>
-            </li>
-          {% endif %} -->
         </ul>
 
         <!-- Tab content -->
@@ -104,6 +102,7 @@
                   var container = document.getElementById('visualization');
                   var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
                   var items = new vis.DataSet(jsonObject);
+                  console.log(jsonObject);
                   var options = {orientation: 'top', type: 'point'};
                   var timeline = new vis.Timeline(container, items, options);
                 </script>
@@ -121,7 +120,6 @@
             </div>
           {% endif %}
 
-          <!-- Code unused due to map zoom level issue. See above -->
           {% if route.wikipedia_routemaps or elrs %}
             <div class="tab-pane fade" id="maps" role="tabpanel" aria-labelledby="maps-tab">
               <div class="container">
@@ -131,7 +129,7 @@
                         {{map|safe}}
                       <script script>{{map.script.render|safe}}</script>
                       {% else %}
-                        <h4>No co-ordinate data available for this selection to generate the map</h4>
+                        <h4>No map available for this route</h4>
                       {% endif %}
                     </div>
                 </div>
@@ -150,28 +148,30 @@
   </div>
 
 <script>
-      document.addEventListener('DOMContentLoaded', function() {
-      var tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
-      tabLinks.forEach(function(link) {
-        link.addEventListener('shown.bs.tab', function(event) {
-          var tabPaneId = event.target.getAttribute('href');
-          var tabPane = document.querySelector(tabPaneId);
-          var activeTabPane = document.querySelector('.tab-pane.active-tab-pane');
-          
-          if (activeTabPane) {
-            activeTabPane.classList.remove('active-tab-pane');
-          }
-          
-          tabPane.classList.add('active-tab-pane');
-        });
-      });
+  document.addEventListener('DOMContentLoaded', function() {
+    var tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
 
-      // Highlight the initially active tab pane
-      var initialActiveTabPane = document.querySelector('.tab-pane.show.active');
-      if (initialActiveTabPane) {
-        initialActiveTabPane.classList.add('active-tab-pane');
-      }
+    tabLinks.forEach(function(link) {
+      link.addEventListener('shown.bs.tab', function(event) {
+        // Remove active classes from all tab links
+        tabLinks.forEach(function(link) {
+          link.classList.remove('text-primary', 'bg-white');
+          link.classList.add('text-white', 'bg-primary');
+        });
+
+        // Add active classes to the newly activated tab link
+        event.target.classList.add('text-primary', 'bg-white');
+        event.target.classList.remove('text-white', 'bg-primary');
+      });
     });
+
+    // Highlight the initially active tab link
+    var initialActiveTabLink = document.querySelector('.nav-link.active');
+    if (initialActiveTabLink) {
+      initialActiveTabLink.classList.add('text-primary', 'bg-white');
+      initialActiveTabLink.classList.remove('text-white', 'bg-primary');
+    }
+  });
 </script>
 
 {% endblock %}

@@ -8,17 +8,19 @@ from django.contrib import admin
 if settings.GDAL_INSTALLED:
     from django.contrib.gis.admin import GISModelAdmin
 
-    class CustomGeoWidgetAdmin(GISModelAdmin):
-        gis_widget_kwargs = {
-            "attrs": {
-                "default_zoom": 8,
-                "default_lon": 0,
-                "default_lat": 51.5,
-            },
-        }
+    # class CustomGeoWidgetAdmin(GISModelAdmin):
+    #     # gis_widget_kwargs = {
+    #     #     "attrs": {
+    #     #         "default_zoom": 8,
+    #     #         "default_lon": 0,
+    #     #         "default_lat": 51.5,
+    #     #     },
+    #     # }
 
-    admin_class_for_geoclasses = CustomGeoWidgetAdmin
+    #  admin_class_for_geoclasses = CustomGeoWidgetAdmin
+    admin_class_for_geoclasses = GISModelAdmin
 else:
+
     admin_class_for_geoclasses = admin.ModelAdmin
 
 
@@ -42,7 +44,8 @@ class CategoriesFilter(admin.SimpleListFilter):
 
 
 class LocationAdmin(admin_class_for_geoclasses):
-    list_display = ["slug", "name", "wikiname", "wikislug", "osm_node"]
+    # class LocationAdmin(ModelAdmin):
+    list_display = ["name", "slug", "wikiname", "wikislug", "osm_node"]
     list_filter = ["source", CategoriesFilter]
     search_fields = ["wikiname", "name", "osm_node"]
     ordering = ["wikiname"]
@@ -60,6 +63,22 @@ class LocationAdmin(admin_class_for_geoclasses):
         "owner_operators",
         "categories",
     ]
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ["slug"]
+        else:
+            return []
+
+    def save_model(self, request, obj, form, change):
+        if change:  # Check if this is an update of an existing object
+            old_obj = self.model.objects.get(pk=obj.pk)
+            if old_obj.name != obj.name:  # If the title has changed
+                obj.slug = custom_slugify(obj.name)
+        else:
+            if not obj.slug:
+                obj.slug = custom_slugify(obj.name)
+        obj.save()
 
 
 class LocationCodeAdmin(admin.ModelAdmin):

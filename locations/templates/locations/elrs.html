@@ -35,14 +35,15 @@
   {% with queryset|slice:":12" as first_third %}
   {% with queryset|slice:"12:24" as second_third %}
   {% with queryset|slice:"24:" as third_third %}
-  
+  <div class="container">
+
     <div class="row">
       <div class="col-md-4">
         {% for elr in first_third %}
           {% if elr.itemAltLabel %}
             <div class="row mb-1 d-flex align-items-stretch row-height">
               <div class="col-12 d-flex align-items-left justify-content-left">
-                <h5><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></h5>
+                <div><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></div>
               </div>
             </div>
           {% endif %}
@@ -54,7 +55,7 @@
           {% if elr.itemAltLabel %}
             <div class="row mb-1 d-flex align-items-stretch row-height">
               <div class="col-12 d-flex align-items-left justify-content-left">
-                <h5><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></h5>
+                <div><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></div>
               </div>
             </div>
           {% endif %}
@@ -66,13 +67,14 @@
           {% if elr.itemAltLabel %}
             <div class="row mb-1 d-flex align-items-stretch row-height">
               <div class="col-12 d-flex align-items-left justify-content-left">
-                <h5><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></h5>
+                <div><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></div>
               </div>
             </div>
           {% endif %}
         {% endfor %}
       </div>
     </div>
+  </div>
   {% endwith %}
   {% endwith %}
   {% endwith %}

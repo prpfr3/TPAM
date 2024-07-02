@@ -23,24 +23,28 @@ class EmailPostForm(forms.Form):
 
 
 class PostForm(forms.ModelForm):
-
     class Meta:
         model = Post
-        fields = ["title", "body", "status", "url"]
-        labels = {"title": "", "body": "", "status": "", "url": "url"}
+        fields = ["title", "body", "status", "url", "slug"]
+        labels = {"title": "", "body": "", "status": "", "url": "url", "slug": "Slug"}
         widgets = {
             "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": ".form-control-lg"}
+                attrs={"class": "form-control", "placeholder": "Enter Title"}
             ),
             "body": TinyMCE(
                 attrs={"class": "form-control tinymce-editor", "cols": 80, "rows": 30}
             ),
-            #  'body': forms.Textarea(attrs={'class': 'form-control', "placeholder" : ".form-control-md"}),
             "status": forms.Select(
-                attrs={"class": "form-control", "placeholder": ".form-control-sm"}
+                attrs={"class": "form-control", "placeholder": "Enter Status"}
             ),
             "url": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": ".form-control-lg"}
+                attrs={"class": "form-control", "placeholder": "Enter a URL (Optional)"}
+            ),
+            "slug": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Auto-generated from title",
+                }
             ),
         }
 

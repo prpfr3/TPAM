@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import *
+from .forms import PostForm
 from django.db import models
 from tinymce.widgets import TinyMCE
 from locos.models import LocoClass
@@ -7,17 +8,29 @@ from locos.models import LocoClass
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
+    form = PostForm
     list_display = ["title", "slug", "topic", "owner", "publish", "status"]
     list_filter = ["status", "created", "publish", "owner"]
     search_fields = ["title", "body"]
-    prepopulated_fields = {"slug": ("title",)}
-    # Creates a lookup widget for large volume lookups
     raw_id_fields = ("owner",)
     date_hierarchy = "publish"
-    formfield_overrides = {
-        models.TextField: {"widget": TinyMCE()},
-    }
     filter_horizontal = ["references"]
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ["slug"]
+        else:
+            return []
+
+    def save_model(self, request, obj, form, change):
+        if change:  # Check if this is an update of an existing object
+            old_obj = self.model.objects.get(pk=obj.pk)
+            if old_obj.title != obj.title:  # If the title has changed
+                obj.slug = custom_slugify(obj.title)
+        else:
+            if not obj.slug:
+                obj.slug = custom_slugify(obj.title)
+        obj.save()
 
 
 class LocoClassInline(admin.TabularInline):

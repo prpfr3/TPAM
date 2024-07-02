@@ -16,10 +16,14 @@
       background-color: rgb(99, 151, 230);
       font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
     }
+
+    /* Add some separation around the tabs */
+    .nav-tabs .nav-item .nav-link {
+      margin-right: 2px;
+    }
   </style>
 
 {% endblock head %}
-
 
 {% block title %}{{ location }}{% endblock %}
 
@@ -38,42 +42,42 @@
         <ul class="nav nav-tabs" id="myTab" role="tablist">
 
           <li class="nav-item">
-            <a class="nav-link active" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Location Details</a>
+            <a class="nav-link active text-primary bg-white" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Location Details</a>
           </li>
 
           {% if location.wikislug %}
             <li class="nav-item">
-              <a class="nav-link" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
+              <a class="nav-link text-white bg-primary" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
             </li>
           {% endif %}
 
           {% if location.disused_stations_slug %}
             <li class="nav-item">
-              <a class="nav-link" id="disused-stations-tab" href="http://disused-stations.org.uk/{{location.disused_stations_slug}}" role="tab">Disused Stations Website</a>
+              <a class="nav-link text-white bg-primary" id="disused-stations-tab" href="http://disused-stations.org.uk/{{location.disused_stations_slug}}" role="tab">Disused Stations Website</a>
             </li>
           {% endif %}
 
           {% if location.atcocode %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'rtt:location' location.crscode %}">Real Time Train Movements</a>
+              <a class="nav-link text-white bg-primary" href="{% url 'rtt:location' location.crscode %}">Real Time Train Movements</a>
             </li>
           {% endif %}
 
           {% if timeline_json %}
             <li class="nav-item">
-              <a class="nav-link" id="timeline-tab" data-bs-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Timeline</a>
+              <a class="nav-link text-white bg-primary" id="timeline-tab" data-bs-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Timeline</a>
             </li>
           {% endif %}
           
           {% if references %}
             <li class="nav-item">
-              <a class="nav-link" id="references-tab" data-bs-toggle="tab" href="#references" role="tab" aria-controls="references" aria-selected="false">References</a>
+              <a class="nav-link text-white bg-primary" id="references-tab" data-bs-toggle="tab" href="#references" role="tab" aria-controls="references" aria-selected="false">References</a>
             </li>
           {% endif %}
 
           <!-- Tab turned off as map incorporated in location details -->
             <li class="nav-item">
-              <a class="nav-link" href="{{nls_url}}" role="tab">National Library of Scotland Map</a>
+              <a class="nav-link text-white bg-primary" href="{{nls_url}}" role="tab">NLS Map</a>
             </li>
 
         </ul>
@@ -157,7 +161,7 @@
 
           {% if location.wikislug %}
             <div class="tab-pane fade" id="wikipedia" role="tabpanel" aria-labelledby="wikipedia-tab">
-              <iframe src='https://en.wikipedia.org/wiki/{{location.wikislug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
+              <iframe src='https://en.wikipedia.org/wiki/{{location.wikislug}}' id="Wikiframe" width="100%" height="700" marginwidth="300">
                 <p>Your browser does not support iframes - open map using 'Open Popup' on left</p>
               </iframe>
             </div>
@@ -192,29 +196,31 @@
     </div>
   </div>
 
-<script>
-      document.addEventListener('DOMContentLoaded', function() {
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
       var tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
+  
       tabLinks.forEach(function(link) {
         link.addEventListener('shown.bs.tab', function(event) {
-          var tabPaneId = event.target.getAttribute('href');
-          var tabPane = document.querySelector(tabPaneId);
-          var activeTabPane = document.querySelector('.tab-pane.active-tab-pane');
-          
-          if (activeTabPane) {
-            activeTabPane.classList.remove('active-tab-pane');
-          }
-          
-          tabPane.classList.add('active-tab-pane');
+          // Remove active classes from all tab links
+          tabLinks.forEach(function(link) {
+            link.classList.remove('text-primary', 'bg-white');
+            link.classList.add('text-white', 'bg-primary');
+          });
+  
+          // Add active classes to the newly activated tab link
+          event.target.classList.add('text-primary', 'bg-white');
+          event.target.classList.remove('text-white', 'bg-primary');
         });
       });
-
-      // Highlight the initially active tab pane
-      var initialActiveTabPane = document.querySelector('.tab-pane.show.active');
-      if (initialActiveTabPane) {
-        initialActiveTabPane.classList.add('active-tab-pane');
+  
+      // Highlight the initially active tab link
+      var initialActiveTabLink = document.querySelector('.nav-link.active');
+      if (initialActiveTabLink) {
+        initialActiveTabLink.classList.add('text-primary', 'bg-white');
+        initialActiveTabLink.classList.remove('text-white', 'bg-primary');
       }
     });
-</script>
+  </script>
 
 {% endblock %}

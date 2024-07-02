@@ -10,9 +10,9 @@
   {% if post_list %}
 
   {% for post in post_list %}
-    <h2>
+    <div>
         {% autoescape off %}
-        <h4><a href="{% url 'notes:post_detail' post.id %}">{{ post.title }}</a></h4>
+        <a href="{% url 'notes:post_detail' post.id %}">{{ post.title }}</a>
         {% endautoescape %}
         {% comment %}
         {% if post.owner == user %}
@@ -20,7 +20,7 @@
         <a href="{% url 'notes:post_delete' post.id %}">Delete</a>)
         {% endif %}
         {% endcomment %}
-    </h2>
+    </div>
   {% endfor %}
 
 {% else %}

@@ -53,7 +53,7 @@
               ></a>
               {% endif %}     
             </td>
-            <td><h4><a href="{% url 'people:person' person.slug %}">{{ person.name }}</a></h4></td>
+            <td><div><a href="{% url 'people:person' person.slug %}">{{ person.name }}</a></div></td>
             <td>{{ person.birthdate}}</td>
             <td>{{ person.dieddate }}</td>
             {% comment %}

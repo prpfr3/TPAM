@@ -249,7 +249,7 @@ def route_section_locations_extract(route):
         for route_location in route_locations:
             if locations is None:
                 locations = []
-            locations.extend(route_location)
+            locations.append(route_location)
 
     return locations
 
@@ -259,15 +259,34 @@ def folium_map_geojson(geojsons, locations, height=600, width=1000):
     from folium.plugins import MarkerCluster, MiniMap
 
     # By default folium will use OpenStreetMap as the baselayer. 'tiles=None' switches the default off
-    m = folium.Map(zoom_start=13, prefer_canvas=True, height=height, width=width)
+    m = folium.Map(
+        zoom_start=13,  # Initial zoom level (will be overridden by fit_bounds)
+        location=[
+            51.5072,
+            -0.1276,
+        ],  # Initial location of London (will be overridden by fit_bounds)
+        prefer_canvas=True,
+        height=height,
+        width=width,
+        tiles=None,
+    )
+
+    # Add OpenStreetMap as a tile layer with a name
+    folium.TileLayer(
+        tiles="OpenStreetMap",
+        name="OpenStreetMap",
+        overlay=True,
+    ).add_to(m)
 
     folium.TileLayer(
         "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
         attr='<a href="https://maps.nls.uk/"> \
             OS 25 1892-1914 maps Reproduced with the permission of the National Library of Scotland</a>',
-        name="NLS 25inch",
+        name="NLS 25inch (Yorkshire only)",
         min_zoom=2,
         max_zoom=19,
+        overlay=True,
+        show=False,
     ).add_to(m)
 
     """
@@ -283,6 +302,8 @@ def folium_map_geojson(geojsons, locations, height=600, width=1000):
         name="OpenRailwayMap",
         min_zoom=2,
         max_zoom=19,
+        overlay=True,
+        show=False,
     ).add_to(m)
 
     all_features = []
@@ -325,7 +346,7 @@ def folium_map_geojson(geojsons, locations, height=600, width=1000):
                 sticky=False,
             ),
             popup=folium.GeoJsonPopup(fields=["name"], aliases=[""], localize=True),
-            name="OpenRailwayMap data",
+            name="Route",
             # style_function=lambda x: {
             #     "color": "#78491c"
             #     if x["properties"].get("ref") == "NHB"
@@ -334,13 +355,14 @@ def folium_map_geojson(geojsons, locations, height=600, width=1000):
             # Weight determines the width of lines, fillColor has no effect on ways
             highlight_function=lambda x: {"weight": 6, "fillColor": "yellow"},
             smooth_factor=2,
+            show=True,  # Show the route on the map initially
         ).add_to(m)
 
         # Calculate the bounding box of the GeoJSON data
         bounding_box = geojson_layer.get_bounds()
 
     if locations:
-        marker_cluster = MarkerCluster(name="Locations").add_to(m)
+        marker_cluster = MarkerCluster(name="Route Locations", show=False).add_to(m)
 
         for location in locations:
             # i.e. if a y-coordinate is present (if not then it can't be mapped)
@@ -407,14 +429,13 @@ def folium_map_geojson(geojsons, locations, height=600, width=1000):
 
     # format of bound_box is [(minimum latitude, minimum longitude]), [(maximum latitude, maximum longitude)]) i.e. south west, north east
     m.fit_bounds(bounding_box)
+
     folium.LayerControl().add_to(m)
 
     minimap = MiniMap()
     m.add_child(minimap)
-
     figure = folium.Figure()
     m.add_to(figure)
-
     figure.render()
     map_html = figure._repr_html_()
     return map_html
@@ -422,7 +443,7 @@ def folium_map_geojson(geojsons, locations, height=600, width=1000):
 
 def folium_map_latlong(latitude, longitude, tooltip_text, height=600, width=1000):
     import folium
-    from folium.plugins import MarkerCluster, MiniMap
+    from folium.plugins import MiniMap
 
     # By default folium will use OpenStreetMap as the baselayer. 'tiles=None' switches the default off
     m = folium.Map(
@@ -460,14 +481,13 @@ def folium_map_latlong(latitude, longitude, tooltip_text, height=600, width=1000
     folium.Marker([latitude, longitude], tooltip=tooltip_text).add_to(m)
 
     folium.LayerControl().add_to(m)
-
     minimap = MiniMap()
     m.add_child(minimap)
-
     figure = folium.Figure()
     m.add_to(figure)
     figure.render()
-    return figure
+    map_html = figure._repr_html_()
+    return map_html
 
 
 # def merge_geojson_features():

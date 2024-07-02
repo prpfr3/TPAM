@@ -20,7 +20,7 @@ def custom_slugify(value, allow_unicode=False):
             .decode("ascii")
         )
 
-    #  The Regex removes any characters that are not word characters (\w), whitespace characters (\s), or hyphens (-).
-    # Then, it replaces any sequences of hyphens or whitespace characters with a single hyphen.
+    #  The Regex removes any characters that are word characters (\w), whitespace characters (\s), or hyphens (-).
+    # Then, it replaces any sequences of hyphens or whitespace characters with underscore.
     value = re.sub(r"[^\w\s&\-]", "", value).strip()
-    return re.sub(r"[-\s]+", "-", value)
+    return re.sub(r"[-\s]+", "_", value)

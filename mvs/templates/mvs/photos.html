@@ -8,7 +8,7 @@
   <div class="album py-4 bg-light">
     <div class="container">
       <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-        {% for photo in photos  %}
+        {% for photo in queryset  %}
         <div class="col">
           <div class="card text-center shadow-sm">
            
@@ -20,7 +20,7 @@
             margin: auto;" src="{{ photo.image.url }}" alt=""></a>
 
             <div class="card-body">
-              <p class="card-text">{{photo.image_name}}<br>
+              <p class="card-text"><a href="https://en.wikipedia.org/wiki/{{photo.mvclass.wikislug}}">{{ photo.image_name }}</a><br>
               {{photo.location}}<br>
               {{photo.visit.date}}</p>
             </div>
@@ -31,6 +31,6 @@
     </div><!--container-->
   </div><!--album-->
 
-  {% include "mainmenu/pagination.html" with page=photos %}
+  {% include "mainmenu/pagination.html" with page=queryset %}
 
 {% endblock content %}

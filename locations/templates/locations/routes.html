@@ -1,6 +1,8 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
 {% block head %}
+  {% load custom_filters %}
+
   <style>
     .row-height {
         min-height: 36px; /* Adjust the height as needed */
@@ -40,46 +42,13 @@
         <div class="col-md-12 col-lg-12 col-xl-12"> <!-- Content Column -->
       {% endif %}
   
-        {% with queryset|slice:":12" as first_third %}
-        {% with queryset|slice:"12:24" as second_third %}
-        {% with queryset|slice:"24:" as third_third %}
-        <div class="container">
-    
-          <div class="row">
-            <div class="col-md-4">
-              {% for route in first_third %}
-                  <div class="row mb-1 d-flex align-items-stretch row-height">
-                    <div class="col-12 d-flex align-items-left justify-content-left">
-                      <h4><a href="{% url 'locations:route' route.slug %}">{{route.name}}</a></h4>
-                    </div>
-                  </div>
-              {% endfor %}
-            </div>
-    
-            <div class="col-md-4">
-              {% for route in second_third %}
-                  <div class="row mb-1 d-flex align-items-stretch row-height">
-                    <div class="col-12 d-flex align-items-left justify-content-left">
-                      <h4><a href="{% url 'locations:route' route.slug %}">{{route.name}}</a></h4>
-                    </div>
-                  </div>
-              {% endfor %}
-            </div>
-    
-            <div class="col-md-4">
-              {% for route in third_third %}
-                  <div class="row mb-1 d-flex align-items-stretch row-height">
-                    <div class="col-12 d-flex align-items-left justify-content-left">
-                      <h4><a href="{% url 'locations:route' route.slug %}">{{route.name}}</a></h4>
-                    </div>
-                  </div>
-              {% endfor %}
-            </div>
-          </div>
+      <div class="container">
+        <div class="row">
+          {% render_slice queryset 0 12 %}
+          {% render_slice queryset 12 24 %}
+          {% render_slice queryset 24 None %}
         </div>
-        {% endwith %}
-        {% endwith %}
-        {% endwith %}
+      </div>
   
         {% include "mainmenu/pagination.html" with page=queryset %}
       </div> <!-- End of Content Column -->

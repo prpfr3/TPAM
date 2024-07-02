@@ -5,6 +5,11 @@
     .row-height {
         min-height: 35px; /* Adjust the height as needed */
     }
+
+    /* Add some separation around the tabs */
+    .nav-tabs .nav-item .nav-link {
+      margin-right: 2px;
+    }
   </style>
 {% endblock %}
 
@@ -12,68 +17,147 @@
 
 {% block content %}
   
-    <h1 class="text-primary text-center">{{ loco_class }}</h1>
+  <h1 class="text-primary text-center">{{ loco_class }}</h1>
 
-    <h2 class="text-primary">Locos in Class</h2>
-    {% for locomotive in locomotives %}
-      {{locomotive.number_as_built}},
-    {% empty %}
-      <li>None recorded for this class.</li>
-    {% endfor %} 
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-lg-12">
+  
+        <!-- Tab navigation -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
 
-    <h2 class="text-primary">Owners/Operators</h2>
-    {% for operator in operators %}
-      <li><a href="https://en.wikipedia.org/wiki/{{operator.wikislug}}">{{operator.name}}</a></li>
-    {% empty %}
-      <li>None recorded for this class.</li>
-    {% endfor %} 
+          <li class="nav-item">
+            <a class="nav-link active text-primary bg-white" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Class Details</a>
+          </li>
 
-    {% if loco_class.designer_person %}
-      <h2 class="text-primary">Designer</h2>
-      {% if loco_class.designer_person.wikitextslug %}
-      <li><a href="https://en.wikipedia.org//wiki/{{loco_class.designer_person.wikitextslug}}">{{loco_class.designer_person}}</a></li>
-      {% else %}
-      <li>{{loco_class.designer_person}}</li>
-      {% endif %}
-    {% endif %}
+          {% if loco_class.brdslug %}
+          <li class="nav-item">
+            <a class="nav-link text-white bg-primary" id="brd-tab" href="https://www.brdatabase.info/locoqry.php?{{ loco_class.brdslug }}" target="_blank" rel="noopener noreferrer" role="tab">BRD</a>
+          </li>
+          {% endif %}
 
-    <h2 class="text-primary">Manufacturer(s)</h2>
-    {% for manufacturer in manufacturers %}
-      <li><a href="https://en.wikipedia.org/wiki/{{manufacturer.wikislug}}">{{manufacturer.name}}</a></li>
-    {% empty %}
-      <li>None recorded for this class.</li>
-    {% endfor %}
+          {% if loco_class.slug %}
+          <li class="nav-item">
+            <a class="nav-link text-white bg-primary" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
+          </li>
+          {% endif %}
 
-    <h2 class="text-primary">References</h2>
-    {% for reference in references %}
-      {% autoescape off %}
-      <li>{{reference.full_reference}}</li>
-      {% endautoescape %}
-    {% empty %}
-      <li>None recorded for this class.</li>
-    {% endfor %}
+          {% if loco_class.references %}
+          <li class="nav-item">
+            <a class="nav-link text-white bg-primary" id="references-tab" data-bs-toggle="tab" href="#references" role="tab" aria-controls="references" aria-selected="false">References</a>
+          </li>
+          {% endif %}
 
-    {% comment %}
-      <h2 class="text-primary">Images</h2>
-      {% for image in images %}
-        <img src="{{ image.image.url }}" >
-        <p><a href="{% url 'locos:image' image.id %}">{{image.image_name}}</a></p>
-      {% empty %}
-        <li>None recorded for this class.</li>
-      {% endfor %}
-    {% endcomment %}
+        </ul>
 
-    {% if loco_class.post_fk.body %}
-      <h2 class="text-primary">Notes</h2>
-      {% autoescape off %}
-      {{loco_class.post_fk.body}}
-      {% endautoescape %}
-    {% endif %}
+        <!-- Tab content -->
+        <div class="tab-content mt-3" id="myTabContent">
 
-    <h2 class="text-primary mt-3">Wikipedia Page</h2>
-    <iframe src='https://en.wikipedia.org/wiki/{{loco_class.slug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
-      " <p>Your browser does not support iframes - open map using 'Open Popup' on left</p> "
-    </iframe>
+          <div class="tab-pane fade show active" id="notes" role="tabpanel" aria-labelledby="notes-tab">
 
+            {% if loco_class.post_fk.body %}
+              <!-- <h2 class="text-primary">Notes</h2> -->
+              {% autoescape off %}
+              {{loco_class.post_fk.body}}
+              {% endautoescape %}
+            {% endif %}
+
+            {% if loco_class.designer_person %}
+              <h2 class="text-primary">Designer</h2>
+              {% if loco_class.designer_person.wikitextslug %}
+              <li><a href="https://en.wikipedia.org//wiki/{{loco_class.designer_person.wikitextslug}}">{{loco_class.designer_person}}</a></li>
+              {% else %}
+              <li>{{loco_class.designer_person}}</li>
+              {% endif %}
+            {% endif %}
+
+            <h2 class="text-primary">Manufacturer(s)</h2>
+            {% for manufacturer in manufacturers %}
+              <li><a href="https://en.wikipedia.org/wiki/{{manufacturer.wikislug}}">{{manufacturer.name}}</a></li>
+            {% empty %}
+              <li>None recorded for this class.</li>
+            {% endfor %}
+
+            <h2 class="text-primary">Owners/Operators</h2>
+            {% for operator in operators %}
+              <li><a href="https://en.wikipedia.org/wiki/{{operator.wikislug}}">{{operator.name}}</a></li>
+            {% empty %}
+              <li>None recorded for this class.</li>
+            {% endfor %} 
+
+            <h2 class="text-primary">Locos in Class</h2>
+            {% for locomotive in locomotives %}
+              {{locomotive.number_as_built}},
+            {% empty %}
+              <li>None recorded for this class.</li>
+            {% endfor %} 
+
+            {% comment %}
+              <h2 class="text-primary">Images</h2>
+              {% for image in images %}
+                <img src="{{ image.image.url }}" >
+                <p><a href="{% url 'locos:image' image.id %}">{{image.image_name}}</a></p>
+              {% empty %}
+                <li>None recorded for this class.</li>
+              {% endfor %}
+            {% endcomment %}
+
+          </div>
+
+          {% if loco_class.slug %}
+            <div class="tab-pane fade" id="wikipedia" role="tabpanel" aria-labelledby="wikipedia-tab">
+              <iframe src='https://en.wikipedia.org/wiki/{{loco_class.slug}}' id="Wikiframe" width="100%" height="700" marginwidth="300">
+                <p>Your browser does not support iframes - open map using 'Open Popup' on left</p>
+              </iframe>
+            </div>
+          {% endif %}
+
+          {% if loco_class.references %}
+            <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
+              {% for reference in references %}
+                {% autoescape off %}
+                {% if reference.url %}
+                  <li><a href={{reference.url}}>{{reference.full_reference}}</a></li>
+                {% else %}
+                  <li>{{reference.full_reference}}</li>
+                {% endif %}
+                {% endautoescape %}
+                {% empty %}
+                  <li>None recorded for this class.</li>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
+  
+      tabLinks.forEach(function(link) {
+        link.addEventListener('shown.bs.tab', function(event) {
+          // Remove active classes from all tab links
+          tabLinks.forEach(function(link) {
+            link.classList.remove('text-primary', 'bg-white');
+            link.classList.add('text-white', 'bg-primary');
+          });
+  
+          // Add active classes to the newly activated tab link
+          event.target.classList.add('text-primary', 'bg-white');
+          event.target.classList.remove('text-white', 'bg-primary');
+        });
+      });
+  
+      // Highlight the initially active tab link
+      var initialActiveTabLink = document.querySelector('.nav-link.active');
+      if (initialActiveTabLink) {
+        initialActiveTabLink.classList.add('text-primary', 'bg-white');
+        initialActiveTabLink.classList.remove('text-white', 'bg-primary');
+      }
+    });
+  </script>
 
 {% endblock content %}
