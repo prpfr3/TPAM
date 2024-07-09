@@ -1,9 +1,0 @@
-<div class="col-md-4">
-  {% for instance in sliced_queryset %}
-    <div class="row mb-1 d-flex align-items-stretch row-height">
-      <div class="col-12 d-flex align-items-left justify-content-left">
-        <div><a href="{% url 'locations:route' instance.slug %}">{{ instance.name }}</a></div>
-      </div>
-    </div>
-  {% endfor %}
-</div>

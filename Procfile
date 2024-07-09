@@ -1,1 +1,0 @@
-web: gunicorn TPAM.wsgi --log-file -
