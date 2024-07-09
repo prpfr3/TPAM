@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 # Required as from Django 4.2
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-GDAL_INSTALLED = True
+GDAL_INSTALLED = False
 
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 INSTALLED_APPS = [
@@ -400,9 +400,7 @@ else:  # DEVELOPMENT SETTINGS
     # If errors Try https://stackoverflow.com/questions/51833501/oserror-in-geodjango-winerror-127-the-specified-procedure-could-not-be-foun#:~:text=%22OSError%20in%20Geodjango%3A%20%5BWinError,of%20Supported%20G%2DDal%20version.
 
     if GDAL_INSTALLED:
-        # GDAL_LIBRARY_PATH = r"C:\\OSGeo4W64\\bin\\gdal301.dll"
-        # GEOS_LIBRARY_PATH = r"C:\\OSGeo4W64\\bin\\geos_c.dll"
-        GDAL_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\gdal308.dll"
+        GDAL_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\gdal309.dll"
         GEOS_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\geos_c.dll"
         INSTALLED_APPS += [
             "django.contrib.gis",

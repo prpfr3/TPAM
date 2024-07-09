@@ -98,20 +98,10 @@ def location(request, location_id):
     WHERE a.id = %s;
     """
     coords = execute_sql(sql, [location_id])
-
-    sql = """ 
-    SELECT ST_AsText(a.geometry), ST_Y(a.geometry), a.name
-    FROM 
-    public."locations_location" AS a
-    WHERE a.id = %s;
-    """
-    geometry = execute_sql(sql, [location_id])
-
     y_coord = coords[0].get("st_y")
     x_coord = coords[0].get("st_x")
-    map_html = folium_map_latlong(y_coord, x_coord, None)
-    # map_html = map._repr_html_()
     location_name = coords[0].get("name")
+    map_html = folium_map_latlong(y_coord, x_coord, None)
 
     nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=16&lat={y_coord}&lon={x_coord}&layers=168&b=5"
 
