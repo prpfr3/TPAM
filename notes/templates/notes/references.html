@@ -1,0 +1,49 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}References{% endblock %}
+{% block content_desc %}{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="row">
+      <div class=" col-md-4 col-lg-4 col-xl-4">
+        <h1 class="text-primary text-center">
+          References            
+          </h1>
+      </div>
+
+      <div class="col-md-8 col-lg-8 col-xl-8">
+        <div class="text-left">
+          <form method='POST' action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>{{ selection_criteria }}</table>
+            <input type="submit" class="btn btn-primary" name="submit_input" value="Submit">
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+      {% for reference in queryset %}
+      <li>
+        <!-- <a href="{% url 'notes:reference' reference.id %}"> -->
+          {{ reference.full_reference }}
+        <!-- </a> -->
+  
+        {% if reference.person_set.all %}
+        
+          People mentioned:-
+          {% for person in reference.person_set.all %}
+            {{ person.name }}
+          {% endfor %}
+        
+        {% endif %}
+      </li>        
+      {% empty %}
+        <h2>No Records Found.</h2>
+      {% endfor %}
+    <br>
+    {% include "mainmenu/pagination.html" with page=references %}
+{% endblock content %}

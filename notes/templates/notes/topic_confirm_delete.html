@@ -1,0 +1,12 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content %}
+<h1>Delete Topic</h1>
+
+<p>Are you sure you want to delete the topic: {{ topic }}?</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="submit" class="btn btn-primary" class="btn btn-primary" value="Yes, delete.">
+</form>
+{% endblock %}

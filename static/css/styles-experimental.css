@@ -1,0 +1,128 @@
+/* ============ experimental elements ======= */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100&family=Indie+Flower&family=Roboto:ital,wght@1,900&display=swap');
+
+.panel {
+  font-family: 'Indie Flower', cursive;
+}
+
+.panel-heading {
+  background-color:rgba(255,0,0,0.5);
+  color:white;
+  top:100px;
+  outline-color:purple;
+  outline-width:2px;
+  outline-style:solid;
+  max-width:500px;
+  margin:auto;
+}
+
+.infobox {
+  font-family: 'Indie Flower', cursive;
+  float:none !important;
+}
+
+p {
+  font-family: 'Indie Flower', cursive;
+  height:100px;
+  width:70%;
+  color : indigo;
+  border : 3px solid black;
+  padding:20px; 
+  margin-top:50px;
+  text-align:justify;
+  text-indent: 30px;
+  line-height:2;
+  word-spacing:2;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-style:italic;
+  font-weight:bold;
+  overflow:scroll;
+}
+
+p::first-letter{
+  color:red;
+  font-size:3em;
+}
+
+p::first-line{
+  background-color: yellow;
+}
+
+p::before{
+  content:'START';
+}
+
+tr {
+  color : indigo
+}
+
+strong {
+  font-size:2.0em;
+  background-color:yellow;
+  text-decoration: double underline;
+  vertical-align: text-top;
+  letter-spacing:5px;
+  text-shadow:5px 2px 5px teal;
+
+}
+
+.mw-headline {
+  color : red
+}
+
+.infobox-header {
+  color : teal
+}
+
+.infobox-above {
+  color : green
+}
+
+.infobox-label {
+  color : orangered
+}
+
+.infobox-data {
+  color:orange
+}
+
+/* ============ experimental elements end ======= */
+
+/* ============ desktop view ============ */
+@media all and (min-width: 992px) {
+  .dropdown-menu li {
+    position: relative;
+  }
+
+  .nav-item .submenu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: -7px;
+  }
+
+  .nav-item .submenu-left {
+    right: 100%;
+    left: auto;
+  }
+
+  .dropdown-menu > li:hover {
+    background-color: #f1f1f1
+  }
+
+    .dropdown-menu > li:hover > .submenu {
+      display: block;
+    }
+}
+/* ============ desktop view .end// ============ */
+
+/* ============ small devices ============ */
+@media (max-width: 991px) {
+  .dropdown-menu .dropdown-menu {
+    margin-left: 0.7rem;
+    margin-right: 0.7rem;
+    margin-bottom: .5rem;
+  }
+}
+/* ============ small devices .end// ============ */

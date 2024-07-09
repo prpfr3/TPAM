@@ -1,0 +1,84 @@
+﻿{% extends "../mainmenu/base.html" %}
+{% block title %}Locomotives{% endblock %}
+{% block content_title %}Locomotives{% endblock %}
+{% block content %}
+
+<div class="container-fluid">
+
+  <div class="row">
+    <div class=" col-md-4 col-lg-4 col-xl-4">
+      <h1 class="text-primary text-center">Locos</h1>
+    </div>
+
+    <div class="col-md-8 col-lg-8 col-xl-8">
+      <div class="text-left"> <!-- Added text-center class -->
+        <form method='POST' action="" enctype="multipart/form-data">
+          <p>
+          {% csrf_token %}
+          {{ selection_criteria }}
+          <input type="submit" class="btn btn-primary" name="submit_input" value="Submit">
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+    <div class="container">
+      <div class="row mb-1">
+        <div class="col-3 d-flex align-items-center justify-content-center" style="font-weight: bold;">Class</div>
+
+        <div class="col-3 d-flex align-items-center justify-content-center" style="font-weight: bold;">Grouping Company</div>
+
+        <div class="col-3 d-flex align-items-center justify-content-center" style="font-weight: bold;">Pre=Grouping Company</div>
+
+        <div class="col-1 d-flex align-items-center justify-content-center" style="font-weight: bold;">No. As Built</div>
+
+        <div class="col-1 d-flex align-items-center justify-content-center" style="font-weight: bold;">Age</div>
+
+
+    </div>
+
+    {% for row in queryset %}
+    <div class="container">
+      <div class="row mb-1 d-flex align-items-stretch row-height">
+        <div class="col-3 d-flex align-items-center justify-content-center">
+          {% if row.brd_class_name %}
+            {{row.brd_class_name}}
+          {% endif %}
+        </div>
+
+        <div class="col-3 d-flex align-items-center justify-content-center">
+          {% if row.company_grouping_code %}
+            {{row.company_grouping_code}}
+          {% endif %}
+        </div>
+
+        <div class="col-3 d-flex align-items-center justify-content-center">
+          {% if row.company_pregrouping_code %}   
+            {{row.company_pregrouping_code}}
+          {% endif %}
+        </div>
+
+        <div class="col-1 d-flex align-items-center justify-content-center">
+          <a href="{% url 'locos:locomotive' row.id %}">
+          {% if row.number_as_built %}
+            {{row.number_as_built}}
+          {% endif %}
+          </a>
+        </div>
+        
+        <div class="col-1 d-flex align-items-center justify-content-center">
+          {% if row.age %}
+            {{row.age}}
+          {% endif %}
+        </div>
+      
+      {% empty %}
+        <div>None Found for the Selection</div>
+      {% endfor %}
+<br>
+    {% include "mainmenu/pagination.html" with page=queryset %}
+  </div>
+{% endblock content %}

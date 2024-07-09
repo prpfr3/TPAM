@@ -1,0 +1,80 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block title %}{{ person }}{% endblock %}
+
+{% block content %}
+
+  <h1 class="text-primary text-center">
+    {{person}}
+    {% if person.wikitextslug %}
+      <a href="https://en.wikipedia.org//wiki/{{person.wikitextslug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i
+      ></a>
+    {% endif %}
+    {% if person.gracetextslug %}
+      <a href="https://gracesguide.co.uk/{{person.gracetextslug}}" class="btn btn-primary">G</i
+      ></a>
+    {% endif %}  
+      </h1>
+
+  <div class="panel panel-default">
+    <div class="panel-body">
+
+      <h2>
+      {% if person.birthdate %}
+        Born:- {{person.birthdate}}
+      {% endif %}
+      {% if person.birthplace %}
+        at {{person.birthplace}}
+      {% endif %}
+      </h2>
+
+      <h2>
+      {% if person.dieddate %}
+        Died:- {{person.dieddate}}
+      {% endif %}
+      {% if person.diedplace %}
+        at {{person.diedplace}}
+      {% endif %}
+      </h2>
+
+      <h2 class="text-primary">References</h2>
+      {% for reference in references %}
+
+      <p>{{reference.full_reference}}</p>
+
+      {% empty %}
+        <p>None recorded</p>
+      {% endfor %}
+    
+      {% if designed_loco_classes %}
+        <h2 class="text-primary">Designed Loco Classes</h2>
+        {% for designed_loco_class in designed_loco_classes %}
+          <p>{{ designed_loco_class }}</p>
+        {% empty %}
+          <p>None recorded</p>
+        {% endfor %}
+      {% endif %}
+
+      <h2 class="text-primary">Roles</h2>
+      {% for person_role in person.personrole_set.all %}
+        <p>{{ person_role.role }} 
+          {% if person_role.date_from %}
+            from {{ person_role.date_from }}
+          {% endif %}
+          {% if person_role.date_to %}
+            to {{ person_role.date_to }}
+          {% endif %}
+        </p>
+      {% empty %}
+        <p>None recorded</p>
+      {% endfor %}
+
+      {% if description_type %}
+        <h2 class="text-primary">{{description_type}}</h2>
+        {% autoescape off %}
+        <p>{{ description }}</p>
+        {% endautoescape %}
+      {% endif %}
+    </div> <!-- panel body -->
+  </div> <!-- panel -->
+{% endblock content %}

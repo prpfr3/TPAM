@@ -1,0 +1,42 @@
+﻿{% extends "../mainmenu/base.html" %} 
+
+{% block title %}Live Train Times{% endblock %} 
+
+{% block content %}
+
+
+    <h1 class="text-primary text-center">
+      Live Time Trains (Ctrl-F to search the list)          
+      </h1>
+
+  <div class="col-md-8 col-lg-8 col-xl-8">
+    <div class="text-left">
+      <form method="POST" action="">
+        {% csrf_token %} {{location_list}}
+        <p></p>
+        <p></p>
+      </form>
+    </div>
+  </div>
+
+
+<!--<div class="bg-light container">-->
+<div>
+  <ul style="list-style-type: none"></ul>
+</div>
+<div class="bd-example">
+  <ul class="list-group">
+    {% for location in locations %}
+    <a
+      class="list-group-item list-group-item-action list-group-item-primary"
+      href="{% url 'rtt:location' location.crscode %}"
+    >
+      <b>{{location.crscode}}</b> - {{location.name}}</a
+    >
+    {% empty %}
+    <li>No Sites have been added yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,18 @@
+﻿{% extends "../mainmenu/base.html" %}
+{% load django_bootstrap5 %}
+{% block title %}{{ location }}{% endblock %}
+{% block content %}
+
+<h1 class="text-primary text-center">{{ location }}</h1>
+<form action="{% url 'rtt:times' location.id %}" method="post">
+
+  {% csrf_token %}
+  {% bootstrap_form form %}
+
+  <a class="btn btn-primary" type="button" href="{% url 'rtt:livefreight' location.crscode %}">Current Freight Movements</a>
+  <a class="btn btn-primary" type="button" href="{% url 'rtt:times' location.crscode %}">Current Timetable</a>
+  <a class="btn btn-primary" type="button" href="{% url 'rtt:livepassenger' location.crscode %}">Current Passenger Movements</a>
+
+</form>
+
+{% endblock content %}

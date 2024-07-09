@@ -1,0 +1,543 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block head %}
+
+    <title>{% block title %}Southern Railway Routes{% endblock title %}</title>
+
+    <style type="text/css">
+
+        body {
+          font-family: 'Roboto', sans-serif;
+          margin: 0;
+        }
+        
+        .background {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: url("https://django-tpam-paulf.s3.eu-west-2.amazonaws.com/media/Map_of_Southern_Railway_1926.jpg") repeat;
+          background-size: cover;
+        }
+        
+        .container {
+          padding: 20px;
+          background-color: rgba(255, 255, 255, 0.8);
+          margin: 20px auto; /* Adjust the margin as needed to ensure the content doesn't cover the map */
+          max-width: 90%; /* Adjust the max-width as needed */
+          overflow-y: auto; /* Enable vertical scrolling */
+          max-height: calc(100% - 20px); /* Adjust the max-height to fit within the viewport */
+        }
+        
+        .container h1 {
+          position: fixed; /* Fix the position of the h1 element */
+          top: 20px; /* Adjust the top position as needed */
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: rgba(255, 255, 255, 0.8);
+          padding: 10px 10px;
+          z-index: 2; /* Ensure the h1 stays above the content */
+        }
+        
+        .row-container {
+          margin-top: 120px; /* Adjust the top margin to create space below the fixed h1 */
+        }
+        </style>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="background position-relative">
+        <div class="container opaque-container">
+            <h1 class="text-center position-relative"><a href="https://en.wikipedia.org/wiki/Southern_Railway_(UK)"> The Southern Railway Constituent Companies and their Routes</a></h1>
+            <div class="row-container position-relative">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h3><a href="https://en.wikipedia.org/wiki/London_and_Brighton_Railway">London and Brighton Railway</a></h3>
+
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Arun_Valley_line/">Arun Valley / Mid Sussex line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Bexhill_West_branch_line/">Bexhill West branch line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Bluebell_Railway/">Bluebell Railway</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Brighton_and_Dyke_Railway/">Brighton and Dyke Railway</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Brighton_Main_Line/">Brighton Main Line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Brighton_to_Portsmouth_line/">Brighton to Portsmouth line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Cliftonville_Curve/">Cliftonville Curve</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Cranleigh_line/">Cranleigh line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Cuckoo_Line/">Cuckoo Line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Deptford_Wharf/">Deptford Wharf</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/East_Coastway_line/">East Coastway line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Epsom_Downs_Branch/">Epsom Downs Branch</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Hayling_Island_branch_line/">Hayling Island branch line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Kemp_Town_branch_line/">Kemp Town branch line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Midhurst_and_Chichester_Line/">Midhurst and Chichester Line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Oxted_line/">Oxted line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Portsmouth_line/">Portsmouth line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Pulborough_Selham_and_Midhurst_Line/">Pulborough Selham and Midhurst Line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Seaford_branch_line/">Seaford branch line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/South_London_line/">South London line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Southsea_Railway/">Southsea Railway</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Steyning_Line/">Steyning Line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Sutton_and_Mole_Valley_lines/">Sutton and Mole Valley lines</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Three_Bridges%E2%80%93Tunbridge_Wells_line/">Three Bridges Tunbridge Wells line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Wealden_Line/">Wealden Line</a>
+                            </h5>
+                        </div>
+                        
+                        <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                            <a href="/locations/route/Wimbledon_West_Croydon_line/">Wimbledon–West Croydon line</a>
+                            </h5>
+                        </div>
+                    
+                    </div>
+                    <div class="col-md-4">
+                        <h3><a href="https://en.wikipedia.org/wiki/South_Eastern_and_Chatham_Railway">South Eastern and Chatham Railway</a></h3>
+                        
+                        <!-- Content for South Eastern and Chatham Railway -->
+                    
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Chatham_Main_Line/">Chatham Main Line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Elham_Valley_Railway/">Elham Valley Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Gravesend_West_Line/">Gravesend West Line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Hawkhurst_branch_line/">Hawkhurst branch line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Hundred_of_Hoo_Railway/">Hundred of Hoo Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Kent_Coast_line/">Kent Coast line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Maidstone_line/">Maidstone line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/North_Kent_Line/">North Kent Line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Sandgate_Branch/">Sandgate Branch</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Sheerness_line/">Sheerness line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Westerham_Valley_branch_line/">Westerham Valley branch line</a>
+                            </h5>
+                            </div>   
+                        
+                    </div>
+                    <div class="col-md-4">
+                        <h3><a href="https://en.wikipedia.org/wiki/London_and_South_Western_Railway"> London and South Western Railway</a></h3>
+                        
+                        <!-- Content for London and South Western Railway -->
+                    
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Aldershot_and_Alton_lines/">Aldershot and Alton lines</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Alton_line/">Alton line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Ascot_Ash_Vale_line/">Ascot–Ash Vale line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Avocet_Line/">Avocet Line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Basingstoke_and_Alton_Light_Railway/">Basingstoke and Alton Light Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Bodmin_and_Wadebridge_Railway/">Bodmin and Wadebridge Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Bordon_Light_Railway/">Bordon Light Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Chertsey_branch_line/">Chertsey branch line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/East_Cornwall_Mineral_Railway/">East Cornwall Mineral Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Eastleigh_Fareham_line/">Eastleigh–Fareham line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Eastleigh_Romsey_line/">Eastleigh–Romsey line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Eastleigh_to_Salisbury_line/">Eastleigh to Salisbury line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Exeter_to_Plymouth_railway_of_the_LSWR/">Exeter to Plymouth railway of the LSWR</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Fawley_branch_line/">Fawley branch line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Fullerton_to_Hurstbourne_Line/">Fullerton to Hurstbourne Line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Funtley_Deviation/">Funtley Deviation</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Gosport_and_Cosham_lines/">Gosport and Cosham lines</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Hampton_Court_branch_line/">Hampton Court branch line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Ilfracombe_branch_line/">Ilfracombe branch line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Lee_on_Solent_Line/">Lee-on-Solent Line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/London_Necropolis_Railway/">London Necropolis Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Lyme_Regis_branch_line/">Lyme Regis branch line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Meon_Valley_Railway/">Meon Valley Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/New_Guildford_line/">New Guildford line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/North_Cornwall_Railway/">North Cornwall Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Okehampton_Bude_line/">Okehampton–Bude line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Petersfield_to_Midhurst_Line/">Petersfield to Midhurst Line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Portsmouth_Direct_line/">Portsmouth Direct line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Ringwood_Christchurch_and_Bournemouth_Railway/">Ringwood, Christchurch and Bournemouth Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Seaton_branch_line/">Seaton branch line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Shepperton_branch_line/">Shepperton branch line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Sidmouth_Railway/">Sidmouth Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/South_West_Main_Line/">South West Main Line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Southampton_Fareham_line/">Southampton–Fareham line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Southampton_and_Dorchester_Railway/">Southampton and Dorchester Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Southsea_Railway/">Southsea Railway</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Sprat_and_Winkle_Line/">Sprat and Winkle Line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Staines_Windsor_line/">Staines–Windsor line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Stokes_Bay_line/">Stokes Bay line</a>
+                            </h5>
+                            </div>
+                            
+                            <div class="row mb-1 d-flex align-items-stretch row-height">
+                            <h5 class="col-12">
+                                <a href="/locations/route/Sutton_and_Mole_Valley_lines/">Sutton and Mole Valley lines</a>
+                            </h5>
+                            </div>
+                            
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "../mainmenu/base.html" %}
+
+{% block head %}
+  <style>
+    .box {
+        padding: 10px;
+        width: 600px;
+        margin: 5px 0;
+        border: 1px solid #ddd;
+    }
+
+    .box span {
+        width: 50px;
+        height: 20px;
+        border: 1px solid red;
+        padding: 2px;
+        border-radius: 10px;
+        color: red;
+        margin-left: 20px;
+    }
+
+    .box span:hover {
+        cursor: pointer;
+        background-color: cornsilk;
+        color: black;
+    }
+
+    .confirmed {
+        color: green;
+    }
+
+    .notConfirmed {
+        color: red;
+    }
+  </style>
+{% endblock head %}
+
+{% block header %}{{map.header.render|safe}}{% endblock header %}
+{% block content_title %}{{title}}{% endblock %}
+{% block content %}
+  {% if elr_geojson %}
+
+    <span class="spinner-border spinner-border-sm text-center" id="spinner" role="status" style="visibility: visible"></span>  
+    <div class="output"></div>
+
+    <script>
+      // Note that the highest level of the Geojson has already been removed in 
+      // the Python Django view and just the first element of the second level array
+      // has been passed through here to elr_geojson
+
+      window.addEventListener('DOMContentLoaded', () => {//Same thing as jquery document.ready
+
+        const output = document.querySelector('.output');
+
+        var elr_geojson = {{ elr_geojson|safe }};
+
+        // Loop through the features array
+        for (var i = 0; i < elr_geojson.length; i++) {
+          var feature = elr_geojson[i];
+          var properties = feature.properties;
+          var geometry = feature.geometry;
+
+          const h2 = document.createElement('h2');
+          h2.classList.add('text-primary');
+          h2.innerHTML = `${feature.type} ${i + 1}: ${properties.type} ${properties.id}`;
+          output.append(h2);
+
+          if (properties && properties.tags) {
+            var tags = properties.tags;
+            const h3 = document.createElement('h3');
+            h3.classList.add('text-primary');
+            h3.innerHTML = `Tags`;
+            output.append(h3);
+            for (var key in tags) {
+              if (tags.hasOwnProperty(key)) {
+                const div = document.createElement('div');
+                div.classList.add('text-primary','box');
+                div.innerHTML = `${key} = ${tags[key]}`;
+                output.append(div);                
+              }
+            }
+          } else {
+            console.log('No geometry information available for this feature.');
+          }
+
+          const h3 = document.createElement('h3');
+            h3.classList.add('text-primary');
+            h3.innerHTML = `Geometry Coordinates`;
+            output.append(h3);
+
+          // If there are co-ordinates list them out
+          if (geometry.type == "LineString" && geometry.coordinates) {
+            var coordinates = geometry.coordinates;
+            for (var j = 0; j < coordinates.length; j++) {
+              const div = document.createElement('div');
+              div.classList.add('text-primary','box');
+              div.innerHTML = `node ${properties.nodes[j]} @ ${coordinates[j][0]} lon. ${coordinates[j][1]} lat.`;
+              output.append(div);   
+            }
+          } else if (geometry.type == "Point" && geometry.coordinates) {
+            var coordinates = geometry.coordinates;
+            const div = document.createElement('div');
+            div.classList.add('text-primary','box');
+            div.innerHTML = `${coordinates[0]} lon. ${coordinates[1]} lat.`;
+            output.append(div);   
+          } else {
+            console.log('No geometry information available for this feature.');
+          }
+        }
+        
+      });
+      let spinner = document.getElementById("spinner");
+      spinner.style.visibility = 'hidden'; //'hidden'
+    </script>
+  {% endif %}
+{% endblock %}

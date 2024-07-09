@@ -1,0 +1,82 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block head %}
+  <style>
+    .row-height {
+        min-height: 38px; /* Adjust the height as needed */
+    }
+  </style>
+{% endblock %}
+
+{% block title %}Motive Power Classes{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class=" col-md-4 col-lg-4 col-xl-4">
+        <h1 class="text-primary text-center">Loco Classes</h1>
+      </div>
+
+      <div class="col-md-8 col-lg-8 col-xl-8">
+        <div class="text-left"> <!-- Added text-center class -->
+          <form method='POST' action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ selection_criteria }}
+            <input type="submit" class="btn btn-primary" name="submit_input" value="Submit">
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12 col-lg-12 col-xl-12">
+
+        {% with queryset|slice:":13" as first_third %}
+        {% with queryset|slice:"13:26" as second_third %}
+        {% with queryset|slice:"26:" as third_third %}
+
+        <div class="container">
+        
+          <div class="row">
+
+            <div class="col-md-4">
+              {% for row in first_third %}
+                <div class="row mb-1 d-flex align-items-stretch row-height">
+                  <div class="col-12 d-flex align-items-left justify-content-left">
+                    <a href='{% url "locos:loco_class" row.slug %}'>{{row.wikiname}}</a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-4">
+              {% for row in second_third %}
+                <div class="row mb-1 d-flex align-items-stretch row-height">
+                  <div class="col-12 d-flex align-items-left justify-content-left">
+                    <a href='{% url "locos:loco_class" row.slug %}'>{{row.wikiname}}</a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-4">
+              {% for row in third_third %}
+                <div class="row mb-1 d-flex align-items-stretch row-height">
+                  <div class="col-12 d-flex align-items-left justify-content-left">
+                    <a href='{% url "locos:loco_class" row.slug %}'>{{row.wikiname}}</a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% include "mainmenu/pagination.html" with page=queryset %} 
+        </div>
+      </div><!--- End of Content Columns -->
+    </div><!-- End of Content Rows -->
+  </div><!-- End of Container -->
+{% endblock content %}

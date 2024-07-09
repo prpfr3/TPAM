@@ -1,0 +1,28 @@
+{% extends "../mainmenu/base.html" %}
+{% block title %}Region Select{% endblock %}
+{% block header %}{% load django_bootstrap5 %}{% endblock %}
+{% block content %}
+
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class=" col-md-4 col-lg-4 col-xl-4">
+        <h1 class="text-primary">
+          Regional Railmap             
+          </h1>
+      </div>
+
+      <div class="col-md-8 col-lg-8 col-xl-8">
+        <div class="text-left">
+          <form method='POST' action="">
+            {% csrf_token %}
+            {{region_form}}
+            <p></p><p></p>
+            {% bootstrap_button "Select" button_type="submit" button_class="btn-primary" %}
+        </form>
+        </div>
+      </div>
+    </div>
+  </div><!-- End of Container -->
+
+{% endblock content %}

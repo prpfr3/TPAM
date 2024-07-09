@@ -1,0 +1,42 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block title %}Service {{ service.service }}{% endblock %}
+
+{% block content %}
+
+<h1 class="text-primary text-center">Service {{ service.service }}</h1>
+<h2 class="text-primary text-center">{{service.train_uid}} @  {{ service.date}} Time: {{service.time_of_day }}
+  from {{service.origin_name}} to {{service.destination_name}}</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Station</th>
+      <th scope="col">Plan Arr.</th>
+      <th scope="col">Plan Dep.</th>
+      <th scope="col">Plan Pass</th>
+      <th scope="col">Status</th>
+      <th scope="col">Est Arr.</th>
+      <th scope="col">Est Dep.</th>
+      <th scope="col">Est Pass</th>
+    </tr>
+  </thead>
+    <tbody>
+      {% for s in service.stops %}
+      <tr>
+          <td>{{s.station_name}}</td>
+          <td>{{s.aimed_arrival_time }} </td>
+          <td>{{s.aimed_departure_time }}</td>
+          <td>{{s.aimed_pass_time }}</td>
+          <td>{{s.status}}</td>
+          <td>{{s.expected_arrival_time }}</td>
+          <td>{{s.expected_departure_time }}</td>
+          <td>{{s.expected_pass_time }}</td>
+      {% empty %}
+          <h3>No Service Details Available for the Service</h3>
+      {% endfor %}
+      </tr>
+    </tbody>
+</table>
+
+{% endblock content %}

@@ -1,0 +1,16 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}Bookmark an image{% endblock %}
+{% block content_desc %}Bookmark a military vehicle image from the web:{% endblock %}
+
+{% block content %}
+
+<img src="{{ request.GET.url }}" class="image-preview">
+<form action="." method="post">
+  {% csrf_token %}
+  {% bootstrap_form form %}
+
+  <input type="submit" class="btn btn-primary" value="Bookmark it!">
+</form>
+
+{% endblock content %}

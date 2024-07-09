@@ -1,0 +1,86 @@
+{% extends "../mainmenu/base.html" %}
+
+{% block content_title %}Military Vehicle Classes{% endblock %}
+{% block content_desc %}Based on <a href="https://en.wikipedia.org/wiki/List_of_military_vehicles">https://en.wikipedia.org/wiki/List_of_military_vehicles</a>{% endblock %}
+
+{% block content %}
+
+  <form method='POST' action="" enctype="multipart/form-data">
+    <p>
+    {% csrf_token %}
+    {{ selection_criteria }}
+    <input type="submit" class="btn btn-primary" name="submit_input" value="Submit">
+    </p>
+  </form>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name/Wikipedia Page (Where Available)</th>
+        <th scope="col">Description</th>
+        <th scope="col">Favorites</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for military_vehicle_class in military_vehicle_classes %}
+      <tr><h4>
+          <td><a href="https://en.wikipedia.org/wiki/{{military_vehicle_class.wikislug}}"> {{ military_vehicle_class.mvclass }}</a></td>
+          <td>{{ military_vehicle_class.description}}</td>
+          <td>
+
+            {% if user.is_authenticated %}
+            <!-- Display Orange Star if it IS a favorite -->
+              <script language="Javascript">
+                var urlname = "{% url 'mvs:mvclass_unfavorite' military_vehicle_class.id %}";
+                var mvsid = "{{ military_vehicle_class.id }}";              
+              </script>
+
+              <a href="#" onclick= "
+                            favPost(urlname, mvsid);
+                            return false;"
+              
+              {% if military_vehicle_class.id not in favorites %} style="display: none;" {% endif %}
+                  id="favorite_star_{{military_vehicle_class.id}}">
+                  <span class="fa-stack" style="vertical-align: middle;">
+                  <i class="fa fa-star fa-stack-1x" style="color: orange;"></i>
+                  <i class="fa fa-star-o fa-stack-1x"></i>
+                  </span>
+              </a>
+
+              <!-- Display empty star if NOT a favorite -->
+              <script language="Javascript">
+                var urlname = "{% url 'mvs:mvclass_favorite' military_vehicle_class.id %}";
+                var mvsid = "{{ military_vehicle_class.id }}";
+              </script>
+              <a href="#" onclick= "favPost(urlname, mvsid );return false;"
+                  {% if military_vehicle_class.id in favorites %} style="display: none;" {% endif %}
+                  id="unfavorite_star_{{military_vehicle_class.id}}">
+                  <span class="fa-stack" style="vertical-align: middle;">
+                  <i class="fa fa-star fa-stack-1x" style="display: none; color: orange;"></i>
+                  <i class="fa fa-star-o fa-stack-1x"></i>
+                  </span>
+              </a>
+            {% endif %}   
+          </td>
+
+          {% empty %}
+            <h2>No classes have been loaded yet.</h2>
+          {% endfor %}
+        </h4></tr>
+    </tbody>
+  </table>
+
+  <script>
+    function favPost(url, military_vehicle_class_id) {
+        console.log('Requesting post', url);
+        $.post(url, {},  function(rowz){
+            console.log(url, 'finished');
+            $("#unfavorite_star_"+military_vehicle_class_id).toggle();
+            $("#favorite_star_"+military_vehicle_class_id).toggle();
+        }).fail(function(xhr) {
+            alert('Url failed with '+xhr.status+' '+url);
+        });
+    }
+    </script>
+
+{% endblock content %}

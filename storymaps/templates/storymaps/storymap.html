@@ -1,0 +1,39 @@
+{% extends 'mainmenu/base.html' %}
+
+{% block content %}
+<!--- Created using Knightlab's Storymap.
+
+For documentation:- https://storymap.knightlab.com/advanced/
+For Github JSON example:- https://github.com/NUKnightLab/StoryMapJS/blob/master/storymap/static/demo/demo.json
+
+The StoryMap container can go anywhere on the page. Specify a width and height. 
+The width can be absolute (in pixels) or relative (in percentage) but the height must be an absolute value.
+CSS can be used for width and height specification if preferred 
+-->
+<head>
+    <div id="mapdiv" style="width: 100%; height: 600px;"></div>
+
+    <!-- Script tags should be placed before the closing body tag. -->
+    <link rel="stylesheet" href="https://cdn.knightlab.com/libs/storymapjs/latest/css/storymap.css">
+    <script type="text/javascript" src="https://cdn.knightlab.com/libs/storymapjs/latest/js/storymap-min.js"></script>
+</head>
+
+<body>
+    <script>
+
+        // storymap_data can be an URL or a Javascript object
+        // var storymap_data = '/static/storymap.json';
+        // console.log('{{ storymap_json | escapejs }}')
+        var storymap_data = JSON.parse('{{ storymap_json | escapejs }}');
+
+        // certain settings must be passed within a separate options object
+        var storymap_options = {};
+        
+        var storymap = new KLStoryMap.StoryMap('mapdiv', storymap_data, storymap_options);
+        window.onresize = function(event) {
+            storymap.updateDisplay(); // this isn't automatic
+        }
+    </script>
+</body>
+</html>
+{% endblock content %}

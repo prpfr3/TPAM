@@ -1,0 +1,27 @@
+﻿<!doctype html>
+{% extends "../mainmenu/base.html" %}
+
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+
+{% block head %}
+  {{ form.media }}
+{% endblock %}
+
+{% block content %}
+  {{ form.media }}
+  <form action="" method="post">
+    
+    {% csrf_token %}
+
+    {% bootstrap_form form %}
+
+    <input type="submit" class="btn btn-primary" value="Submit">
+    <input type="submit" class="btn btn-primary" value="Cancel" onclick="window.location.href='{% url 'notes:topics' %}';return false;">
+  </form>
+
+{% endblock %}

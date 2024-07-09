@@ -1,0 +1,12 @@
+﻿{% extends "../mainmenu/base.html" %}
+{% load crispy_forms_tags %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <input type="submit" class="btn btn-primary" value="Submit">
+    <input type="submit" class="btn btn-primary" value="Cancel" onclick="window.location.href='{% url ''notes:topics'' %}';return false;">
+  </form>
+{% endblock %}

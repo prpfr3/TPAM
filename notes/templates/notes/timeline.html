@@ -1,0 +1,61 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% block head %}
+
+  <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css">
+
+  <!-- Overrides for timeline -->
+  <style type="text/css">
+    #visualization {
+      border: 5px solid rgb(16, 65, 3);
+      height: 1600px; /* Adjust the height as needed */
+      /* overflow-y: scroll; Enable vertical scrolling */
+    }
+    .vis-item {
+      border-color: rgb(16, 65, 3);
+      background-color: rgb(99, 230, 101);
+      font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+    }
+  </style>
+
+{% endblock head %}
+
+{% block title %}Timeline{% endblock %}
+
+{% block content %}
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-lg-12">
+
+        {% if timeline_json %}
+        <h1 class="'text-primary text-center">Timeline</h1>
+          <div id="visualization">
+            <script type="text/javascript">
+              var container = document.getElementById('visualization');
+              var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
+              var items = new vis.DataSet(jsonObject);
+              var jsonObjectGroups = JSON.parse('{{ groups | safe | escapejs }}');
+              var groups = new vis.DataSet(jsonObjectGroups);
+              var options = {
+                orientation: {
+                  axis: 'top', // Keep the timeline axis at the top
+                  item: 'bottom' // Keep the items scrolling beneath the timeline
+                },
+                verticalScroll: true, // Enable vertical scrolling
+                maxHeight: 1600, // Maximum height of the timeline container
+                type: 'point',
+                showMajorLabels: false,
+              };
+              var timeline = new vis.Timeline(container, items, groups, options);
+            </script>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
