@@ -36,8 +36,6 @@
     <div class="row justify-content-center">
       <div class="col-md-12 col-lg-12">
 
-
-
         <!-- Tab navigation -->
         <ul class="nav nav-tabs" id="myTab" role="tablist">
 
@@ -75,10 +73,29 @@
             </li>
           {% endif %}
 
-          <!-- Tab turned off as map incorporated in location details -->
+          {% if map %}
             <li class="nav-item">
-              <a class="nav-link text-white bg-primary" href="{{nls_url}}" role="tab">NLS Map</a>
+              <a class="nav-link text-white bg-primary" href="{{nls_url}}"  target="_blank" rel="noopener noreferrer" role="tab">NLS Map 1900 Series</a>
             </li>
+          {% endif %}
+
+          {% if map %}
+            <li class="nav-item">
+              <a class="nav-link text-white bg-primary" href="{{nls_url_1944_1973}}"  target="_blank" rel="noopener noreferrer" role="tab">NLS Map 1944-1973 Series</a>
+            </li>
+          {% endif %}
+
+          {% if map %}
+            <li class="nav-item">
+              <a class="nav-link text-white bg-primary" id="nls1-tab" data-bs-toggle="tab" href="#nls1" role="tab" aria-controls="wikipedia" aria-selected="false">NLS Map 1900 Series</a>
+            </li>
+          {% endif %}
+
+          {% if map %}
+            <li class="nav-item">
+              <a class="nav-link text-white bg-primary" id="nls2-tab" data-bs-toggle="tab" href="#nls2" role="tab" aria-controls="wikipedia" aria-selected="false">NLS Map 1944-1973 Series</a>
+            </li>
+          {% endif %}
 
         </ul>
 
@@ -113,7 +130,7 @@
                   {% if location.crscode %}
                     <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
                   {% endif %}
-                  {% if location.geometry.x %}
+                  {% if location.geometry %}
                     <tr><td width="35%"><strong>Longitude/Latitude:</strong></td><td>{{location.geometry.x|floatformat:4}} {{location.geometry.y|floatformat:4}}</td></tr>
                   {% endif %}
                   {% if location.easting %}
@@ -151,12 +168,17 @@
                 {% endif %}
               </div>
 
-              {% if location.custom_post.body %}
-              <h1 class="text-primary">Notes</h1>
-              {% autoescape off %}
-              {{location.custom_post.body}}
-              {% endautoescape %}
-            {% endif %}
+              {% if posts %}
+                <div class="tab-pane fade show active mt-4" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+                  {% for post in posts %}
+                    <h2>{{ post.title}}</h2>
+                    {% autoescape off %}
+                    {{ post.body }}
+                    {% endautoescape %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+
             </div>
 
           {% if location.wikislug %}
@@ -183,44 +205,74 @@
           {% endif %}
 
           {% if references %}
-            <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
+            <div class="tab-pane fade mt-4" id="references" role="tabpanel" aria-labelledby="references-tab">
               <ul>
                 {% for reference in references %}
-                  <li>{{reference.full_reference}}</li>
+                
+                  {% if '/ukla/' in reference.url %}
+                    <h3><a href="https://www.legislation.gov.uk{{reference.url}}">{{ reference.full_reference }}</a></h3>
+                  {% elif reference.url %}
+                    <h3><a href="{{reference.url}}">{{ reference.full_reference }}</a></h3>
+                  {% else %}
+                    <h3>{{reference.full_reference}}</h3>
+                  {% endif %}
+
+                  {% if reference.description %}
+                    {{reference.description}}
+                  {% endif %}
+
                 {% endfor %}
               </ul>
             </div>
           {% endif %}
+
+          {% if map %}
+            <div class="tab-pane fade" id="nls1" role="tabpanel" aria-labelledby="nls1-tab">
+              <iframe src="{{nls_url}}" id="Wikiframe" width="100%" height="700" marginwidth="300">
+                <p>Your browser does not support iframes - open map using 'Open Popup' on left</p>
+              </iframe>
+            </div>
+          {% endif %}
+
+          {% if map %}
+            <div class="tab-pane fade" id="nls2" role="tabpanel" aria-labelledby="nls2-tab">
+              <iframe src="{{nls_url_1944_1973}}" id="Wikiframe" width="100%" height="700" marginwidth="300">
+                <p>Your browser does not support iframes - open map using 'Open Popup' on left</p>
+              </iframe>
+            </div>
+          {% endif %}
+
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var tabLinks = document.querySelectorAll('a[data-bs-toggle="tab"]');
-  
+document.addEventListener('DOMContentLoaded', function() {
+  // Select only links meant for tab navigation
+  var tabLinks = document.querySelectorAll('.nav-tabs a[data-bs-toggle="tab"]');
+
+  tabLinks.forEach(function(link) {
+    link.addEventListener('shown.bs.tab', function(event) {
+      // Remove active classes from all tab links
       tabLinks.forEach(function(link) {
-        link.addEventListener('shown.bs.tab', function(event) {
-          // Remove active classes from all tab links
-          tabLinks.forEach(function(link) {
-            link.classList.remove('text-primary', 'bg-white');
-            link.classList.add('text-white', 'bg-primary');
-          });
-  
-          // Add active classes to the newly activated tab link
-          event.target.classList.add('text-primary', 'bg-white');
-          event.target.classList.remove('text-white', 'bg-primary');
-        });
+        link.classList.remove('text-primary', 'bg-white');
+        link.classList.add('text-white', 'bg-primary');
       });
-  
-      // Highlight the initially active tab link
-      var initialActiveTabLink = document.querySelector('.nav-link.active');
-      if (initialActiveTabLink) {
-        initialActiveTabLink.classList.add('text-primary', 'bg-white');
-        initialActiveTabLink.classList.remove('text-white', 'bg-primary');
-      }
+
+      // Add active classes to the newly activated tab link
+      event.target.classList.add('text-primary', 'bg-white');
+      event.target.classList.remove('text-white', 'bg-primary');
     });
+  });
+
+  // Highlight the initially active tab link
+  var initialActiveTabLink = document.querySelector('.nav-tabs .nav-link.active');
+  if (initialActiveTabLink) {
+    initialActiveTabLink.classList.add('text-primary', 'bg-white');
+    initialActiveTabLink.classList.remove('text-white', 'bg-primary');
+  }
+});
   </script>
 
 {% endblock %}

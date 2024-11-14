@@ -1,0 +1,34 @@
+    /* Applies to all input fields, select dropdowns, and textareas */
+    input, select, textarea {
+      border-radius: 8px; /* Adjust radius for desired roundness */
+      padding: 2px;
+      padding-left: 4px;
+      border: 1px solid #ccc; /* Optional: customize border color */
+      outline: none; /* Removes default outline */
+  }
+
+  /* Optional: add focus style */
+  input:focus, select:focus, textarea:focus {
+      border-color: #007bff; /* Border color on focus */
+      box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Optional shadow on focus */
+  }
+  
+  .single-selection-container {
+    display: flex;
+    align-items: center;
+    gap: 1px; /* Space between the field and button */
+    }
+
+  /* Optional: Ensure the button doesn't take too much space */
+  .single-selection-container .btn {
+    white-space: nowrap; /* Prevents the button text from wrapping */
+      }
+
+  .single-selection-container input, 
+    .single-selection-container select {
+        flex-grow: 1; /* Allows the field to take remaining space */
+    }
+
+  .designer-person-select {
+      width: 100px !important;
+  }

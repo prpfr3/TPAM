@@ -11,12 +11,14 @@ class CompanyAdmin(admin.ModelAdmin):
         "code",
     ]
     search_fields = ["name", "code"]
-    ordering = ("name",)
-    raw_id_fields = [
-        "post_fk",
-    ]
+    # ordering = ("name",)
 
-    filter_horizontal = ["company_category_fk"]
+    formfield_overrides = {
+        models.TextField: {"widget": TinyMCE()},
+    }
+
+    filter_horizontal = ["references", "posts", "company_categories"]
+    raw_id_fields = ["successor_company"]
 
 
 class ManufacturerAdmin(admin.ModelAdmin):
@@ -33,9 +35,7 @@ class ManufacturerAdmin(admin.ModelAdmin):
     ]
     search_fields = ["name"]
     ordering = ["name"]
-    raw_id_fields = [
-        "post_fk",
-    ]
+    filter_horizontal = ["posts"]
 
 
 class ClassManufacturerAdmin(admin.ModelAdmin):

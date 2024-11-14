@@ -17,8 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 # Required as from Django 4.2
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-GDAL_INSTALLED = False
-
+GDAL_INSTALLED = True
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 INSTALLED_APPS = [
     # "djangocms_admin_style",  # django-cms requirement. Must be before django.contrib.admin
@@ -83,7 +82,6 @@ INSTALLED_APPS = [
     "rtt",
     "storages",
     "storymaps",
-    "timelines",
     "TPAM",
     # "ukheritage", "Commented out to remove GDAL dependencies"
     "users",
@@ -402,6 +400,7 @@ else:  # DEVELOPMENT SETTINGS
     if GDAL_INSTALLED:
         GDAL_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\gdal309.dll"
         GEOS_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\geos_c.dll"
+        # PROJ_LIB = r"C:\\OSGeo4W\\share\\proj"
         INSTALLED_APPS += [
             "django.contrib.gis",
         ]

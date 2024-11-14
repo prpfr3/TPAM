@@ -1,92 +1,106 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
+from django.utils.safestring import mark_safe
 
 from .models import *
 
 
-class SingleSelectWidget(forms.Select):
-    def __init__(self, attrs=None, choices=()):
-        super().__init__(attrs, choices)
-        self.attrs["size"] = 1  # Display only one option
+class Select2Widget(forms.Select):
+    class Media:
+        css = {
+            "all": (
+                "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css",
+            )
+        }
+        js = (
+            "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js",
+        )
 
 
 class LocoClassSelectionForm(forms.ModelForm):
-    name = forms.CharField(
-        required=False, widget=forms.TextInput(attrs={"class": "search-input"})
-    )
-
     designer_person = forms.ModelChoiceField(
         queryset=Person.objects.all(),
         required=False,
-        widget=forms.Select(attrs={"class": "search-select2"}),
+        widget=Select2Widget(
+            attrs={"class": "search-select2", "style": "width: 200px;"}
+        ),
     )
 
     owner_operators = forms.ModelChoiceField(
-        queryset=Company.objects.all(),
+        queryset=Company.objects.order_by("name"),
         required=False,
-        widget=forms.Select(attrs={"class": "search-select2"}),
+        widget=Select2Widget(
+            attrs={"class": "search-select2", "style": "width: 200px;"}
+        ),
     )
 
     manufacturers = forms.ModelChoiceField(
         queryset=Manufacturer.objects.all(),
         required=False,
-        widget=forms.Select(attrs={"class": "search-select2"}),
+        widget=Select2Widget(
+            attrs={"class": "search-select2", "style": "width: 200px;"}
+        ),
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["name"].label = "Class Name"
-
-    def clean_name(self):
-        if name := self.cleaned_data.get("name"):
-            results = LocoClassList.objects.filter(name__icontains=name)
-            return LocoClassList.objects.filter(name__icontains=name)
-        return LocoClassList.objects.all()
+    wheel_arrangement = forms.ModelChoiceField(
+        queryset=WheelArrangement.objects.all(),
+        required=False,
+        widget=Select2Widget(
+            attrs={"class": "search-select2", "style": "width: 200px;"}
+        ),
+    )
 
     class Meta:
         model = LocoClass
         fields = (
-            # "wheel_body_type", # Not fully populated as yet
-            "wheel_arrangement",
+            "name",
             "designer_person",
             "owner_operators",
             "manufacturers",
+            "wheel_arrangement",
+            "power_type",
         )
-        widgets = {
-            # "wheel_body_type": forms.Select(attrs={"class": "search-select2"}), # Not fully populated as yet
-            "wheel_arrangement": forms.Select(attrs={"class": "search-select2"}),
-            "designer_person": forms.Select(attrs={"class": "search-select2"}),
-            "owner_operators": forms.Select(attrs={"class": "search-select2"}),
-            "manufacturers": forms.Select(attrs={"class": "search-select2"}),
-        }
+
         labels = {
-            # "wheel_body_type": "Type", # Not fully populated as yet
-            "wheel_arrangement": "Wheel Arrangement",
+            "name": "Name",
             "designer_person": "Designer",
             "owner_operators": "Owner Operator",
             "manufacturers": "Manufacturer",
+            "wheel_arrangement": "Wheel Arrangements",
+            "power_type": "Traction Type (Steam, Diesel, Electric)",
         }
 
 
 class LocomotiveSelectionForm(forms.ModelForm):
     class Meta:
         model = Locomotive
-        fields = ("identifier",)
+        fields = ("number_as_built",)
+
+        widgets = {
+            "number_as_built": forms.TextInput(
+                attrs={
+                    "style": "width: 100px",
+                }
+            )
+        }
 
 
 class LocomotiveImageForm(forms.ModelForm):
-    class Meta:
-        model = Reference
-        fields = ("full_reference",)
+    heritage_site = forms.ModelChoiceField(
+        queryset=HeritageSite.objects.order_by("name"),
+        required=False,
+        widget=Select2Widget(
+            attrs={"class": "search-select2", "style": "width: 200px;"}
+        ),
+    )
 
-
-class LocoClassForm(forms.ModelForm):
     class Meta:
-        model = LocoClass
-        fields = ["wikiname", "power_class", "wheel_body_type"]
-        labels = {
-            "wikiname": "class",
-            "power_class": "power class",
-            "wheel_body_type": "wheel configuration",
-        }
-        widgets = {"text": forms.Textarea(attrs={"cols": 80})}
+        model = Image
+        fields = ("image_name", "heritage_site")
+        labels = {"image_name": "Title", "heritage_site": "Heritage Site"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["image_name"].required = (
+            False  # For this form override the model mandatory status
+        )

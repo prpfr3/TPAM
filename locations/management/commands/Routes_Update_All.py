@@ -1,5 +1,6 @@
 from django.core.management import BaseCommand
-from notes.models import Reference
+from locations.models import RouteLocation, RouteMap
+import urllib.parse
 
 
 class Command(BaseCommand):
@@ -9,11 +10,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         import os
 
-        queryset = Reference.objects.all()
+        queryset = RouteMap.objects.all()
 
         for entry in queryset:
             try:
+                old_entry_name = entry.name
+                entry.name = urllib.parse.unquote(entry.name)
                 entry.save()
+                # print(old_entry_name, entry.name)
             except Exception as e:
-                print(f"Could not save location due to error: {e}")
+                print(f"Could not save routelocation due to error: {e}")
                 continue

@@ -1,0 +1,46 @@
+.tl-text .tl-headline-date, .tl-text h3.tl-headline-date {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 45px;
+  line-height: 45px;
+  font-weight: bold;
+  margin: 0 0 3px 0;
+  color: #415848;
+}
+
+.tl-timenav {
+  background-color: #399864fe;
+}
+
+.tl-menubar {
+  background-color: #399864fe;
+}
+
+.tl-timemarker.tl-timemarker-active .tl-timemarker-content-container .tl-timemarker-content .tl-timemarker-text h2.tl-headline {
+  color: #415848;
+}
+
+.tl-timeaxis-background {
+  background-color: #415848;
+}
+
+
+.tl-slide .tl-slide-content-container {
+  background-color: #95e3ac;
+}
+/* 
+.tl-timemarker .tl-timemarker-content-container .tl-timemarker-content {
+  background-color: #95e3ac;
+} */
+
+.tl-timemarker .tl-timemarker-content-container .tl-timemarker-content .tl-timemarker-text h2.tl-headline, .tl-timemarker .tl-timemarker-content-container .tl-timemarker-content .tl-timemarker-text h2.tl-headline p {
+  color: #95e3ac;
+}
+
+.tl-slidenav-previous .tl-slidenav-content-container .tl-slidenav-icon, .tl-slidenav-next .tl-slidenav-content-container .tl-slidenav-icon, .tl-slidenav-previous .tl-slidenav-content-container .tl-slidenav-title, .tl-slidenav-next .tl-slidenav-content-container .tl-slidenav-title, .tl-slidenav-previous .tl-slidenav-content-container .tl-slidenav-description, .tl-slidenav-next .tl-slidenav-content-container .tl-slidenav-description {
+  color: #399864fe;
+}
+
+/* Make sure the button text is white */
+.btn {
+  color: white !important; /* Force the text color to white */
+}

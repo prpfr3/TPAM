@@ -25,52 +25,57 @@
       </div>
     </div>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">Wikipedia<br>Link</th>
-          <th scope="col">Grace's<br>Guide<br>Link</th>
-          <th scope="col">Name</th>
-          <th scope="col">Born</th>
-          <th scope="col">Died</th>
-          {% comment %}<th scope="col">References</th>{% endcomment %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for person in queryset %}
-        <tr>
-            <td>
-            {% if person.wikitextslug %}
-              <a href="https://en.wikipedia.org//wiki/{{person.wikitextslug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i
-              ></a>
-            {% else %}
-            N/A
-            {% endif %}
-            </td>
-            <td>
-              {% if person.gracetextslug %}
-              <a href="https://gracesguide.co.uk/{{person.gracetextslug}}" class="btn btn-primary">G</i
-              ></a>
-              {% endif %}     
-            </td>
-            <td><div><a href="{% url 'people:person' person.slug %}">{{ person.name }}</a></div></td>
-            <td>{{ person.birthdate}}</td>
-            <td>{{ person.dieddate }}</td>
-            {% comment %}
-            <td>
-                {% for reference in person.references.all %}
-                <li>{{ reference }}</li>
-                {% endfor %}
-            </td>
-            {% endcomment %} 
-        
-        {% empty %}
-          <h2>No Records Found.</h2>
-        {% endfor %}
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    {% if not queryset %}
+    <div class="col-md-12">
+      <div class="alert alert-success" role="alert">No Records Found for those Search Criteria</div>
+    </div>
+    {% else %}
 
-{% include "mainmenu/pagination.html" with page=people %}
-{% endblock content %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Wikipedia<br>Link</th>
+            <th scope="col">Grace's<br>Guide<br>Link</th>
+            <th scope="col">Name</th>
+            <th scope="col">Born</th>
+            <th scope="col">Died</th>
+            {% comment %}<th scope="col">References</th>{% endcomment %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for person in queryset %}
+          <tr>
+              <td>
+              {% if person.wikitextslug %}
+                <a href="https://en.wikipedia.org//wiki/{{person.wikitextslug}}" target="_blank" rel="noopener noreferrer" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i
+                ></a>
+              {% else %}
+              N/A
+              {% endif %}
+              </td>
+              <td>
+                {% if person.gracetextslug %}
+                <a href="https://gracesguide.co.uk/{{person.gracetextslug}}" class="btn btn-primary">G</i
+                ></a>
+                {% endif %}     
+              </td>
+              <td><div><a href="{% url 'people:person' person.slug %}">{{ person.name }}</a></div></td>
+              <td>{{ person.birthdate}}</td>
+              <td>{{ person.dieddate }}</td>
+              {% comment %}
+              <td>
+                  {% for reference in person.references.all %}
+                  <li>{{ reference }}</li>
+                  {% endfor %}
+              </td>
+              {% endcomment %} 
+          {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+
+      {% include "mainmenu/pagination.html" with page=people %}
+
+    {% endif %}
+  </div>
+  {% endblock content %}

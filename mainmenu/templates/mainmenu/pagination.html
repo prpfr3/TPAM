@@ -1,13 +1,24 @@
-<div class="pagination">
-  <span class="step-links">
-    {% if queryset.has_previous %}
-      <a href="?{{ query_params }}&page={{ queryset.previous_page_number }}">Previous</a>
-    {% endif %}
-    <span class="current">
-      Page {{ queryset.number }} of {{ queryset.paginator.num_pages }}.
-    </span>
-      {% if queryset.has_next %}
-        <a href="?{{ query_params }}&page={{ queryset.next_page_number }}">Next</a>
+
+<div class="d-flex justify-content-center align-items-center">
+  <div class="pagination">
+    <span class="step-links">
+
+      {% if queryset.has_previous %}
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary"><a href="?{{ query_params }}&page={{ queryset.previous_page_number }}">Previous</a></button>
+          </div> 
       {% endif %}
-  </span>
+
+      <span class="current">
+          Page {{ queryset.number }} of {{ queryset.paginator.num_pages }}.
+      </span>
+
+      {% if queryset.has_next %}
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-outline-primary"><a href="?{{ query_params }}&page={{ queryset.next_page_number }}">Next</a></button>
+          </div> 
+      {% endif %}
+
+    </span>
+  </div>
 </div>

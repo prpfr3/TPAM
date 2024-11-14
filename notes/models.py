@@ -49,14 +49,18 @@ class Reference(models.Model):
     TYPE_VIDEO = 4
     TYPE_MYSIGHTING = 5
     TYPE_MYPHOTO = 6
+    TYPE_WEBPAGE = 7
+    TYPE_GOVUK_ACT = 8
 
     REFERENCE_TYPE = (
         (TYPE_BOOK, "Book"),
         (TYPE_WEBSITE, "Website"),
+        (TYPE_WEBPAGE, "Webpage"),
+        (TYPE_GOVUK_ACT, "UK Act of Parliament"),
         (TYPE_MAGAZINE, "Journal, Periodical or Magazine"),
         (TYPE_VIDEO, "Video"),
         (TYPE_MYSIGHTING, "MySighting"),
-        (TYPE_MYPHOTO, "MyPhoto"),
+        (TYPE_MYPHOTO, "Redundant"),
     )
 
     JANUARY = 1
@@ -185,6 +189,8 @@ class Reference(models.Model):
             self.full_reference += f"ISBN:{self.isbn}, "
         if self.doi:
             self.full_reference += f"doi:{self.doi}, "
+        if self.image:
+            self.full_reference += f"{self.image}"
         # if self.url:
         #     self.full_reference += f"{self.url}, "
         if self.access_date:

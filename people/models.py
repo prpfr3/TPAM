@@ -59,9 +59,7 @@ class Person(models.Model):
     roles = models.ManyToManyField(
         Role, through="PersonRole", related_name="persons", blank=True
     )
-    post_fk = models.ForeignKey(
-        Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
+    posts = models.ManyToManyField(Post, related_name="person_posts", blank=True)
     references = models.ManyToManyField(Reference, blank=True)
     source = models.IntegerField(
         choices=SOURCE_TYPE,

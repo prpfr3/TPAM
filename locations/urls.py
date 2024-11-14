@@ -10,15 +10,10 @@ urlpatterns = [
     path("location/<int:location_id>/", views.location, name="location"),
     path("location_map/<int:location_id>/", views.location_map, name="location_map"),
     path("routes/", views.routes, name="routes"),
-    path("route_sections/", views.route_sections, name="route_sections"),
-    path(
-        "route_section/<int:route_section_id>",
-        views.route_section,
-        name="route_section",
-    ),
     path("route/<slug>/", views.route, name="route"),
     path("route_storymap/<slug>/", views.route_storymap, name="route_storymap"),
     path("route_map/<slug>/", views.route_map, name="route_map"),
+    path("route_timeline/<slug>/", views.route_timeline, name="route_timeline"),
     path(
         "closed_lines_region_select/",
         views.ClosedLinesRegionSelectView.as_view(),
@@ -31,6 +26,7 @@ urlpatterns = [
     # ),
     path("elrs/", views.elrs, name="elrs"),
     path("elr_map/<int:elr_id>/", views.elr_map, name="elr_map"),
+    # path("elr_map/<int:elr_id>/", views.elr_display_osmdata, name="elr_map"),
     path("elr_storymap/<int:elr_id>/", views.elr_storymap, name="elr_storymap"),
     path("elr_history/<int:elr_id>/", views.elr_history, name="elr_history"),
     path(

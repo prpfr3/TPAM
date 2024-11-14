@@ -68,13 +68,7 @@ class LocationSelectionForm(forms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        if clear_previous_criteria := kwargs.pop("clear_previous_criteria", False):
-            kwargs["initial"] = {
-                "name": None,
-            }
-
         super().__init__(*args, **kwargs)
-
         self.fields["categories"].queryset = LocationCategory.objects.order_by(
             "category"
         )
@@ -93,14 +87,21 @@ class RouteSelectionForm(forms.ModelForm):
     owner_operators = forms.ModelChoiceField(
         queryset=Company.objects.order_by("name"),
         required=False,
-        widget=Select2Widget(attrs={"class": "search-select2"}),
+        widget=Select2Widget(
+            attrs={"class": "search-select2", "style": "width: 200px;"}
+        ),
     )
 
     categories = forms.ModelChoiceField(
-        queryset=RouteCategory.objects.all(),
+        queryset=RouteCategory.objects.order_by("category"),
         required=False,
         label="Categories",
-        widget=Select2Widget(attrs={"class": "search-select2"}),
+        widget=Select2Widget(
+            attrs={
+                "class": "search-select2",
+                "style": "width: 200px;",
+            }
+        ),
     )
 
     def __init__(self, *args, **kwargs):
@@ -119,41 +120,30 @@ class RouteSelectionForm(forms.ModelForm):
         }
 
 
-class RouteSectionSelectionForm(forms.ModelForm):
-    class Meta:
-        model = RouteSection
-        fields = [
-            "name",
-        ]
-        labels = {
-            "name": "Name",
-        }
-
-
-class LocationForm(forms.ModelForm):
-    class Meta:
-        model = Location
-        fields = [
-            "wikiname",
-            "postcode",
-            "opened",
-            "closed",
-            "atcocode",
-            "tiploccode",
-            "crscode",
-            "easting",
-            "northing",
-            "slug",
-        ]
-        labels = {
-            "wikiname": "Name",
-            "postcode": "Postcode",
-            "opened": "Opened",
-            "closed": "Closed",
-            "atcocode": "ATCO code",
-            "tiploccode": "Tiploc code",
-            "crscode": "CRS code",
-            "easting": "Easting",
-            "northing": "Northing",
-            "slug": "Slug",
-        }
+# class LocationForm(forms.ModelForm):
+#     class Meta:
+#         model = Location
+#         fields = [
+#             "wikiname",
+#             "postcode",
+#             "opened",
+#             "closed",
+#             "atcocode",
+#             "tiploccode",
+#             "crscode",
+#             "easting",
+#             "northing",
+#             "slug",
+#         ]
+#         labels = {
+#             "wikiname": "Name",
+#             "postcode": "Postcode",
+#             "opened": "Opened",
+#             "closed": "Closed",
+#             "atcocode": "ATCO code",
+#             "tiploccode": "Tiploc code",
+#             "crscode": "CRS code",
+#             "easting": "Easting",
+#             "northing": "Northing",
+#             "slug": "Slug",
+#         }

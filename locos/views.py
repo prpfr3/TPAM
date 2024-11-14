@@ -7,6 +7,7 @@ from django.http import QueryDict
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 
 from notes.models import Reference
 from mainmenu.views import pagination
@@ -20,32 +21,35 @@ def index(request):
 
 def loco_classes(request):
     errors = None
-    page = None
+    items_per_page = 30
 
-    queryset = LocoClass.objects.order_by("wikiname")
-    selection_criteria = LocoClassSelectionForm(request.GET or None)
-
-    # This code changes the POST into GET which is a method of retaining the form selections
+    # Load selection criteria from session if available, or use empty data on first load
     if request.method == "POST":
-        return redirect(request.path_info + "?" + request.POST.urlencode())
+        selection_criteria = LocoClassSelectionForm(request.POST)
+        if selection_criteria.is_valid():
+            # Save criteria to session
+            request.session["loco_class_selection_criteria"] = request.POST.dict()
+            return redirect(request.path_info)
+    else:
+        # Initialize form with session-stored data or empty if none available
+        form_data = request.session.get("loco_class_selection_criteria", None)
+        selection_criteria = LocoClassSelectionForm(form_data)
 
-    if not selection_criteria.is_valid():
-        errors = selection_criteria.errors
+    # Default queryset for all loco classes
+    queryset = LocoClass.objects.order_by("name")
 
     if selection_criteria.is_valid():
+        # Build the queryset based on valid selection criteria
         queryset = loco_classes_query_build(selection_criteria.cleaned_data)
+    else:
+        errors = selection_criteria.errors
 
-    queryset, page = pagination(request, queryset)
-
-    # Retain existing query parameters for pagination
-    query_params = QueryDict("", mutable=True)
-    query_params.update(request.GET)
+    queryset = pagination(request, queryset, items_per_page)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "query_params": query_params.urlencode(),
     }
     return render(request, "locos/motive_power_classes.html", context)
 
@@ -56,17 +60,14 @@ def loco_classes_query_build(selection_criteria):
     cleandata = selection_criteria
 
     if "name" in cleandata and cleandata["name"]:
-        fk_ids = [fk.lococlass_fk_id for fk in cleandata["name"]]
-        conditions &= Q(id__in=fk_ids)
-
-    if "wikiname" in cleandata and cleandata["wikiname"]:
-        conditions &= Q(wikiname__icontains=cleandata["wikiname"])
+        conditions &= Q(name__icontains=cleandata["name"])
 
     if "wheel_body_type" in cleandata and cleandata["wheel_body_type"]:
         conditions &= Q(wheel_body_type__icontains=cleandata["wheel_body_type"])
 
     if "wheel_arrangement" in cleandata and cleandata["wheel_arrangement"]:
-        conditions &= Q(wheel_arrangement__icontains=cleandata["wheel_arrangement"])
+        fk = cleandata["wheel_arrangement"]
+        conditions &= Q(wheel_arrangement_id=fk)
 
     if "designer_person" in cleandata and cleandata["designer_person"]:
         fk = cleandata["designer_person"]
@@ -80,22 +81,31 @@ def loco_classes_query_build(selection_criteria):
         fk = cleandata["manufacturers"]
         conditions &= Q(manufacturers=fk)
 
-    queryset = LocoClass.objects.filter(conditions).order_by("wikiname")
+    if "power_type" in cleandata and cleandata["power_type"]:
+        conditions &= Q(power_type__icontains=cleandata["power_type"])
+
+    queryset = LocoClass.objects.filter(conditions).order_by("name")
+    # .annotate(total=Count("brd_class_name"))
 
     return queryset
 
 
 def loco_class(request, slug):
 
-    loco_class = LocoClass.objects.filter(slug=slug).order_by("wikiname").first()
+    loco_class = LocoClass.objects.filter(slug=slug).order_by("name").first()
 
-    locomotives = Locomotive.objects.filter(lococlass=loco_class.id)
+    locomotives = Locomotive.objects.filter(lococlass=loco_class.id).order_by(
+        "number_as_built"
+    )
+
     references = loco_class.references.all()
     operators = loco_class.owner_operators.all()
     manufacturers = loco_class.manufacturers.all()
+    posts = loco_class.posts.all()
 
     context = {
         "loco_class": loco_class,
+        "posts": posts,
         "locomotives": locomotives,
         "operators": operators,
         "references": references,
@@ -105,45 +115,46 @@ def loco_class(request, slug):
     return render(request, "locos/motive_power_class.html", context)
 
 
+@login_required
 def locomotives(request):
     errors = None
+    # Default queryset for all locomotives
     queryset = Locomotive.objects.order_by("name")
-    selection_criteria = LocomotiveSelectionForm(request.GET or None)
 
+    # Load selection criteria from session if available, or use empty data on first load
     if request.method == "POST":
-        # Use GET method for form submission
-        return redirect(request.path_info + "?" + request.POST.urlencode())
+        selection_criteria = LocomotiveSelectionForm(request.POST)
+        if selection_criteria.is_valid():
+            # Save criteria to session
+            request.session["locomotive_selection_criteria"] = request.POST.dict()
+            return redirect(request.path_info)
+    else:
+        # Initialize form with session-stored data or empty if none available
+        form_data = request.session.get("locomotive_selection_criteria", None)
+        selection_criteria = LocomotiveSelectionForm(form_data)
 
-    if not selection_criteria.is_valid():
-        errors = selection_criteria.errors
-
-    if selection_criteria.is_valid() and selection_criteria.cleaned_data["identifier"]:
-        queryset = (
-            Locomotive.objects.filter(
-                identifier__icontains=selection_criteria.cleaned_data.get(
-                    "identifier", ""
-                )
+    # Filter based on selection criteria
+    if (
+        selection_criteria.is_valid()
+        and selection_criteria.cleaned_data["number_as_built"]
+    ):
+        queryset = Locomotive.objects.filter(
+            number_as_built__icontains=selection_criteria.cleaned_data.get(
+                "number_as_built", ""
             )
-            .values("brd_class_name")
-            .annotate(total=Count("brd_class_name"))
-            .order_by("total")
         )
 
-    queryset, page = pagination(request, queryset)
-
-    # Retain existing query parameters for pagination
-    query_params = QueryDict("", mutable=True)
-    query_params.update(request.GET)
+    queryset = pagination(request, queryset)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "query_params": query_params.urlencode(),
     }
     return render(request, "locos/motive_power_list.html", context)
 
 
+@login_required
 def locomotive(request, locomotive_id):
     lococlass = None
     operators = None
@@ -203,52 +214,35 @@ def locomotive(request, locomotive_id):
 
 
 def photos(request):
-    queryset = Reference.objects.filter(type="6").order_by("full_reference")
-
-    paginator = Paginator(queryset, 40)
-    page = request.GET.get("page")
-
-    # Retain existing query parameters for pagination links
-
-    try:
-        paginated_queryset = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver the first page
-        paginated_queryset = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range, deliver the last page of results
-        paginated_queryset = paginator.page(paginator.num_pages)
-
-    context = {"page": page, "photos": paginated_queryset}
-    return render(request, "locos/photos.html", context)
-
-
-def photos(request):
+    # Photos are currently not catalogued with information
+    # The LocomotiveImageForm is therefore not displayed and this
+    # view will display all records.
     errors = None
-    queryset = Reference.objects.filter(type="6").order_by("full_reference")
-    selection_criteria = LocomotiveImageForm(request.GET or None)
+    queryset = Image.objects.all()
 
+    # Load selection criteria from session if available
+    if request.method == "POST":
+        selection_criteria = LocomotiveImageForm(request.POST)
+        if selection_criteria.is_valid():
+            # Save criteria to session
+            request.session["photo_selection_criteria"] = request.POST.dict()
+            return redirect(request.path_info)
+    else:
+        # Initialize form with session-stored data or empty if none available
+        form_data = request.session.get("photo_selection_criteria", None)
+        selection_criteria = LocomotiveImageForm(form_data)
+
+    # Filter queryset based on selection criteria
     if selection_criteria.is_valid():
+        # queryset = Image.objects.all()
         queryset = photos_query_build(selection_criteria.cleaned_data)
 
-    # This code changes the POST into GET which is a method of retaining the form selections
-    if request.method == "POST":
-        return redirect(request.path_info + "?" + request.POST.urlencode())
-
-    if not selection_criteria.is_valid():
-        errors = selection_criteria.errors
-
-    queryset, page = pagination(request, queryset)
-
-    # Retain existing query parameters for pagination
-    query_params = QueryDict("", mutable=True)
-    query_params.update(request.GET)
+    queryset = pagination(request, queryset, 27)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "query_params": query_params.urlencode(),
     }
 
     return render(request, "locos/photos.html", context)
@@ -259,17 +253,18 @@ def photos_query_build(selection_criteria):
     conditions = Q()
     cleandata = selection_criteria
 
-    if "full_reference" in cleandata and cleandata["full_reference"]:
-        conditions &= Q(full_reference__icontains=cleandata["full_reference"])
+    if "image_name" in cleandata and cleandata["image_name"]:
+        conditions &= Q(image_name__icontains=cleandata["image_name"])
 
-    conditions &= Q(type="6")
+    if "heritage_site" in cleandata and cleandata["heritage_site"]:
+        fk = cleandata["heritage_site"]
+        conditions &= Q(location=fk)
 
-    queryset = Reference.objects.filter(conditions).order_by("full_reference")
-
+    queryset = Image.objects.filter(conditions).order_by("image_name")
     return queryset
 
 
 def photo(request, photo_id):
-    photo = Reference.objects.get(id=photo_id)
+    photo = Image.objects.get(id=photo_id)
     context = {"photo": photo}
     return render(request, "locos/photo.html", context)

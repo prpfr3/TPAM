@@ -70,20 +70,6 @@ class UKArea(models.Model):
         return self.ITL121NM
 
 
-class ELRManager(models.Manager):
-    def get_elr_within_uk_area(self, uk_area_geometry):
-        # Convert the geometry to GeoJSON string
-        uk_area_geojson = uk_area_geometry.geojson
-
-        sql = """
-        SELECT * FROM locations_elr WHERE ST_Within(ST_GeomFromGeoJSON(%s), ST_GeomFromGeoJSON(geodata::text));
-        """
-        geodata = execute_sql(sql, [uk_area_geojson])
-
-        # Return the matching ELRs
-        return geodata
-
-
 class ELR(models.Model):
     slug = models.SlugField(
         default=None,
@@ -96,12 +82,41 @@ class ELR(models.Model):
     item = models.SlugField(max_length=20, blank=True, default="")
     itemLabel = models.CharField(max_length=400, blank=True, default="")
     itemAltLabel = models.CharField(max_length=200, blank=True, default="")
-    geodata = models.JSONField(blank=True, default=None, null=True)
-    post_fk = models.ForeignKey(
-        Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
+    opened = models.DateField(blank=True, null=True)
+    opened_freight = models.DateField(blank=True, null=True)
+    opened_passenger = models.DateField(blank=True, null=True)
+    closed_freight = models.DateField(blank=True, null=True)
+    closed_passenger = models.DateField(blank=True, null=True)
+    closed = models.DateField(blank=True, null=True)
+    reopened = models.DateField(blank=True, null=True)
+    geojson = models.JSONField(blank=True, default=None, null=True)
+    start_point = models.ForeignKey(
+        "Location",
+        on_delete=models.CASCADE,
+        related_name="elr_start_points",
+        default=None,
+        null=True,
     )
+    end_point = models.ForeignKey(
+        "Location",
+        on_delete=models.CASCADE,
+        related_name="elr_end_points",
+        default=None,
+        null=True,
+    )
+    min_lat = models.FloatField(blank=True, null=True, default=None)
+    min_lon = models.FloatField(blank=True, null=True, default=None)
+    max_lat = models.FloatField(blank=True, null=True, default=None)
+    max_lon = models.FloatField(blank=True, null=True, default=None)
+    length = models.FloatField(blank=True, null=True, default=None)
+    derived = models.BooleanField(default=False)
+    note = models.CharField(max_length=200, blank=True, default="")
 
-    objects = ELRManager()
+    owneroperators = models.ManyToManyField(Company, blank=True)
+
+    references = models.ManyToManyField(
+        Reference, related_name="elr_references", blank=True
+    )
 
     def get_absolute_url(self):
         return reverse("locations:elr_map", kwargs={"slug": self.slug})
@@ -113,10 +128,6 @@ class ELR(models.Model):
         if not self.slug:
             self.slug = custom_slugify(self.itemLabel).replace("-", "_")
         super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = "Engineer's Line Reference"
-        verbose_name_plural = "Engineer's Line References"
 
 
 class LocationCategory(models.Model):
@@ -140,41 +151,42 @@ class Location(models.Model):
     )
     wikiname = models.CharField(max_length=200, blank=True, null=True)
     wikislug = models.CharField(max_length=250, default=None, blank=True, null=True)
+    wikidata_id = models.CharField(max_length=20, default=None, blank=True, null=True)
     wikidata = models.CharField(max_length=20, default=None, blank=True, null=True)
+    notes = models.TextField(default=None, blank=True, null=True)
     postcode = models.CharField(default=None, blank=True, null=True, max_length=10)
     opened = models.CharField(max_length=200, blank=True, null=True)
     closed = models.CharField(max_length=200, blank=True, null=True)
     closed_to_steam = models.CharField(max_length=200, blank=True, null=True)
     disused_stations_slug = models.CharField(max_length=200, blank=True, null=True)
-    geometry = location_geometry_fieldtype(blank=True, null=True)
-    # geometry = models.TextField(blank=True, null=True)
+    geometry = location_geometry_fieldtype(blank=True, null=True, default=None)
     atcocode = models.CharField(max_length=20, blank=True, null=True)
     tiploccode = models.CharField(max_length=20, blank=True, null=True)
     crscode = models.CharField(max_length=10, blank=True, null=True)
     name = models.CharField(max_length=100, blank=True, null=True)
     namealt = models.CharField(max_length=100, blank=True, null=True)
-    namelang = models.CharField(max_length=2, blank=True, null=True)
-    gridtype = models.CharField(max_length=1, blank=True, null=True)
     easting = models.FloatField(blank=True, null=True)
     northing = models.FloatField(blank=True, null=True)
-    creationdatetime = models.DateTimeField
-    modificationdatetime = models.DateTimeField
-    revisionnumber = models.SmallIntegerField(blank=True, null=True)
-    modification = models.CharField(max_length=3, blank=True, null=True)
     osm_node = models.CharField(max_length=20, blank=True, null=True)
     media_caption = models.CharField(max_length=100, blank=True, null=True)
     media_credit = models.CharField(max_length=200, blank=True, null=True)
     media_url = models.URLField(blank=True, null=True, max_length=400)
+
+    RCH_StopsGB_PlaceId = models.CharField(max_length=20, blank=True, null=True)
+    RCH_StopsGB_StationId = models.CharField(max_length=20, blank=True, null=True)
+    RCH_StopsGB_Place = models.CharField(max_length=100, blank=True, null=True)
+    RCH_StopsGB_AbbrStation = models.CharField(max_length=50, blank=True, null=True)
+    RCH_StopsGB_Station = models.CharField(max_length=100, blank=True, null=True)
+    RCH_StopsGB_Altnames = models.CharField(max_length=200, blank=True, null=True)
+    RCH_StopsGB_Predicted_Place = models.CharField(
+        max_length=100, blank=True, null=True
+    )
 
     SOURCE_TYPE = (
         (1, "Wikipedia"),
         (2, "Custom"),
     )
     source = models.IntegerField(choices=SOURCE_TYPE, default=1)
-
-    custom_post = models.ForeignKey(
-        Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
 
     references = models.ManyToManyField(
         Reference, related_name="locations_references", blank=True
@@ -188,7 +200,7 @@ class Location(models.Model):
         LocationCategory, related_name="locations_in_category", blank=True
     )
 
-    posts = models.ManyToManyField(Post, related_name="locations_in_post", blank=True)
+    posts = models.ManyToManyField(Post, related_name="location_posts", blank=True)
 
     elrs = models.ManyToManyField(
         ELR, through="ELRLocation", related_name="locations_on_elr", blank=True
@@ -199,6 +211,7 @@ class Location(models.Model):
         return reverse("locations:location", kwargs={"slug": self.slug})
 
     def __str__(self):
+        print(f"{location_geometry_fieldtype=}")
         return self.wikiname or self.name or str(self.id)
 
     def save(self, *args, **kwargs):
@@ -206,6 +219,11 @@ class Location(models.Model):
             self.slug = custom_slugify(self.wikislug)
         elif self.name:
             self.slug = custom_slugify(self.name)
+
+        # if self.geometry:
+        #     coords = self.geometry
+        #     self.latitude, self.longitude = coords
+
         super().save(*args, **kwargs)
 
     class Meta:
@@ -280,6 +298,8 @@ class Route(models.Model):
         help_text="Enter a slug only if you wish to override that which will be autogenerated",
     )
     name = models.CharField(max_length=1000, blank=True, default="")
+    notes = models.TextField(default=None, blank=True, null=True)
+
     wikipedia_slug = models.CharField(
         default=None,
         db_index=True,
@@ -294,9 +314,7 @@ class Route(models.Model):
     wikipedia_routemaps = models.ManyToManyField(RouteMap, blank=True)
     elrs = models.ManyToManyField(ELR, blank=True)
     references = models.ManyToManyField(Reference, blank=True)
-    post_fk = models.ForeignKey(
-        Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
+    posts = models.ManyToManyField(Post, related_name="route_posts", blank=True)
     owneroperators = models.ManyToManyField(Company, blank=True)
     source = models.IntegerField(
         choices=SOURCE_TYPE,
@@ -314,43 +332,6 @@ class Route(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class RouteSection(models.Model):
-    name = models.CharField(max_length=1000, blank=True, default="")
-    route_fk = models.ForeignKey(
-        Route, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
-    elrs = models.ManyToManyField(ELR, through="RouteSectionELR", blank=True)
-    geodata = models.JSONField(blank=True, default=None, null=True)
-    geometry = geometry_fieldtype(blank=True, null=True)
-    date_opened = models.CharField(max_length=10, blank=True, null=True)
-    date_closed = models.CharField(max_length=10, blank=True, null=True)
-    date_opened_passenger = models.CharField(max_length=10, blank=True, null=True)
-    date_closed_passenger = models.CharField(max_length=10, blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = "Route Section"
-        verbose_name_plural = "Route Sections"
-
-
-class RouteSectionELR(models.Model):
-    route_section_fk = models.ForeignKey(RouteSection, on_delete=models.CASCADE)
-    elr_fk = models.ForeignKey(ELR, blank=True, null=True, on_delete=models.CASCADE)
-    min_lat = models.FloatField(blank=True, null=True, default=None)
-    min_lon = models.FloatField(blank=True, null=True, default=None)
-    max_lat = models.FloatField(blank=True, null=True, default=None)
-    max_lon = models.FloatField(blank=True, null=True, default=None)
-
-    def __str__(self):
-        return f" {self.route_section_fk} {self.elr_fk}"
-
-    class Meta:
-        verbose_name = "ELR on a Route Section"
-        verbose_name_plural = "ELRs on a Route Section"
 
 
 class RouteLocation(models.Model):
@@ -401,11 +382,12 @@ class LocationEvent(models.Model):
         (4, "Razed"),
         (5, "Name Change"),
         (6, "Ownership Change"),
-        (7, "Construction Approved"),
+        (7, "Act of Parliamenet Approval"),
         (8, "Prospectus Issued"),
         (9, "Proposal"),
         (10, "Construction"),
         (11, "Operation"),
+        (12, "Company Incorporated"),
         (99, "Other"),
     )
     type = models.IntegerField(
@@ -427,9 +409,7 @@ class LocationEvent(models.Model):
     elr_fk = models.ForeignKey(
         ELR, on_delete=models.SET_NULL, blank=True, null=True, default=None
     )
-    # post_fk = models.ForeignKey(
-    #     Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    # )
+
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -450,7 +430,6 @@ class RouteGeoClosed(models.Model):
     name = models.TextField(db_column="name", blank=True, null=True)
     # Field name made lowercase.
     description = models.TextField(db_column="Description", blank=True, null=True)
-    # Geometry Field if using contrib.gis
     geometry = geometry_fieldtype(blank=True, null=True)
 
     class Meta:
@@ -624,7 +603,6 @@ class RouteGeoOsm(models.Model):
     historic = models.TextField(blank=True, null=True)
     # Field renamed to remove unsuitable characters. Field renamed because it started with '_'.
     field_relations = models.TextField(db_column="@relations", blank=True, null=True)
-    # Geometry Field if using contrib.gis
     geometry = geometry_fieldtype(blank=True, null=True)
 
     class Meta:

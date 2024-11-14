@@ -14,12 +14,11 @@
         {% autoescape off %}
         <a href="{% url 'notes:post_detail' post.id %}">{{ post.title }}</a>
         {% endautoescape %}
-        {% comment %}
+
         {% if post.owner == user %}
         (<a href="{% url 'notes:post_update' post.id %}">Edit</a> |
         <a href="{% url 'notes:post_delete' post.id %}">Delete</a>)
         {% endif %}
-        {% endcomment %}
     </div>
   {% endfor %}
 

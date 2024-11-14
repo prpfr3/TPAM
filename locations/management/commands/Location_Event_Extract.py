@@ -50,8 +50,6 @@ class Command(BaseCommand):
                         event.location_fk.name if event.location_fk else "",
                         event.elr_fk.id if event.elr_fk else "",
                         event.elr_fk.slug if event.elr_fk else "",
-                        # event.post_fk.id if event.post_fk else "",
-                        # event.post_fk.name if event.post_fk else "",
                         event.date_added,
                     ]
                 )

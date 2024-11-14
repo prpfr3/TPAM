@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simple DataTable Example</title>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+
+  <table id="peopleTable" class="display">
+    <thead>
+        <tr>
+          <th scope="col">Wikipedia<br>Link</th>
+          <th scope="col">Grace's<br>Guide<br>Link</th>
+          <th scope="col">Name</th>
+          <th scope="col">Born</th>
+          <th scope="col">Died</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for person in people %}
+        <tr>
+          <td>
+            {% if person.wikitextslug %}
+              <a href="https://en.wikipedia.org//wiki/{{person.wikitextslug}}" class="btn btn-primary"><i class="fa fa-wikipedia-w"></i
+              ></a>
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+          <td>
+            {% if person.gracetextslug %}
+            <a href="https://gracesguide.co.uk/{{person.gracetextslug}}" class="btn btn-primary">G</i></a>
+            {% endif %}     
+          </td>
+          <td><div><a href="{% url 'people:person' person.slug %}">{{ person.name }}</a></div></td>
+          <td>{{ person.birthdate}}</td>
+          <td>{{ person.dieddate }}</td>
+        </tr>
+
+        {% empty %}
+          <h2>No Records Found.</h2>
+
+        {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    $(document).ready(function() {
+        // Initialize DataTables with drop-down filters
+        $('#peopleTable').DataTable({
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select><option value=""></option></select>')
+                        .appendTo($(column.header()))
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search(val ? '^' + val + '$' : '', true, false)
+                                .draw();
+                        });
+
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -30,15 +30,15 @@
             <a class="nav-link active text-primary bg-white" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Class Details</a>
           </li>
 
-          {% if loco_class.brdslug %}
-          <li class="nav-item">
-            <a class="nav-link text-white bg-primary" id="brd-tab" href="https://www.brdatabase.info/locoqry.php?{{ loco_class.brdslug }}" target="_blank" rel="noopener noreferrer" role="tab">BRD</a>
-          </li>
-          {% endif %}
-
           {% if loco_class.slug %}
           <li class="nav-item">
             <a class="nav-link text-white bg-primary" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
+          </li>
+          {% endif %}
+
+          {% if loco_class.brdslug %}
+          <li class="nav-item">
+            <a class="nav-link text-white bg-primary" id="brd-tab" href="https://www.brdatabase.info/locoqry.php?action=class&type={{loco_class.power_type|make_list|first}}&id={{ loco_class.brdslug }}" target="_blank" rel="noopener noreferrer" role="tab">BRD</a>
           </li>
           {% endif %}
 
@@ -55,12 +55,7 @@
 
           <div class="tab-pane fade show active" id="notes" role="tabpanel" aria-labelledby="notes-tab">
 
-            {% if loco_class.post_fk.body %}
-              <!-- <h2 class="text-primary">Notes</h2> -->
-              {% autoescape off %}
-              {{loco_class.post_fk.body}}
-              {% endautoescape %}
-            {% endif %}
+
 
             {% if loco_class.designer_person %}
               <h2 class="text-primary">Designer</h2>
@@ -87,10 +82,29 @@
 
             <h2 class="text-primary">Locos in Class</h2>
             {% for locomotive in locomotives %}
-              {{locomotive.number_as_built}},
+              {% if locomotive.number_as_built %}
+                {{ locomotive.number_as_built }},
+              {% endif %}
             {% empty %}
               <li>None recorded for this class.</li>
-            {% endfor %} 
+            {% endfor %}
+
+            {% autoescape off %}
+            {% if loco_class.notes %}
+              {{ loco_class.notes }}
+            {% endif %}
+            {% endautoescape %}
+            
+            {% comment %}
+            {% if posts %}
+                {% for post in posts %}
+                  <h2 class="text-primary">{{ post.title}}</h2>
+                  {% autoescape off %}
+                  {{ post.body }}
+                  {% endautoescape %}
+                {% endfor %}
+            {% endif %}
+            {% endcomment %}
 
             {% comment %}
               <h2 class="text-primary">Images</h2>
@@ -114,17 +128,19 @@
 
           {% if loco_class.references %}
             <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
-              {% for reference in references %}
-                {% autoescape off %}
-                {% if reference.url %}
-                  <li><a href={{reference.url}}>{{reference.full_reference}}</a></li>
+              {% for reference in references %}                
+                {% if '/ukla/' in reference.url %}
+                  <h3><a href="https://www.legislation.gov.uk{{reference.url}}">{{ reference.full_reference }}</a></h3>
+                {% elif reference.url %}
+                  <h3><a href="{{reference.url}}">{{ reference.full_reference }}</a></h3>
                 {% else %}
-                  <li>{{reference.full_reference}}</li>
+                  <h3>{{reference.full_reference}}</h3>
                 {% endif %}
-                {% endautoescape %}
-                {% empty %}
-                  <li>None recorded for this class.</li>
-              {% endfor %}
+
+                {% if reference.description %}
+                  {{reference.description}}
+                {% endif %}
+            {% endfor %}
             </div>
           {% endif %}
 

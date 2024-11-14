@@ -32,52 +32,59 @@
     </div>
   </div>
 
-  {% with queryset|slice:":12" as first_third %}
-  {% with queryset|slice:"12:24" as second_third %}
-  {% with queryset|slice:"24:" as third_third %}
-  <div class="container">
+  {% if not queryset %}
+    <div class="col-md-12">
+      <div class="alert alert-success" role="alert">No ELRs Found for those Search Criteria</div>
+    </div>
+  {% else %}
 
-    <div class="row">
-      <div class="col-md-4">
-        {% for elr in first_third %}
-          {% if elr.itemAltLabel %}
-            <div class="row mb-1 d-flex align-items-stretch row-height">
-              <div class="col-12 d-flex align-items-left justify-content-left">
-                <div><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></div>
-              </div>
-            </div>
-          {% endif %}
-        {% endfor %}
-      </div>
+    {% with queryset|slice:":10" as first_third %}
+    {% with queryset|slice:"10:20" as second_third %}
+    {% with queryset|slice:"20:" as third_third %}
+    <div class="container">
 
-      <div class="col-md-4">
-        {% for elr in second_third %}
-          {% if elr.itemAltLabel %}
-            <div class="row mb-1 d-flex align-items-stretch row-height">
-              <div class="col-12 d-flex align-items-left justify-content-left">
-                <div><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></div>
+      <div class="row">
+        <div class="col-md-4">
+          {% for elr in first_third %}
+            {% if elr.itemAltLabel %}
+              <div class="row mb-1 d-flex align-items-stretch row-height">
+                <div class="col-12 d-flex align-items-left justify-content-left">
+                  <div><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></div>
+                </div>
               </div>
-            </div>
-          {% endif %}
-        {% endfor %}
-      </div>
+            {% endif %}
+          {% endfor %}
+        </div>
 
-      <div class="col-md-4">
-        {% for elr in third_third %}
-          {% if elr.itemAltLabel %}
-            <div class="row mb-1 d-flex align-items-stretch row-height">
-              <div class="col-12 d-flex align-items-left justify-content-left">
-                <div><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></div>
+        <div class="col-md-4">
+          {% for elr in second_third %}
+            {% if elr.itemAltLabel %}
+              <div class="row mb-1 d-flex align-items-stretch row-height">
+                <div class="col-12 d-flex align-items-left justify-content-left">
+                  <div><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></div>
+                </div>
               </div>
-            </div>
-          {% endif %}
-        {% endfor %}
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="col-md-4">
+          {% for elr in third_third %}
+            {% if elr.itemAltLabel %}
+              <div class="row mb-1 d-flex align-items-stretch row-height">
+                <div class="col-12 d-flex align-items-left justify-content-left">
+                  <div><a href="{% url 'locations:elr_map' elr.id %}">{{ elr.itemAltLabel }} : {{ elr.itemLabel }}</a></div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
       </div>
     </div>
-  </div>
-  {% endwith %}
-  {% endwith %}
-  {% endwith %}
-  {% include "mainmenu/pagination.html" with page=queryset %} 
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% include "mainmenu/pagination.html" with page=queryset %}
+  {% endif %}
 
 {% endblock content %}

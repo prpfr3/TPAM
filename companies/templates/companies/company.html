@@ -7,29 +7,47 @@
   <div class="panel panel-default">
     <div class="panel-body">
 
-      <h1 class="text-primary">Routes</h1>
+      <h1>{{ company.name }}</h1>
+      
+      {% if posts %}
+          {% for post in posts %}
+            <h2 class="text-primary">{{ post.title}}</h2>
+            {% autoescape off %}
+            {{ post.body }}
+            {% endautoescape %}
+          {% endfor %}
+      {% endif %}
+
+      <h2 class="text-primary">Routes</h2>
       {% for route in routes %}
         <li>{{route}}</li>
       {% empty %}
-        <li>No routes recorded for this company.</li>
+        No routes recorded for this company.
       {% endfor %}
 
-      <h1 class="text-primary">Predecessor Companies</h1>
+      <h2 class="text-primary">Predecessor Companies</h2>
       {% for predecessor_company in predecessor_companies %}
         {{predecessor_company}}
       {% empty %}
-        <li>No predecessors recorded for this company.</li>
+        No predecessors recorded for this company.
       {% endfor %}
 
-      <h1 class="text-primary">Wikipedia Categories</h1>
+      <h2 class="text-primary">Successor Companies</h2>
+      {% if company.successor_company %}
+        {{company.successor_company}}
+      {% else %}
+        No successor recorded for this company.
+      {% endif %}
+
+      <h2 class="text-primary">Wikipedia Categories</h2>
       {% for category in wiki_categories %}
         {{category}}
       {% empty %}
-        <li>No wiki categories for this company.</li>
+        No wiki categories for this company.
       {% endfor %}
 
       {% if description_type %}
-      <h1 class="text-primary">{{description_type}}</h1>
+      <h2 class="text-primary">{{description_type}}</h2>
         {% autoescape off %}
         <div>{{ description }}</div>
         {% endautoescape %}

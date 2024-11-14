@@ -1,5 +1,5 @@
 {% comment %}
-{% extends 'mainmenu/base.html' %}
+  {% extends 'mainmenu/base.html' %}
 {% endcomment %}
 
 {% block head %}
@@ -16,7 +16,7 @@
     integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog=="
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" type="text/css", href="{% static 'carousel.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'carousel.css' %}" />
   <title>Carousel Story</title>
 {% endblock %}
 
@@ -46,9 +46,7 @@
       
       <div class="slide-content">
         <h1>{{ slide.text_headline }}</h1>
-        {% autoescape off %}
-        <p>{{ slide.text_text }}</p>
-        {% endautoescape %}
+        <p>{{ slide.text_text|safe }}</p>
       </div>
 
     </div>

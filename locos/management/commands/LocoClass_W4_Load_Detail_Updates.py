@@ -20,14 +20,14 @@ class Command(BaseCommand):
             for row in DictReader(file):
                 # First check the Class Exists; held in the first column of the spreadsheet
                 try:
-                    c = LocoClass.objects.get(wikiname=row["Class"])
+                    c = LocoClass.objects.get(name=row["Class"])
                 except ObjectDoesNotExist:
                     print(row["Class"], " does not exist in the database")
                 except Exception as e:
                     print(row["Class"], e)
                 else:
                     if row["Field"] == "Wikipedia Name":
-                        c.wikiname = row["Value"]
+                        c.name = row["Value"]
                     elif row["Field"] == "Axle load":
                         c.axle_load = row["Value"]
                     elif row["Field"] == "Adhesive weight":

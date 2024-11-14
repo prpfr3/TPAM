@@ -34,6 +34,12 @@
       </div>
     </div>
 
+    {% if not queryset %}
+    <div class="col-md-12">
+      <div class="alert alert-success" role="alert">No Routes Found for those Search Criteria</div>
+    </div>
+    {% else %}
+
   
     <div class="row">
       {% if map %}
@@ -44,9 +50,9 @@
   
       <div class="container">
         <div class="row">
-          {% render_slice queryset 0 12 %}
-          {% render_slice queryset 12 24 %}
-          {% render_slice queryset 24 None %}
+          {% render_slice queryset 0 10 %}
+          {% render_slice queryset 10 20 %}
+          {% render_slice queryset 20 None %}
         </div>
       </div>
   
@@ -61,6 +67,7 @@
       {% endif %}
 
     </div> <!-- End of Row -->
+    {% endif %}
   </div><!-- End of Container -->
 
 {% endblock content %}

@@ -298,13 +298,12 @@ def references(request):
         errors = selection_criteria.errors
         queryset = Reference.objects.exclude(type=6).order_by("title")
 
-    queryset, page = pagination(request, queryset)
+    queryset = pagination(request, queryset)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "references": queryset,
-        "page": page,
     }
 
     return render(request, "notes/references.html", context)
@@ -313,34 +312,35 @@ def references(request):
 def references(request):
     errors = None
 
+    # Default queryset excluding type 6 and ordering by full_reference
     queryset = (
         Reference.objects.exclude(type=6)
         .prefetch_related("person_set")
         .order_by("full_reference")
     )
-    selection_criteria = ReferenceSelectionForm(request.GET or None)
 
-    # This code changes the POST into GET which is a method of retaining the form selections
+    # Load selection criteria from session if available
     if request.method == "POST":
-        return redirect(request.path_info + "?" + request.POST.urlencode())
+        selection_criteria = ReferenceSelectionForm(request.POST)
+        if selection_criteria.is_valid():
+            # Save criteria to session
+            request.session["reference_selection_criteria"] = request.POST.dict()
+            return redirect(request.path_info)
+    else:
+        # Initialize form with session-stored data or empty if none available
+        form_data = request.session.get("reference_selection_criteria", None)
+        selection_criteria = ReferenceSelectionForm(form_data)
 
-    if not selection_criteria.is_valid():
-        errors = selection_criteria.errors
-
+    # Filter queryset based on selection criteria
     if selection_criteria.is_valid():
         queryset = references_query_build(selection_criteria.cleaned_data)
 
-    queryset, page = pagination(request, queryset)
-
-    # Retain existing query parameters for pagination
-    query_params = QueryDict("", mutable=True)
-    query_params.update(request.GET)
+    queryset = pagination(request, queryset)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "query_params": query_params.urlencode(),
     }
     return render(request, "notes/references.html", context)
 

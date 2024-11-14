@@ -43,14 +43,14 @@ class Command(BaseCommand):
                 elrid = row["id"]
                 elr = ELR.objects.get(id=elrid)
                 try:
-                    elr.geodata = row["geodata"]
+                    elr.geojson = row["geojson"]
                 except Exception as e:
                     print(e)
 
                 if row["geometry"] != "":
                     try:
                         # elr.geometry = row["geometry"]
-                        elr.geometry = geojson_to_geometry(elr.geodata)
+                        elr.geometry = geojson_to_geometry(elr.geojson)
                     except Exception as e:
                         print(e)
                 else:

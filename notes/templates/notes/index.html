@@ -8,10 +8,11 @@
 <div class="bd-example">
     <ul class="list-group">      
         <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:topics' %}">Notes</a>
-        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'timelines:timelines' %}">Custom Timelines</a>
-        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'storymaps:storymaps' %}">Custom Storymaps</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'storymaps:timelines' %}">StoryTimelines</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'storymaps:storymaps' %}">Storymaps</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'storymaps:carousels' %}">Storyboards</a>
         <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:references' %}">References</a>
-        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:timeline' %}">Bluebell Railway Timeline</a>
+        <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'notes:timeline' %}">Railway Timeline</a>
         {% comment %}
         <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
         <a class="list-group-item list-group-item-action list-group-item-primary" href="{% url 'locations:county_select' %}">Closed Lines Map</a>

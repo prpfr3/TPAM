@@ -27,29 +27,32 @@ def people(request):
             "surname", "firstname"
         )
         cache.set("cached_queryset", queryset, timeout=None)  # Cache it
-    selection_criteria = PersonSelectionForm(request.GET or None)
 
+    # Load selection criteria from session if available, or use empty data on first load
     if request.method == "POST":
-        # Use GET method for form submission
-        return redirect(request.path_info + "?" + request.POST.urlencode())
+        selection_criteria = PersonSelectionForm(request.POST)
+        if selection_criteria.is_valid():
+            # Save criteria to session
+            request.session["person_selection_criteria"] = request.POST.dict()
+            return redirect(request.path_info)
+    else:
+        # Initialize form with session-stored data or empty if none available
+        form_data = request.session.get("person_selection_criteria", None)
+        selection_criteria = PersonSelectionForm(form_data)
 
-    if not selection_criteria.is_valid():
+    # Default queryset for all persons
+    if selection_criteria.is_valid():
+        # Build the queryset based on valid selection criteria
+        queryset = people_query_build(selection_criteria.cleaned_data)
+    else:
         errors = selection_criteria.errors
 
-    if selection_criteria.is_valid():
-        queryset = people_query_build(selection_criteria.cleaned_data)
-
-    queryset, _ = pagination(request, queryset)
-
-    # Retain existing query parameters for pagination
-    query_params = QueryDict("", mutable=True)
-    query_params.update(request.GET)
+    queryset = pagination(request, queryset, 8)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "query_params": query_params.urlencode(),
     }
 
     return render(request, "people/people.html", context)
@@ -92,9 +95,10 @@ def person(request, slug):
     designed_loco_classes = LocoClass.objects.filter(designer_person=person.id)
 
     # Get text describing the person either from a notes app research article, else Wikipedia, else none
-    if person.post_fk:
-        description = person.post_fk.body
-        description_type = "Notes"
+    if person.posts.exists():
+        first_post = person.posts.first()  # Get the first post in the queryset
+        description_type = first_post.title
+        description = first_post.body
     elif person.wikitextslug:
         wiki_wiki = wikipediaapi.Wikipedia(
             language="en",
@@ -118,6 +122,11 @@ def person(request, slug):
         "description": description,
     }
     return render(request, "people/person.html", context)
+
+
+def people_spreadsheet(request):
+    people = Person.objects.all()
+    return render(request, "people/people_spreadsheet.html", {"people": people})
 
 
 def people_storyline(request):
@@ -164,14 +173,11 @@ def people_storyline(request):
             "surname", "firstname"
         )
 
-    queryset, page = pagination(
-        request, queryset
-    )  # Pass the updated queryset to the pagination function
+    queryset = pagination(request, queryset)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
-        "page": page,
         "people": queryset,
     }
 

@@ -1,10 +1,7 @@
 """
 Loads a CSV file of manually prepared data into the Locomotive table.
-
-Locomotive identifiers are unlikely to be the same as those created from BRD
-so where there the manually created locomotives overlap with those from BRD 
-'Locomotive_Manual_Deletions.py' should be used to delete duplicate BRD entries
 """
+
 import os, datetime
 from csv import DictReader
 from django.core.management import BaseCommand
@@ -133,18 +130,16 @@ class Command(BaseCommand):
         with open(input_filename, encoding="utf-8-sig") as csvfile:
             for row in DictReader(csvfile):
                 # print(f'{row=}')
-                # identifier = f"{row['wikiclass']} Nos:- {row['number_pregrouping']} {row['number_grouping']} {row['number_postgrouping']}"
                 # l = Locomotive()
                 wikiclass = row["wikiclass"]
                 number_as_built = row["Number (as built)"]
                 try:
                     l, created = Locomotive.objects.get_or_create(
-                        lococlass__wikiname=wikiclass, number_as_built=number_as_built
+                        lococlass__name=wikiclass, number_as_built=number_as_built
                     )
                     print(l, "Created:-", created)
                 except Exception as e:
                     print(wikiclass, number_as_built, e)
-                # l.identifier = f"{row['wikiclass']} Nos:- {row['number_pregrouping']} {row['number_grouping']} {row['number_postgrouping']}"
                 l.number_as_built = row["Number (as built)"]
                 l.number_pregrouping_1 = row["number_pregrouping_1"]
                 l.number_grouping_1 = row["number_grouping_1"]
@@ -217,7 +212,7 @@ class Command(BaseCommand):
                     l.order_date, l.order_datetime = dateformatter(row["order_date"])
 
                 try:
-                    c = LocoClass.objects.get(wikiname=row["wikiclass"])
+                    c = LocoClass.objects.get(name=row["wikiclass"])
                 except ObjectDoesNotExist:
                     print(
                         f"Wikipedia class {row['wikiclass']} cannot be found in the TPAM database"
@@ -230,6 +225,6 @@ class Command(BaseCommand):
 
                 try:
                     l.save()
-                    print(f"{l.identifier} saved")
+                    print(f"{l} saved")
                 except Exception as e:
-                    print(f"{l.identifier} not saved due to {e}")
+                    print(f"{l} not saved due to {e}")

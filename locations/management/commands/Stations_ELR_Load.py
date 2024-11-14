@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from locations.models import Location, ELR, ELRLocation
 
 """
-# Run the following Wikidata SPARQL query and save to a csv file called "Locations_Stations_Wikidata.csv"
+# Run the following Wikidata SPARQL query at https://query.wikidata.org/ and save to a csv file called "Locations_Stations_Wikidata.csv"
 # Project Webscraping, file Wikidata_SPARQLWrapper.ipynb has an example of how to do this using Python
 
 SELECT DISTINCT ?item ?itemLabel ?operator ?operatorLabel ?geo ?openedLabel ?closedLabel ?image ?adminareaLabel ?countyLabel ?elrnameLabel ?disused ?railscot ?adjacentLabel ?towards ?interchangeLabel ?elr ?distance ?inceptionLabel ?elevationLabel ?ownedby ?ownedbyLabel ?architectLabel
@@ -47,7 +47,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         with open(
-            os.path.join(DATAIO_DIR, "Location_Stations_Wikidata.csv"),
+            os.path.join(DATAIO_DIR, "Location_Stations_Wikidata_2024-07-21.csv"),
             encoding="utf-8",
         ) as file:
 
@@ -87,6 +87,10 @@ class Command(BaseCommand):
                                         location_fk=location, elr_fk=elr
                                     )
                                 )
+                                if elrloc_created:
+                                    print(
+                                        f"{elr.itemAltLabel} added to location {location.name}"
+                                    )
                             except Exception as e:
                                 print(
                                     f"error {e} getting or creating elr location {location} {elr}"
@@ -98,6 +102,6 @@ class Command(BaseCommand):
                                 elrloc.distance = None
                             try:
                                 elrloc.save()
-                                print(f"{elrloc} saved")
+                                # print(f"{elrloc} saved")
                             except Exception as e:
                                 print(f"error {e} saving {elrloc}")

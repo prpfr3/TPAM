@@ -1,24 +1,22 @@
 {% extends 'mainmenu/base.html' %}
 
+{% block head %}
+    <link rel="stylesheet" href="https://cdn.knightlab.com/libs/storymapjs/latest/css/storymap.css">
+{% endblock %}
+
 {% block content %}
-<!--- Created using Knightlab's Storymap.
 
-For documentation:- https://storymap.knightlab.com/advanced/
-For Github JSON example:- https://github.com/NUKnightLab/StoryMapJS/blob/master/storymap/static/demo/demo.json
+    <!--- Created using Knightlab's Storymap.
 
-The StoryMap container can go anywhere on the page. Specify a width and height. 
-The width can be absolute (in pixels) or relative (in percentage) but the height must be an absolute value.
-CSS can be used for width and height specification if preferred 
--->
-<head>
+    For documentation:- https://storymap.knightlab.com/advanced/
+    For Github JSON example:- https://github.com/NUKnightLab/StoryMapJS/blob/master/storymap/static/demo/demo.json
+
+    The StoryMap container can go anywhere on the page. Specify a width and height. The width can be absolute (in pixels) or relative (in percentage) but the height must be an absolute value. CSS can be used for width and height specification if preferred 
+    -->
     <div id="mapdiv" style="width: 100%; height: 600px;"></div>
 
-    <!-- Script tags should be placed before the closing body tag. -->
-    <link rel="stylesheet" href="https://cdn.knightlab.com/libs/storymapjs/latest/css/storymap.css">
     <script type="text/javascript" src="https://cdn.knightlab.com/libs/storymapjs/latest/js/storymap-min.js"></script>
-</head>
 
-<body>
     <script>
 
         // storymap_data can be an URL or a Javascript object
@@ -34,6 +32,6 @@ CSS can be used for width and height specification if preferred
             storymap.updateDisplay(); // this isn't automatic
         }
     </script>
-</body>
-</html>
-{% endblock content %}
+
+
+{% endblock %}

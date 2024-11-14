@@ -24,7 +24,6 @@ urlpatterns = [
     # path("vehicles/", include("vehicles.urls", namespace="vehicles")),
     path("storymaps/", include("storymaps.urls", namespace="storymaps")),
     path("locations/", include("locations.urls", namespace="locations")),
-    path("timelines/", include("timelines.urls", namespace="timelines")),
     path("ukheritage/", include("ukheritage.urls", namespace="ukheritage")),
     # path("blog/", include("cms.urls")),
 ]

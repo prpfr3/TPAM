@@ -86,7 +86,7 @@ main::before {
   padding: 20px;
   font-size: 30px;
   border: 2px solid orange;
-  top: 5px;
+  bottom: 5px;
   width: 5%;
   height: auto; /* Adjust height as needed */
   z-index: 3;
@@ -95,7 +95,7 @@ main::before {
 .home {
   position: absolute;
   cursor: pointer;
-  top: 5px;
+  bottom: 5px;
   right: 15%;
   background-color: transparent;
   color: #fff;

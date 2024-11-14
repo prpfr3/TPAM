@@ -25,7 +25,7 @@ class EmailPostForm(forms.Form):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ["title", "body", "status", "url", "slug"]
+        fields = ["title", "body", "status", "url", "slug", "topic"]
         labels = {"title": "", "body": "", "status": "", "url": "url", "slug": "Slug"}
         widgets = {
             "title": forms.TextInput(

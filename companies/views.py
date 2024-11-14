@@ -12,36 +12,38 @@ def index(request):
 
 def companies(request):
     errors = None
-    queryset = Company.objects.order_by("name")
-    selection_criteria = CompanySelectionForm(request.GET or None)
+    items_per_page = 30
 
+    # Load selection criteria from session if available, fallback to form data otherwise
     if request.method == "POST":
-        # Use GET method for form submission
-        return redirect(request.path_info + "?" + request.POST.urlencode())
+        selection_criteria = CompanySelectionForm(request.POST)
+        if selection_criteria.is_valid():
+            # Save criteria to session
+            request.session["selection_criteria"] = request.POST.dict()
+            return redirect(request.path_info)
+    else:
+        # Initialize form with session-stored data or empty
+        form_data = request.session.get("selection_criteria", None)
+        selection_criteria = CompanySelectionForm(form_data)
+
+    # Default to all records if no valid selection criteria
+    queryset = Company.objects.all().order_by("name")
 
     if not selection_criteria.is_valid():
         errors = selection_criteria.errors
-
-    if selection_criteria.is_valid():
+    else:
         query = Q()
         name_query = selection_criteria.cleaned_data.get("name", "")
-
         if name_query:
             query &= Q(name__icontains=name_query)
-
         queryset = Company.objects.filter(query).order_by("name")
 
-    queryset, page = pagination(request, queryset)
-
-    # Retain existing query parameters for pagination
-    query_params = QueryDict("", mutable=True)
-    query_params.update(request.GET)
+    queryset = pagination(request, queryset, items_per_page)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "query_params": query_params.urlencode(),
     }
     return render(request, "companies/companies.html", context)
 
@@ -54,14 +56,8 @@ def company(request, company_id):
     predecessor_companies = Company.objects.filter(successor_company=company_id)
     wiki_categories = CompanyCategory.objects.filter(company=company_id)
     routes = Route.objects.filter(owneroperators=company).order_by("name")
-
-    # # Get either a customised post or otherwise a wikipedia page
-    if company.post_fk:
-        description = company.post_fk.body
-        description_type = "Notes"
-    elif company.wikislug:
-        import sys
-
+    posts = company.posts.all()
+    if company.wikislug:
         wikipediaapi.log.setLevel(level=wikipediaapi.logging.DEBUG)
         wiki_wiki = wikipediaapi.Wikipedia(
             user_agent="github/prpfr3 TPAM",
@@ -79,6 +75,7 @@ def company(request, company_id):
 
     context = {
         "company": company,
+        "posts": posts,
         "wiki_categories": wiki_categories,
         "description_type": description_type,
         "description": description,
@@ -90,36 +87,38 @@ def company(request, company_id):
 
 def manufacturers(request):
     errors = None
-    queryset = Manufacturer.objects.order_by("name")
-    selection_criteria = ManufacturerSelectionForm(request.GET or None)
+    items_per_page = 30
 
+    # Load selection criteria from session if available, or use empty data on first load
     if request.method == "POST":
-        # Use GET method for form submission
-        return redirect(request.path_info + "?" + request.POST.urlencode())
+        selection_criteria = ManufacturerSelectionForm(request.POST)
+        if selection_criteria.is_valid():
+            # Save criteria to session
+            request.session["manufacturer_selection_criteria"] = request.POST.dict()
+            return redirect(request.path_info)
+    else:
+        # Initialize form with session-stored data or empty if none available
+        form_data = request.session.get("manufacturer_selection_criteria", None)
+        selection_criteria = ManufacturerSelectionForm(form_data)
 
-    if not selection_criteria.is_valid():
-        errors = selection_criteria.errors
+    # Default to all records if no valid selection criteria
+    queryset = Manufacturer.objects.all().order_by("name")
 
     if selection_criteria.is_valid():
         query = Q()
         name_query = selection_criteria.cleaned_data.get("name", "")
-
         if name_query:
             query &= Q(name__icontains=name_query)
-
         queryset = Manufacturer.objects.filter(query).order_by("name")
+    else:
+        errors = selection_criteria.errors
 
-    queryset, page = pagination(request, queryset)
-
-    # Retain existing query parameters for pagination
-    query_params = QueryDict("", mutable=True)
-    query_params.update(request.GET)
+    queryset = pagination(request, queryset, items_per_page)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "query_params": query_params.urlencode(),
     }
     return render(request, "companies/manufacturers.html", context)
 

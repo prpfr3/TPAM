@@ -5,36 +5,26 @@ from django.db import models
 
 
 class LocoClassAdmin(admin.ModelAdmin):
-    list_display = ["wikiname", "brdslug", "wheel_body_type"]
+    list_display = ["name", "slug", "brdslug"]
     list_filter = [
         "br_power_class",
         "wheel_body_type",
         ("owner_operators", admin.RelatedOnlyFieldListFilter),
         ("manufacturers", admin.RelatedOnlyFieldListFilter),
     ]
-    search_fields = ["wikiname"]
-    ordering = ["wikiname"]
+    search_fields = ["name"]
+    ordering = ["name"]
     formfield_overrides = {
         models.TextField: {"widget": TinyMCE()},
     }
-    raw_id_fields = ["post_fk", "designer_person"]
-    filter_horizontal = ["references", "owner_operators", "manufacturers"]
-
-
-class LocoClassListAdmin(admin.ModelAdmin):
-    list_display = ["name", "wikislug", "brdslug", "lococlass_fk"]
-    search_fields = ["name", "wikislug"]
-    ordering = ["name"]
-    raw_id_fields = [
-        "lococlass_fk",
-    ]
+    raw_id_fields = ["designer_person"]
+    filter_horizontal = ["references", "owner_operators", "manufacturers", "posts"]
 
 
 class LocomotiveAdmin(admin.ModelAdmin):
     list_display = [
         "lococlass",
         "number_as_built",
-        "identifier",
         "number_pregrouping_1",
         "number_grouping_1",
         "number_postgrouping_1",
@@ -42,11 +32,10 @@ class LocomotiveAdmin(admin.ModelAdmin):
     list_filter = ["company_pregrouping_code", "company_grouping_code", "manufacturer"]
     search_fields = (
         "number_as_built",
-        "identifier",
         "number_pregrouping_1",
         "number_grouping_1",
         "number_postgrouping_1",
-        "lococlass__wikiname",
+        "lococlass__name",
     )
     ordering = ("number_as_built",)
 
@@ -56,7 +45,29 @@ class WheelArrangementAdmin(admin.ModelAdmin):
     ordering = ("whyte_notation",)
 
 
+class ImageAdmin(admin.ModelAdmin):
+    list_display = ["image_thumbnail", "image_name", "location", "visit"]
+    list_filter = [
+        ("location", admin.RelatedOnlyFieldListFilter),
+        ("visit", admin.RelatedOnlyFieldListFilter),
+    ]
+    search_fields = ["image_name"]
+    ordering = ["image_name"]
+    formfield_overrides = {
+        models.TextField: {"widget": TinyMCE()},
+    }
+    raw_id_fields = ["location"]
+    filter_horizontal = ["lococlass"]
+
+    def image_thumbnail(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="50" height="50" />', obj.image.url)
+        return ""
+
+    image_thumbnail.short_description = "Thumbnail"
+
+
 admin.site.register(LocoClass, LocoClassAdmin)
 admin.site.register(Locomotive, LocomotiveAdmin)
 admin.site.register(WheelArrangement, WheelArrangementAdmin)
-admin.site.register(LocoClassList, LocoClassListAdmin)
+admin.site.register(Image, ImageAdmin)

@@ -25,25 +25,28 @@
       </div>
     </div>
 
+    {% if not queryset %}
+    <div class="col-md-12">
+      <div class="alert alert-success" role="alert">No References Found for those Search Criteria</div>
+    </div>
+    {% else %}
 
       {% for reference in queryset %}
       <li>
-        <!-- <a href="{% url 'notes:reference' reference.id %}"> -->
           {{ reference.full_reference }}
-        <!-- </a> -->
   
-        {% if reference.person_set.all %}
-        
-          People mentioned:-
-          {% for person in reference.person_set.all %}
-            {{ person.name }}
-          {% endfor %}
-        
-        {% endif %}
+          {% if reference.person_set.all %}
+          
+            People mentioned:-
+            {% for person in reference.person_set.all %}
+              {{ person.name }}
+            {% endfor %}
+          
+          {% endif %}
       </li>        
-      {% empty %}
-        <h2>No Records Found.</h2>
       {% endfor %}
-    <br>
-    {% include "mainmenu/pagination.html" with page=references %}
+      <br>
+      {% include "mainmenu/pagination.html" with page=references %}
+
+    {% endif %}
 {% endblock content %}

@@ -12,11 +12,6 @@ def pagination(request, queryset, instances=40):
     paginator = Paginator(queryset, instances)
     page = request.GET.get("page")
 
-    # Retain existing query parameters for pagination links
-    query_params = request.GET.copy()
-    if "page" in query_params:
-        del query_params["page"]
-
     try:
         paginated_queryset = paginator.page(page)
     except PageNotAnInteger:
@@ -26,4 +21,4 @@ def pagination(request, queryset, instances=40):
         # If page is out of range, deliver the last page of results
         paginated_queryset = paginator.page(paginator.num_pages)
 
-    return (paginated_queryset, query_params)
+    return paginated_queryset

@@ -27,54 +27,71 @@
       </div>
     </div>
 
-
-  {% with queryset|slice:":13" as first_third %}
-  {% with queryset|slice:"13:26" as second_third %}
-  {% with queryset|slice:"26:" as third_third %}
-  <div class="container">
-  
-    <div class="row">
-      <div class="col-md-4">
-        {% for company in first_third %}
-          {% if company.post_fk %}
-            <div><a href="{% url 'notes:post_detail' company.post_fk.slug %}">{{company.name}}</a></div>
-          {% elif company.wikislug %}
-            <div><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></div>
-          {% else %}
-            <div>{{ company.name }}</div>
-          {% endif %}
-        {% endfor %}
+    {% if not queryset %}
+      <div class="col-md-12">
+        <div class="alert alert-success" role="alert">No Owner Operators Found for those Search Criteria</div>
       </div>
+    {% else %}
+      {% with queryset|slice:":10" as first_third %}
+      {% with queryset|slice:"10:20" as second_third %}
+      {% with queryset|slice:"20:" as third_third %}
+      <div class="container">
+      
+        <div class="row">
+          <div class="col-md-4">
+            {% for company in first_third %}
+              <div class="row mb-1 d-flex align-items-stretch row-height">
+                <div class="col-12 d-flex align-items-left justify-content-left">
+                  {% if company.notes %}
+                    <div><a href="{% url 'companies:company' company.id %}">{{company.name}}</a></div>
+                  {% elif company.wikislug %}
+                    <div><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></div>
+                  {% else %}
+                    <div>{{ company.name }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
 
-      <div class="col-md-4">
-        {% for company in second_third %}
-          {% if company.post_fk %}
-          <div><a href="{% url 'notes:post_detail' company.post_fk.slug %}">{{company.name}}</a></div>
-          {% elif company.wikislug %}
-            <div><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></div>
-          {% else %}
-            <div>{{ company.name }}</div>
-          {% endif %}
-        {% endfor %}
+          <div class="col-md-4">
+            {% for company in second_third %}
+              <div class="row mb-1 d-flex align-items-stretch row-height">
+                <div class="col-12 d-flex align-items-left justify-content-left">
+                  {% if company.post_fk %}
+                  <div><a href="{% url 'notes:post_detail' company.post_fk.slug %}">{{company.name}}</a></div>
+                  {% elif company.wikislug %}
+                    <div><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></div>
+                  {% else %}
+                    <div>{{ company.name }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-4">
+            {% for company in third_third %}
+              <div class="row mb-1 d-flex align-items-stretch row-height">
+                <div class="col-12 d-flex align-items-left justify-content-left">
+                  {% if company.post_fk %}
+                  <div><a href="{% url 'notes:post_detail' company.post_fk.slug %}">{{company.name}}</a></div>
+                  {% elif company.wikislug %}
+                    <div><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></div>
+                  {% else %}
+                    <div>{{ company.name }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
+      {% endwith %}
+      {% endwith %}
+      {% endwith %}
+      {% include "mainmenu/pagination.html" with page=queryset %} 
 
-      <div class="col-md-4">
-        {% for company in third_third %}
-          {% if company.post_fk %}
-          <div><a href="{% url 'notes:post_detail' company.post_fk.slug %}">{{company.name}}</a></div>
-          {% elif company.wikislug %}
-            <div><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></div>
-          {% else %}
-            <div>{{ company.name }}</div>
-          {% endif %}
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-  {% endwith %}
-  {% endwith %}
-  {% endwith %}
-  {% include "mainmenu/pagination.html" with page=queryset %} 
-
+    {% endif %}
   </div>
 {% endblock content %}

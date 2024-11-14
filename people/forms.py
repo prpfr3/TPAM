@@ -4,10 +4,31 @@ from django.utils.translation import gettext_lazy as _
 from .models import *
 
 
+class Select2Widget(forms.Select):
+    class Media:
+        css = {
+            "all": (
+                "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css",
+            )
+        }
+        js = (
+            "https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js",
+        )
+
+
 class PersonSelectionForm(forms.ModelForm):
     birthyear = forms.CharField(label="Birth Year", max_length=4, required=False)
     diedyear = forms.CharField(label="Year Died", max_length=4, required=False)
-    role = forms.ModelChoiceField(queryset=Role.objects.all(), required=False)
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.all(),
+        required=False,
+        widget=Select2Widget(
+            attrs={
+                "class": "search-select2",
+                "style": "width: 200px;",
+            }
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         if clear_previous_criteria := kwargs.pop("clear_previous_criteria", False):
@@ -28,7 +49,16 @@ class PersonSelectionForm(forms.ModelForm):
 class PersonTimelineSelectionForm(forms.ModelForm):
     birthyear = forms.CharField(label="Birth Year", max_length=4, required=False)
     diedyear = forms.CharField(label="Year Died", max_length=4, required=False)
-    role = forms.ModelChoiceField(queryset=Role.objects.all(), required=False)
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.all(),
+        required=False,
+        widget=Select2Widget(
+            attrs={
+                "class": "search-select2",
+                "style": "width: 200px;",
+            }
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         if clear_previous_criteria := kwargs.pop("clear_previous_criteria", False):

@@ -5,6 +5,9 @@ from django.db import models
 from notes.models import Post, Reference
 from people.models import Person
 from companies.models import Company, Manufacturer
+from locations.models import HeritageSite, Visit
+from django.conf import settings
+from django.utils.html import format_html
 
 sys.path.append("..")
 from utils.utils import custom_slugify
@@ -27,16 +30,12 @@ class WheelArrangement(models.Model):
 
 
 class LocoClass(models.Model):
-    SOURCE = (
-        (1, "Wikipedia"),
-        (2, "Custom"),
-    )
-
     slug = models.CharField(
         default=None, null=True, blank=True, max_length=255, unique=True, editable=False
     )
-    wikiname = models.CharField(max_length=1000, blank=True, default="")
+    name = models.CharField(max_length=1000, blank=True, default="")
     brdslug = models.CharField(default=None, blank=True, null=True, max_length=255)
+    notes = models.TextField(default=None, blank=True, null=True)
 
     br_power_class = models.CharField(max_length=5, blank=True, default="")
     wheel_body_type = models.CharField(max_length=100, blank=True, default="")
@@ -165,10 +164,8 @@ class LocoClass(models.Model):
     whyte = models.CharField(max_length=200, blank=True, default="")
     width = models.CharField(max_length=200, blank=True, default="")
     withdrawn = models.CharField(max_length=200, blank=True, default="")
+    posts = models.ManyToManyField(Post, related_name="lococlass_posts", blank=True)
 
-    post_fk = models.ForeignKey(
-        Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
     designer_person = models.ForeignKey(
         Person, on_delete=models.SET_NULL, blank=True, null=True, default=None
     )
@@ -194,10 +191,11 @@ class LocoClass(models.Model):
         return reverse("locos:loco_class", kwargs={"loco_class_id": self.pk})
 
     def __str__(self):
-        return self.wikiname
+        return self.name
 
     def save(self, *args, **kwargs):
-        self.slug = self.wikiname.replace(" ", "_").replace("/", "%2F")
+        self.classes = self.name.split(";")
+        self.slug = self.classes[0].replace(" ", "_").replace("/", "%2F")
         super().save(*args, **kwargs)
 
     class Meta:
@@ -206,27 +204,7 @@ class LocoClass(models.Model):
         managed = True
 
 
-class LocoClassList(models.Model):
-    name = models.CharField(max_length=1000, blank=True, default="")
-    wikislug = models.SlugField(
-        max_length=250, allow_unicode=True, default=None, blank=True, null=True
-    )
-    brdslug = models.CharField(default=None, null=True, max_length=255)
-    lococlass_fk = models.ForeignKey(
-        LocoClass, blank=True, null=True, on_delete=models.CASCADE
-    )
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = "Locomotive Class Mapping"
-        verbose_name_plural = "Locomotive Class Mappings"
-
-
 class Locomotive(models.Model):
-    identifier = models.CharField(max_length=500, blank=True, null=True)
-
     number_as_built = models.CharField(max_length=20, blank=True, null=True)
     number_pregrouping_1 = models.CharField(max_length=20, blank=True, null=True)
     number_pregrouping_1_date = models.CharField(max_length=10, blank=True, null=True)
@@ -271,9 +249,7 @@ class Locomotive(models.Model):
 
     references = models.ManyToManyField(Reference, blank=True)
     notes = models.TextField(blank=True, null=True)
-    post_fk = models.ForeignKey(
-        Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
+    posts = models.ManyToManyField(Post, related_name="loco_posts", blank=True)
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -283,14 +259,8 @@ class Locomotive(models.Model):
     def __str__(self):
         parts = []
 
-        if self.company_grouping_code is not None:
-            parts.append(f"{self.company_grouping_code}")
-
-        if self.company_pregrouping_code is not None:
-            parts.append(f"{self.company_pregrouping_code}")
-
-        if self.brd_class_name is not None:
-            parts.append(f"{self.brd_class_name}")
+        if self.lococlass is not None:
+            parts.append(f"{self.lococlass}")
 
         if self.number_as_built is not None:
             parts.append(f"Number as Built: {self.number_as_built}")
@@ -304,3 +274,81 @@ class Locomotive(models.Model):
             (today.month, today.day)
             < (self.build_datetime.month, self.build_datetime.day)
         )
+
+
+class Image(models.Model):
+    image_name = models.CharField(max_length=100, default=None)
+    image = models.ImageField(upload_to="images/")
+    lococlass = models.ManyToManyField(
+        LocoClass, related_name="lococlass_images", blank=True
+    )
+    location = models.ForeignKey(
+        HeritageSite,
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Location",
+        on_delete=models.SET_DEFAULT,
+    )
+    visit = models.ForeignKey(
+        Visit,
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name="Visit",
+        on_delete=models.SET_DEFAULT,
+    )
+    notes = models.TextField(default=None, blank=True, null=True)
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Railway Image"
+        verbose_name_plural = "Railway Images"
+
+    def __str__(self):
+        return self.image_name
+
+
+class Fav(models.Model):
+    thing = models.ForeignKey(Image, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="railway_image_favs_users",
+    )
+
+    # https://docs.djangoproject.com/en/3.0/ref/models/options/#unique-together
+    class Meta:
+        unique_together = ("thing", "user")
+        verbose_name = "Railway Image Favourite"
+        verbose_name_plural = "Railway Image Favourites"
+
+    def __str__(self):
+        return f"{self.user} likes {self.thing.image_name[:10]}"
+
+
+class BMImage(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="images_created",
+        on_delete=models.CASCADE,
+    )
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, blank=True)
+    url = models.URLField()
+    image = models.ImageField(upload_to="images/%Y/%m/%d/")
+    description = models.TextField(blank=True)
+    created = models.DateField(auto_now_add=True, db_index=True)
+    users_like = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        # Needed because of similar relationships in other appas
+        related_name="images_liked",
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Railway Bookmarked Image"
+        verbose_name_plural = "Railway Bookmarked Images"
+
+    def __str__(self):
+        return self.title

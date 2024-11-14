@@ -39,15 +39,15 @@
         <!-- Tab navigation -->
         <ul class="nav nav-tabs" id="myTab" role="tablist">
 
-          {% if route.post_fk %}
+          {% if route.notes %}
             <li class="nav-item">
-              <a class="nav-link {% if route.post_fk %}active text-primary bg-white{% else %}text-white bg-primary{% endif %}" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">History</a>
+              <a class="nav-link {% if route.notes %}active text-primary bg-white{% else %}text-white bg-primary{% endif %}" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Notes</a>
             </li>
           {% endif %}
 
           {% if route.wikipedia_slug %}
             <li class="nav-item">
-              <a class="nav-link {% if not route.post_fk %}active text-primary bg-white{% else %}text-white bg-primary{% endif %}" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
+              <a class="nav-link {% if not route.notes %}active text-primary bg-white{% else %}text-white bg-primary{% endif %}" id="wikipedia-tab" data-bs-toggle="tab" href="#wikipedia" role="tab" aria-controls="wikipedia" aria-selected="false">Wikipedia</a>
             </li>
           {% endif %}
           
@@ -71,7 +71,13 @@
 
           {% if route.wikipedia_routemaps or elrs %}
             <li class="nav-item text-white">
-              <a class="nav-link text-white bg-primary" href="{% url 'locations:route_map' route.slug %}">Maps</a>
+              <a class="nav-link text-white bg-primary" href="{% url 'locations:route_map' route.slug %}">Map</a>
+            </li>
+          {% endif %}
+
+          {% if route.wikipedia_routemaps or elrs %}
+            <li class="nav-item text-white">
+              <a class="nav-link text-white bg-primary" href="{% url 'locations:route_timeline' route.slug %}">Timeline Map</a>
             </li>
           {% endif %}
         </ul>
@@ -79,16 +85,16 @@
         <!-- Tab content -->
         <div class="tab-content" id="myTabContent">
 
-          {% if route.post_fk.body %}
-            <div class="tab-pane fade show active" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+          {% if route.notes %}
+            <div class="tab-pane fade show active mt-4" id="notes" role="tabpanel" aria-labelledby="notes-tab">
               {% autoescape off %}
-                {{route.post_fk.body}}
+              {{ route.notes }}
               {% endautoescape %}
             </div>
           {% endif %}
 
           {% if route.wikipedia_slug %}
-            <div class="tab-pane fade {% if not route.post_fk %}show active{% endif %}" id="wikipedia" role="tabpanel" aria-labelledby="wikipedia-tab">
+            <div class="tab-pane fade {% if not route.notes %}show active{% endif %}" id="wikipedia" role="tabpanel" aria-labelledby="wikipedia-tab">
               <iframe src='https://en.wikipedia.org/wiki/{{route.wikipedia_slug}}' id="NLSiframe" width="100%" height="700" marginwidth="300">
                 <p>Your browser does not support iframes - open map using 'Open Popup' on left</p>
               </iframe>
@@ -111,12 +117,22 @@
           {% endif %}
 
           {% if references %}
-            <div class="tab-pane fade" id="references" role="tabpanel" aria-labelledby="references-tab">
-              <ul>
+            <div class="tab-pane fade mt-4" id="references" role="tabpanel" aria-labelledby="references-tab">
                 {% for reference in references %}
-                  <li>{{reference.full_reference}}</li>
+                
+                  {% if '/ukla/' in reference.url %}
+                    <h3><a href="https://www.legislation.gov.uk{{reference.url}}">{{ reference.full_reference }}</a></h3>
+                  {% elif reference.url %}
+                    <h3><a href="{{reference.url}}">{{ reference.full_reference }}</a></h3>
+                  {% else %}
+                    <h3>{{reference.full_reference}}</h3>
+                  {% endif %}
+
+                  {% if reference.description %}
+                    {{reference.description|safe}}
+                  {% endif %}
+
                 {% endfor %}
-              </ul>
             </div>
           {% endif %}
 
@@ -140,6 +156,22 @@
                     <h4>{{elr.itemAltLabel}} {{elr.itemLabel}}</h4>
                   {% endfor %}
                 {% endif %}
+            </div>
+          {% endif %}
+
+          {% if route.wikipedia_routemaps or elrs %}
+            <div class="tab-pane fade" id="timeline-map" role="tabpanel" aria-labelledby="timeline-map">
+              <div class="container">
+                <div class="row justify-content-center align-items-center">
+                    <div class="col-12">
+                      {% if map %}
+                        {{map|safe}}
+                      <script script>{{map.script.render|safe}}</script>
+                      {% else %}
+                        <h4>No map available for this route</h4>
+                      {% endif %}
+                    </div>
+                </div>
             </div>
           {% endif %}
         </div>

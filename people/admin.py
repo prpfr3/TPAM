@@ -20,27 +20,12 @@ class PersonAdmin(admin.ModelAdmin):
         "birthdate",
         "dieddate",
         "wikitextslug",
-        "get_post_fk",
     ]
     ordering = ("name",)
-    search_fields = ("name", "post_fk__title")
+    search_fields = ("name",)
     formfield_overrides = {models.TextField: {"widget": TinyMCE()}}
-    raw_id_fields = ["post_fk"]
-    filter_horizontal = ["references"]
+    filter_horizontal = ["references", "posts"]
     inlines = [RoleInline]
-
-    def get_post_fk(self, obj):
-        return obj.post_fk.title if obj.post_fk is not None else None
-
-    get_post_fk.short_description = "Post FK"
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "post_fk":
-            kwargs["queryset"] = Post.objects.all().order_by("title")
-            kwargs["widget"] = ForeignKeyRawIdWidget(
-                db_field.remote_field, self.admin_site
-            )
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class PersonInline(admin.TabularInline):  # or StackedInline

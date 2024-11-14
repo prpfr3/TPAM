@@ -37,14 +37,24 @@
       {% endif %}
       </h2>
 
-      <h2 class="text-primary">References</h2>
-      {% for reference in references %}
+      {% if references %}
+        <h2 class="text-primary">References</h2>
+        {% for reference in references %}
+                  
+          {% if '/ukla/' in reference.url %}
+            <h3><a href="https://www.legislation.gov.uk{{reference.url}}">{{ reference.full_reference }}</a></h3>
+          {% elif reference.url %}
+            <h3><a href="{{reference.url}}">{{ reference.full_reference }}</a></h3>
+          {% else %}
+            <h3>{{reference.full_reference}}</h3>
+          {% endif %}
 
-      <p>{{reference.full_reference}}</p>
+          {% if reference.description %}
+            {{reference.description}}
+          {% endif %}
+        {% endfor %}
 
-      {% empty %}
-        <p>None recorded</p>
-      {% endfor %}
+      {% endif %}
     
       {% if designed_loco_classes %}
         <h2 class="text-primary">Designed Loco Classes</h2>

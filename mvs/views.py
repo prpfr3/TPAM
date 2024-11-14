@@ -113,14 +113,14 @@ def locations(request):
         locations = paginator.page(1)
     except EmptyPage:
         locations = paginator.page(paginator.num_pages)
-    context = {"page": page, "locations": locations}
+    context = {"locations": locations}
     return render(request, "mvs/locations.html", context)
 
 
 def photos(request):
-    photos = MVImage.objects.order_by("image_name")
-    photos, page = pagination(request, photos, 36)
-    context = {"page": page, "queryset": photos}
+    queryset = MVImage.objects.order_by("image_name")
+    queryset = pagination(request, queryset, 36)
+    context = {"queryset": queryset}
     return render(request, "mvs/photos.html", context)
 
 

@@ -1,0 +1,62 @@
+{% extends "admin/change_list.html" %}
+
+{% load notes_filters %}
+
+{% block result_list %}
+    <form method="post" action="">
+        {% csrf_token %}
+        <table class="table table-striped">
+            <thead>
+                <!-- Header row for the filters -->
+                <tr>
+                    <th><input type="checkbox" id="action-toggle"></th> <!-- Action checkbox header -->
+                    {% for field in cl.list_display %}
+                        <th>
+                            <input type="text" name="{{ field }}" value="{{ request.GET.field }}" placeholder="Filter {{ field }}">
+                        </th>
+                    {% endfor %}
+                    <th>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </th>
+                </tr>
+                <!-- Original headers -->
+                <tr>
+                    <th>{{ cl.formset.management_form }}</th>  <!-- Checkbox management form -->
+                    {% for header in cl.result_headers %}
+                        <th scope="col" class="{{ header.class_attrib }}">
+                            {{ header.text|safe }}
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Loop over the records -->
+                {% for result in cl.result_list %}
+                    <tr>
+                        <!-- Action checkbox -->
+                        <td>{{ cl.formset.forms.forloop.counter0|add:1 }}</td>
+                        <td>{{ result.action_checkbox }}</td> <!-- Add action checkbox for each row -->
+
+                        <!-- For each field in list_display, display the value for the current row -->
+                        {% for field in cl.list_display %}
+                            <td>{{ result|get_field_value:field }}</td> <!-- Custom template tag for the field value -->
+                        {% endfor %}
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{{ cl.list_display|length|add:'1' }}">No records found</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="actions">
+            {% for action in cl.actions %}
+                {% with cl.action_choices.action as action_choice %}
+                    <button name="action" type="submit" value="{{ action }}">{{ action_choice }}</button>
+                {% endwith %}
+            {% endfor %}
+        </div>
+
+    </form>
+{% endblock %}

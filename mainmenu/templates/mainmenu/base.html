@@ -16,6 +16,7 @@
 
     <link rel="stylesheet" href="{% static 'scss/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'scss/style.css' %}">
+
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
 
     <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
@@ -24,6 +25,7 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
     <!-- <link rel="stylesheet" type="text/css" href="https://www.bluebell-railway-museum.co.uk/css/additionalA.css"> -->
 
+    <link rel="stylesheet" href="{% static 'css/custom-styles.css' %}">
     {% block head %}{% endblock %}
 
   </head>
@@ -67,7 +69,6 @@
               <a class="dropdown-item nav-link" href="{% url 'locations:locations' %}">Locations</a>
               <a class="dropdown-item nav-link" href="{% url 'locations:routes' %}">Routes</a>
               <a class="dropdown-item nav-link" href="{% url 'locations:routes_southern' %}">Southern Railway Routes</a>
-              <a class="dropdown-item nav-link" href="{% url 'locations:route_sections' %}">Route Sections</a>
               <a class="dropdown-item nav-link" href="{% url 'locations:elrs' %}">Engineers Line References</a>              
               <a class="dropdown-item nav-link" href="{% url 'locations:regional_map_select' %}">Regional Railmap</a>
               {% comment %}
@@ -96,9 +97,9 @@
               <a class="dropdown-item nav-link" href="{% url 'notes:notes' %}">Notes</a>
               <a class="dropdown-item nav-link" href="{% url 'notes:references' %}">References</a>
               <a class="dropdown-item nav-link" href="{% url 'notes:timeline' %}">Railway Timeline</a>
-              <a class="dropdown-item nav-link" href="{% url 'timelines:timelines' %}">Custom Storylines</a>
-              <a class="dropdown-item nav-link" href="{% url 'storymaps:storymaps' %}">Custom Storymaps</a>
-              <a class="dropdown-item nav-link" href="{% url 'storymaps:carousels' %}">Custom Storyboards</a>
+              <a class="dropdown-item nav-link" href="{% url 'storymaps:timelines' %}">StoryTimelines</a>
+              <a class="dropdown-item nav-link" href="{% url 'storymaps:storymaps' %}">Storymaps</a>
+              <a class="dropdown-item nav-link" href="{% url 'storymaps:carousels' %}">Storyboards</a>
             </div>
           </div>
     
@@ -156,8 +157,13 @@
           <div class="nav-item text-nowrap">  
             <a class="nav-link px-3">Hello {{ user.username }}</a>
           </div>
-          <div class="nav-item text-nowrap"> 
-            <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+          <div class="nav-item text-nowrap">
+            <form action="{% url 'users:logout' %}" method="post" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="nav-link btn btn-link px-3" style="display: inline; border: none; background: none; cursor: pointer;">
+                Logout
+              </button>
+            </form>
           </div>
         {% else %}
           <div class="nav-item text-nowrap"> 

@@ -26,67 +26,56 @@
 
     <div class="col-md-8 col-lg-8 col-xl-8">
       <div class="text-left">
-        <form method="GET" action="{% url 'locations:locations' %}" enctype="multipart/form-data">
-          <p>
-            {% csrf_token %} {{ selection_criteria }}
+        <form method="POST" action="" enctype="multipart/form-data" class="mx-auto">
+          {% csrf_token %}
+          <p> {{ selection_criteria }}
             <input type="submit" class="btn btn-primary" name="submit_input" value="Submit" />
-            <input type="hidden" name="letter" value="{{ letter }}"> <!-- Include the letter in the form -->
           </p>
         </form>
       </div>
     </div>
   </div>
 
-  <ul class="nav nav-tabs" id="alphabetTab" role="tablist">
-    {% for l in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
-      <li class="nav-item" role="presentation">
-        <a class="nav-link {% if l == letter %}active bg-white text-primary{% else %}bg-primary text-white{% endif %}" 
-          id="tab-{{ l }}-tab" 
-          href="?letter={{ l }}&{% for key, value in request.GET.items %}{% if key != 'letter' and key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" 
-          role="tab" 
-          aria-controls="tab-{{ l }}" 
-          aria-selected="{% if l == letter %}true{% else %}false{% endif %}">
-          {{ l }}
-        </a>
-      </li>
-    {% endfor %}
-  </ul>
-
-  <div class="tab-content" id="myTabContent">
-    <div class="tab-pane fade show active" id="tab-{{ letter }}" role="tabpanel" aria-labelledby="tab-{{ letter }}-tab">
-
+  {% if not queryset.object_list %}
+    <div class="col-md-12">
+      <div class="alert alert-success" role="alert">No Locations Found for those Search Criteria</div>
+    </div>
+  {% else %}
+    <div class="tab-content" id="myTabContent">
       <div class="row mt-3">
         <div class="col-md-12 col-lg-12 col-xl-12">
 
-          {% with queryset.object_list|slice:":12" as first_third %}
-          {% with queryset.object_list|slice:"12:24" as second_third %}
-          {% with queryset.object_list|slice:"24:" as third_third %}
+          {% with queryset.object_list|slice:":10" as first_third %}
+          {% with queryset.object_list|slice:"10:20" as second_third %}
+          {% with queryset.object_list|slice:"20:" as third_third %}
           <div class="container">
             <div class="row">
+
               <div class="col-md-4">
-                {% for location in first_third %}
-                    <div class="row mb-1 d-flex align-items-stretch row-height">
-                      <div class="col-12 d-flex align-items-left justify-content-left">
-                        {% if location.wikiname %}
-                        <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
-                        {% elif location.name %}
-                        <a href="{% url 'locations:location' location.id %}">{{location.name}}</a>
-                        {% else %}
-                        <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
-                        {% endif %}
+                  {% for location in first_third %}
+                      <div class="row mb-1 d-flex align-items-stretch row-height">
+                        <div class="col-12 d-flex align-items-left justify-content-left">
+                          {% if location.name %}
+                          <a href="{% url 'locations:location' location.id %}">{{location.name}}</a>
+                          {% elif location.wikiname %}
+                          <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
+                          {% else %}
+                          <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
+                          {% endif %}
+                        </div>
                       </div>
-                    </div>
-                {% endfor %}
+                  {% endfor %}
+
               </div>
 
               <div class="col-md-4">
                 {% for location in second_third %}
                     <div class="row mb-1 d-flex align-items-stretch row-height">
                       <div class="col-12 d-flex align-items-left justify-content-left">
-                        {% if location.wikiname %}
-                        <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
-                        {% elif location.name %}
+                        {% if location.name %}
                         <a href="{% url 'locations:location' location.id %}">{{location.name}}</a>
+                        {% elif location.wikiname %}
+                        <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
                         {% else %}
                         <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
                         {% endif %}
@@ -99,10 +88,10 @@
                 {% for location in third_third %}
                     <div class="row mb-1 d-flex align-items-stretch row-height">
                       <div class="col-12 d-flex align-items-left justify-content-left">
-                        {% if location.wikiname %}
-                        <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
-                        {% elif location.name %}
+                        {% if location.name %}
                         <a href="{% url 'locations:location' location.id %}">{{location.name}}</a>
+                        {% elif location.wikiname %}
+                        <a href="{% url 'locations:location' location.id %}">{{location.wikiname}}</a>
                         {% else %}
                         <a href="{% url 'locations:location' location.id %}">OpenStreetMaps node {{location.osm_node}}</a>
                         {% endif %}
@@ -110,46 +99,18 @@
                     </div>
                 {% endfor %}
               </div>
+
             </div>
           </div>
           {% endwith %}
           {% endwith %}
           {% endwith %}
         </div>
-      </div>    
+      </div>       
     </div>
-  </div>
+  {% endif %}
 </div>
 
-
-  {% include "mainmenu/pagination_with_letter_tabs.html" with page=queryset letter=letter %}
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var tabLinks = document.querySelectorAll('a[data-toggle="tab"]');
+{% include "mainmenu/pagination.html" with page=queryset %}
   
-    tabLinks.forEach(function(link) {
-      link.addEventListener('shown.bs.tab', function(event) {
-        // Remove active classes from all tab links
-        tabLinks.forEach(function(link) {
-          link.classList.remove('text-primary', 'bg-white');
-          link.classList.add('text-white', 'bg-primary');
-        });
-  
-        // Add active classes to the newly activated tab link
-        event.target.classList.add('text-primary', 'bg-white');
-        event.target.classList.remove('text-white', 'bg-primary');
-      });
-    });
-  
-    // Highlight the initially active tab link
-    var initialActiveTabLink = document.querySelector('.nav-link.active');
-    if (initialActiveTabLink) {
-      initialActiveTabLink.classList.add('text-primary', 'bg-white');
-      initialActiveTabLink.classList.remove('text-white', 'bg-primary');
-    }
-  });
-  </script>
-  
-
 {% endblock content %}

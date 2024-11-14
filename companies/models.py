@@ -1,5 +1,5 @@
 from django.db import models
-from notes.models import Post
+from notes.models import Post, Reference
 from utils.utils import custom_slugify
 from django.core.validators import RegexValidator
 
@@ -15,8 +15,8 @@ class CompanyCategory(models.Model):
 
 
 custom_slug_validator = RegexValidator(
-    regex=r"^[a-zA-Z0-9'_,-]+$",
-    message="Enter a valid slug consisting of letters, numbers, apostrophes, commas, underscores, or hyphens.",
+    regex=r"^[a-zA-Z0-9'_#:,-]+$",
+    message="Enter a valid slug consisting of letters, numbers, apostrophes, commas, underscores, colons, hashes or hyphens.",
     code="invalid_slug",
 )
 
@@ -31,11 +31,17 @@ class Company(models.Model):
         max_length=100,
         validators=[custom_slug_validator],  # Apply the custom slug validator
     )
+    wikidata_id = models.CharField(max_length=20, default=None, blank=True, null=True)
     code = models.CharField(max_length=10, blank=True, null=True)
-    post_fk = models.ForeignKey(
-        Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
+
+    references = models.ManyToManyField(
+        Reference, related_name="company_references", blank=True
     )
-    company_category_fk = models.ManyToManyField(CompanyCategory, blank=True)
+
+    note = models.TextField(default=None, null=True, blank=True)
+    posts = models.ManyToManyField(Post, related_name="company_posts", blank=True)
+
+    company_categories = models.ManyToManyField(CompanyCategory, blank=True)
     successor_company = models.ForeignKey(
         "self", on_delete=models.SET_NULL, blank=True, null=True, default=None
     )
@@ -77,9 +83,8 @@ class Manufacturer(models.Model):
     electric = models.CharField(max_length=10, blank=True, null=True)
     map = models.CharField(max_length=200, blank=True, null=True)
     web = models.CharField(max_length=200, blank=True, null=True)
-    post_fk = models.ForeignKey(
-        Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
+
+    posts = models.ManyToManyField(Post, related_name="manufacturer_posts", blank=True)
 
     def get_absolute_url(self):
         # Enables "View on Site" link in Admin to go to detail view on (non-admin) site

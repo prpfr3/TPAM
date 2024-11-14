@@ -18,8 +18,8 @@
         <h1 class="text-primary text-center">Loco Classes</h1>
       </div>
 
-      <div class="col-md-8 col-lg-8 col-xl-8">
-        <div class="text-left"> <!-- Added text-center class -->
+      <div class="col-md-4 col-lg-4 col-xl-4">
+        <div class="text-left">
           <form method='POST' action="" enctype="multipart/form-data">
             {% csrf_token %}
             {{ selection_criteria }}
@@ -27,55 +27,57 @@
           </form>
         </div>
       </div>
-    </div>
 
     <div class="row">
-      <div class="col-md-12 col-lg-12 col-xl-12">
+      <div class="col-md-12 col-lg-12 col-xl-12"> 
 
-        {% with queryset|slice:":13" as first_third %}
-        {% with queryset|slice:"13:26" as second_third %}
-        {% with queryset|slice:"26:" as third_third %}
+        {% if not queryset %}
+          <div class="alert alert-success" role="alert">No Classes Found for those Search Criteria</div>
+        {% else %}
 
-        <div class="container">
-        
-          <div class="row">
+          {% with queryset|slice:":10" as first_third %}
+          {% with queryset|slice:"10:20" as second_third %}
+          {% with queryset|slice:"20:" as third_third %}
 
-            <div class="col-md-4">
-              {% for row in first_third %}
-                <div class="row mb-1 d-flex align-items-stretch row-height">
-                  <div class="col-12 d-flex align-items-left justify-content-left">
-                    <a href='{% url "locos:loco_class" row.slug %}'>{{row.wikiname}}</a>
+          <div class="container">       
+            <div class="row">
+              <div class="col-md-4">
+                {% for row in first_third %}
+                  <div class="row mb-1 d-flex align-items-stretch row-height">
+                    <div class="col-12 d-flex align-items-left justify-content-left">
+                      <a href='{% url "locos:loco_class" row.slug %}'>{{row.name}}</a>
+                    </div>
                   </div>
-                </div>
-              {% endfor %}
+                {% endfor %}
+              </div>
+
+              <div class="col-md-4">
+                {% for row in second_third %}
+                  <div class="row mb-1 d-flex align-items-stretch row-height">
+                    <div class="col-12 d-flex align-items-left justify-content-left">
+                      <a href='{% url "locos:loco_class" row.slug %}'>{{row.name}}</a>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-4">
+                {% for row in third_third %}
+                  <div class="row mb-1 d-flex align-items-stretch row-height">
+                    <div class="col-12 d-flex align-items-left justify-content-left">
+                      <a href='{% url "locos:loco_class" row.slug %}'>{{row.name}}</a>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
             </div>
 
-            <div class="col-md-4">
-              {% for row in second_third %}
-                <div class="row mb-1 d-flex align-items-stretch row-height">
-                  <div class="col-12 d-flex align-items-left justify-content-left">
-                    <a href='{% url "locos:loco_class" row.slug %}'>{{row.wikiname}}</a>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-
-            <div class="col-md-4">
-              {% for row in third_third %}
-                <div class="row mb-1 d-flex align-items-stretch row-height">
-                  <div class="col-12 d-flex align-items-left justify-content-left">
-                    <a href='{% url "locos:loco_class" row.slug %}'>{{row.wikiname}}</a>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
+          {% endwith %}
+          {% endwith %}
+          {% endwith %}
+          {% include "mainmenu/pagination.html" with page=queryset %} 
           </div>
-
-        {% endwith %}
-        {% endwith %}
-        {% endwith %}
-        {% include "mainmenu/pagination.html" with page=queryset %} 
-        </div>
+        {% endif %}
       </div><!--- End of Content Columns -->
     </div><!-- End of Content Rows -->
   </div><!-- End of Container -->

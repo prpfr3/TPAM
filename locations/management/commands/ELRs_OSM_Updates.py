@@ -30,7 +30,7 @@ def geojson_to_geometry(geojson):
 
 class Command(BaseCommand):
     # Show this when the user types help
-    help = "Updates one, one or more or all elr instances, with or without going to OpenRailMaps to get the geodata"
+    help = "Updates one, one or more or all elr instances, with or without going to OpenRailMaps to get the geojson"
 
     def handle(self, *args, **options):
 
@@ -50,19 +50,19 @@ class Command(BaseCommand):
                 instance = elr
 
             if refresh_from_OSM == True:
-                instance.geodata = osm_elr_fetch(instance.itemAltLabel, None)
+                instance.geojson = osm_elr_fetch(instance.itemAltLabel, None)
                 instance.save()
                 print(f"{instance.itemAltLabel} saved")
 
             try:
                 if (
                     refresh_geometry
-                    and instance.geodata
-                    and len(instance.geodata["features"]) > 0
+                    and instance.geojson
+                    and len(instance.geojson["features"]) > 0
                 ):
-                    instance.geometry = geojson_to_geometry(instance.geodata)
+                    instance.geometry = geojson_to_geometry(instance.geojson)
                     instance.save()
                 else:
-                    print(f"{instance} has no geodata")
+                    print(f"{instance} has no geojson")
             except Exception as e:
                 print(f"Error {e} on instance {instance}")
