@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 # Required as from Django 4.2
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-GDAL_INSTALLED = True
+GDAL_INSTALLED = False
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 INSTALLED_APPS = [
     # "djangocms_admin_style",  # django-cms requirement. Must be before django.contrib.admin
