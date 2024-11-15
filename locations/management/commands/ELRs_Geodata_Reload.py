@@ -1,10 +1,11 @@
 """
-Reloads the Geodata and Geometry fields from a backup csv file of the ELR table
+Reloads the Geojson fields from a backup csv file of the ELR table
+
+Backup file can be created from Postgres Pgadmin by downloading the table to a csv file
 """
 
-from csv import DictReader
 from django.core.management import BaseCommand
-import os
+import os, csv
 from locations.models import *
 from django.contrib.gis.geos import MultiLineString
 from django.contrib.gis.geos import LineString
@@ -28,34 +29,39 @@ def geojson_to_geometry(geojson):
 
 
 class Command(BaseCommand):
-    help = "Loads Wikidata Engineer Line Reference Data"
 
     def handle(self, *args, **options):
 
-        ELRs_updated = 0
+        cwd = os.getcwd()
+        if cwd == "/app" or cwd.startswith("/home"):
+            DATAIO_DIR = os.path.join("/home", "/django")
+        else:
+            DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 
-        with open(
-            os.path.join(DATAIO_DIR, "locations_elr.csv"), encoding="utf-8-sig"
-        ) as file:
+        input_file = os.path.join(DATAIO_DIR, "ELR_geojsons.csv")
 
-            for row in DictReader(file, delimiter="|"):
-                print(row["id"])
+        with open(input_file, encoding="utf-8-sig") as file:
+
+            csv.field_size_limit(100 * 1024 * 1024)
+
+            count = 0
+
+            for row in csv.DictReader(file, delimiter="|"):
+
                 elrid = row["id"]
                 elr = ELR.objects.get(id=elrid)
-                try:
-                    elr.geojson = row["geojson"]
-                except Exception as e:
-                    print(e)
 
-                if row["geometry"] != "":
+                if row["geojson"] and count < 1:
+                    count = count + 1
+
                     try:
-                        # elr.geometry = row["geometry"]
-                        elr.geometry = geojson_to_geometry(elr.geojson)
+                        elr.geojson = row["geojson"]
                     except Exception as e:
-                        print(e)
-                else:
-                    elr.geometry = None
-                elr.save()
-                ELRs_updated += 1
+                        print(f"EXCEPTION {e} for record {elrid}")
 
-        print(f"{ELRs_updated=}")
+                    try:
+                        elr.save()
+                    except Exception as e:
+                        print(f"EXCEPTION on save of {e} for record {elrid}")
+
+            self.stdout.write(f"{count} Geojsons reloaded to the ELR Table")

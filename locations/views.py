@@ -467,7 +467,7 @@ def elrs(request):
         selection_criteria = ELRSelectForm(form_data)
 
     # Default queryset for all ELRs
-    queryset = ELR.objects.only("itemLabel", "itemAltLabel")
+    queryset = ELR.objects.order_by("itemAltLabel").only("itemLabel", "itemAltLabel")
 
     if selection_criteria.is_valid():
         # Build the queryset based on valid selection criteria
