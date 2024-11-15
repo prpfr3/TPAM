@@ -211,7 +211,6 @@ class Location(models.Model):
         return reverse("locations:location", kwargs={"slug": self.slug})
 
     def __str__(self):
-        print(f"{location_geometry_fieldtype=}")
         return self.wikiname or self.name or str(self.id)
 
     def save(self, *args, **kwargs):
