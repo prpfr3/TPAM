@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
         cwd = os.getcwd()
         if cwd == "/app" or cwd.startswith("/home"):
-            DATAIO_DIR = os.path.join("/home", "/django")
+            DATAIO_DIR = os.path.join("/home", "django")
         else:
             DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 
