@@ -6,9 +6,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 import configparser
-
-# import dj_database_url
-
 # My Settings
 LOGIN_URL = "/users/login"
 # __file__ is the full path of the current file, settings.py
@@ -17,7 +14,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 # Required as from Django 4.2
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-GDAL_INSTALLED = False
+GDAL_INSTALLED = False  # True for Development, False for Digital Ocean
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 INSTALLED_APPS = [
     # "djangocms_admin_style",  # django-cms requirement. Must be before django.contrib.admin
@@ -268,6 +265,11 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     except configparser.NoOptionError:
         # Handle missing option error
         print("Error: One of the keys not found in [Django] section of .env file")
+
+    GDAL_LIBRARY_PATH = os.getenv("GDAL_LIBRARY_PATH", "/lib/libgdal.so")
+    GEOS_LIBRARY_PATH = os.getenv(
+        "GEOS_LIBRARY_PATH", "/lib/x86_64-linux-gnu/libgeos_c.so"
+    )
 
     DEBUG = False  # Always runs as False in Production
 

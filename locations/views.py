@@ -497,7 +497,11 @@ def elrs_query_build(selection_criteria):
     if "itemLabel" in cleandata and cleandata["itemLabel"]:
         conditions &= Q(itemLabel__icontains=cleandata["itemLabel"])
 
-    queryset = ELR.objects.filter(conditions).only("itemLabel", "itemAltLabel")
+    queryset = (
+        ELR.objects.filter(conditions)
+        .order_by("itemAltLabel")
+        .only("itemLabel", "itemAltLabel")
+    )
 
     return queryset
 
@@ -510,7 +514,7 @@ def elr_map(request, elr_id):
         elr_geojsons.append(elr.geojson)
 
         sql = """
-        SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        SELECT a."id", a."wikiname", a."wikislug", a."opened", a."closed", a."name",
         ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry)), a."media_url", b."itemAltLabel", b."itemLabel"
         FROM "locations_location" AS a
         INNER JOIN "locations_elrlocation" AS c ON a."id" = c."location_fk_id"

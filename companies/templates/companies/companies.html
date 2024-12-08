@@ -42,13 +42,7 @@
             {% for company in first_third %}
               <div class="row mb-1 d-flex align-items-stretch row-height">
                 <div class="col-12 d-flex align-items-left justify-content-left">
-                  {% if company.notes %}
                     <div><a href="{% url 'companies:company' company.id %}">{{company.name}}</a></div>
-                  {% elif company.wikislug %}
-                    <div><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></div>
-                  {% else %}
-                    <div>{{ company.name }}</div>
-                  {% endif %}
                 </div>
               </div>
             {% endfor %}
@@ -58,13 +52,7 @@
             {% for company in second_third %}
               <div class="row mb-1 d-flex align-items-stretch row-height">
                 <div class="col-12 d-flex align-items-left justify-content-left">
-                  {% if company.post_fk %}
-                  <div><a href="{% url 'notes:post_detail' company.post_fk.slug %}">{{company.name}}</a></div>
-                  {% elif company.wikislug %}
-                    <div><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></div>
-                  {% else %}
-                    <div>{{ company.name }}</div>
-                  {% endif %}
+                  <div><a href="{% url 'companies:company' company.id %}">{{company.name}}</a></div>
                 </div>
               </div>
             {% endfor %}
@@ -74,13 +62,7 @@
             {% for company in third_third %}
               <div class="row mb-1 d-flex align-items-stretch row-height">
                 <div class="col-12 d-flex align-items-left justify-content-left">
-                  {% if company.post_fk %}
-                  <div><a href="{% url 'notes:post_detail' company.post_fk.slug %}">{{company.name}}</a></div>
-                  {% elif company.wikislug %}
-                    <div><a href="https://en.wikipedia.org/wiki/{{company.wikislug}}"> {{ company.name }}</a></div>
-                  {% else %}
-                    <div>{{ company.name }}</div>
-                  {% endif %}
+                  <div><a href="{% url 'companies:company' company.id %}">{{company.name}}</a></div>
                 </div>
               </div>
             {% endfor %}

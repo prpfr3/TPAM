@@ -26,8 +26,14 @@
     <!-- <link rel="stylesheet" type="text/css" href="https://www.bluebell-railway-museum.co.uk/css/additionalA.css"> -->
 
     <link rel="stylesheet" href="{% static 'css/custom-styles.css' %}">
+    <style>
+    @media (max-width: 360px) {
+      body {
+        padding-top: 40px; /* Ensures the navbar does not cover the body on small screens */
+      }
+    }
+    </style>
     {% block head %}{% endblock %}
-
   </head>
   
   <body>  
@@ -150,7 +156,7 @@
           </div> <!--Military Vehicles-->
           {% endcomment %}
         </div>
-      </div>      
+     
 
       <div class="d-flex ms-auto navbar-nav">    
         {% if user.is_authenticated %}
@@ -173,13 +179,14 @@
             <a class="nav-link px-3" href="{% url 'users:login' %}">Login</a>
           </div>
         {% endif %}
-      </div>
+      </div>      
+    </div> 
 
     </nav>
 
     {% block header %}{% endblock %}
 
-    <main class="position-relative container-fluid ms-sm-auto pt-5">
+    <main class="position-relative container-fluid ms-sm-auto mt-5 pt-5">
 
       {% if messages %}
         {% for message in messages %}

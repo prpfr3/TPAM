@@ -8,7 +8,7 @@ from django.core.validators import RegexValidator
 from utils.utils import custom_slugify
 
 # from locos.models import LocoClass
-
+ 
 custom_slug_validator = RegexValidator(
     regex=r"^[a-zA-Z0-9'_,-]+$",
     message="Enter a valid slug consisting of letters, numbers, apostrophes, commas, underscores, or hyphens.",
@@ -277,6 +277,7 @@ class Post(models.Model):
 
     body = models.TextField(default=None)
     publish = models.DateTimeField(default=timezone.now)
+    # publish = models.DateTimeField(db_default=Now()) # Uses DB rather than Python function. Requires from django.db.models.functions import Now
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="draft")

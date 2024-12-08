@@ -34,6 +34,7 @@ class PostForm(forms.ModelForm):
             "body": TinyMCE(
                 attrs={"class": "form-control tinymce-editor", "cols": 80, "rows": 30}
             ),
+
             "status": forms.Select(
                 attrs={"class": "form-control", "placeholder": "Enter Status"}
             ),

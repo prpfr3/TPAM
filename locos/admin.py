@@ -19,6 +19,7 @@ class LocoClassAdmin(admin.ModelAdmin):
     }
     raw_id_fields = ["designer_person"]
     filter_horizontal = ["references", "owner_operators", "manufacturers", "posts"]
+    show_facets = admin.ShowFacets.ALWAYS
 
 
 class LocomotiveAdmin(admin.ModelAdmin):

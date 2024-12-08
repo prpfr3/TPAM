@@ -49,38 +49,24 @@ def companies(request):
 
 
 def company(request, company_id):
-    import wikipediaapi, urllib
     from locations.models import Route
 
     company = Company.objects.get(id=company_id)
-    predecessor_companies = Company.objects.filter(successor_company=company_id)
+    predecessor_companies = Company.objects.filter(
+        successor_company=company_id
+    ).order_by("name")
+    references = company.references.all().order_by("description")
     wiki_categories = CompanyCategory.objects.filter(company=company_id)
     routes = Route.objects.filter(owneroperators=company).order_by("name")
     posts = company.posts.all()
-    if company.wikislug:
-        wikipediaapi.log.setLevel(level=wikipediaapi.logging.DEBUG)
-        wiki_wiki = wikipediaapi.Wikipedia(
-            user_agent="github/prpfr3 TPAM",
-            language="en",
-            extract_format=wikipediaapi.ExtractFormat.HTML,
-        )
-        slug = company.wikislug.replace("/wiki/", "")
-        slug = urllib.parse.unquote(slug, encoding="utf-8", errors="replace")
-        page_html = wiki_wiki.page(slug)
-        description = page_html.text
-        description_type = "From Wikipedia:-"
-    else:
-        description = None
-        description_type = None
 
     context = {
         "company": company,
-        "posts": posts,
-        "wiki_categories": wiki_categories,
-        "description_type": description_type,
-        "description": description,
-        "routes": routes,
         "predecessor_companies": predecessor_companies,
+        "references": references,
+        "wiki_categories": wiki_categories,
+        "routes": routes,
+        "posts": posts,
     }
     return render(request, "companies/company.html", context)
 

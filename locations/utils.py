@@ -213,7 +213,7 @@ def fetch_locations(route):
         return None  # No routemaps found, return None
 
     sql = """
-        SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        SELECT a."id", a."wikiname", a."wikislug", a."opened", a."closed", a."name",
             ST_Y(ST_CENTROID(a.geometry)),
             ST_X(ST_CENTROID(a.geometry)),
             a."media_url"
@@ -232,6 +232,9 @@ def routes_mapdata_extract(routes):
     figure = None
     for route in routes:
         route_locations = fetch_locations(route)
+        from pprint import pprint
+
+        pprint(route_locations)
         if route_locations and locations is None:
             locations = []
         if route_locations:
@@ -385,8 +388,8 @@ def folium_map_geojson(elr_geojsons, locations, height=650, width=1100):
                 )
 
                 if location["wikislug"] != None:
-                    name = f'<a href="https://en.wikipedia.org//wiki/{str(location["wikislug"])}"target="_blank"> \
-                    {str(location["wikiname"])}</a>'
+                    url = reverse("locations:location", args=[location["id"]])
+                    name = f'<a href="{url}" target="_blank">{location["wikiname"]}</a>'
                 elif location["name"] != None:
                     name = f'{location["name"]}'
                 else:
@@ -564,8 +567,10 @@ def folium_map_timeline(elr_geojsons, locations, height=650, width=1100):
                 name = f'{str(location["st_y"])," ",str(location["st_x"])}'
 
             if location["wikislug"] != None:
-                popup_name = f'<a href="https://en.wikipedia.org//wiki/{str(location["wikislug"])}"target="_blank"> \
-                {str(location["wikiname"])}</a>'
+                url = reverse("locations:location", args=[location["id"]])
+                popup_name = (
+                    f'<a href="{url}" target="_blank">{location["wikiname"]}</a>'
+                )
             else:
                 popup_name = name
 

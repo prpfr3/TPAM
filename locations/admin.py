@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.gis import forms
 from django.contrib.gis.db.models import GeometryField
+from django.forms import Textarea
 
 from django.contrib.gis.admin import GISModelAdmin
 
@@ -83,11 +84,12 @@ class HeritageSiteAdmin(admin.ModelAdmin):
 
 
 class LocationAdmin(admin_class_for_geoclasses):
-    list_display = ["name", "slug", "wikiname", "wikislug", "osm_node"]
+    list_display = ["slug", "name", "wikiname", "wikislug", "osm_node"]
     list_filter = ["source", CategoriesFilter]
     search_fields = ["wikiname", "name", "osm_node", "RCH_StopsGB_Altnames"]
     ordering = ["wikiname"]
     verbose_name = "Railway Locations"
+    show_facets = admin.ShowFacets.ALWAYS
 
     filter_horizontal = [
         "posts",
@@ -96,10 +98,12 @@ class LocationAdmin(admin_class_for_geoclasses):
         "categories",
     ]
 
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name == "notes" and isinstance(db_field, models.TextField):
-            kwargs["widget"] = TinyMCE()
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+    # Need to turn this code on to use TinyMCE in the notes field
+    # But has an adverse impact on the PointField that can't be maintained
+    # def formfield_for_dbfield(self, db_field, request, **kwargs):
+    #     if db_field.name == "notes":
+    #         kwargs["widget"] = TinyMCE()
+    #     return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -188,6 +192,7 @@ class RouteAdmin(admin.ModelAdmin):
         "owneroperators",
         "posts",
     ]
+    show_facets = admin.ShowFacets.ALWAYS
 
 
 class RouteLocationAdmin(admin_class_for_geoclasses):
@@ -199,8 +204,8 @@ class RouteLocationAdmin(admin_class_for_geoclasses):
     ]
     search_fields = ["routemap__name", "label"]
     ordering = ["routemap", "loc_no"]
-    # raw_id_fields = ["routemap", "location_fk"]
-    raw_id_fields = ["routemap"]
+    raw_id_fields = ["routemap", "location_fk"]
+    # raw_id_fields = ["routemap"]
 
     def get_location_fk_field(self, obj):
         if obj.location_fk:  # Check if location_fk is not None

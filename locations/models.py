@@ -159,7 +159,7 @@ class Location(models.Model):
     closed = models.CharField(max_length=200, blank=True, null=True)
     closed_to_steam = models.CharField(max_length=200, blank=True, null=True)
     disused_stations_slug = models.CharField(max_length=200, blank=True, null=True)
-    geometry = location_geometry_fieldtype(blank=True, null=True, default=None)
+    geometry = geometry_fieldtype(blank=True, null=True, default=None)
     atcocode = models.CharField(max_length=20, blank=True, null=True)
     tiploccode = models.CharField(max_length=20, blank=True, null=True)
     crscode = models.CharField(max_length=10, blank=True, null=True)

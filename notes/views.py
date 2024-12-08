@@ -71,11 +71,20 @@ class OwnerUpdateView(LoginRequiredMixin, UpdateView):
     queryset to the requesting user.
     """
 
+    # def get_queryset(self):
+    #     """Limit a User to only modifying their own data."""
+    #     qs = super(OwnerUpdateView, self).get_queryset()
+
+    #     return qs.filter(owner=get_object_or_404(Profile, user=self.request.user))
+
     def get_queryset(self):
         """Limit a User to only modifying their own data."""
         qs = super(OwnerUpdateView, self).get_queryset()
 
-        return qs.filter(owner=get_object_or_404(Profile, user=self.request.user))
+        # Get the User instance from the Profile
+        user = get_object_or_404(Profile, user=self.request.user).user
+
+        return qs.filter(owner=user)
 
 
 class OwnerDeleteView(LoginRequiredMixin, DeleteView):
@@ -86,7 +95,10 @@ class OwnerDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         qs = super(OwnerDeleteView, self).get_queryset()
-        return qs.filter(owner=get_object_or_404(Profile, user=self.request.user))
+        # Get the User instance from the Profile
+        user = get_object_or_404(Profile, user=self.request.user).user
+
+        return qs.filter(owner=user)
 
 
 def index(request):
