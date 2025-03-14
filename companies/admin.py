@@ -48,9 +48,6 @@ class ClassManufacturerAdmin(admin.ModelAdmin):
     ordering = ["lococlass_fk"]
 
 
-# admin.site.register(ClassDesigner)
-# admin.site.register(ClassManufacturer, ClassManufacturerAdmin)
-
-
 admin.site.register(Company, CompanyAdmin)
+admin.site.register(CompanyCategory)
 admin.site.register(Manufacturer, ManufacturerAdmin)

@@ -109,10 +109,10 @@ def storymap(request, slug):
             "call_to_action_text": "Travel the Route",
             "map_as_image": False,
             "map_subdomains": "",
-            # See Overlay tab of NLS Maps for map countyoptions
+            # See Overlay tab of NLS Maps for map county options
             # "map_type": "https://mapseries-tilesets.s3.amazonaws.com/25_inch/kent/{z}/{x}/{y}.png",
-            # "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
-            "map_type": "osm:standard",
+            "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+            # "map_type": "osm:standard",
             "slides": slide_list,
             "zoomify": False,
         }

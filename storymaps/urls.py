@@ -10,4 +10,5 @@ urlpatterns = [
     path("carousel/<slug:slug>/", views.carousel, name="carousel"),
     path("timelines/", views.timelines, name="timelines"),
     path("timeline/<slug:slug>/", views.timeline, name="timeline"),
+
 ]

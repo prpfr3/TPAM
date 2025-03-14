@@ -1,13 +1,21 @@
 ﻿{% extends "../mainmenu/base.html" %}
+{% load django_bootstrap5 %}
 
-{% block header %}
+{% block content %}
+
   <div class="container-fluid">
     <h1 class="text-primary text-center">{{ photo.image_name }}</h1>
   </div>
-{% endblock %}
 
-{% block content %}
   <div class="card text-center text-primary">
+
+    <form action="{% url 'cart:cart_add' photo.id %}" method="post">
+      <p class="price">Purchase a copy of this Photo for £2.50</p>
+       {{ cart_product_form }}
+       {% csrf_token %}
+       <p></p>
+       {% bootstrap_button "Add to cart" button_type="submit" button_class="btn-primary" %}
+      </form>
 
     <img class="card-img-top mx-auto" style="max-width:60%" src="{{ photo.image.url }}" alt="">
     <div class="card-body">
@@ -32,7 +40,10 @@
     </div><!-- card-body -->
 
     {% comment %}
-      <a href="{% url 'locos:edit_mvimage' mvimage.id %}"  class="btn btn-primary">Edit</a>
+      <a href="{% url 'locos:edit_mvimage' photo.id %}"  class="btn btn-primary">Edit</a>
     {% endcomment %}
+
+
+
   </div> <!-- card -->
 {% endblock content %}

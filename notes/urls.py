@@ -44,4 +44,9 @@ urlpatterns = [
     path("references/", views.references, name="references"),
     path("reference/<int:reference_id>/", views.reference, name="reference"),
     path("timeline", views.timeline, name="timeline"),
+    path("brmplans/", views.brmplans, name="brmplans"),
+    path("brmplan/<int:plan_id>/", views.brmplan, name="brmplan"),
+    path("brmphotos/", views.brmphotos, name="brmphotos"),
+    # path("brmphoto/<int:photo_id>/", views.brmphoto, name="brmphoto"),
+    path("brmphoto/<int:pk>/", views.BRMPhotoDetailView.as_view(), name="brmphoto"),
 ]

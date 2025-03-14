@@ -5,7 +5,7 @@ Extracts Railway Acts from the UK Government Legislation site
 import requests, csv, os
 from bs4 import BeautifulSoup
 
-output_file = os.path.join("D:\\Data", "TPAM", "Companies_Extract_AoP3.csv")
+output_file = os.path.join("D:\\Data", "TPAM", "Companies_Extract_AoP.csv")
 
 with open(output_file, "wt+", newline="", encoding="utf-8") as csvFile:
     output = csv.writer(csvFile)
@@ -13,10 +13,8 @@ with open(output_file, "wt+", newline="", encoding="utf-8") as csvFile:
     output.writerow(csvrow)
     count = 0
 
-    # for i in range(1802, 2024):
     for i in range(1, 251):
         url = f"https://www.legislation.gov.uk/primary+secondary?title=railway&page={i}"
-        # url = f"https://www.legislation.gov.uk/primary+secondary/{i}?title=railway"
 
         try:
             res = requests.get(url).content.decode("utf-8", "ignore")

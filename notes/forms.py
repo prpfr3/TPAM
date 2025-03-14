@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.files.base import ContentFile
 from tinymce.widgets import TinyMCE
 
-from .models import Post, Topic, Reference
+from .models import *
 
 # from .models import Comment
 
@@ -34,7 +34,6 @@ class PostForm(forms.ModelForm):
             "body": TinyMCE(
                 attrs={"class": "form-control tinymce-editor", "cols": 80, "rows": 30}
             ),
-
             "status": forms.Select(
                 attrs={"class": "form-control", "placeholder": "Enter Status"}
             ),
@@ -86,4 +85,41 @@ class ReferenceSelectionForm(forms.ModelForm):
             "journal",
             "volume",
             "issue",
+        )
+
+
+class BRMPlansImageForm(forms.ModelForm):
+
+    class Meta:
+        model = BRMPlans
+        fields = ("archivenumber", "location", "description", "tube")
+        labels = {
+            "archivenumber": "Archive Number",
+            "location": "Location",
+            "description": "Description",
+            "tube": "Tube",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["archivenumber"].required = (
+            False  # For this form override the model mandatory status
+        )
+
+
+class BRMPhotosImageForm(forms.ModelForm):
+
+    class Meta:
+        model = BRMPhotos
+        fields = ("reference_number", "location", "lococlass")
+        labels = {
+            "reference_number": "Reference Number",
+            "location": "Location",
+            "lococlass": "Class",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["reference_number"].required = (
+            False  # For this form override the model mandatory status
         )

@@ -6,6 +6,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 import configparser
+
 # My Settings
 LOGIN_URL = "/users/login"
 # __file__ is the full path of the current file, settings.py
@@ -16,6 +17,20 @@ DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 GDAL_INSTALLED = False  # True for Development, False for Digital Ocean
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+config = configparser.ConfigParser()
+KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
+config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
+EMAIL_HOST_PASSWORD = config["Django"]["email"]
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.talktalk.net"
+EMAIL_HOST_USER = "paul.frost@talktalk.net"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
 INSTALLED_APPS = [
     # "djangocms_admin_style",  # django-cms requirement. Must be before django.contrib.admin
     "django.contrib.admin",
@@ -69,11 +84,13 @@ INSTALLED_APPS = [
     "tinymce",
     # Myapps
     "api",
+    "cart.apps.CartConfig",
     "companies",
     "locations",
     "locos",
     "mainmenu",
     "notes",
+    # "orders.apps.OrdersConfig",
     "mvs",
     "people",
     "rtt",
@@ -158,6 +175,7 @@ TEMPLATES = [
                 # "django.template.context_processors.i18n",  # Added for django-cms
                 # "sekizai.context_processors.sekizai",  # Added for django-cms
                 # "cms.context_processors.cms_settings",  # Added for django-cms as cms check says necessary
+                "cart.context_processors.cart",
             ],
         },
     },
@@ -275,19 +293,20 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
 
     # Find out what the IP addresses are at run time
     # This is necessary because otherwise Gunicorn will reject the connections
-    import netifaces
+    # Though Digital Ocean does not seem to need it
+    # import netifaces
 
-    def ip_addresses():
-        ip_list = []
-        for interface in netifaces.interfaces():
-            addrs = netifaces.ifaddresses(interface)
-            for x in (netifaces.AF_INET, netifaces.AF_INET6):
-                if x in addrs:
-                    ip_list.append(addrs[x][0]["addr"])
-        return ip_list
+    # def ip_addresses():
+    #     ip_list = []
+    #     for interface in netifaces.interfaces():
+    #         addrs = netifaces.ifaddresses(interface)
+    #         for x in (netifaces.AF_INET, netifaces.AF_INET6):
+    #             if x in addrs:
+    #                 ip_list.append(addrs[x][0]["addr"])
+    #     return ip_list
 
-    print(ip_addresses())
-    ALLOWED_HOSTS = ip_addresses()
+    # print(ip_addresses())
+    # ALLOWED_HOSTS = ip_addresses()
     ALLOWED_HOSTS = ["134.122.98.236", "localhost"]
 
     INSTALLED_APPS += [
@@ -361,6 +380,11 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
                 "handlers": ["console"],
                 "level": "DEBUG",
                 "propagate": False,
+            },
+            "celery": {
+                "handlers": ["console"],
+                "level": "DEBUG",
+                "propagate": True,
             },
         },
     }

@@ -15,37 +15,39 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Adding Plans and Map")
         with open(
-            os.path.join(DATAIO_DIR, "HorshamDrawingBox20 SL Date 2024-01-10 PF.csv"),
+            os.path.join(DATAIO_DIR, "HorshamDrawingBox20 SL Date 2025-02-04.csv"),
             encoding="utf-8-sig",
         ) as file:
             for row in DictReader(file):
 
                 instance = BRMPlans()
 
-                if row["archivenumber"]:
-                    instance.archivenumber = row["archivenumber"]
-                if row["location"]:
-                    instance.location = row["location"]
-                if row["description"]:
-                    instance.description = row["description"]
-                if row["scale"]:
-                    instance.scale = row["scale"]
-                if row["number"]:
-                    instance.number = row["number"]
-                if row["origin"]:
-                    instance.origin = row["origin"]
-                if row["date"]:
-                    instance.date = row["date"]
-                if row["tube"]:
-                    instance.tube = row["tube"]
-                if row["roll"]:
-                    instance.roll = row["roll"]
-                if row["drawingno"]:
-                    instance.drawingno = row["drawingno"]
-                if row["negativeno"]:
-                    instance.negativeno = row["negativeno"]
-                if row["material"]:
-                    instance.material = row["material"]
+                if row["BMARN"]:
+                    instance.archivenumber = row["BMARN"]
+                if row["LOCATION"]:
+                    instance.location = row["LOCATION"]
+                if row["DESCRIPTION"]:
+                    instance.description = row["DESCRIPTION"]
+                if row["SCALE"]:
+                    instance.number = row["SCALE"]
+                if row["Copies/Sheets"]:
+                    instance.date = row["Copies/Sheets"]
+                if row["ORIGIN"]:
+                    instance.date = row["ORIGIN"]
+                if row["DATE"]:
+                    instance.date = row["DATE"]
+                if row["TUBE No"]:
+                    instance.tube = row["TUBE No"]
+                if row["Roll"]:
+                    instance.roll = row["Roll"]
+                if row["Drawing No. "]:
+                    instance.drawingno = row["Drawing No. "]
+                if row["Negative No."]:
+                    instance.negativeno = row["Negative No."]
+                if row["Material"]:
+                    instance.material = row["Material"]
+                if row["ThumbnailPhotoId"]:
+                    instance.material = row["ThumbnailPhotoId"]
 
                 try:
                     instance.save()

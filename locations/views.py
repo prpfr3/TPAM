@@ -2,20 +2,15 @@ import json
 import urllib
 import wikipediaapi
 import folium
-from folium.plugins import MarkerCluster
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.http import HttpResponseRedirect, QueryDict
 from django.shortcuts import render, redirect
-from django.urls import reverse
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 
 from notes.models import Reference
 from mainmenu.views import pagination
-
-# from ukheritage.views import map_points
 
 from .forms import *
 from .models import *
@@ -285,11 +280,11 @@ def route_storymap(request, slug):
     storymap_json = None
     route = Route.objects.get(slug=slug)
 
-    if (
-        routemaps := route.wikipedia_routemaps.all()
-    ):  # i.e. If the route has any wikipedia routemaps
+    if routemaps := route.wikipedia_routemaps.all():
+
         sql = """
-            SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+            SELECT DISTINCT ON (a."id") 
+                a."wikiname", a."wikislug", a."opened", a."closed", a."name",
                 ST_Y(ST_CENTROID(a.geometry)),
                 ST_X(ST_CENTROID(a.geometry)),
                 a."media_caption",
@@ -299,17 +294,16 @@ def route_storymap(request, slug):
             INNER JOIN "locations_routelocation" AS b
                 ON (a."id" = b."location_fk_id")
             WHERE a."geometry" IS NOT NULL AND b."routemap_id" = %s
-            ORDER BY b."loc_no";
+            ORDER BY a."id", b."loc_no";
         """
 
         if slide_locations := execute_sql(sql, [routemaps[0].id]):
             header_title = route.name or None
-            wikislug = route.wikipedia_slug or None
 
             # If the route has notes, show these on the first page, otherwise show the wikipage
             if route.notes:
                 header_text = route.notes
-            else:
+            elif route.wikipedia_slug is not None:
                 pagename = route.wikipedia_slug.replace("_", " ")
                 wikipage = urllib.parse.unquote(
                     pagename, encoding="utf-8", errors="replace"
@@ -321,35 +315,31 @@ def route_storymap(request, slug):
                     extract_format=wikipediaapi.ExtractFormat.HTML,
                 )
 
-                # VARIANTS FOR THE TEXT TO APPEAR ON THE STORYMAP FRONT PAGE
-                # This variant gets only the text up to the Notes or References section
                 if wiki_wiki.page(wikipage).exists:
-                    text_array = wiki_wiki.page(wikipage).text.split("<h2>Notes</h2>")
-                    header_text = text_array[0].split("<h2>References</h2>")
+                    # This variant gets only the text up to the Notes or References section
+                    # text_array = wiki_wiki.page(wikipage).text.split("<h2>Notes</h2>")
+                    # header_text = text_array[0].split("<h2>References</h2>")
 
-                # This variant gets only the summary text
-                if wiki_wiki.page(wikipage).exists:
-                    header_text = wiki_wiki.page(wikipage).summary
+                    # # This variant gets only the summary text
+                    # header_text = wiki_wiki.page(wikipage).summary
 
-                # This variant gets the routemap template page rather than the route page
-                routemaps = route.wikipedia_routemaps.all()
-                url = f"https://en.wikipedia.org/wiki/Template:{str(routemaps[0])}"
-                header_text = get_wikipage_html(url)
+                    # # This variant gets the routemap template page rather than the route page
+                    # routemaps = route.wikipedia_routemaps.all()
+                    # url = f"https://en.wikipedia.org/wiki/Template:{str(routemaps[0])}"
+                    # header_text = get_wikipage_html(url)
 
-                # This variant gets all the html
-                url = f"https://en.wikipedia.org/wiki/{wikipage}"
-                header_text = get_wikipage_html(url)
+                    # This variant gets all the html
+                    url = f"https://en.wikipedia.org/wiki/{wikipage}"
+                    header_text = get_wikipage_html(url)
 
             storymap_json = generate_storymap(
                 header_title, header_text, slide_locations
             )
 
-            # Specify the file path where you want to save the JSON file
-            output_file_path = (
-                "D:\OneDrive\Source\FE Projects\BRMTimeline\\bluebell_storymap.json"
-            )
-
             # Write the storymap_json to the JSON file
+            # output_file_path = (
+            #     "D:\OneDrive\Source\FE Projects\BRMTimeline\\bluebell_storymap.json"
+            # )
             # with open(output_file_path, "w") as json_file:
             #     json_file.write(json.dumps(storymap_json, indent=2))
 
@@ -417,7 +407,7 @@ def regional_map(request, geo_area):
 
     sql = """
     SELECT 
-        a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        a."id", a."wikiname", a."wikislug", a."opened", a."closed", a."name",
         ST_Y(ST_CENTROID(a.geometry)),
         ST_X(ST_CENTROID(a.geometry)),
         a."media_url"

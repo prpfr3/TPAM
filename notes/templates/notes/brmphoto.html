@@ -1,0 +1,33 @@
+﻿{% extends "../mainmenu/base.html" %}
+{% load django_bootstrap5 %}
+
+{% block header %}
+  <div class="container-fluid mt-3 pt-3">
+    <h1 class="text-primary text-center">{{ object.company}} {{object.lococlass}} @ {{object.location}}</h1>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="card text-center text-primary">
+
+
+    <form action="{% url 'cart:cart_add' object.id %}" method="post">
+      <p class="price">Purchase a copy of this Photo for £2.50</p>
+       {{ cart_product_form }}
+       {% csrf_token %}
+       <p></p>
+       {% bootstrap_button "Add to cart" button_type="submit" button_class="btn-primary" %}
+      </form>
+    {{object.image_url}}
+
+    <img class="card-img-top mx-auto" style="max-width:60%" src="{{ image_src }}" alt="">
+    <div class="card-body">
+      {{ reference_number }}
+        <p class="card-text">Train Working: {{object.train_working}}</p>
+        <p class="card-text">Other Information: {{object.other_information}}</p>
+        <p class="card-text">Photographer: {{object.photographer}}</p>
+        <p class="card-text">Date {{object.date}}</p>
+    </div>
+
+  </div> <!-- card -->
+{% endblock content %}

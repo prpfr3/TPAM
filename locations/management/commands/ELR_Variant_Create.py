@@ -12,17 +12,17 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
-        elr_base = ELR.objects.get(itemAltLabel="SMJ2")
-        elr_new, _ = ELR.objects.get_or_create(itemAltLabel="SMJ2-A")
-        elr_new.itemLabel = "Burton Salmon to Ferrybridge North Junction"
-        elr_new.opened = datetime.strptime("1850-04-01", "%Y-%m-%d").date()
+        elr_base = ELR.objects.get(itemAltLabel="SMJ1")
+        elr_new, _ = ELR.objects.get_or_create(itemAltLabel="SMJ1-A")
+        elr_new.itemLabel = "Wath Road Junction to Dearne Junction"
+        elr_new.opened = datetime.strptime("1879-05-19", "%Y-%m-%d").date()
         # elr_new.closed = datetime.strptime("1847-07-09", "%Y-%m-%d").date()
         elr_new.derived = True
         # Change one or more of 49, -7, 59, 2 to limit the extent of the ELR
         elr_geojson = osm_elr_fetch(
             elr_base.itemAltLabel,
             (
-                53.712,
+                53.4981,
                 -7,
                 59,
                 2,

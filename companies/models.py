@@ -15,8 +15,8 @@ class CompanyCategory(models.Model):
 
 
 custom_slug_validator = RegexValidator(
-    regex=r"^[a-zA-Z0-9'_#:,-]+$",
-    message="Enter a valid slug consisting of letters, numbers, apostrophes, commas, underscores, colons, hashes or hyphens.",
+    regex=r"^[a-zA-Z0-9'_#:,\-\(\)]+$",
+    message="Enter a valid slug consisting of letters, numbers, apostrophes, commas, underscores, colons, hashes, hyphens, or parentheses.",
     code="invalid_slug",
 )
 

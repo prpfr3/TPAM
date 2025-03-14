@@ -67,6 +67,7 @@ def osm_elr_fetch(elr, bbox):
             );
             out geom;
             """
+
     else:
         overpass_query = f"""
             [out:json];    
@@ -74,6 +75,7 @@ def osm_elr_fetch(elr, bbox):
             way(area.a)["ref"="{elr}"]["railway"];
             out geom;
             """
+
     response = requests.get(overpass_url, params={"data": overpass_query})
     data = response.json()
 
@@ -113,31 +115,26 @@ def generate_storymap(headline, text, locations):
                 "text": {"headline": location.get("wikiname")},
             }
 
-            html_string = markdown.markdown(
-                f"https://en.wikipedia.org/wiki/{location.get('wikislug')}"
-            )
-            location_slide["text"]["text"] = html_string.replace('"', "'")
-
-            wikislug = location.get("wikislug").replace("/wiki/", "")
-            pagename = wikislug.replace("_", " ")
+            wikislug = location.get("wikislug", "")
             wiki_wiki = wikipediaapi.Wikipedia(
                 user_agent="github/prpfr3 TPAM",
                 language="en",
                 extract_format=wikipediaapi.ExtractFormat.HTML,
             )
 
-            if wikislug and wiki_wiki.page(wikislug).exists:
-                text_array = wiki_wiki.page(wikislug).text.split("<h2>References</h2>")
-                # pagename (Wikipedia) changed to location.name to allow different location names for rebuilt stations
-                location_slide["text"] = {
-                    "text": text_array[0],
-                    "headline": location.get("name"),
-                }
+            html_string = markdown.markdown(f"https://en.wikipedia.org/wiki/{wikislug}")
+            page = wiki_wiki.page(wikislug)
+
+            if wikislug and page.exists:
+                text_array = page.text.split("<h2>References</h2>")
+                text = text_array[0]
             else:
-                location_slide["text"] = {
-                    "text": html_string,
-                    "headline": location.get("name"),
-                }
+                text = html_string
+
+            location_slide["text"] = {
+                "text": text.replace('"', "'"),
+                "headline": location.get("name", ""),
+            }
 
             slide_list.append(location_slide)
         except Exception as e:
@@ -152,8 +149,9 @@ def generate_storymap(headline, text, locations):
             "map_as_image": False,
             "map_subdomains": "",
             # OSM Railway Map Type alternative shows all ELRs but not the OSM basemap. Also some zooming issues.
-            #  "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
-            "map_type": "osm:standard",
+            "map_type": "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
+            # "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+            # "map_type": "osm:standard",
             "slides": slide_list,
             "zoomify": False,
         }
@@ -206,51 +204,50 @@ def format_tags_as_list(tags_dict):
     return formatted_tags
 
 
-def fetch_locations(route):
+def fetch_route_locations(route):
     routemaps = route.wikipedia_routemaps.all()
 
-    if len(routemaps) == 0:
+    if not routemaps:
         return None  # No routemaps found, return None
 
     sql = """
-        SELECT a."id", a."wikiname", a."wikislug", a."opened", a."closed", a."name",
-            ST_Y(ST_CENTROID(a.geometry)),
-            ST_X(ST_CENTROID(a.geometry)),
-            a."media_url"
-        FROM "locations_location" AS a
-        INNER JOIN "locations_routelocation" AS b
-            ON (a."id" = b."location_fk_id")
-        WHERE a."geometry" IS NOT NULL AND b."routemap_id" = %s;
-    """
+    SELECT DISTINCT ON (a."id") 
+        a."id", a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        ST_Y(ST_CENTROID(a.geometry)),
+        ST_X(ST_CENTROID(a.geometry)),
+        a."media_url"
+    FROM "locations_location" AS a
+    INNER JOIN "locations_routelocation" AS b
+        ON (a."id" = b."location_fk_id")
+    WHERE a."geometry" IS NOT NULL AND b."routemap_id" = %s
+    ORDER BY a."id";  -- Ensure consistent ordering for DISTINCT ON"""
 
-    return execute_sql(sql, [routemaps[0].id])
+    results = []
+    for routemap in routemaps:
+        results.extend(
+            execute_sql(sql, [routemap.id])
+        )  # Execute SQL for each routemap and collect results
+
+    return (
+        results if results else None
+    )  # Return all collected results or None if no results
 
 
 def routes_mapdata_extract(routes):
-    elr_geojsons = None
-    locations = None
-    figure = None
+    elr_geojsons = []
+    route_locations = []
+
     for route in routes:
-        route_locations = fetch_locations(route)
-        from pprint import pprint
+        route_locations.extend(fetch_route_locations(route) or [])
+        elr_geojsons.extend(
+            elr.geojson
+            for elr in route.elrs.all()
+            if elr.geojson and elr.geojson.get("features")
+        )
 
-        pprint(route_locations)
-        if route_locations and locations is None:
-            locations = []
-        if route_locations:
-            locations.extend(route_locations)
-
-        if elrs := route.elrs.all():
-            for elr in elrs:
-                if elr.geojson and len(elr.geojson["features"]) > 0:
-                    if elr_geojsons is None:
-                        elr_geojsons = []
-                    elr_geojsons.append(elr.geojson)
-
-    return elr_geojsons, locations
+    return elr_geojsons or None, route_locations or None
 
 
-#### SUPERSEDED BY TIMELINE
 def folium_map_geojson(elr_geojsons, locations, height=650, width=1100):
     import folium
     from folium.plugins import MarkerCluster, MiniMap
@@ -275,6 +272,7 @@ def folium_map_geojson(elr_geojsons, locations, height=650, width=1100):
         overlay=True,
     ).add_to(m)
 
+    # See Overlay tab of NLS Maps for map county options
     folium.TileLayer(
         "https://mapseries-tilesets.s3.amazonaws.com/25_inch/sussex/{z}/{x}/{y}.png",
         attr='<a href="https://maps.nls.uk/"> \
@@ -476,6 +474,7 @@ def folium_map_timeline(elr_geojsons, locations, height=650, width=1100):
         overlay=True,
     ).add_to(m)
 
+    # See Overlay tab of NLS Maps for map county options
     folium.TileLayer(
         "https://mapseries-tilesets.s3.amazonaws.com/25_inch/kent/{z}/{x}/{y}.png",
         attr='<a href="https://maps.nls.uk/"> \
@@ -567,10 +566,14 @@ def folium_map_timeline(elr_geojsons, locations, height=650, width=1100):
                 name = f'{str(location["st_y"])," ",str(location["st_x"])}'
 
             if location["wikislug"] != None:
-                url = reverse("locations:location", args=[location["id"]])
-                popup_name = (
-                    f'<a href="{url}" target="_blank">{location["wikiname"]}</a>'
-                )
+                try:
+                    url = reverse("locations:location", args=[location["id"]])
+                    popup_name = (
+                        f'<a href="{url}" target="_blank">{location["wikiname"]}</a>'
+                    )
+                except Exception as e:
+                    # print(location["wikislug"], location["id"], e)
+                    pass
             else:
                 popup_name = name
 
@@ -809,8 +812,9 @@ def folium_map_location(latitude, longitude, tooltip_text, height=600, width=100
         width=width,
     )
 
+    # See Overlay tab of NLS Maps for map county options
     folium.TileLayer(
-        "https://mapseries-tilesets.s3.amazonaws.com/25_inch/sussex/{z}/{x}/{y}.png",
+        "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
         attr='<a href="https://maps.nls.uk/"> \
             OS 25 1892-1914 maps Reproduced with the permission of the National Library of Scotland</a>',
         name="NLS 25inch",

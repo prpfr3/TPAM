@@ -5,9 +5,8 @@ Takes a list of UK ACts of Parliament and loads them into the Reference file
 import os
 from csv import DictReader
 from django.core.management import BaseCommand
-from companies.models import Company, CompanyCategory
+from companies.models import Company
 from notes.models import Reference
-from datetime import datetime
 
 input_file = os.path.join("D:\\Data", "TPAM", "Companies_Extract_AoP.csv")
 

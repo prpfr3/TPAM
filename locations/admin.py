@@ -3,11 +3,7 @@ from tinymce.widgets import TinyMCE
 from django.db import models
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.gis import forms
-from django.contrib.gis.db.models import GeometryField
-from django.forms import Textarea
 
-from django.contrib.gis.admin import GISModelAdmin
 
 if settings.GDAL_INSTALLED:
     from django.contrib.gis.admin import GISModelAdmin

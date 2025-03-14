@@ -46,6 +46,7 @@ sparqlwrapper = "*"
 fsspec = "*"
 scipy = "*"
 geojson = "*"
+celery = "*"
 
 [dev-packages]
 django-debug-toolbar = "*"

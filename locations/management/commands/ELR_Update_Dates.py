@@ -10,9 +10,9 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
-        elr = ELR.objects.get(itemAltLabel="SJM1")
-        elr.opened = datetime.strptime("1849-07-10", "%Y-%m-%d").date()
-        # elr.closed = datetime.strptime("1847-07-09", "%Y-%m-%d").date()
+        elr = ELR.objects.get(itemAltLabel="DEN")
+        elr.opened = datetime.strptime("1894-09-01", "%Y-%m-%d").date()
+        elr.closed = datetime.strptime("1967-08-07", "%Y-%m-%d").date()
 
         if elr.geojson:
 

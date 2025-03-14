@@ -22,9 +22,12 @@ from django.views.generic import (
 
 from mainmenu.models import Profile
 from mainmenu.views import pagination
+from django.db.models import F, Func, Value, CharField
+from django.db.models.functions import Concat, Substr, Cast
+from cart.forms import CartAddProductForm
 
-from .forms import EmailPostForm, PostForm, ReferenceSelectionForm
-from .models import Post, Reference, Topic
+from .forms import *
+from .models import *
 
 """
 # Explanatory notes for the Owner views
@@ -457,3 +460,174 @@ def timeline(request):
         "notes/timeline.html",
         {"timeline_json": json.dumps(events), "groups": json.dumps(groups)},
     )
+
+
+def brmplans(request):
+
+    errors = None
+    queryset = BRMPlans.objects.all()
+
+    # Load selection criteria from session if available
+    if request.method == "POST":
+        selection_criteria = BRMPlansImageForm(request.POST)
+        if selection_criteria.is_valid():
+            # Save criteria to session
+            request.session["brmplans_selection_criteria"] = request.POST.dict()
+            return redirect(request.path_info)
+    else:
+        # Initialize form with session-stored data or empty if none available
+        form_data = request.session.get("brmplans_selection_criteria", None)
+        selection_criteria = BRMPlansImageForm(form_data)
+
+    # Filter queryset based on selection criteria
+    if selection_criteria.is_valid():
+        # queryset = Image.objects.all()
+        queryset = brmplans_query_build(selection_criteria.cleaned_data)
+
+    queryset = pagination(request, queryset, 27)
+
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "queryset": queryset,
+    }
+
+    return render(request, "notes/brmplans.html", context)
+
+
+def brmplans_query_build(selection_criteria):
+
+    conditions = Q()
+    cleandata = selection_criteria
+
+    if "archivenumber" in cleandata and cleandata["archivenumber"]:
+        conditions &= Q(archivenumber__icontains=cleandata["archivenumber"])
+
+    if "location" in cleandata and cleandata["location"]:
+        conditions &= Q(location__icontains=cleandata["location"])
+
+    if "description" in cleandata and cleandata["description"]:
+        conditions &= Q(description__icontains=cleandata["description"])
+
+    if "tube" in cleandata and cleandata["tube"]:
+        conditions &= Q(tube__icontains=cleandata["tube"])
+
+    queryset = BRMPlans.objects.filter(conditions).order_by("archivenumber")
+    return queryset
+
+
+def brmplan(request, plan_id):
+    plan = BRMPlans.objects.get(id=plan_id)
+    context = {"plan": plan}
+    return render(request, "notes/brmplan.html", context)
+
+
+def brmphotos(request):
+
+    errors = None
+    queryset = BRMPhotos.objects.all()
+
+    # Load selection criteria from session if available
+    if request.method == "POST":
+        selection_criteria = BRMPhotosImageForm(request.POST)
+        if selection_criteria.is_valid():
+            # Save criteria to session
+            request.session["brmphotos_selection_criteria"] = request.POST.dict()
+            return redirect(request.path_info)
+    else:
+        # Initialize form with session-stored data or empty if none available
+        form_data = request.session.get("brmphotos_selection_criteria", None)
+        selection_criteria = BRMPhotosImageForm(form_data)
+
+    # Filter queryset based on selection criteria
+    if selection_criteria.is_valid():
+        # queryset = Image.objects.all()
+        queryset = brmphotos_query_build(selection_criteria.cleaned_data)
+
+    queryset = pagination(request, queryset, 27)
+
+    context = {
+        "selection_criteria": selection_criteria,
+        "errors": errors,
+        "queryset": queryset,
+    }
+
+    return render(request, "notes/brmphotos.html", context)
+
+
+def brmphotos_query_build(selection_criteria):
+
+    conditions = Q()
+    cleandata = selection_criteria
+
+    if "reference_number" in cleandata and cleandata["reference_number"]:
+        conditions &= Q(archivenumber__icontains=cleandata["reference_number"])
+
+    if "location" in cleandata and cleandata["location"]:
+        conditions &= Q(location__icontains=cleandata["location"])
+
+    if "lococlass" in cleandata and cleandata["lococlass"]:
+        conditions &= Q(lococlass__icontains=cleandata["lococlass"])
+
+    queryset = (
+        BRMPhotos.objects.filter(conditions)
+        .annotate(
+            # Convert reference_number to a string and then apply LPAD
+            padded_ref=Func(
+                Cast(
+                    F("reference_number"), output_field=CharField()
+                ),  # Convert to text
+                Value(6),
+                Value("0"),
+                function="LPAD",
+                output_field=CharField(),
+            ),
+            image_src=Concat(
+                Value("https://www.bluebell-railway-museum.co.uk/archive/photos2/"),
+                Substr(
+                    "padded_ref", 1, 3, output_field=CharField()
+                ),  # First 3 characters
+                Value("/"),
+                Substr(
+                    "padded_ref", 4, 3, output_field=CharField()
+                ),  # Last 3 characters
+                Value(".jpg"),
+            ),
+        )
+        .order_by("reference_number")
+    )
+
+    return queryset
+
+
+# def brmphoto(request, photo_id):
+#     photo = BRMPhotos.objects.get(id=photo_id)
+#     context = {"photo": photo}
+#     return render(request, "notes/brmphoto.html", context)
+
+# class BRMPhotoDetailView(DetailView):
+#     model = BRMPhotos
+#     template_name = 'notes/brmphoto_detail.html'
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         reference_number = self.request.GET.get('ref')
+#         context['reference_number'] = reference_number
+#         return context
+
+# from django.views.generic import DetailView
+# from .models import BRMPhotos
+
+
+class BRMPhotoDetailView(DetailView):
+    model = BRMPhotos
+    template_name = "notes/brmphoto.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["image_src"] = self.request.GET.get("src")
+
+        cart_product_form = CartAddProductForm()
+        context["cart_product_form"] = cart_product_form
+        print(context)
+        return context

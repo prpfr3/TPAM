@@ -26,7 +26,7 @@ input_filename = "D://Data/TPAM/Companies_Wikidata_Extract.csv"
 
 
 class Command(BaseCommand):
-    help = "Loads Wikidata Engineer Line Reference Data"
+    help = "Loads Wikidata Company Data"
 
     def handle(self, *args, **options):
 

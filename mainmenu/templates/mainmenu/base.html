@@ -106,6 +106,8 @@
               <a class="dropdown-item nav-link" href="{% url 'storymaps:timelines' %}">StoryTimelines</a>
               <a class="dropdown-item nav-link" href="{% url 'storymaps:storymaps' %}">Storymaps</a>
               <a class="dropdown-item nav-link" href="{% url 'storymaps:carousels' %}">Storyboards</a>
+              <a class="dropdown-item nav-link" href="{% url 'notes:brmplans' %}">Bluebell Maps and Plans</a>
+              <a class="dropdown-item nav-link" href="{% url 'notes:brmphotos' %}">Bluebell Photos</a>
             </div>
           </div>
     
@@ -186,7 +188,7 @@
 
     {% block header %}{% endblock %}
 
-    <main class="position-relative container-fluid ms-sm-auto mt-5 pt-5">
+    <main class="position-relative container-fluid ms-sm-auto mt-4 pt-4">
 
       {% if messages %}
         {% for message in messages %}

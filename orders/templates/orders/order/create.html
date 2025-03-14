@@ -1,0 +1,33 @@
+{% extends "../../mainmenu/base.html" %}
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Checkout
+{% endblock %}
+
+{% block content %}
+  <div class="container my-4">
+    <h1 class="text-center">Checkout</h1>
+    <div class="card shadow p-4 mx-auto" style="max-width: 25vw;">
+      <h3 class="text-center">Your Order</h3>
+      <ul class="list-group mb-3">
+        {% for item in cart %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ item.quantity }}x {{ item.product.name }}</span>
+            <span class="fw-bold">£{{ item.total_price|floatformat:2 }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="text-end fw-bold">Total: £{{ cart.get_total_price|floatformat:2 }}</p>
+    </div>
+    <div class="card shadow p-4 mt-3 mx-auto" style="max-width: 25vw;">
+      <form method="post" class="order-form">
+        {{ form.as_p }}
+        <div class="text-center">
+          <button type="submit" class="btn btn-success">Place Order</button>
+        </div>
+        {% csrf_token %}
+      </form>
+    </div>
+  </div>
+{% endblock %}
