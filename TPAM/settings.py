@@ -17,19 +17,19 @@ DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 GDAL_INSTALLED = False  # True for Development, False for Digital Ocean
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 config = configparser.ConfigParser()
 KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
 config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
-EMAIL_HOST_PASSWORD = config["Django"]["email"]
+# EMAIL_HOST_PASSWORD = config["Django"]["email"]
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.talktalk.net"
-EMAIL_HOST_USER = "paul.frost@talktalk.net"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.talktalk.net"
+# EMAIL_HOST_USER = "paul.frost@talktalk.net"
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
 
 INSTALLED_APPS = [
     # "djangocms_admin_style",  # django-cms requirement. Must be before django.contrib.admin
