@@ -381,11 +381,11 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
                 "level": "DEBUG",
                 "propagate": False,
             },
-            "celery": {
-                "handlers": ["console"],
-                "level": "DEBUG",
-                "propagate": True,
-            },
+            # "celery": {
+            #     "handlers": ["console"],
+            #     "level": "DEBUG",
+            #     "propagate": True,
+            # },
         },
     }
 
