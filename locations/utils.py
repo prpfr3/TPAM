@@ -149,9 +149,9 @@ def generate_storymap(headline, text, locations):
             "map_as_image": False,
             "map_subdomains": "",
             # OSM Railway Map Type alternative shows all ELRs but not the OSM basemap. Also some zooming issues.
-            "map_type": "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
+            # "map_type": "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
             # "map_type": "https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
-            # "map_type": "osm:standard",
+            "map_type": "osm:standard",
             "slides": slide_list,
             "zoomify": False,
         }

@@ -283,18 +283,30 @@ def route_storymap(request, slug):
     if routemaps := route.wikipedia_routemaps.all():
 
         sql = """
-            SELECT DISTINCT ON (a."id") 
-                a."wikiname", a."wikislug", a."opened", a."closed", a."name",
-                ST_Y(ST_CENTROID(a.geometry)),
-                ST_X(ST_CENTROID(a.geometry)),
-                a."media_caption",
-                a."media_credit",
-                a."media_url"
-            FROM "locations_location" AS a
-            INNER JOIN "locations_routelocation" AS b
-                ON (a."id" = b."location_fk_id")
-            WHERE a."geometry" IS NOT NULL AND b."routemap_id" = %s
-            ORDER BY a."id", b."loc_no";
+            WITH ranked_locations AS (
+                SELECT 
+                    a."id", 
+                    a."wikiname", 
+                    a."wikislug", 
+                    a."opened", 
+                    a."closed", 
+                    a."name",
+                    ST_Y(ST_CENTROID(a.geometry)) AS "st_y",
+                    ST_X(ST_CENTROID(a.geometry)) AS "st_x",
+                    a."media_url",
+                    b."loc_no",
+                    ROW_NUMBER() OVER (PARTITION BY a."id" ORDER BY b."loc_no") AS rank
+                FROM "locations_location" AS a
+                INNER JOIN "locations_routelocation" AS b
+                    ON a."id" = b."location_fk_id"
+                WHERE a."geometry" IS NOT NULL 
+                    AND b."routemap_id" = %s
+            )
+            SELECT *
+            FROM ranked_locations
+            WHERE rank = 1
+            ORDER BY "loc_no";
+
         """
 
         if slide_locations := execute_sql(sql, [routemaps[0].id]):
