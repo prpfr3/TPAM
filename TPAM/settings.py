@@ -144,6 +144,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "TPAM.middleware.LoginRequiredMiddleware",  # Custom middleware
     # "whitenoise.middleware.WhiteNoiseMiddleware",
     # "cms.middleware.utils.ApphookReloadMiddleware",  # Optional for django-cms
     # "django.middleware.locale.LocaleMiddleware",  # Required for django-cms
