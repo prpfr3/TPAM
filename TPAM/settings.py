@@ -233,9 +233,10 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
         "django.contrib.gis",
     ]
 
+    # "ENGINE": "django.db.backends.postgresql_psycopg2",
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
             "NAME": "tpam",
             "USER": "django",
             "PASSWORD": DATABASE_KEY,
