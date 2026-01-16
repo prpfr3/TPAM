@@ -1,5 +1,17 @@
 from .forms import *
+from django.urls import path, register_converter
 
+# Custom path converter to allow ampersands in slugs
+class AmpersandSlugConverter:
+    regex = r"[\w\-\&]+"
+
+    def to_python(self, value):
+        return value
+
+    def to_url(self, value):
+        return value
+
+register_converter(AmpersandSlugConverter, "aslug")
 
 def custom_slugify(value, allow_unicode=False):
     import unicodedata, re

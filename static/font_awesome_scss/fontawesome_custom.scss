@@ -1,0 +1,10 @@
+// 1. Configure BEFORE importing
+$fa-font-path: "../webfonts";
+
+// 2. Import Font Awesome core
+@import "fontawesome";
+
+// 3. Pick the icon packs you need
+@import "solid";
+@import "regular";
+@import "brands";

@@ -1,20 +1,56 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // VS Code debug configuration file.
+    // It tells VS Code how to run and debug your Django project, that is, how VS Code should run or debug your project when you press F5 or choose Run > Start Debugging..
+
     "version": "0.2.0",
     "configurations": [
         {
+            // The name shown in the VS Code Run/Debug menu
             "name": "Python: Django",
-            // "python": "/Users/paulf/anaconda3/envs/GeoDjango/python3",
+
+            // The debug engine used by VS Code (debugpy = Python debugger)
             "type": "debugpy",
+
+            // "launch" means VS Code will start the program itself.
+            // You could also use "attach" to connect to an already running server.
             "request": "launch",
-            "program": "${workspaceFolder}\\manage.py",
+
+            // Path to your manage.py file (entry point for Django)
+            // ${workspaceFolder} = root folder of your current project
+            "program": "${workspaceFolder}/manage.py",
+
+            // Command-line arguments to pass to manage.py
+            // This runs the development server
             "args": [
                 "runserver"
             ],
-            "console": "internalConsole",
+
+            // Recommended: use the integrated terminal
+            // - "internalConsole": output appears in Debug Console (no input possible)
+            // - "integratedTerminal": runs in VS Code's built-in terminal
+            // - "externalTerminal": opens a system terminal window
+            "console": "integratedTerminal",
+
+            // Enables Django-specific debugging support
+            // (automatically sets DJANGO_SETTINGS_MODULE and configures environment)
             "django": true,
+
+            // Optional: specify the Python interpreter path if you have multiple environments
+            // "python": "/Users/paulf/anaconda3/envs/GeoDjango/bin/python3",
+
+            // Optional: environment variables for your Django app
+            // "env": {
+            //     "DJANGO_DEBUG": "true",
+            //     "DJANGO_SETTINGS_MODULE": "myproject.settings"
+            // },
+
+            // Optional: working directory (defaults to workspace root)
+            // "cwd": "${workspaceFolder}",
+
+            // Optional: server arguments
+            // "args": [
+            //     "runserver", "0.0.0.0:8000"
+            // ]
         }
     ]
 }

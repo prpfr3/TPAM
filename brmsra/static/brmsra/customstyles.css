@@ -1,0 +1,14 @@
+/* For the layout of the BRMPlans list screen */
+.brmplans-container .card-img-wrapper {
+  aspect-ratio: 4 / 3;        /* choose your ratio */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.brmplans-container .card-img-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;        /* no cropping */
+}

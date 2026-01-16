@@ -12,10 +12,6 @@
         {% autoescape off %}
         <a href="{% url 'notes:topic_detail' topic.id %}">{{ topic.text }}</a>
         {% endautoescape %}
-        {% if topic.owner == user %}
-        (<a href="{% url 'notes:topic_update' topic.id %}">Edit</a> |
-        <a href="{% url 'notes:topic_delete' topic.id %}">Delete</a>)
-        {% endif %}
     </h2>
   {% endfor %}
 
@@ -23,9 +19,4 @@
   <p>There are no topics in the database.</p>
 {% endif %}
 
-<p>|
-  {% if user.is_authenticated %}
-  |<a href="{% url 'notes:topic_create' %}">Add a topic</a>|
-  {% endif %}
-</p>
 {% endblock %}

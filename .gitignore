@@ -10,6 +10,9 @@ cert.*
 */migrations/*.py
 */migrations/*.pyc
 
+# Ignore SASS Source files
+/static/scss/*.*
+
 # User-specific files
 *.rsuser
 *.suo

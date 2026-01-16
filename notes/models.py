@@ -2,12 +2,9 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from django.urls import reverse
-from django.utils.text import slugify
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from utils.utils import custom_slugify
-
-# from locos.models import LocoClass
 
 custom_slug_validator = RegexValidator(
     regex=r"^[a-zA-Z0-9'_,-]+$",
@@ -31,9 +28,8 @@ class Topic(models.Model):
         return self.text
 
 
+
 # This custom object manager allows a different queryset to be used than the standard "all" objects.
-
-
 class PublishedManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(status="published")
@@ -145,16 +141,13 @@ class Reference(models.Model):
     access_date = models.DateField(blank=True, null=True)
     date_added = models.DateTimeField(auto_now_add=True)
 
-    # loco_classes = models.ManyToManyField(
-    #     LocoClass, related_name="lococlass_references", blank=True
-    # )
 
     def save(self, *args, **kwargs):
         self.full_reference = ""
-        if self.authors:
-            self.full_reference += f"{self.authors}, "
         if self.title:
             self.full_reference += f"{self.title}, "
+        if self.authors:
+            self.full_reference += f"{self.authors}, "
         if self.journal:
             self.full_reference += f"{self.journal}, "
         if self.issn:
@@ -260,6 +253,9 @@ class Reference(models.Model):
         return f"{self.full_reference}"
 
 
+
+
+    
 class Post(models.Model):
     STATUS_CHOICES = (("draft", "Draft"), ("published", "Published"))
 
@@ -276,17 +272,17 @@ class Post(models.Model):
     )
 
     body = models.TextField(default=None)
+    media_url = models.URLField(blank=True, null=True, max_length=400)
+    media_caption = models.CharField(max_length=100, blank=True, null=True)
+    media_credit = models.CharField(max_length=200, blank=True, null=True)
     publish = models.DateTimeField(default=timezone.now)
-    # publish = models.DateTimeField(db_default=Now()) # Uses DB rather than Python function. Requires from django.db.models.functions import Now
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="draft")
     references = models.ManyToManyField(Reference, blank=True)
     liked = models.ManyToManyField(User, blank=True)
-    # Default manager exceptionally needs to be defined because we have defined a second manager, PublishedManager
-    objects = models.Manager()
-    # Our model custom manager which retrieves only published.
-    published = PublishedManager()
+    objects = models.Manager() # Required because we have a custom manager
+    published = PublishedManager() # customer manager
 
     class Meta:
         verbose_name_plural = "Posts"
@@ -301,64 +297,3 @@ class Post(models.Model):
 
     def __str__(self):
         return f"{self.title[:50]}..." if len(self.title) > 50 else self.title
-
-
-class BRMPlans(models.Model):
-
-    archivenumber = models.CharField(max_length=5, default=None, blank=True, null=True)
-    location = models.CharField(max_length=100, default=None, blank=True, null=True)
-    description = models.CharField(max_length=2000, default=None, blank=True, null=True)
-    scale = models.CharField(max_length=100, default=None, blank=True, null=True)
-    number = models.CharField(max_length=100, default=None, blank=True, null=True)
-    origin = models.CharField(max_length=100, default=None, blank=True, null=True)
-    date = models.CharField(max_length=100, default=None, blank=True, null=True)
-    tube = models.CharField(max_length=100, default=None, blank=True, null=True)
-    roll = models.CharField(max_length=100, default=None, blank=True, null=True)
-    drawingno = models.CharField(max_length=100, default=None, blank=True, null=True)
-    negativeno = models.CharField(max_length=100, default=None, blank=True, null=True)
-    material = models.CharField(max_length=100, default=None, blank=True, null=True)
-    images = models.CharField(max_length=100, default=None, blank=True, null=True)
-    image = models.ImageField(upload_to="images/", default=None, blank=True, null=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name_plural = "Bluebell Railway Archive Maps & Plans"
-
-    def __str__(self):
-        return f"{self.location} {self.description}"
-
-
-class BRMPhotos(models.Model):
-
-    reference_number = models.IntegerField()
-    key = models.CharField(max_length=100, default=None, blank=True, null=True)
-    company = models.CharField(max_length=50, default=None, blank=True, null=True)
-    lococlass = models.CharField(max_length=100, default=None, blank=True, null=True)
-    number = models.CharField(max_length=100, default=None, blank=True, null=True)
-    date = models.CharField(max_length=100, default=None, blank=True, null=True)
-    date = models.CharField(max_length=100, default=None, blank=True, null=True)
-    number = models.CharField(max_length=100, default=None, blank=True, null=True)
-    name = models.CharField(max_length=100, default=None, blank=True, null=True)
-    location = models.CharField(max_length=100, default=None, blank=True, null=True)
-    train_working = models.CharField(
-        max_length=1000, default=None, blank=True, null=True
-    )
-    other_information = models.CharField(
-        max_length=1000, default=None, blank=True, null=True
-    )
-    photographer = models.CharField(max_length=100, default=None, blank=True, null=True)
-    photographer_ref = models.CharField(
-        max_length=100, default=None, blank=True, null=True
-    )
-    sort_date = models.CharField(max_length=100, default=None, blank=True, null=True)
-    day_of_week = models.CharField(max_length=100, default=None, blank=True, null=True)
-    holiday = models.CharField(max_length=100, default=None, blank=True, null=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name_plural = "Bluebell Railway Photo Archive"
-
-    def __str__(self):
-        return f"{self.reference_number} {self.lococlass} @ {self.location}"

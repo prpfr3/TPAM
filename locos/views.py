@@ -13,7 +13,6 @@ from notes.models import Reference
 from mainmenu.views import pagination
 from .forms import *
 from .models import *
-from cart.forms import CartAddProductForm
 
 
 def index(request):
@@ -267,6 +266,6 @@ def photos_query_build(selection_criteria):
 
 def photo(request, photo_id):
     photo = Image.objects.get(id=photo_id)
-    cart_product_form = CartAddProductForm()
-    context = {"photo": photo, "cart_product_form": cart_product_form}
+
+    context = {"photo": photo}
     return render(request, "locos/photo.html", context)

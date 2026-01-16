@@ -1,11 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from django.core.files.base import ContentFile
 from tinymce.widgets import TinyMCE
-
 from .models import *
-
-# from .models import Comment
 
 
 class EmailPostForm(forms.Form):
@@ -15,11 +11,14 @@ class EmailPostForm(forms.Form):
     comments = forms.CharField(required=False, widget=forms.Textarea)
 
 
-"""class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ('name', 'email', 'body')
-"""
+from django import forms
+from .models import Topic
+
+
+class PostFilterForm(forms.Form):
+    topic = forms.ModelChoiceField(
+        queryset=Topic.objects.all(), required=False, empty_label="All topics"
+    )
 
 
 class PostForm(forms.ModelForm):
@@ -49,11 +48,16 @@ class PostForm(forms.ModelForm):
         }
 
 
-class TopicForm(forms.ModelForm):
+class ReferenceForm(forms.ModelForm):
     class Meta:
-        model = Topic
-        fields = ["text"]
-        labels = {"text": ""}
+        model = Reference
+        fields = ["type", "full_reference"]
+        labels = {"type": "type", "full reference": "Reference"}
+        widgets = {
+            "description": TinyMCE(
+                attrs={"class": "form-control tinymce-editor", "cols": 80, "rows": 30}
+            ),
+        }
 
 
 class ReferenceSelectionForm(forms.ModelForm):
@@ -88,38 +92,66 @@ class ReferenceSelectionForm(forms.ModelForm):
         )
 
 
-class BRMPlansImageForm(forms.ModelForm):
+from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib import admin
+
+from .models import Reference
+from locos.models import LocoClass
+from companies.models import Company
+from locations.models import Location, Route
+
+
+class ReferenceAdminForm(forms.ModelForm):
+
+    lococlasses = forms.ModelMultipleChoiceField(
+        queryset=LocoClass.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple("Loco Classes", is_stacked=False),
+    )
+
+    companies = forms.ModelMultipleChoiceField(
+        queryset=Company.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple("Companies", is_stacked=False),
+    )
+
+    routes = forms.ModelMultipleChoiceField(
+        queryset=Route.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple("Routes", is_stacked=False),
+    )
+
+    locations = forms.ModelMultipleChoiceField(
+        queryset=Location.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple("Locations", is_stacked=False),
+    )
 
     class Meta:
-        model = BRMPlans
-        fields = ("archivenumber", "location", "description", "tube")
-        labels = {
-            "archivenumber": "Archive Number",
-            "location": "Location",
-            "description": "Description",
-            "tube": "Tube",
-        }
+        model = Reference
+        fields = "__all__"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["archivenumber"].required = (
-            False  # For this form override the model mandatory status
-        )
+
+        if self.instance.pk:
+            self.fields["lococlasses"].initial = (
+                self.instance.lococlass_references.all()
+            )
+            self.fields["companies"].initial = self.instance.company_references.all()
+            self.fields["locations"].initial = self.instance.locations_references.all()
+            self.fields["routes"].initial = self.instance.routes_references.all()
+
+    def save(self, commit=True):
+        instance = super().save(commit)
+
+        # Update the reverse ManyToMany relations
+        instance.lococlass_references.set(self.cleaned_data["lococlasses"])
+        instance.company_references.set(self.cleaned_data["companies"])
+        instance.locations_references.set(self.cleaned_data["locations"])
+        instance.routes_references.set(self.cleaned_data["routes"])
+
+        return instance
 
 
-class BRMPhotosImageForm(forms.ModelForm):
-
-    class Meta:
-        model = BRMPhotos
-        fields = ("reference_number", "location", "lococlass")
-        labels = {
-            "reference_number": "Reference Number",
-            "location": "Location",
-            "lococlass": "Class",
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["reference_number"].required = (
-            False  # For this form override the model mandatory status
-        )

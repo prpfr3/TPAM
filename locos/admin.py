@@ -18,7 +18,7 @@ class LocoClassAdmin(admin.ModelAdmin):
         models.TextField: {"widget": TinyMCE()},
     }
     raw_id_fields = ["designer_person"]
-    filter_horizontal = ["references", "owner_operators", "manufacturers", "posts"]
+    autocomplete_fields = ["references", "owner_operators", "manufacturers", "posts"]
     show_facets = admin.ShowFacets.ALWAYS
 
 
@@ -58,7 +58,7 @@ class ImageAdmin(admin.ModelAdmin):
         models.TextField: {"widget": TinyMCE()},
     }
     raw_id_fields = ["location"]
-    filter_horizontal = ["lococlass"]
+    autocomplete_fields = ["lococlass"]
 
     def image_thumbnail(self, obj):
         if obj.image:

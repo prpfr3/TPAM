@@ -1,13 +1,15 @@
 import json
 import urllib
-import wikipediaapi
 import folium
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
+from django.http import HttpResponse
+from django.contrib.gis.db.models.functions import Centroid, AsGeoJSON
+from django.contrib.gis.measure import D
 
 from notes.models import Reference
 from mainmenu.views import pagination
@@ -16,6 +18,11 @@ from .forms import *
 from .models import *
 from .utils import *
 
+from django.contrib.contenttypes.models import ContentType
+
+# This speeds up the route events retrieval significantly
+route_content_type = ContentType.objects.get_for_model(Route)
+location_content_type = ContentType.objects.get_for_model(Location)
 
 def index(request):
     return render(request, "locations/index.html")
@@ -27,7 +34,7 @@ def routes_southern(request):
 
 def locations(request):
     errors = None
-    items_per_page = 30
+    items_per_page = 60
 
     # Load selection criteria from session if available, fallback to form data otherwise
     if request.method == "POST":
@@ -65,84 +72,169 @@ def locations(request):
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
+        "object_type": "Locations",
+        "url_name": "locations:location",
     }
-    return render(request, "locations/locations.html", context)
+    return render(request, "locations/lists.html", context)
+
+def routes_timeline(request):
+
+    route_events = (
+        LocationHistoricEvent.objects
+        .filter(content_type=route_content_type)
+        .select_related('event_type')
+        .prefetch_related('content_object')
+        .order_by('datefield')
+    )
 
 
+    events_json = "[]"
+    if route_events.exists():
+        events_json = events_timeline(route_events)
+
+    print(events_json)
+
+    return render(
+        request, 
+        "locations/routes_timeline.html", 
+        {"timeline_json": events_json}
+    )
 def location(request, location_id):
-    location = Location.objects.get(id=location_id)
+    location = (
+            Location.objects.annotate(centroid=Centroid("geometry"))
+            .annotate(centroid_json=AsGeoJSON("centroid"))
+            .get(id=location_id)
+        )
     categories = location.categories.all()
     posts = location.posts.all()
     references = location.references.all()
+    location_events = (
+        LocationHistoricEvent.objects
+        .filter(object_id=location.id, content_type=location_content_type)
+        .select_related('event_type')
+        .order_by('datefield')
+    )
+ 
+    if location_events.exists():
+        events_json = events_timeline(location_events)
+    
+    x = y = None
+    has_coords = False
 
-    sql = """ 
-    SELECT ST_Y(ST_CENTROID(a.geometry)) AS st_y, 
-           ST_X(ST_CENTROID(a.geometry)) AS st_x, 
-           a.name
-    FROM 
-    public."locations_location" AS a
-    WHERE a.id = %s;
-    """
-    coords = execute_sql(sql, [location_id])
-    y_coord = coords[0].get("st_y")
-    x_coord = coords[0].get("st_x")
-    location_name = coords[0].get("name")
-    if y_coord and x_coord:
-        map_html = folium_map_location(y_coord, x_coord, None)
+    try:
+        if location.centroid_json:
+            c = json.loads(location.centroid_json)
+            coords = c.get("coordinates")
+
+            if (
+                isinstance(coords, (list, tuple))
+                and len(coords) == 2
+                and all(v is not None for v in coords)
+            ):
+                x, y = coords
+                has_coords = True
+    except (json.JSONDecodeError, TypeError, ValueError):
+        pass
+
+    location_map_html = (
+        folium_map_location(y, x, None) if has_coords else None
+    )
+
+    location_area_map_html = (
+        location_area(id=location_id) if has_coords else None
+    )
+
+    if has_coords:
+        nls_url = (
+            f"https://maps.nls.uk/geo/explore/print/"
+            f"#zoom=17&lat={y}&lon={x}&layers=168&b=5"
+        )
+
+        nls_url_1944_1973 = (
+            f"https://maps.nls.uk/geo/explore/print/"
+            f"#zoom=17&lat={y}&lon={x}&layers=173&b=5"
+        )
     else:
-        map_html = None
+        nls_url = None
+        nls_url_1944_1973 = None
 
-    nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=17&lat={y_coord}&lon={x_coord}&layers=168&b=5"
-    nls_url_1944_1973 = f"https://maps.nls.uk/geo/explore/print/#zoom=17&lat={y_coord}&lon={x_coord}&layers=173&b=5"
 
     context = {
         "posts": posts,
         "location": location,
+        "location_events": location_events,
+        "timeline_json": events_json,
         "categories": categories,
-        "map": map_html,
-        "title": location_name,
+        "map": location_map_html,
+        "location_area_map": location_area_map_html,
+        "title": location.name,
         "nls_url": nls_url,
         "nls_url_1944_1973": nls_url_1944_1973,
         "references": references,
     }
+
     return render(request, "locations/location.html", context)
 
 
-def location_map(request, location_id):
-    sql = """ 
-    SELECT ST_Y(ST_CENTROID(a.geometry)) AS st_y, 
-           ST_X(ST_CENTROID(a.geometry)) AS st_x, 
-           a.name
-    FROM 
-    public."locations_location" AS a
-    WHERE a.id = %s;
-    """
-    coords = execute_sql(sql, [location_id])
+def location_area(id):
+    location = get_object_or_404(Location, id=id)
 
-    y_coord = coords[0].get("st_y")
-    x_coord = coords[0].get("st_x")
-    map_html = folium_map_location(y_coord, x_coord, None)
-    # map_html = map._repr_html_()
-    location_name = coords[0].get("name")
+    ref_point = location.geometry.centroid
 
-    nls_url = f"https://maps.nls.uk/geo/explore/print/#zoom=16&lat={y_coord}&lon={x_coord}&layers=168&b=5"
+    # -------------------------
+    # Nearby locations (10 km)
+    # -------------------------
+    nearby_locations_qs = Location.objects.annotate(
+        centroid=Centroid("geometry")
+    ).filter(centroid__distance_lte=(ref_point, D(m=10000))).exclude(id=location.id)
 
-    if coords:
-        context = {
-            "map": map_html,
-            "title": location_name,
-            "nls_url": nls_url,
+    def s(v):
+        return v if v is not None else ""
+
+    nearby_locations = [
+        {
+            "id": loc.id,
+            "name": s(loc.name),
+            "wikiname": s(getattr(loc, "wikiname", "")),
+            "wikislug": s(getattr(loc, "wikislug", "")),
+            "opened": s(getattr(loc, "opened", "")),
+            "closed": s(getattr(loc, "closed", "")),
+            "media_url": getattr(loc, "media_url", None),
+            "st_x": loc.centroid.x if getattr(loc, "centroid", None) else None,
+            "st_y": loc.centroid.y if getattr(loc, "centroid", None) else None,
         }
-    else:
-        context = {"map": None, "title": f"{location_name} Location not found"}
+        for loc in nearby_locations_qs
+    ]
 
-    return render(request, "locations/folium_map.html", context)
+    # -------------------------
+    # Nearby ELRs by centroid (10 km)
+    # -------------------------
+    nearby_elrs_qs = ELR.objects.annotate(centroid=Centroid("geometry")).filter(
+        centroid__distance_lte=(ref_point, D(m=10000))
+    )
+
+    nearby_elrs = []
+    for elr in nearby_elrs_qs:
+        gj = elr.geojson
+        if isinstance(gj, dict) and gj.get("features"):
+            nearby_elrs.append(gj)
+
+    # -------------------------
+    # No results?
+    # -------------------------
+    if not nearby_locations and not nearby_elrs:
+        return HttpResponse("<p>No nearby locations or routes found.</p>")
+
+    # -------------------------
+    # Build Folium map
+    # -------------------------
+    html_map = create_folium_map(elrs=nearby_elrs, locations=nearby_locations)
+    return html_map
 
 
 def routes(request):
-    map_html = None
     errors = None
-    items_per_page = 30
+    items_per_page = 60
 
     # Load selection criteria from session if available, fallback to form data otherwise
     if request.method == "POST":
@@ -176,36 +268,42 @@ def routes(request):
     else:
         errors = selection_criteria.errors
 
-    # Check for "map" action if requested
-    if "action" in request.GET and request.GET.get("action") == "map":
-        elr_geojsons, locations = routes_mapdata_extract(queryset)
-        if locations or elr_geojsons:
-            map_html = folium_map_geojson(elr_geojsons, locations)
-
     queryset = pagination(request, queryset, items_per_page)
 
     context = {
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
-        "map": map_html,
+        "object_type": "Routes",
+        "url_name": "locations:route",
     }
-    return render(request, "locations/routes.html", context)
+    return render(request, "locations/lists.html", context)
 
 
-def route(request, slug):
-
-    route = Route.objects.get(slug=slug)
+def route(request, route_id):
+    route = Route.objects.get(id=route_id)
     references = route.references.all
     elrs = route.elrs.all
     posts = route.posts.all
 
     events_json = None
-    if route_events := LocationEvent.objects.filter(route_fk_id=route.id):
+    # if route_events := LocationEvent.objects.filter(route_fk_id=route.id):
+    #     events_json = events_timeline(route_events)
+
+    # The optimized replacement
+    route_events = (
+        LocationHistoricEvent.objects
+        .filter(object_id=route.id, content_type=route_content_type)
+        .select_related('event_type')  # <--- This is the magic "efficiency" boost
+        .order_by('datefield')
+    )
+
+    if route_events.exists():
         events_json = events_timeline(route_events)
 
     context = {
         "route": route,
+        "route_events": route_events,
         "elrs": elrs,
         "posts": posts,
         "references": references,
@@ -217,20 +315,24 @@ def route(request, slug):
 def route_map(request, slug):
 
     route = Route.objects.get(slug=slug)
-    elrs = route.elrs.all
+    elr_list = route.elrs.all or None
     routes = [route]
 
-    elr_geojsons, locations = routes_mapdata_extract(routes)
+    elrs, locations = routes_mapdata_extract(routes)
     map_html = None
-    if locations or elr_geojsons:
-        map_html = folium_map_geojson(elr_geojsons, locations)
+    if locations or elrs:
+        map_html = create_folium_map(
+            elrs=elrs,
+            locations=locations,
+        )
 
     context = {
         "map": map_html,
         "route": route,
-        "elrs": elrs,
+        "elrs": elr_list,
         "title": route.name,
     }
+
     return render(request, "locations/folium_map.html", context)
 
 
@@ -240,10 +342,14 @@ def route_timeline(request, slug):
     elrs = route.elrs.all
     routes = [route]
 
-    elr_geojsons, locations = routes_mapdata_extract(routes)
+    elrs, locations = routes_mapdata_extract(routes)
     map_html = None
-    if locations or elr_geojsons:
-        map_html = folium_map_timeline(elr_geojsons, locations)
+    if locations or elrs:
+        map_html = create_folium_map(
+            elrs=elrs,
+            locations=locations,
+            timeline=True,
+        )
 
     context = {
         "map": map_html,
@@ -261,21 +367,38 @@ def events_timeline(events_in):
     for event in events_in:
         if event.datefield:
             count += 1
-            # https://visjs.github.io/vis-timeline/docs/timeline/#Data_Format
-            event = {
+            
+            # 1. Determine the name of the object (Route or Location)
+            obj = event.content_object
+            obj_name = "Unknown"
+            
+            if isinstance(obj, Route):
+                obj_name = obj.name
+            elif isinstance(obj, Location):
+                obj_name = obj.name
+            # If you have ELRs in here too:
+            elif hasattr(obj, 'itemLabel'): 
+                obj_name = obj.itemLabel
+
+            # 2. Format the content for Vis-Timeline
+            # This combines the Object Name and the Event Description
+            timeline_content = f"<strong>{obj_name}</strong>: {event.description}"
+
+            # 3. Build the Vis-JS compliant dictionary
+            event_dict = {
                 "id": count,
-                "content": event.description,
-                "start": event.datefield.strftime("%Y/%m/%d"),
-                "event.type": "point",
+                "content": timeline_content,
+                "start": event.datefield.isoformat(),
+                "type": "point",  # Note: Vis-JS uses 'type', not 'event.type'
+                "title": f"Exact Date: {event.displaydate}", # Shows on hover
             }
-            events_out.append(event)
+            events_out.append(event_dict)
 
     return json.dumps(events_out)
 
-
 def route_storymap(request, slug):
 
-    from storymaps.views import get_wikipage_html
+    from storymaps.views import get_wikipedia_summary
 
     storymap_json = None
     route = Route.objects.get(slug=slug)
@@ -320,40 +443,12 @@ def route_storymap(request, slug):
                 wikipage = urllib.parse.unquote(
                     pagename, encoding="utf-8", errors="replace"
                 )
-
-                wiki_wiki = wikipediaapi.Wikipedia(
-                    language="en",
-                    user_agent="prpfr3/Github TPAM",
-                    extract_format=wikipediaapi.ExtractFormat.HTML,
-                )
-
-                if wiki_wiki.page(wikipage).exists:
-                    # This variant gets only the text up to the Notes or References section
-                    # text_array = wiki_wiki.page(wikipage).text.split("<h2>Notes</h2>")
-                    # header_text = text_array[0].split("<h2>References</h2>")
-
-                    # # This variant gets only the summary text
-                    # header_text = wiki_wiki.page(wikipage).summary
-
-                    # # This variant gets the routemap template page rather than the route page
-                    # routemaps = route.wikipedia_routemaps.all()
-                    # url = f"https://en.wikipedia.org/wiki/Template:{str(routemaps[0])}"
-                    # header_text = get_wikipage_html(url)
-
-                    # This variant gets all the html
-                    url = f"https://en.wikipedia.org/wiki/{wikipage}"
-                    header_text = get_wikipage_html(url)
+                url = f"https://en.wikipedia.org/wiki/{wikipage}"
+                header_text = get_wikipedia_summary(url)
 
             storymap_json = generate_storymap(
                 header_title, header_text, slide_locations
             )
-
-            # Write the storymap_json to the JSON file
-            # output_file_path = (
-            #     "D:\OneDrive\Source\FE Projects\BRMTimeline\\bluebell_storymap.json"
-            # )
-            # with open(output_file_path, "w") as json_file:
-            #     json_file.write(json.dumps(storymap_json, indent=2))
 
     return render(request, "locations/storymap.html", {"storymap_json": storymap_json})
 
@@ -378,16 +473,7 @@ def regional_map(request, geo_area):
     east = ukarea_bounds[0]["st_xmax"]
     north = ukarea_bounds[0]["st_ymax"]
 
-    sql = """
-    SELECT 
-        *
-    FROM
-        public."locations_elr" AS a 
-    JOIN
-        (SELECT ST_MakeEnvelope(%s, %s, %s, %s, 4326) AS geometry) AS b
-    ON
-        ST_Within(a.geometry, b.geometry);
-    """
+    elrs = None
 
     sql = """
     SELECT 
@@ -400,20 +486,7 @@ def regional_map(request, geo_area):
         ST_Within(ST_GeomFromGeoJSON(a.geojson), b.geometry);
     
     """
-
     # elrs = execute_sql(sql, [west, south, east, north])
-
-    elr_geojsons = None
-
-    # for elr in elrs:
-    #     try:
-    #         if elr["geojson"]:
-    #             if elr_geojsons is None:
-    #                 elr_geojsons = []
-    #             geojson = json.loads(elr["geojson"])
-    #             elr_geojsons.append(geojson)
-    #     except Exception as e:
-    #         print(f"Error {e}")
 
     locations = None
 
@@ -431,21 +504,10 @@ def regional_map(request, geo_area):
         ST_Intersects(a.geometry, b.geometry);
     """
 
-    # FOR THE WHOLE COUNTRY
-    # sql = """
-    # SELECT
-    #     a."wikiname", a."wikislug", a."opened", a."closed", a."name",
-    #     ST_Y(ST_CENTROID(a.geometry)),
-    #     ST_X(ST_CENTROID(a.geometry)),
-    #     a."media_url"
-    # FROM
-    #     public."locations_location" AS a
-    # """
-
     locations = execute_sql(sql, [west, south, east, north])
 
-    if locations or elr_geojsons:
-        map_html = folium_map_timeline(elr_geojsons, locations)
+    if locations or elrs:
+        map_html = create_folium_map(elrs, locations, timeline=False)
 
     title = f"UK {geo_area} Region"
     context = {"map": map_html, "title": title}
@@ -454,7 +516,7 @@ def regional_map(request, geo_area):
 
 def elrs(request):
     errors = None
-    items_per_page = 30
+    items_per_page = 60
 
     # Load selection criteria from session if available, or use empty data on first load
     if request.method == "POST":
@@ -483,9 +545,11 @@ def elrs(request):
         "selection_criteria": selection_criteria,
         "errors": errors,
         "queryset": queryset,
+        "object_type": "ELRs",
+        "url_name": "locations:elr_map",
     }
 
-    return render(request, "locations/elrs.html", context)
+    return render(request, "locations/lists.html", context)
 
 
 def elrs_query_build(selection_criteria):
@@ -512,8 +576,7 @@ def elr_map(request, elr_id):
     elr = ELR.objects.get(id=elr_id)
 
     if elr.geojson and len(elr.geojson["features"]) > 0:
-        elr_geojsons = []
-        elr_geojsons.append(elr.geojson)
+        elrs = [elr.geojson]
 
         sql = """
         SELECT a."id", a."wikiname", a."wikislug", a."opened", a."closed", a."name",
@@ -526,12 +589,12 @@ def elr_map(request, elr_id):
         locations = execute_sql(sql, [elr_id])
 
         title = f"{elr.itemAltLabel}: {elr.itemLabel}"
-        map_html = folium_map_geojson(elr_geojsons, locations)
+        map_html = create_folium_map(elrs, locations)
     else:
         map_html = None
         title = None
 
-    context = {"map": map_html, "title": title}
+    context = {"map": map_html, "title": title, "elrs": None}
     return render(request, "locations/folium_map.html", context)
 
 
@@ -570,12 +633,12 @@ def elr_display_osmdata(request, elr_id):
 
     elr = ELR.objects.get(id=elr_id)
 
-    elr_geojsons = [osm_elr_fetch(elr.itemAltLabel, None)]
-    elr_geojson = elr_geojsons[0]
+    elrs = [osm_elr_fetch(elr.itemAltLabel, None)]
+    elr = elrs[0]
 
     # Extracting line geometries from the GeoJSON features
     extracted_coords_list = []
-    for feature in elr_geojson["features"]:
+    for feature in elr["features"]:
         for coordinate_pair in feature["geometry"]["coordinates"]:
             # for coordinate_pair in geojson_coordinate_list:
             extracted_coords_list.append(coordinate_pair)
@@ -660,7 +723,7 @@ def elr_display_osmdata(request, elr_id):
         geojson_feature
     ]  # The webpage expects a list of features whereas we have just one here which we put in a list
 
-    context = {"elr_geojson": features, "title": title}
+    context = {"elr": features, "title": title}
     return render(request, "locations/elr_display_osmdata.html", context)
 
 
@@ -671,8 +734,8 @@ def elr_history(request, elr_id):
     route_sections = RouteSection.objects.filter(routesectionelr__elr_fk=elr)
 
     if elr.geojson and len(elr.geojson["features"]) > 0:
-        elr_geojsons = []
-        elr_geojsons.append(elr.geojson)
+        elrs = []
+        elrs.append(elr.geojson)
 
         sql = """
         SELECT a."wikiname", a."wikislug", a."opened", a."closed", a."name",
@@ -685,7 +748,7 @@ def elr_history(request, elr_id):
         locations = execute_sql(sql, [elr_id])
 
         title = f"{elr.itemAltLabel}: {elr.itemLabel}"
-        map_html = folium_map_geojson(elr_geojsons, locations)
+        map_html = folium_map_geojson(elrs, locations)
     else:
         map_html = None
         title = None
@@ -842,3 +905,5 @@ class Trackmap(TemplateView):
         m.add_to(figure)
         figure.render()
         return {"map": figure, "title": f"Map of file {file}"}
+
+

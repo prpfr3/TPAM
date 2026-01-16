@@ -1,35 +1,9 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
 {% block head %}
-
-  <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
-
-  <link rel="stylesheet" type="text/css" href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css">
-  
-  <link rel="stylesheet" type="text/css" href="https://en.wikipedia.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=vector-2022">
-
-  <!-- Timeline Overrides -->
-  <style type="text/css">
-    #visualization {
-      border: 5px solid rgb(52, 14, 241);
-    }
-    .vis-item {
-      border-color: rgb(38, 13, 113);
-      background-color: rgb(99, 151, 230);
-      font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
-    }
-
-    /* Add some separation around the tabs */
-    .nav-tabs .nav-item .nav-link {
-      margin-right: 2px;
-    }
-
-  </style>
-
 {% endblock head %}
 
 {% block content %}
-
   <h1 class="text-primary text-center mt-3">{{ route }}</h1>
 
   <div class="container">
@@ -108,7 +82,6 @@
                   var container = document.getElementById('visualization');
                   var jsonObject = JSON.parse('{{ timeline_json | safe | escapejs }}');
                   var items = new vis.DataSet(jsonObject);
-                  console.log(jsonObject);
                   var options = {orientation: 'top', type: 'point'};
                   var timeline = new vis.Timeline(container, items, options);
                 </script>

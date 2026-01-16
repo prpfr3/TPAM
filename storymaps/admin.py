@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import *
 from tinymce.widgets import TinyMCE
 from django.db import models
+from .forms import *
 
 
 class SlidepackAdmin(admin.ModelAdmin):
@@ -11,15 +12,9 @@ class SlidepackAdmin(admin.ModelAdmin):
 
 
 class SlideAdmin(admin.ModelAdmin):
+    form = SlideAdminForm
     ordering = ["text_headline"]
     search_fields = ["text_headline"]
-    formfield_overrides = {
-        models.TextField: {
-            "widget": TinyMCE(
-                attrs={"cols": 80, "rows": 30},
-            )
-        },
-    }
 
 
 class TimelineSlidepackAdmin(admin.ModelAdmin):

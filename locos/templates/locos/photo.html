@@ -9,41 +9,10 @@
 
   <div class="card text-center text-primary">
 
-    <form action="{% url 'cart:cart_add' photo.id %}" method="post">
-      <p class="price">Purchase a copy of this Photo for £2.50</p>
-       {{ cart_product_form }}
-       {% csrf_token %}
-       <p></p>
-       {% bootstrap_button "Add to cart" button_type="submit" button_class="btn-primary" %}
-      </form>
-
     <img class="card-img-top mx-auto" style="max-width:60%" src="{{ photo.image.url }}" alt="">
     <div class="card-body">
 
-      {% comment %}
-        <h4 class="card-text text-primary">Location
-          {% for location in locations %}
-            <a href="https://en.wikipedia.org/wiki/{{location.wikislug}}">{{location}}</a>
-          {% empty %}
-            None Identified
-          {% endfor %}
-        </h4>
-
-        <h4 class="card-text text-primary">Description
-          {% for class in classes %}
-            <a href="https://en.wikipedia.org/wiki/{{class.name}}">{{class}}</a>
-          {% empty %}
-            None Identified
-          {% endfor %}
-        </h4>
-      {% endcomment %}
     </div><!-- card-body -->
-
-    {% comment %}
-      <a href="{% url 'locos:edit_mvimage' photo.id %}"  class="btn btn-primary">Edit</a>
-    {% endcomment %}
-
-
 
   </div> <!-- card -->
 {% endblock content %}

@@ -5,10 +5,9 @@ app_name = "storymaps"
 
 urlpatterns = [
     path("storymaps/", views.storymaps, name="storymaps"),
+    path("timelines/", views.timelines, name="timelines"),
     path("carousels/", views.carousels, name="carousels"),
     path("storymap/<slug:slug>/", views.storymap, name="storymap"),
-    path("carousel/<slug:slug>/", views.carousel, name="carousel"),
-    path("timelines/", views.timelines, name="timelines"),
     path("timeline/<slug:slug>/", views.timeline, name="timeline"),
-
+    path("carousel/<slug:slug>/", views.carousel, name="carousel"),
 ]

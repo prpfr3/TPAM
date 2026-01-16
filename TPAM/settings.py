@@ -11,28 +11,34 @@ import configparser
 LOGIN_URL = "/users/login"
 # __file__ is the full path of the current file, settings.py
 # os.path.dirname is the directory of the current file and dirname x 2 the directory one level up
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent  # points to TPAM
+
+STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+# Optional, used in production for collectstatic
+
+
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
+
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 # Required as from Django 4.2
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-GDAL_INSTALLED = False  # True for Development, False for Digital Ocean
+GDAL_INSTALLED = True  # True for Development, False for Digital Ocean
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 config = configparser.ConfigParser()
-KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
-config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
-# EMAIL_HOST_PASSWORD = config["Django"]["email"]
-
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-# EMAIL_HOST = "smtp.talktalk.net"
-# EMAIL_HOST_USER = "paul.frost@talktalk.net"
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_USE_SSL = False
 
 INSTALLED_APPS = [
-    # "djangocms_admin_style",  # django-cms requirement. Must be before django.contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,40 +47,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_extensions",
     "smart_selects",
-    # django-cms requirements
-    # "django.contrib.sites",
-    # "cms",  # A core CMS module
-    # "menus",  # A core CMS module
-    # "treebeard",  # Used for CMS page tree structures
-    # "sekizai",
-    # "filer",
-    # "easy_thumbnails",
-    # "djangocms_frontend",
-    # "djangocms_frontend.contrib.accordion",
-    # "djangocms_frontend.contrib.alert",
-    # "djangocms_frontend.contrib.badge",
-    # "djangocms_frontend.contrib.card",
-    # "djangocms_frontend.contrib.carousel",
-    # "djangocms_frontend.contrib.collapse",
-    # "djangocms_frontend.contrib.content",
-    # "djangocms_frontend.contrib.grid",
-    # "djangocms_frontend.contrib.image",
-    # "djangocms_frontend.contrib.jumbotron",
-    # "djangocms_frontend.contrib.link",
-    # "djangocms_frontend.contrib.listgroup",
-    # "djangocms_frontend.contrib.media",
-    # "djangocms_frontend.contrib.tabs",
-    # "djangocms_frontend.contrib.utilities",
-    # "djangocms_text_ckeditor",
-    # "djangocms_file",
-    # "djangocms_picture",
-    # "djangocms_video",
-    # "djangocms_googlemap",
-    # "djangocms_snippet",
-    # "djangocms_style",
-    # "djangocms_alias",
-    # "djangocms_versioning",
-    # "cms.plugins.text",  # May be needed for TinyMCE in djangocms
     # Third Party Apps
     "crispy_forms",
     "crispy_bootstrap5",
@@ -84,45 +56,19 @@ INSTALLED_APPS = [
     "tinymce",
     # Myapps
     "api",
-    "cart.apps.CartConfig",
+    "brmsra",
     "companies",
     "locations",
     "locos",
     "mainmenu",
     "notes",
-    # "orders.apps.OrdersConfig",
-    "mvs",
     "people",
     "rtt",
     "storages",
     "storymaps",
     "TPAM",
-    # "ukheritage", "Commented out to remove GDAL dependencies"
     "users",
-    # "vehicles", "Commented out because smart selects does not work with Django 5"
 ]
-
-# django cms requirements
-# SITE_ID = 1  # Needed for django-cms use of django.contrib.sites
-# CMS_CONFIRM_VERSION4 = True  # Makes sure you don't run migrate on a V3 cms project
-# X_FRAME_OPTIONS = "SAMEORIGIN"
-# CMS_TEMPLATES = [
-#     ("base.html", "Home page template"),
-# ]
-# THUMBNAIL_HIGH_RESOLUTION = True
-# USE_I18N = False
-
-# Enable permissions
-# https://docs.django-cms.org/en/release-4.1.x/topics/permissions.html
-# https://docs.django-cms.org/en/latest/explanation/permissions.html
-# CMS_PERMISSION = True
-
-# THUMBNAIL_PROCESSORS = (
-#     "easy_thumbnails.processors.colorspace",
-#     "easy_thumbnails.processors.autocrop",
-#     "filer.thumbnail_processors.scale_and_crop_with_subject_location",
-#     "easy_thumbnails.processors.filters",
-# )
 
 # Initiate token authentication for REST APIs
 REST_FRAMEWORK = {
@@ -144,28 +90,16 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "TPAM.middleware.LoginRequiredMiddleware",  # Custom middleware
-    # "whitenoise.middleware.WhiteNoiseMiddleware",
-    # "cms.middleware.utils.ApphookReloadMiddleware",  # Optional for django-cms
-    # "django.middleware.locale.LocaleMiddleware",  # Required for django-cms
-    # "cms.middleware.user.CurrentUserMiddleware",  # Required for django-cms
-    # "cms.middleware.page.CurrentPageMiddleware",  # Required for django-cms
-    # "cms.middleware.toolbar.ToolbarMiddleware",  # Required for django-cms
-    # "cms.middleware.language.LanguageCookieMiddleware",  # Required for django-cms
+    "TPAM.middleware.LoginRequiredMiddleware",  # Custom middleware - forces login
 ]
 
 ROOT_URLCONF = "TPAM.urls"
-CART_SESSION_ID = "cart"
 
 # Template configuration
 # https://docs.djangoproject.com/en/4.2/topics/templates/
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # "DIRS": [],
-        # "DIRS": [
-        #     os.path.join(BASE_DIR, "TPAM", "templates"),
-        # ],  # Amendment for django-cms
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -173,10 +107,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                # "django.template.context_processors.i18n",  # Added for django-cms
-                # "sekizai.context_processors.sekizai",  # Added for django-cms
-                # "cms.context_processors.cms_settings",  # Added for django-cms as cms check says necessary
-                "cart.context_processors.cart",
             ],
         },
     },
@@ -203,8 +133,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 LANGUAGES = [
     ("en", "English"),
-    # ("de", "German"),
-    # ("it", "Italian"),
 ]
 LANGUAGE_CODE = "en"
 
@@ -214,8 +142,8 @@ USE_L10N = True
 USE_TZ = True
 
 # Following theoretically not needed for production and/or AWS S3. Best to retain though.
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATIC_URL = "/static/"
+# STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# STATIC_URL = "/static/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
@@ -230,31 +158,36 @@ TINYMCE_DEFAULT_CONFIG = {
     "font_formats": "Montserrat=montserrat,arial,sans-serif;Raleway=raleway,arial,sans-serif",
     "height": 360,
     "width": 1120,
-    "cleanup_on_startup": True,
+    "cleanup_on_startup": False,  # Don't strip iframe HTML at load
+    "cleanup": False,  # Disable auto-cleanup
+    "verify_html": False,  # Allow non-standard HTML (important for iframes)
     "custom_undo_redo_levels": 20,
-    "selector": "textarea",
-    # Note the theme 'modern' is deprecated - do not use
-    # https://www.tiny.cloud/docs/migration-from-4x/#themes
+    "selector": "textarea.tinymce-editor",
     "theme": "silver",
     "plugins": """
-      textcolor save link image media preview codesample contextmenu table code lists fullscreen insertdatetime nonbreaking contextmenu directionality searchreplace wordcount visualblocks visualchars code autolink lists charmap print hr anchor pagebreak
-     """,
+        textcolor save link image media preview codesample contextmenu table code lists fullscreen
+        insertdatetime nonbreaking directionality searchreplace wordcount visualblocks visualchars
+        autolink lists charmap print hr anchor pagebreak
+    """,
     "toolbar1": """
-            fullscreen preview bold italic underline | fontselect,
-            fontsizeselect  | forecolor backcolor | alignleft alignright |
-            aligncenter alignjustify | indent outdent | bullist numlist table |
-            | link image media | codesample
-            """,
+        fullscreen preview bold italic underline | fontselect fontsizeselect |
+        forecolor backcolor | alignleft alignright aligncenter alignjustify |
+        indent outdent | bullist numlist table | link image media | codesample
+    """,
     "toolbar2": """
-            visualblocks visualchars |
-            charmap hr pagebreak nonbreaking anchor |  code | h1 h2 h3 |
-            """,
+        visualblocks visualchars | charmap hr pagebreak nonbreaking anchor |
+        code | h1 h2 h3
+    """,
     "contextmenu": "formats | link image",
     "menubar": True,
     "statusbar": True,
     "editor_deselector": "mceNoEditor",
-    "valid_elements": "*[*]",
+    "valid_elements": "*[*]",  # Keep this broad rule
+    # Explicitly allow iframes
+    "extended_valid_elements": "iframe[src|width|height|frameborder|allowfullscreen|allow|style|scrolling]",
+    "valid_children": "+body[iframe]",  # Allow iframe directly inside body
 }
+
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -276,13 +209,10 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
         OTAPI_APP_ID = config["opentransport"]["app_id"]
         OTAPI_API_KEY = config["opentransport"]["api_key"]
     except FileNotFoundError:
-        # Handle file not found error
         print("Error: .env file not found")
     except configparser.NoSectionError:
-        # Handle missing section error
         print("Error: [Django] section not found in .env file")
     except configparser.NoOptionError:
-        # Handle missing option error
         print("Error: One of the keys not found in [Django] section of .env file")
 
     GDAL_LIBRARY_PATH = os.getenv("GDAL_LIBRARY_PATH", "/lib/libgdal.so")
@@ -292,29 +222,12 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
 
     DEBUG = False  # Always runs as False in Production
 
-    # Find out what the IP addresses are at run time
-    # This is necessary because otherwise Gunicorn will reject the connections
-    # Though Digital Ocean does not seem to need it
-    # import netifaces
-
-    # def ip_addresses():
-    #     ip_list = []
-    #     for interface in netifaces.interfaces():
-    #         addrs = netifaces.ifaddresses(interface)
-    #         for x in (netifaces.AF_INET, netifaces.AF_INET6):
-    #             if x in addrs:
-    #                 ip_list.append(addrs[x][0]["addr"])
-    #     return ip_list
-
-    # print(ip_addresses())
-    # ALLOWED_HOSTS = ip_addresses()
     ALLOWED_HOSTS = [
         "up-and-down-the-line.uk",
         "www.up-and-down-the-line.uk",
         "134.122.98.236",
         "localhost",
     ]
-    print(f"printing {ALLOWED_HOSTS}")
 
     INSTALLED_APPS += [
         "django.contrib.gis",
@@ -344,12 +257,10 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 
     # specify the Django storage classes
-
+    STATIC_ROOT = BASE_DIR / "staticfiles"
     STATICFILES_LOCATION = "staticfiles"  # The directory name in S3
     STATICFILES_STORAGE = "custom_storages.StaticStorage"  # For AWS
-    #   STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage' # For Whitenoise Static Files Storage
     MEDIAFILES_LOCATION = "media"
-    # ideally this would be called mediafiles_storage in django but it isn't !
     DEFAULT_FILE_STORAGE = "custom_storages.MediaStorage"
 
     LOGGING = {
@@ -388,11 +299,6 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
                 "level": "DEBUG",
                 "propagate": False,
             },
-            # "celery": {
-            #     "handlers": ["console"],
-            #     "level": "DEBUG",
-            #     "propagate": True,
-            # },
         },
     }
 
@@ -400,12 +306,13 @@ else:  # DEVELOPMENT SETTINGS
     msg = (
         f"Using development/local settings from settings.py.\n"
         f"Base directory is {BASE_DIR}."
-        f"Static directory is {STATIC_ROOT}.\n"
     )
     print(msg)
 
     config = configparser.ConfigParser()
-    KEYS_DIR = os.path.join("D:\\Data", "API_Keys")
+    KEYS_DIR = os.path.join(
+        "C:\\Users\\paulf\\OneDrive\\Source\\Python Projects\\API_Keys"
+    )
     config.read(os.path.join(KEYS_DIR, "TPAMWeb.ini"))
     SECRET_KEY = config["Django"]["tpam_secret_key"]
 
@@ -428,12 +335,10 @@ else:  # DEVELOPMENT SETTINGS
         mimetypes.add_type("application/javascript", ".js", True)
 
     ALLOWED_HOSTS = []
-    # If errors Try https://stackoverflow.com/questions/51833501/oserror-in-geodjango-winerror-127-the-specified-procedure-could-not-be-foun#:~:text=%22OSError%20in%20Geodjango%3A%20%5BWinError,of%20Supported%20G%2DDal%20version.
 
     if GDAL_INSTALLED:
-        GDAL_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\gdal309.dll"
+        GDAL_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\gdal311.dll"
         GEOS_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\geos_c.dll"
-        # PROJ_LIB = r"C:\\OSGeo4W\\share\\proj"
         INSTALLED_APPS += [
             "django.contrib.gis",
         ]

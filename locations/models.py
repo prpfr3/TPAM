@@ -1,14 +1,14 @@
-import sys
-from notes.models import *
-from companies.models import Company
 from django.db import models
 from django.urls import reverse
-from utils.utils import custom_slugify
 from django.conf import settings
+from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from notes.models import *
+from companies.models import Company
+from utils.utils import custom_slugify
 
-# from .utils import execute_sql # Including this statement triggers an error on UKArea. Unclear why
-
-# sys.path.append("..")
+import json
 
 if settings.GDAL_INSTALLED:
     from django.contrib.gis.db.models import GeometryField, PointField
@@ -40,6 +40,13 @@ class UKArea(models.Model):
         self.calculate_bounding_box()
         super().save(*args, **kwargs)
 
+    def _reset_bounding_box(self):
+        """Reset bounding box to default values."""
+        self.bbox_longitude_min = 0.0
+        self.bbox_latitude_min = 0.0
+        self.bbox_longitude_max = 0.0
+        self.bbox_latitude_max = 0.0
+
     def calculate_bounding_box(self):
         try:
             if self.geometry:
@@ -51,20 +58,10 @@ class UKArea(models.Model):
                     self.bbox_latitude_max,
                 ) = bbox
             else:
-                # Set default values or handle as needed when geometry is empty
-                self.bbox_longitude_min = 0.0
-                self.bbox_latitude_min = 0.0
-                self.bbox_longitude_max = 0.0
-                self.bbox_latitude_max = 0.0
+                self._reset_bounding_box()
         except Exception as e:
-            # Print the exception to help identify the issue
             print(f"Error calculating bounding box: {e}")
-            # Handle the case where the geometry is invalid
-            # Set default values or handle as needed
-            self.bbox_longitude_min = 0.0
-            self.bbox_latitude_min = 0.0
-            self.bbox_longitude_max = 0.0
-            self.bbox_latitude_max = 0.0
+            self._reset_bounding_box()
 
     def __str__(self):
         return self.ITL121NM
@@ -82,14 +79,8 @@ class ELR(models.Model):
     item = models.SlugField(max_length=20, blank=True, default="")
     itemLabel = models.CharField(max_length=400, blank=True, default="")
     itemAltLabel = models.CharField(max_length=200, blank=True, default="")
-    opened = models.DateField(blank=True, null=True)
-    opened_freight = models.DateField(blank=True, null=True)
-    opened_passenger = models.DateField(blank=True, null=True)
-    closed_freight = models.DateField(blank=True, null=True)
-    closed_passenger = models.DateField(blank=True, null=True)
-    closed = models.DateField(blank=True, null=True)
-    reopened = models.DateField(blank=True, null=True)
     geojson = models.JSONField(blank=True, default=None, null=True)
+    geometry = geometry_fieldtype(blank=True, null=True, default=None, srid=4326)
     start_point = models.ForeignKey(
         "Location",
         on_delete=models.CASCADE,
@@ -118,15 +109,27 @@ class ELR(models.Model):
         Reference, related_name="elr_references", blank=True
     )
 
+    events = GenericRelation(
+        "locations.LocationHistoricEvent", related_query_name="elr"
+    )
+
     def get_absolute_url(self):
         return reverse("locations:elr_map", kwargs={"slug": self.slug})
 
     def __str__(self):
         return f"{self.itemAltLabel} {self.itemLabel}" or ""
 
+    @property
+    def display_name(self):
+        return f"{self.itemAltLabel} {self.itemLabel}"
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = custom_slugify(self.itemLabel).replace("-", "_")
+
+        if self.geojson and not self.geometry:
+            geom_json = self.geojson["features"][0]["geometry"]
+            self.geometry = GEOSGeometry(json.dumps(geom_json), srid=4326)
         super().save(*args, **kwargs)
 
 
@@ -153,11 +156,9 @@ class Location(models.Model):
     wikislug = models.CharField(max_length=250, default=None, blank=True, null=True)
     wikidata_id = models.CharField(max_length=20, default=None, blank=True, null=True)
     wikidata = models.CharField(max_length=20, default=None, blank=True, null=True)
+    wiki_altnames = models.CharField(max_length=200, blank=True, null=True)
     notes = models.TextField(default=None, blank=True, null=True)
     postcode = models.CharField(default=None, blank=True, null=True, max_length=10)
-    opened = models.CharField(max_length=200, blank=True, null=True)
-    closed = models.CharField(max_length=200, blank=True, null=True)
-    closed_to_steam = models.CharField(max_length=200, blank=True, null=True)
     disused_stations_slug = models.CharField(max_length=200, blank=True, null=True)
     geometry = geometry_fieldtype(blank=True, null=True, default=None)
     atcocode = models.CharField(max_length=20, blank=True, null=True)
@@ -206,6 +207,14 @@ class Location(models.Model):
         ELR, through="ELRLocation", related_name="locations_on_elr", blank=True
     )
 
+    """
+    GenericRelation is a virtual reverse relation (no DB column, so no migration).
+    It is not strictly necessary for the relationship to work but it makes queries, prefetches and attribute access such as via 'location.events.all()' convenient and efficient, and enables using the inline on the model admin more naturally.
+    """
+    events = GenericRelation(
+        "locations.LocationHistoricEvent", related_query_name="location"
+    )
+
     def get_absolute_url(self):
         # Enables "View on Site" link in Admin to go to detail view on (non-admin) site
         return reverse("locations:location", kwargs={"slug": self.slug})
@@ -224,6 +233,10 @@ class Location(models.Model):
         #     self.latitude, self.longitude = coords
 
         super().save(*args, **kwargs)
+
+    @property
+    def display_name(self):
+        return self.name or self.wikiname or f"OpenStreetMaps node {self.osm_node}"
 
     class Meta:
         managed = True
@@ -312,12 +325,22 @@ class Route(models.Model):
     categories = models.ManyToManyField(RouteCategory, blank=True)
     wikipedia_routemaps = models.ManyToManyField(RouteMap, blank=True)
     elrs = models.ManyToManyField(ELR, blank=True)
-    references = models.ManyToManyField(Reference, blank=True)
+    references = models.ManyToManyField(
+        Reference, related_name="routes_references", blank=True
+    )
     posts = models.ManyToManyField(Post, related_name="route_posts", blank=True)
     owneroperators = models.ManyToManyField(Company, blank=True)
     source = models.IntegerField(
         choices=SOURCE_TYPE,
         default=1,
+    )
+
+    """
+    GenericRelation is a virtual reverse relation (no DB column, so no migration).
+    It is not strictly necessary for the relationship to work but it makes queries, prefetches and attribute access such as via 'location.events.all()' convenient and efficient, and enables using the inline on the model admin more naturally.
+    """
+    events = GenericRelation(
+        "locations.LocationHistoricEvent", related_query_name="route"
     )
 
     def get_absolute_url(self):
@@ -330,6 +353,10 @@ class Route(models.Model):
     #     super().save(*args, **kwargs)
 
     def __str__(self):
+        return self.name
+
+    @property
+    def display_name(self):
         return self.name
 
 
@@ -373,57 +400,75 @@ class ELRLocation(models.Model):
         verbose_name_plural = "Engineer's Line Reference Locations"
 
 
-class LocationEvent(models.Model):
-    EVENT_TYPE = (
-        (1, "Official Opening"),
-        (2, "Closed to Passengers"),
-        (3, "Closed to Freight"),
-        (4, "Razed"),
-        (5, "Name Change"),
-        (6, "Ownership Change"),
-        (7, "Act of Parliamenet Approval"),
-        (8, "Prospectus Issued"),
-        (9, "Proposal"),
-        (10, "Construction"),
-        (11, "Operation"),
-        (12, "Company Incorporated"),
-        (99, "Other"),
-    )
-    type = models.IntegerField(
-        choices=EVENT_TYPE,
-        default=1,
-    )
-    description = models.CharField(max_length=255, blank=True, null=True)
-    date = models.CharField(max_length=10, blank=True, null=True)
-    datefield = models.DateField(blank=True, null=True)
-    route_fk = models.ForeignKey(
-        Route, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
-    company_fk = models.ForeignKey(
-        Company, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
-    location_fk = models.ForeignKey(
-        Location, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
-    elr_fk = models.ForeignKey(
-        ELR, on_delete=models.SET_NULL, blank=True, null=True, default=None
-    )
+class EventType(models.Model):
+    class Category(models.TextChoices):
+        INITIATION = "INIT", "Initiation & Legal"
+        CONSTRUCTION = "CONST", "Construction & Inspection"
+        OPERATIONS = "OP", "Operations"
+        CLOSURE = "CLOSE", "Closure & Decommissioning"
+        ADMIN = "ADMIN", "Administrative & Ownership"
 
-    date_added = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{str(self.get_type_display())}: {str(self.description)}"
+    code = models.CharField(max_length=20, unique=True)
+    label = models.CharField(max_length=100)
+    category = models.CharField(
+        max_length=10, choices=Category.choices, default=Category.OPERATIONS
+    )
+    description = models.TextField(
+        blank=True, help_text="Historical definition of this event type"
+    )
 
     class Meta:
-        verbose_name = "Location Event"
-        verbose_name_plural = "Location Events"
+        ordering = ["category", "label"]
+
+    def __str__(self):
+        return f"{self.label} ({self.get_category_display()})"
+
+    @classmethod
+    def get_default_pk(cls):
+        # Finds the 'OTHER' type, or creates it if it doesn't exist
+        # This prevents the migration from failing on a clean DB
+        obj, created = cls.objects.get_or_create(
+            code="OTHER", defaults={"label": "Other", "category": "ADMIN"}
+        )
+        return obj.pk
+
+
+class LocationHistoricEvent(models.Model):
+    event_type = models.ForeignKey(
+        EventType,
+        on_delete=models.PROTECT,
+        related_name="events",
+    )
+    description = models.TextField(blank=True, null=True)
+    displaydate = models.CharField(max_length=10, blank=True, null=True)
+    datefield = models.DateField(db_index=True)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Location Historic Event"
+        verbose_name_plural = "Location Historic Events"
+        ordering = ["datefield"]
+        indexes = [
+            models.Index(fields=["datefield"]),
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not self.displaydate and self.datefield:
+            self.displaydate = self.datefield.strftime("%d-%m-%Y")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.event_type.label}: {self.description or ''}"
 
 
 """
 CLOSED RAILWAY DATA FROM GOOGLE MAPS
 """
-
-
 class RouteGeoClosed(models.Model):
     # Field name made lowercase. Had to change Name to name in PgAdmin
     name = models.TextField(db_column="name", blank=True, null=True)
@@ -452,8 +497,6 @@ Then copy the model from models_temporary.py to here
 Convert the id field to null=False, primary_key=True 
 (note the id field already exists in the loaded data but does contain characters)
 """
-
-
 class RouteGeoOsm(models.Model):
     id = models.TextField(blank=True, null=False, primary_key=True)
     # Field renamed to remove unsuitable characters. Field renamed because it started with '_'.

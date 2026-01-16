@@ -6,158 +6,97 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{% block title %}TPAM{% endblock title %}</title>
+    <title>{% block title %}Up and Down The Line{% endblock title %}</title>
 
-    {% load static %}
     {% load django_bootstrap5 %}
-    {% bootstrap_css %}
+    {% load static %}
     {% bootstrap_javascript %}
     {% bootstrap_messages %}
+    <!-- /* Bootstrap CSS not required as loaded in SASS CSS (/css/style.css file generated from SASS) -->
 
-    <link rel="stylesheet" href="{% static 'scss/bootstrap.css' %}">
-    <link rel="stylesheet" href="{% static 'scss/style.css' %}">
-
-    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
-
-    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
-    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.15.4/css/v4-shims.css">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Montserrat">  
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
-    <!-- <link rel="stylesheet" type="text/css" href="https://www.bluebell-railway-museum.co.uk/css/additionalA.css"> -->
-
+    <link rel="stylesheet" href="{% static 'css/fontawesome_custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom-styles.css' %}">
-    <style>
-    @media (max-width: 360px) {
-      body {
-        padding-top: 40px; /* Ensures the navbar does not cover the body on small screens */
-      }
-    }
-    </style>
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat|Raleway&display=swap">
+    <link rel="stylesheet" type="text/css" href="https://en.wikipedia.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=vector-2022">
+
+    <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+    <link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+
     {% block head %}{% endblock %}
   </head>
   
   <body>  
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary flex-md-nowrap p-0 shadow fixed-top" style="z-index: 100;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary flex-md-nowrap p-0 shadow fixed-top">
 
-      <a class="navbar-brand me-0 px-3" href="{% url 'mainmenu:index' %}" >TPAM Home</a>
+      <a class="navbar-brand me-0 px-3" href="{% url 'mainmenu:index' %}">Home</a>
 
-      <button class="navbar-toggler  d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navbarToggler">
-        <div class="navbar-nav mr-auto"><!-- This class determines the text colour for the enclosed items-->
+        <ul class="navbar-nav me-auto">
 
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Motive Power</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownMotivePower" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rolling Stock</a>
+            <div class="dropdown-menu bg-primary" aria-labelledby="dropdownMotivePower">
               <a class="dropdown-item nav-link" href="{% url 'locos:loco_classes' %}">Locomotive Classes</a>
               <a class="dropdown-item nav-link" href="{% url 'locos:locomotives' %}">Locomotives</a>
               <a class="dropdown-item nav-link" href="{% url 'locos:photos' %}">Photo Album</a>
             </div>
-          </div>
+          </li>
     
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            People</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownPeople" role="button" data-bs-toggle="dropdown" aria-expanded="false">People</a>
+            <div class="dropdown-menu bg-primary" aria-labelledby="dropdownPeople">
               <a class="dropdown-item nav-link" href="{% url 'people:people' %}">Famous People</a>
               <a class="dropdown-item nav-link" href="{% url 'people:people_storyline' %}">People Storyline</a>
               <a class="dropdown-item nav-link" href="{% url 'people:people_vis_timeline' %}">People Timeline</a>
             </div>
-          </div>
+          </li>
     
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Locations</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownLocations" role="button" data-bs-toggle="dropdown" aria-expanded="false">Locations</a>
+            <div class="dropdown-menu bg-primary" aria-labelledby="dropdownLocations">
               <a class="dropdown-item nav-link" href="{% url 'locations:locations' %}">Locations</a>
               <a class="dropdown-item nav-link" href="{% url 'locations:routes' %}">Routes</a>
               <a class="dropdown-item nav-link" href="{% url 'locations:routes_southern' %}">Southern Railway Routes</a>
               <a class="dropdown-item nav-link" href="{% url 'locations:elrs' %}">Engineers Line References</a>              
               <a class="dropdown-item nav-link" href="{% url 'locations:regional_map_select' %}">Regional Railmap</a>
-              {% comment %}
-              <a class="dropdown-item nav-link" href="{% url 'locations:heritage_sites' %}">Museums & Heritage Sites </a>
-
-              <a class="dropdown-item nav-link" href="{% url 'locations:visits' %}">Heritage Site Visits</a>
-              <a class="dropdown-item nav-link" href="{% url 'locations:region_select' %}">Closed Lines Map</a>
-              <a class="dropdown-item nav-link" href="{% url 'locations:trackmap' %}">Track Diagrams</a>
-              {% endcomment %}
             </div>
-          </div>
+          </li>
     
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Companies</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownCompanies" role="button" data-bs-toggle="dropdown" aria-expanded="false">Companies</a>
+            <div class="dropdown-menu bg-primary" aria-labelledby="dropdownCompanies">
               <a class="dropdown-item nav-link" href="{% url 'companies:manufacturers' %}">Manufacturers</a>
               <a class="dropdown-item nav-link" href="{% url 'companies:companies' %}">Owner Operators</a>
             </div>
-          </div>
+          </li>
     
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Reference</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'notes:notes' %}">Notes</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownNotes" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reference</a>
+            <div class="dropdown-menu bg-primary" aria-labelledby="dropdownNotes">
+              <a class="dropdown-item nav-link" href="{% url 'notes:post_list' %}">Notes</a>
               <a class="dropdown-item nav-link" href="{% url 'notes:references' %}">References</a>
               <a class="dropdown-item nav-link" href="{% url 'notes:timeline' %}">Railway Timeline</a>
               <a class="dropdown-item nav-link" href="{% url 'storymaps:timelines' %}">StoryTimelines</a>
               <a class="dropdown-item nav-link" href="{% url 'storymaps:storymaps' %}">Storymaps</a>
               <a class="dropdown-item nav-link" href="{% url 'storymaps:carousels' %}">Storyboards</a>
-              <a class="dropdown-item nav-link" href="{% url 'notes:brmplans' %}">Bluebell Maps and Plans</a>
-              <a class="dropdown-item nav-link" href="{% url 'notes:brmphotos' %}">Bluebell Photos</a>
             </div>
-          </div>
+          </li>
     
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Live Train Times</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownLTT" role="button" data-bs-toggle="dropdown" aria-expanded="false">Live Train Times</a>
+            <div class="dropdown-menu bg-primary" aria-labelledby="dropdownLTT">
               <a class="dropdown-item nav-link" href="{% url 'rtt:locations' %}">Live Train Times</a>
             </div>
-          </div>
-    
-          {% comment %}
-    
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            UK Heritage Sites</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'ukheritage:region_select' %}">UK Heritage Map</a>
-            </div>
-          </div>
-    
-          <div class="nav-item dropdown"> <!--Aircraft-->
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Planes</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item nav-link" href="{% url 'aircraft:airimages' %}">Photos</a>
-                <a class="dropdown-item nav-link" href="{% url 'aircraft:aircraft_classes' %}">Classes</a>
-            </div>
-          </div> <!--Aircraft-->
-    
-          <div class="nav-item dropdown"><!--Vehicle Licensing-->
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Automobiles</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'vehicles:licensed_vehicles_list' %}">Database of UK Licensed Vehicles</a>
-              <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_models_list' %}">UK Most Popular Models</a>
-              <a class="dropdown-item nav-link" href="{% url 'vehicles:most_popular_makes' %}">UK Most Popular Makes</a>
-            </div>
-          </div><!--Vehicle Licensing-->
-    
-          <div class="nav-item dropdown"> <!--Military Vehicles-->
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Military Vehicles</a>
-            <div class="dropdown-menu bg-primary" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item nav-link" href="{% url 'mvs:mvimages' %}">Photos</a>
-              <a class="dropdown-item nav-link" href="{% url 'mvs:military_vehicle_classes' %}">Classes</a>
-            </div>
-          </div> <!--Military Vehicles-->
-          {% endcomment %}
-        </div>
+          </li>
+        </ul>
      
 
       <div class="d-flex ms-auto navbar-nav">    
@@ -166,11 +105,9 @@
             <a class="nav-link px-3">Hello {{ user.username }}</a>
           </div>
           <div class="nav-item text-nowrap">
-            <form action="{% url 'users:logout' %}" method="post" style="display: inline;">
+            <form action="{% url 'users:logout' %}" method="post" class="d-inline">
               {% csrf_token %}
-              <button type="submit" class="nav-link btn btn-link px-3" style="display: inline; border: none; background: none; cursor: pointer;">
-                Logout
-              </button>
+              <button type="submit" class="nav-link btn btn-link px-3">Logout</button>
             </form>
           </div>
         {% else %}
@@ -186,9 +123,11 @@
 
     </nav>
 
-    {% block header %}{% endblock %}
 
-    <main class="position-relative container-fluid ms-sm-auto mt-4 pt-4">
+
+    <main class="position-relative container ms-sm-auto">
+
+    {% block header %}{% endblock %}
 
       {% if messages %}
         {% for message in messages %}
@@ -204,10 +143,5 @@
       {% endblock %}
 
     </main>
-
-    <!-- Theoretically not needed. bootstrap5 does not use jquery and popper is bundled with javascript -->
-      <script src="{% static 'jquery-3.6.0.min.js' %}"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-
   </body>
 </html>

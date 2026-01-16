@@ -111,7 +111,7 @@ class Slide(models.Model):
     media_credit = models.CharField(max_length=200, blank=True, null=True)
     media_url = models.URLField(blank=True, null=True, max_length=400)
     text_headline = models.CharField(max_length=200, blank=True, null=True)
-    text_text = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
     post_fk = models.ForeignKey(
         Post, on_delete=models.SET_NULL, blank=True, null=True, default=None
     )

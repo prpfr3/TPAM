@@ -8,9 +8,10 @@ urlpatterns = [
     path("routes_southern", views.routes_southern, name="routes_southern"),
     path("locations/", views.locations, name="locations"),
     path("location/<int:location_id>/", views.location, name="location"),
-    path("location_map/<int:location_id>/", views.location_map, name="location_map"),
+    path("location_area/<slug:slug>/", views.location_area, name="location_area"),
     path("routes/", views.routes, name="routes"),
-    path("route/<slug>/", views.route, name="route"),
+    path("routes_timeline/", views.routes_timeline, name="routes_timeline"),
+    path("route/<int:route_id>/", views.route, name="route"),
     path("route_storymap/<slug>/", views.route_storymap, name="route_storymap"),
     path("route_map/<slug>/", views.route_map, name="route_map"),
     path("route_timeline/<slug>/", views.route_timeline, name="route_timeline"),
@@ -26,7 +27,6 @@ urlpatterns = [
     # ),
     path("elrs/", views.elrs, name="elrs"),
     path("elr_map/<int:elr_id>/", views.elr_map, name="elr_map"),
-    # path("elr_map/<int:elr_id>/", views.elr_display_osmdata, name="elr_map"),
     path("elr_storymap/<int:elr_id>/", views.elr_storymap, name="elr_storymap"),
     path("elr_history/<int:elr_id>/", views.elr_history, name="elr_history"),
     path(
@@ -55,4 +55,5 @@ urlpatterns = [
     # ),
     path("visits/", views.VisitListView.as_view(), name="visits"),
     path("visit/<int:visit_id>/", views.visit, name="visit"),
+
 ]

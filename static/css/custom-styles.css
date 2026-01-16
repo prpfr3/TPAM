@@ -1,0 +1,92 @@
+/* Applies to all input fields, select dropdowns, and textareas */
+input, select, textarea {
+    border-radius: 8px; /* Adjust radius for desired roundness */
+    padding: 2px;
+    padding-left: 4px;
+    border: 1px solid #ccc; /* Optional: customize border color */
+    outline: none; /* Removes default outline */
+}
+
+/* Optional: add focus style */
+input:focus, select:focus, textarea:focus {
+    border-color: #007bff; /* Border color on focus */
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5); /* Optional shadow on focus */
+}
+
+.single-selection-container {
+  display: flex;
+  align-items: center;
+  gap: 1px; /* Space between the field and button */
+  }
+
+/* Optional: Ensure the button doesn't take too much space */
+.single-selection-container .btn {
+  white-space: nowrap; /* Prevents the button text from wrapping */
+    }
+
+.single-selection-container input, 
+  .single-selection-container select {
+      flex-grow: 1; /* Allows the field to take remaining space */
+  }
+
+.designer-person-select {
+    width: 100px !important;
+}
+
+#visualization {
+  border: 5px solid rgb(16, 65, 3);
+  height: 1600px; /* Adjust the height as needed */
+  /* overflow-y: scroll; Enable vertical scrolling */
+}
+.vis-item {
+  border-color: rgb(16, 65, 3);
+  background-color: rgb(99, 230, 101);
+  font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+}
+
+/* === ensure content is below and not behind navbar ============ */
+body {
+  padding-top: 4.5rem;
+}
+
+
+/* ============ desktop view ============ */
+@media all and (min-width: 992px) {
+  .dropdown-menu li {
+    position: relative;
+  }
+
+  .nav-item .submenu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: -7px;
+  }
+
+  .nav-item .submenu-left {
+    right: 100%;
+    left: auto;
+  }
+
+  .dropdown-menu > li:hover {
+    background-color: #f1f1f1
+  }
+
+  .dropdown-menu > li:hover > .submenu {
+    display: block;
+  }
+}
+/* ============ desktop view .end// ============ */
+
+/* ============ small devices ============ */
+@media (max-width: 991px) {
+  .dropdown-menu .dropdown-menu {
+    margin-left: 0.7rem;
+    margin-right: 0.7rem;
+    margin-bottom: .5rem;
+  }
+}
+
+/* ============ small devices .end// ============ */
+
+

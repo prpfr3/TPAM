@@ -1,0 +1,62 @@
+﻿{% extends "../mainmenu/base.html" %}
+
+{% load static %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'brmsra/customstyles.css' %}">}
+
+{% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid"></div>
+
+    <div class="row">
+      <div class=" col-md-4 col-lg-4 col-xl-4">
+        <h1 class="text-primary text-center">Bluebell Museum - Southern Railways Archive Plans</h1>
+      </div>
+
+      <div class="col-md-4 col-lg-4 col-xl-4">
+        <div class="text-left">
+          <form method='POST' action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ selection_criteria }}
+            <input type="submit" class="btn btn-primary" name="submit_input" value="Submit">
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="album py-4 bg-light">
+      <div class="container brmplans-container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-2">
+          {% for plan in queryset  %}
+            <div class="col">
+
+              <div class="card text-center shadow-sm h-100">
+
+                {% if plan.image %}
+                  <a href="{% url 'brmsra:brmplan' plan.id %}" class="card-img-wrapper">
+                    <img src="{{ plan.image.url }}" alt="">
+                  </a>
+                {% else %}
+                  <div class="card-img-wrapper d-flex align-items-center justify-content-center text-muted">
+                    No image available
+                  </div>
+                {% endif %}
+
+                <div class="card-body">
+                  <p class="card-text">{% if plan.archivenumber %}
+        Ref.{{ plan.archivenumber }}{% endif %} {{plan.location}}: {{plan.description}}</p>
+                </div>
+
+              </div>
+            </div><!--col-->
+          {% endfor %}
+        </div><!--row-->
+      </div><!--container-->
+    </div><!--album-->
+  </div><!-- container fluid-->
+
+  {% include "mainmenu/pagination.html" with page=queryset %}
+
+{% endblock content %}

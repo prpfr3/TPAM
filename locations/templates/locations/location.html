@@ -1,36 +1,19 @@
 ﻿{% extends "../mainmenu/base.html" %}
 
 {% block head %}
-
-  <script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css"> 
-  <link rel="stylesheet" type="text/css" href="https://en.wikipedia.org/w/load.php?lang=en&amp;modules=site.styles&amp;only=styles&amp;skin=vector-2022">
-
-  <!-- Timeline Overrides -->
-  <style type="text/css">
-    #visualization {
-      border: 5px solid rgb(52, 14, 241);
-    }
-    .vis-item {
-      border-color: rgb(38, 13, 113);
-      background-color: rgb(99, 151, 230);
-      font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
-    }
-
-    /* Add some separation around the tabs */
-    .nav-tabs .nav-item .nav-link {
-      margin-right: 2px;
-    }
-  </style>
+<style>
+  .folium-map-wrapper {
+    width: 100%;
+    max-width: 1200px; /* optional, but recommended */
+  }
+</style>
 
 {% endblock head %}
 
 {% block title %}{{ location }}{% endblock %}
 
 {% block content %}
-
   <h1 class="text-primary text-center mt-3">{{ location }}</h1>
-
 
   <div class="container">
     <div class="row justify-content-center">
@@ -61,11 +44,12 @@
             </li>
           {% endif %}
 
+          <!-- Removed in favour of table of events currently
           {% if timeline_json %}
             <li class="nav-item">
               <a class="nav-link text-white bg-primary" id="timeline-tab" data-bs-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Timeline</a>
             </li>
-          {% endif %}
+          {% endif %} -->
           
           {% if references %}
             <li class="nav-item">
@@ -73,6 +57,11 @@
             </li>
           {% endif %}
 
+          {% if location_area_map %}
+            <li class="nav-item">
+              <a class="nav-link text-white bg-primary" id="location-area-map-tab" data-bs-toggle="tab" href="#location_area_map" role="tab" aria-controls="location_area_map" aria-selected="false">Location Area Map</a>
+            </li>
+          {% endif %}
           <!-- target = "_blank" often does not open a new tab, target="frameName" does.
            https://stackoverflow.com/questions/29444051/link-with-target-blank-does-not-open-in-new-tab-in-chrome-->
           {% if map %}
@@ -86,100 +75,81 @@
               <a class="nav-link text-white bg-primary" href="{{nls_url_1944_1973}}"  target="frameName" rel="noopener noreferrer" role="tab">NLS Map 1944-1973 Series</a>
             </li>
           {% endif %}
-
-          {% comment %}
-
-          <!-- Code for opening in current window. Causes issues when scrolling in the NLS map 
-          
-          {% if map %}
-            <li class="nav-item">
-              <a class="nav-link text-white bg-primary" id="nls1-tab" data-bs-toggle="tab" href="#nls1" role="tab" aria-controls="wikipedia" aria-selected="false">NLS Map 1900 Series</a>
-            </li>
-          {% endif %}
-
-          {% if map %}
-            <li class="nav-item">
-              <a class="nav-link text-white bg-primary" id="nls2-tab" data-bs-toggle="tab" href="#nls2" role="tab" aria-controls="wikipedia" aria-selected="false">NLS Map 1944-1973 Series</a>
-            </li>
-          {% endif %} -->
-
-          {% endcomment %}
-
         </ul>
 
         <!-- Tab content -->
         <div class="tab-content" id="myTabContent">
-
-            <div class="tab-pane fade show active" id="notes" role="tabpanel" aria-labelledby="notes-tab">
-              <table class="border-primary" width="99%" frame="box" id="depot">
-              
-                <tr>
-                  <tr><td><strong>Categories:</strong></td><td>
-                    {% for category in categories %}
-                      {{category}} 
-                    {% endfor %}
-                  </td>
-                  </tr>
-                  {% if location.postcode %}
-                    <tr><td width="35%"><strong>Postcode:</strong></td><td>{{location.postcode }}</td></tr>
-                  {% endif %}
-                  {% if location.opened %}
-                    <tr><td width="35%"><strong>Opened:</strong></td><td>{{location.opened }}</td></tr>
-                  {% endif %}
-                  {% if location.closed %}
-                    <tr><td width="35%"><strong>Closed:</strong></td><td>{{location.closed }}</td></tr>
-                  {% endif %}
-                  {% if location.atcocode %}
-                    <tr><td width="35%"><strong>ATCO code:</strong></td><td>{{location.atcocode }}</td></tr>
-                  {% endif %}
-                  {% if location.tiploccode %}
-                    <tr><td width="35%"><strong>Tiploc Code:</strong></td><td>{{location.tiploccode }}</td></tr>
-                  {% endif %}
-                  {% if location.crscode %}
-                    <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
-                  {% endif %}
-                  {% if location.geometry %}
-                    <tr><td width="35%"><strong>Longitude/Latitude:</strong></td><td>{{location.geometry.x|floatformat:4}} {{location.geometry.y|floatformat:4}}</td></tr>
-                  {% endif %}
-                  {% if location.easting %}
-                    <tr><td width="35%"><strong>Eastings/Northings:</strong></td><td>{{location.easting }} {{ location.northing }}</td></tr>
-                  {% endif %}
-                </tbody>
-              </table>
-
-              {% if location.notes %}
-              <p>
-                  {% autoescape off %}
-                  {{ location.notes }}
-                  {% endautoescape %}
-                </p>
-              {% endif %}
-
-              <div class="container">
-                <div class="row justify-content-center align-items-center">
-                    <div class="col-12">
-                      {% if map %}
-                        {{map|safe}}
-                      <script script>{{map.script.render|safe}}</script>
-                      {% else %}
-                        <h4>No co-ordinate data available for this selection to generate the map</h4>
-                      {% endif %}
-                    </div>
-                </div>
-              </div>
-
-              {% if posts %}
-                <div class="tab-pane fade show active mt-4" id="notes" role="tabpanel" aria-labelledby="notes-tab">
-                  {% for post in posts %}
-                    <h2>{{ post.title}}</h2>
-                    {% autoescape off %}
-                    {{ post.body }}
-                    {% endautoescape %}
+          <div class="tab-pane fade show active" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+            <table class="border-primary" width="99%" frame="box" id="depot">
+            
+              <tr>
+                <tr><td><strong>Categories:</strong></td><td>
+                  {% for category in categories %}
+                    {{category}} 
                   {% endfor %}
-                </div>
-              {% endif %}
+                </td>
+                </tr>
+                {% if location.postcode %}
+                  <tr><td width="35%"><strong>Postcode:</strong></td><td>{{location.postcode }}</td></tr>
+                {% endif %}
+                {% if location.atcocode %}
+                  <tr><td width="35%"><strong>ATCO code:</strong></td><td>{{location.atcocode }}</td></tr>
+                {% endif %}
+                {% if location.tiploccode %}
+                  <tr><td width="35%"><strong>Tiploc Code:</strong></td><td>{{location.tiploccode }}</td></tr>
+                {% endif %}
+                {% if location.crscode %}
+                  <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
+                {% endif %}
+                {% if location.geometry %}
+                  <tr><td width="35%"><strong>Longitude/Latitude:</strong></td><td>{{location.geometry.x|floatformat:4}} {{location.geometry.y|floatformat:4}}</td></tr>
+                {% endif %}
+                {% if location.easting %}
+                  <tr><td width="35%"><strong>Eastings/Northings:</strong></td><td>{{ location.easting|floatformat:0 }} {{ location.northing|floatformat:0 }}</td></tr>
+                {% endif %}
+                <tr><td><strong>Key Dates:</strong></td><td>
+                  {% for location_event in location_events %}
+                    {{location_event.displaydate}}:  {{location_event.description}}<br>
+                  {% endfor %}
+                </td>
+              </tbody>
+            </table>
 
+            {% if location.notes %}
+              <p>
+                {% autoescape off %}
+                {{ location.notes }}
+                {% endautoescape %}
+              </p>
+            {% endif %}
+
+            {% if posts %}
+              <div class="tab-pane fade show active mt-4" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+                {% for post in posts %}
+                  <h2>{{ post.title}}</h2>
+                  {% autoescape off %}
+                  {{ post.body }}
+                  {% endautoescape %}
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <div class="container">
+              <div class="d-flex justify-content-center">
+                <div class="folium-map-wrapper">
+                    {% if map %}
+                      {{map|safe}}
+                    <script script>{{map.script.render|safe}}</script>
+                    {% else %}
+                      <h4>No co-ordinate data available for this selection to generate the map</h4>
+                    {% endif %}
+                  </div>
+              </div>
             </div>
+
+
+
+          </div>
 
           {% if location.wikislug %}
             <div class="tab-pane fade" id="wikipedia" role="tabpanel" aria-labelledby="wikipedia-tab">
@@ -188,6 +158,23 @@
               </iframe>
             </div>
           {% endif %}
+
+          {% if location_area_map %}
+            <div class="tab-pane fade"
+                id="location_area_map"
+                role="tabpanel"
+                aria-labelledby="location-area-map-tab">
+
+              <div id="location-area-map-container"></div>
+
+              <script type="text/template" id="location-area-map-template">
+                {{ location_area_map|safe }}
+              </script>
+
+            </div>
+          {% endif %}
+
+
 
 
           {% if timeline_json %}
@@ -218,65 +205,64 @@
                   {% endif %}
 
                   {% if reference.description %}
-                  {% autoescape off %}
-                  {{reference.description}}
-                  {% endautoescape %}                   
+                    {% autoescape off %}
+                    {{reference.description}}
+                    {% endautoescape %}                   
                   {% endif %}
 
                 {% endfor %}
               </ul>
             </div>
           {% endif %}
-
-          {% comment %}
-          <!-- {% if map %}
-            <div class="tab-pane fade" id="nls1" role="tabpanel" aria-labelledby="nls1-tab">
-              <iframe src="{{nls_url}}" id="Wikiframe" width="100%" height="700" marginwidth="300">
-                <p>Your browser does not support iframes - open map using 'Open Popup' on left</p>
-              </iframe>
-            </div>
-          {% endif %}
-
-          {% if map %}
-            <div class="tab-pane fade" id="nls2" role="tabpanel" aria-labelledby="nls2-tab">
-              <iframe src="{{nls_url_1944_1973}}" id="Wikiframe" width="100%" height="700" marginwidth="300">
-                <p>Your browser does not support iframes - open map using 'Open Popup' on left</p>
-              </iframe>
-            </div>
-          {% endif %} -->
-          {% endcomment %}
-
         </div>
       </div>
     </div>
   </div>
 
   <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Select only links meant for tab navigation
-  var tabLinks = document.querySelectorAll('.nav-tabs a[data-bs-toggle="tab"]');
+    document.addEventListener('DOMContentLoaded', function() {
+      // Select only links meant for tab navigation
+      var tabLinks = document.querySelectorAll('.nav-tabs a[data-bs-toggle="tab"]');
 
-  tabLinks.forEach(function(link) {
-    link.addEventListener('shown.bs.tab', function(event) {
-      // Remove active classes from all tab links
       tabLinks.forEach(function(link) {
-        link.classList.remove('text-primary', 'bg-white');
-        link.classList.add('text-white', 'bg-primary');
+        link.addEventListener('shown.bs.tab', function(event) {
+          // Remove active classes from all tab links
+          tabLinks.forEach(function(link) {
+            link.classList.remove('text-primary', 'bg-white');
+            link.classList.add('text-white', 'bg-primary');
+          });
+
+          // Add active classes to the newly activated tab link
+          event.target.classList.add('text-primary', 'bg-white');
+          event.target.classList.remove('text-white', 'bg-primary');
+        });
       });
 
-      // Add active classes to the newly activated tab link
-      event.target.classList.add('text-primary', 'bg-white');
-      event.target.classList.remove('text-white', 'bg-primary');
+      // Highlight the initially active tab link
+      var initialActiveTabLink = document.querySelector('.nav-tabs .nav-link.active');
+      if (initialActiveTabLink) {
+        initialActiveTabLink.classList.add('text-primary', 'bg-white');
+        initialActiveTabLink.classList.remove('text-white', 'bg-primary');
+      }
     });
-  });
 
-  // Highlight the initially active tab link
-  var initialActiveTabLink = document.querySelector('.nav-tabs .nav-link.active');
-  if (initialActiveTabLink) {
-    initialActiveTabLink.classList.add('text-primary', 'bg-white');
-    initialActiveTabLink.classList.remove('text-white', 'bg-primary');
+
+document.addEventListener('shown.bs.tab', function (event) {
+  if (event.target.id === 'location-area-map-tab') {
+
+    const container = document.getElementById('location-area-map-container');
+    const template = document.getElementById('location-area-map-template');
+
+    if (container && template && !container.dataset.loaded) {
+      container.innerHTML = template.innerHTML;
+      container.dataset.loaded = "true";
+    }
   }
 });
-  </script>
+
+
+
+
+</script>
 
 {% endblock %}

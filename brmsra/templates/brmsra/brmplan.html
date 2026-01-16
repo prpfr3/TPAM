@@ -1,0 +1,59 @@
+{% extends "../mainmenu/base.html" %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'brmsra/custom-styles.css' %}">
+{% endblock %}
+
+{% block header %}
+  <div class="container-fluid">
+    <h1 class="text-primary text-center">
+      {% if plan.archivenumber %}
+        Ref:{{ plan.archivenumber }} 
+      {% endif %}
+        {{ plan.location }}:
+        {{ plan.description }}
+    </h1>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="card text-center text-primary">
+
+  <div class="card-body">
+
+    {% if plan.image %}
+      <img
+        src="{{ plan.image.url }}"
+        class="img-fluid mb-3"
+        style="max-width:60%; height:auto;"
+        alt=""
+      >
+    {% endif %}
+
+    <p class="card-text">
+      <strong>Archive Reference:</strong>
+      {% if plan.archivenumber %}
+        {{ plan.archivenumber }}
+      {% else %}
+        <em>Not Yet Allocated</em>
+      {% endif %}
+    </p>
+
+    <p class="card-text">
+      <strong>Location:</strong> {{ plan.location }}
+    </p>
+
+    <p class="card-text">
+      <strong>Description:</strong> {{ plan.description }}
+    </p>
+
+    <p class="card-text">
+      <strong>Archive Location:</strong> Tube {{ plan.tube }}
+    </p>
+
+  </div>
+
+</div>
+
+{% endblock content %}

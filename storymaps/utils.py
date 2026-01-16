@@ -1,77 +1,66 @@
-import requests
+import time
+import requests_cache
 from bs4 import BeautifulSoup
+from requests.exceptions import RequestException
 
+# Enable polite caching (7 days)
+requests_cache.install_cache(
+    "wiki_cache",
+    expire_after=60 * 60 * 24 * 7,
+    allowable_methods=("GET",),
+)
 
-def get_wikipage_html(url):
-    # Fetch the HTML content of the webpage
-    response = requests.get(url)
-    html_content = response.text
+def get_wikipedia_summary(url, delay=1.0):
+    """
+    Fetch and cache the summary paragraph from a Wikipedia page.
+    Returns a fallback message if not available.
+    """
 
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(html_content, "html.parser")
-
-    # Find the <div> tag with id=bodyContent
-    body_content_div = soup.find("div", id="bodyContent")
-
-    if body_content_div:
-
-        # Remove mw-editsection and its descendants
-        for element in body_content_div.select(".mw-editsection"):
-            element.decompose()
-
-        # Remove mw-editsection and its descendants
-        for element in body_content_div.select(".box-More_citations_needed"):
-            element.decompose()
-
-        # Split the HTML content within the bodyContent div at the point where <div class="navbox-styles"> occurs
-        split_html = str(body_content_div).split('<div class="navbox-styles">')
-
-        # Keep only the first part of the split, which contains the content before navbox-styles
-        html_within_body_content = (
-            split_html[0]
-            .replace("<span>edit<span>", "")
-            .replace("/wiki/", "https://en.wikipedia.org/wiki/")
-        )
-
-        return html_within_body_content
-    else:
-        print("No <div> tag with id=bodyContent found.")
-        return None
-
-
-def get_wikipedia_page_content(title):
-    base_url = "https://en.wikipedia.org/w/api.php"
-    params = {
-        "action": "parse",
-        "format": "json",
-        "page": title,
-        "prop": "text",
-        "disabletoc": True,
+    headers = {
+        "User-Agent": "TPAM Django Project (https://github.com/prpfr3; contact@example.com)"
     }
 
-    headers = {"User-Agent": "TPAM Django Project @ https://github.com/prpfr3"}
+    session = requests_cache.CachedSession()
 
-    response = requests.get(base_url, params=params, headers=headers)
-    data = response.json()
+    # Check if URL is cached
+    cached = session.cache.contains(url)
+    if not cached:
+        print(f"⌛ Waiting {delay:.1f}s before new request to {url} ...")
+        time.sleep(delay)
 
-    if "parse" in data and "text" in data["parse"]:
-        return data["parse"]["text"]["*"]
+    try:
+        response = session.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+    except RequestException as e:
+        print(f"⚠️ Error fetching {url}: {e}")
+        return "No further information available from TPAM or Wikipedia"
+
+    if getattr(response, "from_cache", False):
+        print(f"ℹ️ Loaded from cache: {url}")
     else:
-        return None
+        print(f"⬇️ Downloaded: {url}")
 
+    soup = BeautifulSoup(response.text, "html.parser")
 
-def save_content_to_file(file_path, content):
-    with open(file_path, "w", encoding="utf-8") as file:
-        file.write(content)
+    # Find the main article content
+    body_content_div = soup.find("div", id="bodyContent")
+    if not body_content_div:
+        print(f"⚠️ bodyContent div not found in {url}")
+        return "No further information available from TPAM or Wikipedia"
 
+    # Extract the first meaningful <p> paragraph from the content
+    paragraphs = body_content_div.find_all("p")
+    summary_text = ""
+    for p in paragraphs:
+        text = p.get_text(strip=True)
+        if text:
+            summary_text = p.decode_contents()  # keep inline formatting, links, etc.
+            break
 
-if __name__ == "__main__":
-    page_title = "Elham_Valley_Railway"
-    page_content = get_wikipedia_page_content(page_title)
+    if not summary_text:
+        return "No further information available from TPAM or Wikipedia"
 
-    if page_content:
-        file_path = f"{page_title}.html"
-        save_content_to_file(file_path, page_content)
-        print(f"Successfully saved the Wikipedia page to: {file_path}")
-    else:
-        print(f"Failed to retrieve the Wikipedia page: {page_title}")
+    # Clean and fix internal links
+    summary_text = summary_text.replace('href="/wiki/', 'href="https://en.wikipedia.org/wiki/')
+
+    return f"<p>From Wikipedia:</p>{summary_text}"

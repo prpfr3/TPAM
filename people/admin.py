@@ -24,7 +24,7 @@ class PersonAdmin(admin.ModelAdmin):
     ordering = ("name",)
     search_fields = ("name",)
     formfield_overrides = {models.TextField: {"widget": TinyMCE()}}
-    filter_horizontal = ["references", "posts"]
+    autocomplete_fields = ["references", "posts"]
     inlines = [RoleInline]
 
 
@@ -45,7 +45,7 @@ class RoleAdmin(admin.ModelAdmin):
         models.TextField: {"widget": TinyMCE()},
     }
     inlines = [PersonInline]
-    # filter_horizontal = ["persons"]
+    # autocomplete_fields = ["persons"]
 
 
 class PersonRoleAdmin(admin.ModelAdmin):

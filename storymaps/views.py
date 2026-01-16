@@ -4,9 +4,7 @@ from django.conf import settings
 from .models import *
 from .utils import *
 import json
-import wikipediaapi
 import urllib
-
 from urllib.parse import urljoin, urlparse
 
 
@@ -53,69 +51,87 @@ def carousels(request):
     return render(request, "storymaps/carousels.html", context)
 
 
-def storymap(request, slug):
-    import urllib.parse
+def get_text_content(obj):
+    """Return headline and text from post_fk, Wikipedia, or model fields."""
+    text = {"headline": obj.text_headline or None, "text": None}
 
+    if getattr(obj, "post_fk", None):
+        text["headline"] = obj.post_fk.title
+        text["text"] = obj.post_fk.body
+
+    elif getattr(obj, "wikipedia_name", None):
+        wikipage = urllib.parse.unquote(
+            obj.wikipedia_name.replace(" ", "_"), encoding="utf-8"
+        )
+        url = f"https://en.wikipedia.org/wiki/{wikipage}"
+        text["headline"] = obj.wikipedia_name
+        text["text"] = get_wikipedia_summary(url)
+
+    elif getattr(obj, "notes", None):
+        text["text"] = obj.notes
+
+    return text
+
+
+def get_media_dict(obj, use_absolute_url=False):
+    """Builds a media dictionary, converting URLs if needed."""
+    media_url = obj.media_url
+    if use_absolute_url and media_url:
+        if not bool(urlparse(media_url).netloc):  # relative path
+            media_url = urljoin(settings.MEDIA_URL, media_url)
+
+    return {
+        "url": media_url,
+        "caption": obj.media_caption,
+        "credit": obj.media_credit,
+    }
+
+
+def build_slide(slide):
+    """Builds a standard storymap slide dictionary."""
+    slide_dict = {
+        "background": {"url": slide.background},
+        "location": {
+            "lat": slide.northing,
+            "lon": slide.easting,
+            "zoom": slide.zoom,
+        },
+        "media": get_media_dict(slide),
+        "text": get_text_content(slide),
+    }
+    return slide_dict
+
+
+def build_timeline_event(slide):
+    """Builds a standard timeline event dictionary."""
+    media = get_media_dict(slide, use_absolute_url=True)
+    event = {
+        "background": {"url": slide.background},
+        "media": media,
+        "start_date": {"year": slide.start_date[:4]},
+        "end_date": {"year": slide.end_date[:4]},
+        "text": get_text_content(slide),
+    }
+    return event
+
+
+def storymap(request, slug):
     slideheader = SlideHeader.objects.get(slug=slug)
     slides = Slide.objects.filter(slideheader__id=slideheader.id).order_by(
         "slidepack__slide_order"
     )
 
-    # Add the first slide to a dictionary list from the SlideHeader Object
-    slide_dict = {"location_line": slideheader.location_line, "media": {}}
-    slide_dict["media"]["caption"] = slideheader.media_caption
-    slide_dict["media"]["credit"] = slideheader.media_credit
-    slide_dict["media"]["url"] = slideheader.media_url
-    slide_dict["text"] = {}
-    slide_dict["text"]["headline"] = slideheader.text_headline or None
-    slide_dict["text"]["text"] = None
+    # First slide (header info)
+    first_slide = {
+        "location_line": slideheader.location_line,
+        "media": get_media_dict(slideheader),
+        "text": get_text_content(slideheader),
+        "type": getattr(slideheader, "type", None),
+    }
 
-    if slideheader.post_fk:
-        slide_dict["text"]["headline"] = slideheader.post_fk.title
-        slide_dict["text"]["text"] = slideheader.post_fk.body
-    elif slideheader.wikipedia_name:
-        wikipage = urllib.parse.unquote(
-            slideheader.wikipedia_name, encoding="utf-8", errors="replace"
-        )
-        url = f"https://en.wikipedia.org/wiki/{wikipage}"
+    slide_list = [first_slide]
+    slide_list.extend(build_slide(slide) for slide in slides)
 
-        slide_dict["text"]["headline"] = slideheader.wikipedia_name
-        slide_dict["text"]["text"] = get_wikipedia_summary(url)
-        slide_dict["type"] = slideheader.type
-        slide_list = [slide_dict]
-
-    for slide in slides:
-        slide_dict = {
-            "background": {"url": slide.background},
-            "location": {
-                "lat": slide.northing,
-                "lon": slide.easting,
-                "zoom": slide.zoom,
-            },
-            "media": {
-                "caption": slide.media_caption,
-                "credit": slide.media_credit,
-                "url": slide.media_url,
-            },
-        }
-
-        slide_dict["text"] = {}
-        slide_dict["text"]["headline"] = slide.text_headline or None
-        slide_dict["text"]["text"] = slide.notes or None
-
-        # Determine alternative headline and text content
-        if slide.post_fk:  # Use the post if available
-            slide_dict["text"]["headline"] = slide.post_fk.title
-            slide_dict["text"]["text"] = slide.post_fk.body
-        elif slide.wikipedia_name:  # Fallback to Wikipedia summary
-            slide_dict["text"]["headline"] = slide.wikipedia_name
-            wikislug = urllib.parse.unquote(slide.wikipedia_name.replace(" ", "_"))
-            url = f"https://en.wikipedia.org/wiki/{wikislug}"
-            slide_dict["text"]["text"] = get_wikipedia_summary(url)
-
-        slide_list.append(slide_dict)
-
-    # Create a dictionary in the required JSON format, including the dictionary list of slides
     storymap_dict = {
         "storymap": {
             "attribution": "Wikipedia / OpenStreetMaps",
@@ -123,7 +139,6 @@ def storymap(request, slug):
             "call_to_action_text": "Up and Down the Line",
             "map_as_image": False,
             "map_subdomains": "",
-            # "map_type": "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
             "map_type": "osm:standard",
             "slides": slide_list,
             "zoomify": False,
@@ -135,78 +150,25 @@ def storymap(request, slug):
 
 
 def timeline(request, slug):
-    import urllib.parse
-
     slideheader = TimelineSlideHeader.objects.get(slug=slug)
     slides = Slide.objects.filter(timeline_slideheader__id=slideheader.id).order_by(
         "slidepack__slide_order"
     )
 
-    # Add the first slide to a dictionary list from the SlideHeader Object
-    slide_dict = {"media": {}}
-    slide_dict["media"]["caption"] = slideheader.media_caption
-    slide_dict["media"]["credit"] = slideheader.media_credit
-    slide_dict["media"]["url"] = slideheader.media_url
-    slide_dict["text"] = {}
-    slide_dict["text"]["headline"] = slideheader.text_headline or None
-    slide_dict["text"]["text"] = None
-
-    # if slideheader.post_fk:
-    #     slide_dict["text"]["headline"] = slideheader.post_fk.title
-    #     slide_dict["text"]["text"] = slideheader.post_fk.body
-    if slideheader.wikipedia_name:
-        wikipage = urllib.parse.unquote(
-            slideheader.wikipedia_name, encoding="utf-8", errors="replace"
-        )
-        url = f"https://en.wikipedia.org/wiki/{wikipage}"
-
-        slide_dict["text"]["headline"] = slideheader.wikipedia_name
-        slide_dict["text"]["text"] = get_wikipedia_summary(url)
-        slide_dict["type"] = slideheader.type
-        slide_list = [slide_dict]
-
-    slide_dict["events"] = None
+    # First slide (header info)
+    slide_dict = {
+        "media": get_media_dict(slideheader),
+        "text": get_text_content(slideheader),
+        "events": [],
+    }
 
     for slide in slides:
-
         if not slide.media_url:
-            return None
+            continue  # skip incomplete slides
 
-        # Check if it's an absolute URL (e.g. starts with http:// or https://)
-        if bool(urlparse(slide.media_url).netloc):
-            media_url = slide.media_url  # external URL, return as is
-        else:
+        slide_dict["events"].append(build_timeline_event(slide))
 
-            # Otherwise, it's a relative path — prepend MEDIA_URL
-            media_url = urljoin(settings.MEDIA_URL, slide.media_url)
-
-        slide_dict = {
-            "background": {"url": slide.background},
-            "media": {
-                "url": media_url,
-                "caption": slide.media_caption,
-                "credit": slide.media_credit,
-            },
-            "start_date": {"year": slide.start_date[:4]},
-            "end_date": {"year": slide.end_date[:4]},
-        }
-
-        slide_dict["text"] = {}
-        slide_dict["text"]["headline"] = slide.text_headline or None
-        slide_dict["text"]["text"] = slide.notes or None
-
-        # Determine alternative headline and text content
-        if slide.post_fk:  # Use the post if available
-            slide_dict["text"]["headline"] = slide.post_fk.title
-            slide_dict["text"]["text"] = slide.post_fk.body
-        elif slide.wikipedia_name:  # Fallback to Wikipedia summary
-            slide_dict["text"]["headline"] = slide.wikipedia_name
-            wikislug = urllib.parse.unquote(slide.wikipedia_name.replace(" ", "_"))
-            url = f"https://en.wikipedia.org/wiki/{wikislug}"
-            slide_dict["text"]["text"] = get_wikipedia_summary(url)
-        slide_list["events"].append(slide_dict)
-
-    timeline_json = json.dumps(slide_list)
+    timeline_json = json.dumps(slide_dict)
     return render(request, "storymaps/timeline.html", {"timeline_json": timeline_json})
 
 

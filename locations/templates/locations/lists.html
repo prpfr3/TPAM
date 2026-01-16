@@ -1,0 +1,78 @@
+﻿{% extends "../mainmenu/base.html" %}
+{% load custom_filters %}
+
+{% block title %}{{object_type}}{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-md-4">
+        <h1 class="text-primary text-center">{{object_type}}</h1>
+      </div>
+
+      <div class="col-md-8">
+        <div class="text-left">
+          <form method="POST" action="" enctype="multipart/form-data" class="mx-auto">
+            {% csrf_token %}
+            {{ selection_criteria }}
+            <input type="submit" class="btn btn-primary" name="submit_input" value="Submit" />
+          </form>
+        </div>
+      </div>
+    </div>
+
+    {% if not queryset.object_list %}
+    <div class="row">
+      <div class="col-12">
+        <div class="alert alert-success" role="alert">
+          No {{object_type}} Found for those Search Criteria
+        </div>
+      </div>
+    </div>
+
+    {% else %}
+
+      {% with col1=queryset.object_list|slice:":20" col2=queryset.object_list|slice:"20:40" col3=queryset.object_list|slice:"40:" %}
+
+      <div class="container mb-1">
+        <div class="row">
+
+          <div class="col-md-4">
+            {% for object in col1 %}
+              <div>
+                <a href="{% url url_name object.id %}" class="d-block text-truncate" style="max-width: 100%;">
+                  {{ object.display_name }}
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-4">
+            {% for object in col2 %}
+              <div>
+                <a href="{% url url_name object.id %}" class="d-block text-truncate" style="max-width: 100%;">
+                  {{ object.display_name }}
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="col-md-4">
+            {% for object in col3 %}
+              <div>
+                <a href="{% url url_name object.id %}" class="d-block text-truncate" style="max-width: 100%;">
+                  {{ object.display_name }}
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+
+        </div>
+      </div> <!-- End of container -->
+      {% endwith %}
+    {% endif %}
+  </div><!-- End of Container -->
+
+{% include "mainmenu/pagination.html" with page=queryset %}  
+{% endblock content %}

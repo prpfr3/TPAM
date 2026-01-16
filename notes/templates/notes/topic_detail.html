@@ -3,18 +3,9 @@
 {% block content_title %} {{ topic.text }} Notes {% endblock %}
 
 {% block content_desc %}
-  <!-- <span style="float: center;">
-    {% if topic.owner == user %}
-      <a href="{% url 'notes:topic_update' topic.id %}">Update Topic - </a>
-      <a href="{% url 'notes:topic_delete' topic.id %}">Delete Topic - </a>
-      <a href="{% url 'notes:topics' %}">All topics</a>
-    {% endif %}
-    </span> -->
 {% endblock content_desc %}
 
 {% block content %}
-  <!--- For future search feature https://www.w3schools.com/howto/howto_css_search_button.asp-->
-  <!-- <a href="{% url 'notes:post_create' topic.id %}">Add new post</a> -->
   <div style="float:center">
     <form>
       <input type="text" placeholder="Search.." name="search"
@@ -38,12 +29,12 @@
       </div> <!-- panel-heading -->
 
       <div class="panel-body">
-        <!-- {% autoescape off %}
+        {% autoescape off %}
         <div>{{ post.body }}</div>
         {% endautoescape %}
         {% if post.url %}
           <cite>For more information see:- <a href="{{ post.url }}">{{post.url}}</a></cite>
-        {% endif %} -->
+        {% endif %}
       </div> <!-- panel body -->
     </div> <!-- panel -->
     

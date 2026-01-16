@@ -17,7 +17,7 @@ class CompanyAdmin(admin.ModelAdmin):
         models.TextField: {"widget": TinyMCE()},
     }
 
-    filter_horizontal = ["references", "posts", "company_categories"]
+    autocomplete_fields = ["references", "posts", "company_categories"]
     raw_id_fields = ["successor_company"]
 
 
@@ -35,7 +35,7 @@ class ManufacturerAdmin(admin.ModelAdmin):
     ]
     search_fields = ["name"]
     ordering = ["name"]
-    filter_horizontal = ["posts"]
+    autocomplete_fields = ["posts"]
 
 
 class ClassManufacturerAdmin(admin.ModelAdmin):
@@ -47,7 +47,15 @@ class ClassManufacturerAdmin(admin.ModelAdmin):
     ]
     ordering = ["lococlass_fk"]
 
+class CompanyCategoryAdmin(admin.ModelAdmin):
+    list_display = [
+        "category",
+
+    ]
+    ordering = ["category"]
+    search_fields = ["category"]
+
 
 admin.site.register(Company, CompanyAdmin)
-admin.site.register(CompanyCategory)
+admin.site.register(CompanyCategory, CompanyCategoryAdmin)
 admin.site.register(Manufacturer, ManufacturerAdmin)

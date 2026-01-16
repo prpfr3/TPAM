@@ -1,9 +1,9 @@
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit, Div
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.utils.safestring import mark_safe
-
+from django import forms
+from django.contrib.gis.geos import Point
+from tinymce.widgets import TinyMCE
 from .models import *
 
 
@@ -120,30 +120,42 @@ class RouteSelectionForm(forms.ModelForm):
         }
 
 
-# class LocationForm(forms.ModelForm):
-#     class Meta:
-#         model = Location
-#         fields = [
-#             "wikiname",
-#             "postcode",
-#             "opened",
-#             "closed",
-#             "atcocode",
-#             "tiploccode",
-#             "crscode",
-#             "easting",
-#             "northing",
-#             "slug",
-#         ]
-#         labels = {
-#             "wikiname": "Name",
-#             "postcode": "Postcode",
-#             "opened": "Opened",
-#             "closed": "Closed",
-#             "atcocode": "ATCO code",
-#             "tiploccode": "Tiploc code",
-#             "crscode": "CRS code",
-#             "easting": "Easting",
-#             "northing": "Northing",
-#             "slug": "Slug",
-#         }
+
+class LocationAdminForm(forms.ModelForm):
+    latitude = forms.FloatField(required=False)
+    longitude = forms.FloatField(required=False)
+
+    class Meta:
+        model = Location
+        fields = "__all__"
+
+        widgets = {
+            "notes": TinyMCE(
+                attrs={"class": "form-control tinymce-editor", "cols": 80, "rows": 30}
+            ),}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # If editing an existing record, prefill lat/lon from geometry
+        if self.instance and self.instance.geometry:
+            point = self.instance.geometry
+            self.fields["latitude"].initial = point.y
+            self.fields["longitude"].initial = point.x
+
+    def clean(self):
+        cleaned = super().clean()
+
+        lat = cleaned.get("latitude")
+        lon = cleaned.get("longitude")
+
+        if lat is not None and lon is not None:
+            if not (-90 <= lat <= 90):
+                self.add_error("latitude", "Latitude must be between -90 and 90.")
+            if not (-180 <= lon <= 180):
+                self.add_error("longitude", "Longitude must be between -180 and 180.")
+
+            cleaned["geometry"] = Point(lon, lat)
+
+        return cleaned
+    
