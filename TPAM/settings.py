@@ -32,7 +32,7 @@ STATICFILES_FINDERS = [
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 # Required as from Django 4.2
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-GDAL_INSTALLED = True  # True for Development, False for Digital Ocean
+GDAL_INSTALLED = False  # True for Development, False for Digital Ocean
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
