@@ -1,0 +1,146 @@
+{% extends "mainmenu/base.html" %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<body>
+  <main>
+    <section class="py-3 text-center container">
+      <div class="row py-lg-3">
+        <div class="col-lg-6 col-md-8 mx-auto">
+          <h1 class="text-primary">Up and Down the Line</h1>
+
+          <p class="text-primary">The History and Geography of UK Railways and Beyond</p>
+        </div>
+      </div>
+    </section>
+
+
+    <div class="album py-4 bg-light">
+      <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+          {% for mydjangoapp in mydjangoapps.all  %}
+          <div class="col">
+            <div class="card shadow-sm">
+              <img src="{{ mydjangoapp.image.url }}">
+              <div class="card-body">
+                <p class="card-text">{{ mydjangoapp.summary }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><a href="{{ mydjangoapp.url }}">View</a></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+
+<div class="album py-4 bg-light">
+      <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+          
+          <div class="col">
+            <div class="card shadow-sm">
+              <img src="/media/media/HomeLocos.jpg">
+              <div class="card-body">
+                <p class="card-text">Rolling Stock</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><a href="{% url 'locos:loco_classes' %}">View</a></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!--col-->
+          
+          <div class="col">
+            <div class="card shadow-sm">
+              <img src="/media/media/HomePeople.jpg">
+              <div class="card-body">
+                <p class="card-text">People</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><a href="people">View</a></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!--col-->
+          
+          <div class="col">
+            <div class="card shadow-sm">
+              <img src="/media/media/HomeMaps.jpg">
+              <div class="card-body">
+                <p class="card-text">Locations, Routes &amp; Maps</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><a href="locations">View</a></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!--col-->
+          
+          <div class="col">
+            <div class="card shadow-sm">
+              <img src="/media/media/HomeCompanies.jpg">
+              <div class="card-body">
+                <p class="card-text">Companies</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><a href="companies">View</a></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!--col-->
+          
+          <div class="col">
+            <div class="card shadow-sm">
+              <img src="/media/media/HomeTimelines_TfvYK9H.jpg">
+              <div class="card-body">
+                <p class="card-text">Notes and References</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><a href="notes">View</a></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!--col-->
+          
+          <div class="col">
+            <div class="card shadow-sm">
+              <img src="/media/media/HomeLiveTrains.jpg">
+              <div class="card-body">
+                <p class="card-text">Live Train Times</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><a href="rtt">View</a></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!--col-->
+          
+        </div><!--row-->
+      </div><!--container-->
+    </div>
+
+  </main>
+
+  <footer class="text-muted py-5">
+    <div class="container">
+      This is a non-commercial website.  Live Trains pages are under development and information provided may be inaccurate. Test sample data is sourced via <a href="https:\\www.transportapi.com">TransportAPI.com</a> which in turn sources the data as referenced <a href="https:\\www.transportapi.com/credits">here</a>.
+      <p class="float-end mb-2">
+        <a href="#">Back to top</a>
+      </p>
+    </div>
+  </footer>
+</body>
+{% endblock %}
