@@ -206,7 +206,7 @@ def fetch_route_locations(route):
 
     sql = """
     SELECT DISTINCT ON (a."id") 
-        a."id", a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        a."id", a."wikiname", a."wikislug", a."name",
         ST_Y(ST_CENTROID(a.geometry)),
         ST_X(ST_CENTROID(a.geometry)),
         a."media_url"

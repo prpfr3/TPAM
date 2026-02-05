@@ -24,6 +24,7 @@ from django.contrib.contenttypes.models import ContentType
 route_content_type = ContentType.objects.get_for_model(Route)
 location_content_type = ContentType.objects.get_for_model(Location)
 
+
 def index(request):
     return render(request, "locations/index.html")
 
@@ -77,16 +78,15 @@ def locations(request):
     }
     return render(request, "locations/lists.html", context)
 
+
 def routes_timeline(request):
 
     route_events = (
-        LocationHistoricEvent.objects
-        .filter(content_type=route_content_type)
-        .select_related('event_type')
-        .prefetch_related('content_object')
-        .order_by('datefield')
+        LocationHistoricEvent.objects.filter(content_type=route_content_type)
+        .select_related("event_type")
+        .prefetch_related("content_object")
+        .order_by("datefield")
     )
-
 
     events_json = "[]"
     if route_events.exists():
@@ -95,29 +95,29 @@ def routes_timeline(request):
     print(events_json)
 
     return render(
-        request, 
-        "locations/routes_timeline.html", 
-        {"timeline_json": events_json}
+        request, "locations/routes_timeline.html", {"timeline_json": events_json}
     )
+
+
 def location(request, location_id):
     location = (
-            Location.objects.annotate(centroid=Centroid("geometry"))
-            .annotate(centroid_json=AsGeoJSON("centroid"))
-            .get(id=location_id)
-        )
+        Location.objects.annotate(centroid=Centroid("geometry"))
+        .annotate(centroid_json=AsGeoJSON("centroid"))
+        .get(id=location_id)
+    )
     categories = location.categories.all()
     posts = location.posts.all()
     references = location.references.all()
     location_events = (
-        LocationHistoricEvent.objects
-        .filter(object_id=location.id, content_type=location_content_type)
-        .select_related('event_type')
-        .order_by('datefield')
+        LocationHistoricEvent.objects.filter(
+            object_id=location.id, content_type=location_content_type
+        )
+        .select_related("event_type")
+        .order_by("datefield")
     )
- 
-    if location_events.exists():
-        events_json = events_timeline(location_events)
-    
+
+    events_json = events_timeline(location_events) if location_events else None
+
     x = y = None
     has_coords = False
 
@@ -136,13 +136,9 @@ def location(request, location_id):
     except (json.JSONDecodeError, TypeError, ValueError):
         pass
 
-    location_map_html = (
-        folium_map_location(y, x, None) if has_coords else None
-    )
+    location_map_html = folium_map_location(y, x, None) if has_coords else None
 
-    location_area_map_html = (
-        location_area(id=location_id) if has_coords else None
-    )
+    location_area_map_html = location_area(id=location_id) if has_coords else None
 
     if has_coords:
         nls_url = (
@@ -157,7 +153,6 @@ def location(request, location_id):
     else:
         nls_url = None
         nls_url_1944_1973 = None
-
 
     context = {
         "posts": posts,
@@ -184,9 +179,11 @@ def location_area(id):
     # -------------------------
     # Nearby locations (10 km)
     # -------------------------
-    nearby_locations_qs = Location.objects.annotate(
-        centroid=Centroid("geometry")
-    ).filter(centroid__distance_lte=(ref_point, D(m=10000))).exclude(id=location.id)
+    nearby_locations_qs = (
+        Location.objects.annotate(centroid=Centroid("geometry"))
+        .filter(centroid__distance_lte=(ref_point, D(m=10000)))
+        .exclude(id=location.id)
+    )
 
     def s(v):
         return v if v is not None else ""
@@ -281,25 +278,25 @@ def routes(request):
 
 
 def route(request, route_id):
-    route = Route.objects.get(id=route_id)
+    route = get_object_or_404(Route, id=route_id)
+    return redirect("locations:route_by_slug", slug=route.slug, permanent=True)
+
+
+def route_by_slug(request, slug):
+    route = Route.objects.get(slug=slug)
     references = route.references.all
     elrs = route.elrs.all
     posts = route.posts.all
 
-    events_json = None
-    # if route_events := LocationEvent.objects.filter(route_fk_id=route.id):
-    #     events_json = events_timeline(route_events)
-
-    # The optimized replacement
     route_events = (
-        LocationHistoricEvent.objects
-        .filter(object_id=route.id, content_type=route_content_type)
-        .select_related('event_type')  # <--- This is the magic "efficiency" boost
-        .order_by('datefield')
+        LocationHistoricEvent.objects.filter(
+            object_id=route.id, content_type=route_content_type
+        )
+        .select_related("event_type")
+        .order_by("datefield")
     )
 
-    if route_events.exists():
-        events_json = events_timeline(route_events)
+    events_json = events_timeline(route_events) if route_events.exists() else None
 
     context = {
         "route": route,
@@ -309,6 +306,7 @@ def route(request, route_id):
         "references": references,
         "timeline_json": events_json,
     }
+    print(context)
     return render(request, "locations/route.html", context)
 
 
@@ -367,17 +365,17 @@ def events_timeline(events_in):
     for event in events_in:
         if event.datefield:
             count += 1
-            
+
             # 1. Determine the name of the object (Route or Location)
             obj = event.content_object
             obj_name = "Unknown"
-            
+
             if isinstance(obj, Route):
                 obj_name = obj.name
             elif isinstance(obj, Location):
                 obj_name = obj.name
             # If you have ELRs in here too:
-            elif hasattr(obj, 'itemLabel'): 
+            elif hasattr(obj, "itemLabel"):
                 obj_name = obj.itemLabel
 
             # 2. Format the content for Vis-Timeline
@@ -390,11 +388,12 @@ def events_timeline(events_in):
                 "content": timeline_content,
                 "start": event.datefield.isoformat(),
                 "type": "point",  # Note: Vis-JS uses 'type', not 'event.type'
-                "title": f"Exact Date: {event.displaydate}", # Shows on hover
+                "title": f"Exact Date: {event.displaydate}",  # Shows on hover
             }
             events_out.append(event_dict)
 
     return json.dumps(events_out)
+
 
 def route_storymap(request, slug):
 
@@ -411,8 +410,6 @@ def route_storymap(request, slug):
                     a."id", 
                     a."wikiname", 
                     a."wikislug", 
-                    a."opened", 
-                    a."closed", 
                     a."name",
                     ST_Y(ST_CENTROID(a.geometry)) AS "st_y",
                     ST_X(ST_CENTROID(a.geometry)) AS "st_x",
@@ -468,6 +465,7 @@ def regional_map(request, geo_area):
     ST_Y(ST_CENTROID(geometry)), ST_X(ST_CENTROID(geometry))
     FROM public."locations_ukarea" WHERE "ITL121NM" = %s;"""
     ukarea_bounds = execute_sql(sql, [geo_area])
+
     west = ukarea_bounds[0]["st_xmin"]
     south = ukarea_bounds[0]["st_ymin"]
     east = ukarea_bounds[0]["st_xmax"]
@@ -492,7 +490,7 @@ def regional_map(request, geo_area):
 
     sql = """
     SELECT 
-        a."id", a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        a."id", a."wikiname", a."wikislug", a."name",
         ST_Y(ST_CENTROID(a.geometry)),
         ST_X(ST_CENTROID(a.geometry)),
         a."media_url"
@@ -579,7 +577,7 @@ def elr_map(request, elr_id):
         elrs = [elr.geojson]
 
         sql = """
-        SELECT a."id", a."wikiname", a."wikislug", a."opened", a."closed", a."name",
+        SELECT a."id", a."wikiname", a."wikislug", a."name",
         ST_Y(ST_CENTROID(a.geometry)), ST_X(ST_CENTROID(a.geometry)), a."media_url", b."itemAltLabel", b."itemLabel"
         FROM "locations_location" AS a
         INNER JOIN "locations_elrlocation" AS c ON a."id" = c."location_fk_id"
@@ -905,5 +903,3 @@ class Trackmap(TemplateView):
         m.add_to(figure)
         figure.render()
         return {"map": figure, "title": f"Map of file {file}"}
-
-

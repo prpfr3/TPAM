@@ -12,6 +12,7 @@ urlpatterns = [
     path("routes/", views.routes, name="routes"),
     path("routes_timeline/", views.routes_timeline, name="routes_timeline"),
     path("route/<int:route_id>/", views.route, name="route"),
+    path("route/<slug:slug>/", views.route_by_slug, name="route_by_slug"),
     path("route_storymap/<slug>/", views.route_storymap, name="route_storymap"),
     path("route_map/<slug>/", views.route_map, name="route_map"),
     path("route_timeline/<slug>/", views.route_timeline, name="route_timeline"),

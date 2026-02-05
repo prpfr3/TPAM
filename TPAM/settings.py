@@ -32,7 +32,7 @@ STATICFILES_FINDERS = [
 DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
 # Required as from Django 4.2
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-GDAL_INSTALLED = True  # True for Development, False for Digital Ocean
+
 # https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-INSTALLED_APPS
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -215,6 +215,7 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     except configparser.NoOptionError:
         print("Error: One of the keys not found in [Django] section of .env file")
 
+    GDAL_INSTALLED = False  # True for Development, False for Digital Ocean
     GDAL_LIBRARY_PATH = os.getenv("GDAL_LIBRARY_PATH", "/lib/libgdal.so")
     GEOS_LIBRARY_PATH = os.getenv(
         "GEOS_LIBRARY_PATH", "/lib/x86_64-linux-gnu/libgeos_c.so"
@@ -337,15 +338,13 @@ else:  # DEVELOPMENT SETTINGS
 
     ALLOWED_HOSTS = []
 
-    if GDAL_INSTALLED:
-        GDAL_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\gdal311.dll"
-        GEOS_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\geos_c.dll"
-        INSTALLED_APPS += [
-            "django.contrib.gis",
-        ]
-        engine = "django.contrib.gis.db.backends.postgis"
-    else:
-        engine = "django.db.backends.postgresql"
+    GDAL_INSTALLED = True  # True for Development, False for Digital Ocean
+    GDAL_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\gdal311.dll"
+    GEOS_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\geos_c.dll"
+    INSTALLED_APPS += [
+        "django.contrib.gis",
+    ]
+    engine = "django.contrib.gis.db.backends.postgis"
 
     db_pswd = config["MySQL"]["p"]
 
