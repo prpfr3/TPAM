@@ -20,7 +20,6 @@ cert.*
 *.userosscache
 *.sln.docstates
 *.sqlite3
-*.sqlite
 *.csv
 
 # Exclude media files
