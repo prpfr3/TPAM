@@ -215,7 +215,7 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     except configparser.NoOptionError:
         print("Error: One of the keys not found in [Django] section of .env file")
 
-    GDAL_INSTALLED = False  # True for Development, False for Digital Ocean
+    GDAL_INSTALLED = True  # True for Development, False for Digital Ocean
     GDAL_LIBRARY_PATH = os.getenv("GDAL_LIBRARY_PATH", "/lib/libgdal.so")
     GEOS_LIBRARY_PATH = os.getenv(
         "GEOS_LIBRARY_PATH", "/lib/x86_64-linux-gnu/libgeos_c.so"
