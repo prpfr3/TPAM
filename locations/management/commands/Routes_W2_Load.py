@@ -3,7 +3,7 @@ from django.core.management import BaseCommand
 from locations.models import Route, RouteCategory, RouteMap
 import os
 
-DATAIO_DIR = os.path.join("D:\\Data", "TPAM")
+DATAIO_DIR = os.path.join("C:\\Users\\paulf\\OneDrive\\Data", "TPAM")
 
 
 class Command(BaseCommand):
@@ -20,12 +20,13 @@ class Command(BaseCommand):
         route_category_created = 0
 
         with open(
-            os.path.join(DATAIO_DIR, "Routes_Manual_Additions.csv"), encoding="utf-8"
+            os.path.join(DATAIO_DIR, "Routes_Switzerland.csv"), encoding="utf-8"
         ) as file:
             for row in DictReader(file):
                 from urllib.parse import unquote
 
                 wikislug = unquote(row["wikislug"].encode("utf-8"))
+                wikislug = wikislug.replace("/wiki/","")
                 route_fk, route_created = Route.objects.get_or_create(
                     name=row["name"], wikipedia_slug=wikislug
                 )
@@ -35,7 +36,7 @@ class Command(BaseCommand):
                 # Get or create the routemap for the route and then add the routemap as a fk into the route table
                 if row["routemap"] != None:
                     wikipedia_routemap = unquote(row["routemap"].encode("utf-8"))
-                    wikipedia_routemap = wikipedia_routemap
+                    wikipedia_routemap = wikipedia_routemap.replace("/wiki/","")
                     routemap, routemap_created = RouteMap.objects.get_or_create(
                         name=wikipedia_routemap,
                     )

@@ -147,6 +147,86 @@ def storymap(request, slug):
 
     storymap_json = json.dumps(storymap_dict)
     return render(request, "storymaps/storymap.html", {"storymap_json": storymap_json})
+    # slides_payload = build_leaflet_storymap_payload(slideheader, slides)
+    # return render(
+    #     request,
+    #     "storymaps/newstorymap.html",
+    #     {"slides_payload": json.dumps(slides_payload)},
+    # )
+
+
+def convert_bng_to_wgs84(easting, northing):
+    """Convert British National Grid eastings/northings (EPSG:27700) to WGS84 lat/lon."""
+    if easting is None or northing is None:
+        return None, None
+    try:
+        from pyproj import Transformer
+
+        transformer = Transformer.from_crs("EPSG:27700", "EPSG:4326", always_xy=True)
+        lon, lat = transformer.transform(easting, northing)
+        return lat, lon
+    except Exception:
+        return None, None
+
+
+def build_leaflet_storymap_payload(slideheader, slides):
+    """Construct a Leaflet-friendly payload for the new storymap carousel."""
+    header_text = get_text_content(slideheader)
+    first_slide = {
+        "type": "overview",
+        "headline": header_text.get("headline"),
+        "text": header_text.get("text"),
+        "media_url": get_media_dict(slideheader).get("url"),
+        "media_caption": get_media_dict(slideheader).get("caption"),
+        "media_credit": get_media_dict(slideheader).get("credit"),
+        "lat": None,
+        "lon": None,
+        "zoom": None,
+    }
+
+    slide_payload = [first_slide]
+    bounds = [None, None, None, None]
+    for slide in slides:
+        text = get_text_content(slide)
+        media = get_media_dict(slide)
+        lat, lon = convert_bng_to_wgs84(slide.easting, slide.northing)
+        if lat is not None and lon is not None:
+            if bounds[0] is None or lat < bounds[0]:
+                bounds[0] = lat
+            if bounds[1] is None or lon < bounds[1]:
+                bounds[1] = lon
+            if bounds[2] is None or lat > bounds[2]:
+                bounds[2] = lat
+            if bounds[3] is None or lon > bounds[3]:
+                bounds[3] = lon
+
+        slide_payload.append(
+            {
+                "type": "location",
+                "headline": text.get("headline"),
+                "text": text.get("text"),
+                "media_url": media.get("url"),
+                "media_caption": media.get("caption"),
+                "media_credit": media.get("credit"),
+                "lat": lat,
+                "lon": lon,
+                "zoom": slide.zoom or 12,
+            }
+        )
+
+    bounds_payload = None
+    if bounds[0] is not None:
+        bounds_payload = [[bounds[0], bounds[1]], [bounds[2], bounds[3]]]
+
+    return {
+        "attribution": "© OpenStreetMap contributors",
+        "tiles": {
+            "url": settings.MAP_TILE_URL,
+            "attribution": settings.MAP_TILE_ATTRIBUTION,
+        },
+        "slides": slide_payload,
+        "bounds": bounds_payload,
+    }
 
 
 def timeline(request, slug):
@@ -180,3 +260,55 @@ def carousel(request, slug):
     )
 
     return render(request, "storymaps/carousel.html", {"slides": slides})
+
+
+def proxy_tile(request, z, x, y):
+    """
+    Proxy view for tile requests that adds proper User-Agent and Referer headers
+    to satisfy OpenStreetMap's tile usage policy.
+    """
+    import requests
+    from django.http import HttpResponse
+
+    # Construct the tile URL
+    tile_url = (
+        settings.MAP_TILE_URL.replace("{z}", str(z))
+        .replace("{x}", str(x))
+        .replace("{y}", str(y))
+        .replace("{s}", "a")
+    )
+
+    # Build proper headers for OSM compliance
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Referer": request.build_absolute_uri("/storymaps/"),
+        "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    }
+
+    try:
+        response = requests.get(tile_url, headers=headers, timeout=15)
+
+        if response.status_code == 200:
+            print(
+                f"Tile proxy success: {response.status_code}, content-type: {response.headers.get('content-type')}"
+            )
+            return HttpResponse(
+                response.content,
+                content_type=response.headers.get("content-type", "image/png"),
+                headers={
+                    "Cache-Control": "public, max-age=86400",  # Cache tiles for 24 hours
+                },
+            )
+        else:
+            print(
+                f"Tile proxy failed: {response.status_code}, response: {response.text[:200]}"
+            )
+            return HttpResponse(status=response.status_code)
+
+    except requests.exceptions.RequestException as e:
+        print(f"Tile proxy error: {e}")
+        return HttpResponse(status=500)

@@ -30,23 +30,13 @@
       <div class="alert alert-success" role="alert">No References Found for those Search Criteria</div>
     </div>
     {% else %}
-
       {% for reference in queryset %}
-      <li>
-          {{ reference.full_reference }}
-  
-          {% if reference.person_set.all %}
-          
-            People mentioned:-
-            {% for person in reference.person_set.all %}
-              {{ person.name }}
-            {% endfor %}
-          
+          <h3>{{ reference.full_reference }}</h3>   
+          {% if reference.description %}
+            {{reference.description|safe}}
           {% endif %}
-      </li>        
       {% endfor %}
       <br>
       {% include "mainmenu/pagination.html" with page=references %}
-
     {% endif %}
 {% endblock content %}

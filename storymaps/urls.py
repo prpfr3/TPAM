@@ -10,4 +10,5 @@ urlpatterns = [
     path("storymap/<slug:slug>/", views.storymap, name="storymap"),
     path("timeline/<slug:slug>/", views.timeline, name="timeline"),
     path("carousel/<slug:slug>/", views.carousel, name="carousel"),
+    path("proxy_tile/<int:z>/<int:x>/<int:y>/", views.proxy_tile, name="proxy_tile"),
 ]

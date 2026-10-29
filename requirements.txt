@@ -29,7 +29,6 @@ django-parler==2.3
 django-polymorphic==3.1.0
 django-sekizai==4.1.0; python_version >= '3.8'
 django-smart-selects==1.6.0; python_version >= '3.6'
-django-storages==1.14.2; python_version >= '3.7'
 django-tinymce==4.0.0; python_version >= '3.8'
 django-treebeard==4.7.1; python_version >= '3.8'
 djangocms-admin-style==3.3.1; python_version >= '3.7'
@@ -89,4 +88,3 @@ xyzservices==2024.4.0; python_version >= '3.8'
 netifaces
 gunicorn
 psycopg2-binary
-boto3

@@ -1,0 +1,145 @@
+<div class="container mt-4">
+  {% if slides_payload %}
+  <div class="storymap-shell">
+    <div id="storymap-leaflet" style="height: 400px;"></div>
+    <div class="storymap-slide-panel">
+      <div class="storymap-slide-controls">
+        <button id="prevSlide" type="button" class="btn btn-outline-secondary btn-sm">Previous</button>
+        <button id="nextSlide" type="button" class="btn btn-outline-secondary btn-sm">Next</button>
+      </div>
+      <div class="storymap-slide-list" id="storymapSlideList"></div>
+      <div class="storymap-slide-content" id="storymapSlideContent"></div>
+    </div>
+  </div>
+  {% else %}
+  <h4>No StoryMap available for this selection</h4>
+  {% endif %}
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script id="slides-data" type="application/json">{{ slides_payload|safe }}</script>
+{% if slides_payload %}
+<script>
+  var slidesData = JSON.parse(document.getElementById('slides-data').textContent);
+  var currentSlideIndex = 0;
+  var map = L.map('storymap-leaflet', { scrollWheelZoom: false });
+  var proxyMode = false;
+  var tileErrorCount = 0;
+
+  function getTileUrl(coords) {
+    var z = coords.z, x = coords.x, y = coords.y;
+    if (proxyMode) {
+      return '{% url "storymaps:proxy_tile" z=0 x=0 y=0 %}'.replace('/0/', '/' + z + '/').replace('/0/', '/' + x + '/').replace('/0/', '/' + y + '/');
+    }
+    return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'.replace('{z}', z).replace('{x}', x).replace('{y}', y).replace('{s}', 'a');
+  }
+
+  var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19,
+    subdomains: 'abc'
+  }).addTo(map);
+
+  tileLayer.on('tileerror', function () {
+    tileErrorCount++;
+    if (!proxyMode && tileErrorCount >= 3) {
+      proxyMode = true;
+      map.removeLayer(tileLayer);
+      tileLayer = L.tileLayer('{% url "storymaps:proxy_tile" z=0 x=0 y=0 %}'.replace('0', '{z}').replace('0', '{x}').replace('0', '{y}'), {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19,
+        subdomains: 'abc'
+      }).addTo(map);
+      map.invalidateSize();
+    }
+  });
+
+  var activeMarker = null;
+
+  function formatSlideButton(slide, index) {
+    var title = slide.headline || (slide.type === 'overview' ? 'Overview' : 'Slide ' + (index + 1));
+    return '<button type="button" class="storymap-slide-button" data-slide-index="' + index + '">' + title + '</button>';
+  }
+
+  function buildSlideList() {
+    var listContainer = document.getElementById('storymapSlideList');
+    slidesData.slides.forEach(function (slide, index) {
+      listContainer.insertAdjacentHTML('beforeend', formatSlideButton(slide, index));
+    });
+    listContainer.querySelectorAll('.storymap-slide-button').forEach(function (button) {
+      button.addEventListener('click', function () {
+        setSlide(parseInt(button.dataset.slideIndex, 10));
+      });
+    });
+  }
+
+  function setSlide(index) {
+    if (index < 0 || index >= slidesData.slides.length) {
+      return;
+    }
+    currentSlideIndex = index;
+    updateSlideUI();
+  }
+
+  function updateSlideUI() {
+    var slide = slidesData.slides[currentSlideIndex];
+    var content = document.getElementById('storymapSlideContent');
+    var title = slide.headline || (slide.type === 'overview' ? 'Overview' : 'Untitled slide');
+    var html = '<h2>' + title + '</h2>';
+    if (slide.text) {
+      html += '<div class="mb-3">' + slide.text + '</div>';
+    }
+    if (slide.media_url) {
+      html += '<img src="' + slide.media_url + '" alt="' + title + '" />';
+    }
+    if (slide.media_caption || slide.media_credit) {
+      html += '<p class="text-muted mb-0">';
+      if (slide.media_caption) {
+        html += '<strong>' + slide.media_caption + '</strong>';
+      }
+      if (slide.media_credit) {
+        html += '<br/>' + slide.media_credit;
+      }
+      html += '</p>';
+    }
+    content.innerHTML = html;
+    document.querySelectorAll('.storymap-slide-button').forEach(function (button) {
+      button.classList.toggle('active', parseInt(button.dataset.slideIndex, 10) === currentSlideIndex);
+    });
+    updateMapForSlide(slide);
+  }
+
+  function updateMapForSlide(slide) {
+    if (slide.lat && slide.lon) {
+      if (!activeMarker) {
+        activeMarker = L.marker([slide.lat, slide.lon]).addTo(map);
+      } else {
+        activeMarker.setLatLng([slide.lat, slide.lon]);
+      }
+      activeMarker.bindPopup(slide.headline || 'Location').openPopup();
+      map.setView([slide.lat, slide.lon], slide.zoom || 12);
+    } else if (slidesData.bounds) {
+      map.fitBounds(slidesData.bounds, { padding: [40, 40] });
+      if (activeMarker) {
+        map.removeLayer(activeMarker);
+        activeMarker = null;
+      }
+    } else {
+      map.setView([51.505, -0.09], 5);
+      if (activeMarker) {
+        map.removeLayer(activeMarker);
+        activeMarker = null;
+      }
+    }
+  }
+
+  buildSlideList();
+  document.getElementById('prevSlide').addEventListener('click', function () {
+    setSlide(currentSlideIndex - 1);
+  });
+  document.getElementById('nextSlide').addEventListener('click', function () {
+    setSlide(currentSlideIndex + 1);
+  });
+  setSlide(0);
+</script>
+{% endif %}

@@ -39,8 +39,7 @@ class ReferenceAdmin(admin.ModelAdmin):
     form = ReferenceAdminForm
 
     search_fields = ["full_reference", "image"]
-    list_display = ["type", "journal", "year", "issue", "pages", "title"]
-    # list_display = ["full_reference", "image"]
+    list_display = ["type", "journal", "year", "volume", "issue", "pages", "title"]
     list_filter = ["type", "journal"]
     formfield_overrides = {
         models.TextField: {"widget": TinyMCE()},

@@ -21,8 +21,7 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-# Optional, used in production for collectstatic
-
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -64,7 +63,6 @@ INSTALLED_APPS = [
     "notes",
     "people",
     "rtt",
-    "storages",
     "storymaps",
     "TPAM",
     "users",
@@ -141,9 +139,7 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Following theoretically not needed for production and/or AWS S3. Best to retain though.
-# STATIC_ROOT = os.path.join(BASE_DIR, "static")
-# STATIC_URL = "/static/"
+GDAL_INSTALLED = True
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
@@ -204,8 +200,6 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
         config.read(passwords_file)
         SECRET_KEY = config["Django"]["tpam_secret_key"]
         DATABASE_KEY = config["Django"]["database_key"]
-        AWS_ACCESS_KEY_ID = config["Django"]["aws_access_key_id"]
-        AWS_SECRET_ACCESS_KEY = config["Django"]["aws_secret_access_key"]
         OTAPI_APP_ID = config["opentransport"]["app_id"]
         OTAPI_API_KEY = config["opentransport"]["api_key"]
     except FileNotFoundError:
@@ -215,7 +209,6 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
     except configparser.NoOptionError:
         print("Error: One of the keys not found in [Django] section of .env file")
 
-    GDAL_INSTALLED = True  # True for Development, False for Digital Ocean
     GDAL_LIBRARY_PATH = os.getenv("GDAL_LIBRARY_PATH", "/lib/libgdal.so")
     GEOS_LIBRARY_PATH = os.getenv(
         "GEOS_LIBRARY_PATH", "/lib/x86_64-linux-gnu/libgeos_c.so"
@@ -249,21 +242,6 @@ if cwd == "/app" or cwd.startswith("/home"):  # PRODUCTION SETTINGS
 
     # Honor the 'X-Forwarded-Proto' header for request.is_secure().
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-    # AWS S3 settings
-    AWS_STORAGE_BUCKET_NAME = "django-tpam-paulf"
-    AWS_S3_REGION_NAME = "eu-west-2"  # e.g. us-east-2
-    AWS_DEFAULT_ACL = None
-
-    # Tell django-storages the domain to use to refer to static files.
-    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-
-    # specify the Django storage classes
-    STATIC_ROOT = BASE_DIR / "staticfiles"
-    STATICFILES_LOCATION = "staticfiles"  # The directory name in S3
-    STATICFILES_STORAGE = "custom_storages.StaticStorage"  # For AWS
-    MEDIAFILES_LOCATION = "media"
-    DEFAULT_FILE_STORAGE = "custom_storages.MediaStorage"
 
     LOGGING = {
         "version": 1,
@@ -338,7 +316,6 @@ else:  # DEVELOPMENT SETTINGS
 
     ALLOWED_HOSTS = []
 
-    GDAL_INSTALLED = True  # True for Development, False for Digital Ocean
     GDAL_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\gdal311.dll"
     GEOS_LIBRARY_PATH = r"C:\\OSGeo4W\\bin\\geos_c.dll"
     INSTALLED_APPS += [
@@ -362,3 +339,9 @@ else:  # DEVELOPMENT SETTINGS
             "PORT": "5432",
         }
     }
+
+    MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    MAP_TILE_ATTRIBUTION = "© OpenStreetMap contributors"
+    MAP_TILE_SUBDOMAINS = "abc"
+    MAP_TILE_PROVIDER = "osm"
+    MAP_TILE_API_KEY = None

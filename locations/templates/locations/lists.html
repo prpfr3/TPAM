@@ -41,7 +41,11 @@
           <div class="col-md-4">
             {% for object in col1 %}
               <div>
-                <a href="{% url url_name object.id %}" class="d-block text-truncate" style="max-width: 100%;">
+                {% if url_arg == "slug" %}
+                  <a href="{% url url_name object.slug %}" class="d-block text-truncate" style="max-width: 100%;">
+                {% else %}
+                  <a href="{% url url_name object.id %}" class="d-block text-truncate" style="max-width: 100%;">
+                {% endif %}
                   {{ object.display_name }}
                 </a>
               </div>
@@ -51,7 +55,11 @@
           <div class="col-md-4">
             {% for object in col2 %}
               <div>
-                <a href="{% url url_name object.id %}" class="d-block text-truncate" style="max-width: 100%;">
+                {% if url_arg == "slug" %}
+                  <a href="{% url url_name object.slug %}" class="d-block text-truncate" style="max-width: 100%;">
+                {% else %}
+                  <a href="{% url url_name object.id %}" class="d-block text-truncate" style="max-width: 100%;">
+                {% endif %}
                   {{ object.display_name }}
                 </a>
               </div>
@@ -61,7 +69,11 @@
           <div class="col-md-4">
             {% for object in col3 %}
               <div>
-                <a href="{% url url_name object.id %}" class="d-block text-truncate" style="max-width: 100%;">
+                {% if url_arg == "slug" %}
+                  <a href="{% url url_name object.slug %}" class="d-block text-truncate" style="max-width: 100%;">
+                {% else %}
+                  <a href="{% url url_name object.id %}" class="d-block text-truncate" style="max-width: 100%;">
+                {% endif %}
                   {{ object.display_name }}
                 </a>
               </div>

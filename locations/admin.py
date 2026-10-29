@@ -1,11 +1,13 @@
-from django.db import models
 from django import forms
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.gis.admin import GISModelAdmin
-from django.contrib.contenttypes.admin import GenericInlineModelAdmin
 from django.contrib.contenttypes.admin import GenericTabularInline
-from .forms import LocationAdminForm
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.gis.admin import GISModelAdmin
+from django.db import models
+from django.urls import reverse
+from django.utils.html import format_html
+from .forms import LocationAdminForm, NarrowTinyMCE
 from .models import *
 from utils.utils import custom_slugify
 from tinymce.widgets import TinyMCE
@@ -35,33 +37,6 @@ class LocationCategoryAdmin(admin.ModelAdmin):
     list_display = ["category"]
     ordering = ["category"]
     search_fields = ["category"]
-    
-class LocationHistoricEventInline(GenericTabularInline):
-    model = LocationHistoricEvent
-    extra = 1  # Makes one blank form appear for adding new inline events
-    classes = ["collapse"]  # Use 'classes' to allow collapsing if the history gets long
-    fields = ("event_type", "description", "displaydate", "datefield")
-    formfield_overrides = {
-        models.TextField: {"widget": forms.TextInput(attrs={"size": "60"})},
-    }
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "event_type":
-            # Sort first by category, then alphabetically by label
-            kwargs["queryset"] = EventType.objects.order_by("category", "code")
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        return form
-
-
-class HistoricEventInline(GenericTabularInline):
-    model = LocationHistoricEvent
-    extra = 1
-
-    # Define which fields to show in the row
-    fields = ("event_type", "datefield", "displaydate", "description")
 
 
 class ELRAdmin(admin.ModelAdmin):
@@ -117,6 +92,45 @@ class HeritageSiteAdmin(admin.ModelAdmin):
     }
 
 
+class LocationHistoricEventInlineForm(forms.ModelForm):
+    class Meta:
+        model = LocationHistoricEvent
+        fields = "__all__"
+        widgets = {
+            "description": NarrowTinyMCE(attrs={"class": "tinymce-editor"}),
+        }
+    
+    class Media:
+        js = (
+            'tinymce/tinymce.min.js',
+            'tinymce/jquery.tinymce.min.js',
+        )
+
+
+class LocationHistoricEventInline(GenericTabularInline):
+    model = LocationHistoricEvent
+    form = LocationHistoricEventInlineForm
+    extra = 1
+    classes = ["collapse"]
+
+    class Media:
+        js = (
+            'tinymce/tinymce.min.js',
+            'tinymce/jquery.tinymce.min.js',
+        ) + (
+            'js/tinymce_init.js',
+        )
+
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "event_type":
+            kwargs["queryset"] = EventType.objects.order_by("category", "code")
+        if db_field.name == "content_type":
+            kwargs["queryset"] = ContentType.objects.filter(
+                app_label="locations", model__in=["location", "route"]
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 class LocationAdmin(GISModelAdmin):
     form = LocationAdminForm
 
@@ -139,58 +153,6 @@ class LocationAdmin(GISModelAdmin):
         "categories",
     ]
 
-    """ The Purpose of fieldsets
-
-
-    Fieldsets serves three main organizational purposes:
-
-    Grouping: You can group related fields under a section header (e.g. in a "Relations" section).
-
-    Visual Hierarchy: It allows you to use the 'classes': ('collapse',) option to hide bulky data (like raw geometry or long notes) behind a clickable "Show" link.
-
-    Layout Control: You can display multiple fields on a single line by nesting them in a tuple, e.g., ("latitude", "longitude"),.
-
-    How to show "All Fields"
-    If your goal is to show every single field on the model without manually maintaining a list, you have two options:
-
-    1. Remove fieldsets entirely
-    If you delete the fieldsets block, Django defaults to showing every editable field in the order they are defined in your models.py.
-
-    2. Use fields instead
-    If you don't care about the headers ("Relations", etc.) but want to control the order or exclude just one or two items, use the fields attribute instead of fieldsets:
-    """
-    # fieldsets = (
-    #     (
-    #         None,
-    #         {
-    #             "fields": (
-    #                 "name",
-    #                 "slug",
-    #                 "wikiname",
-    #                 "wikislug",
-    #                 "osm_node",
-    #                 "latitude",
-    #                 "longitude",
-    #                 "opened",
-    #                 "closed",
-    #                 "geometry",
-    #                 "notes",
-    #             )
-    #         },
-    #     ),
-    #     (
-    #         "Relations",
-    #         {
-    #             "fields": (
-    #                 "posts",
-    #                 "references",
-    #                 "owner_operators",
-    #                 "categories",
-    #             )
-    #         },
-    #     ),
-    # )
-
     def get_readonly_fields(self, request, obj=None):
         return ["slug"] if obj else []
 
@@ -204,6 +166,44 @@ class LocationAdmin(GISModelAdmin):
                 obj.slug = custom_slugify(obj.name)
 
         super().save_model(request, obj, form, change)
+
+
+class RouteAdmin(admin.ModelAdmin):
+    list_display = ["name"]
+    list_filter = [
+        ("owneroperators", admin.RelatedOnlyFieldListFilter),
+    ]
+    inlines = [LocationHistoricEventInline]
+    search_fields = ["name"]
+    ordering = ["name"]
+    autocomplete_fields = [
+        "wikipedia_routemaps",
+        "elrs",
+        "references",
+        "owneroperators",
+        "posts",
+    ]
+
+    show_facets = admin.ShowFacets.ALWAYS
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        form_field = super().formfield_for_manytomany(db_field, request, **kwargs)
+        # This targets the 'size' attribute of the HTML select box
+        form_field.widget.attrs.update({"size": "2"})
+        return form_field
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "notes":
+            kwargs["widget"] = TinyMCE(attrs={"class": "tinymce-editor"})
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    class Media:
+        js = (
+            'tinymce/tinymce.min.js',
+            'tinymce/jquery.tinymce.min.js',
+        ) + (
+            'js/tinymce_init.js',
+        )
 
 
 class LocationCodeAdmin(admin.ModelAdmin):
@@ -238,55 +238,72 @@ class RouteGeoOsmhistoryAdmin(admin_class_for_geoclasses):
     verbose_name = "OSM History Rail Routes"
 
 
-class RouteAdmin(admin.ModelAdmin):
-    list_display = ["name"]
-    list_filter = [
-        ("owneroperators", admin.RelatedOnlyFieldListFilter),
-    ]
-    inlines = [LocationHistoricEventInline]
-    search_fields = ["name"]
-    ordering = ["name"]
-    formfield_overrides = {
-        models.TextField: {"widget": TinyMCE()},
-    }
-    autocomplete_fields = [
-        "wikipedia_routemaps",
-        "elrs",
-        "references",
-        "owneroperators",
-        "posts",
-    ]
-
-    show_facets = admin.ShowFacets.ALWAYS
-
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        form_field = super().formfield_for_manytomany(db_field, request, **kwargs)
-        # This targets the 'size' attribute of the HTML select box
-        form_field.widget.attrs.update({"size": "2"})
-        return form_field
-
-
 class RouteLocationAdmin(admin_class_for_geoclasses):
-    # list_display = ["routemap", "loc_no", "label", "get_location_fk_field"]
+
     list_display = [
         "routemap",
+        "linear_reference",
         "loc_no",
-        "label",
     ]
-    search_fields = ["routemap__name", "label"]
+    search_fields = ["routemap__name"]
     ordering = ["routemap", "loc_no"]
     raw_id_fields = ["routemap", "location_fk"]
 
-    def get_location_fk_field(self, obj):
-        if obj.location_fk:  # Check if location_fk is not None
-            return obj.location_fk.opened
-        else:
-            return None
+    # def loc_no_display(self, obj):
+    #     from .models import Location
+    #     try:
+    #         location = Location.objects.get(id=obj.location_fk)
+    #         return f"{obj.location_fk} – {location.name}"
+    #     except Location.DoesNotExist:
+    #         return str(obj.location_fk)
 
-    get_location_fk_field.short_description = (
-        "Opened"  # Optional: Customizing column header
-    )
+    # loc_no_display.admin_order_field = "loc_no_display"
+    # loc_no_display.short_description = "Location"
 
+
+
+class LocationHistoricEventAdmin(admin.ModelAdmin):
+    list_display = [
+        "content_type",
+        "related_object_link",
+        "event_type", 
+        "datefield", 
+        "displaydate", 
+        "description"
+    ]
+    list_filter = ["event_type", "content_type"]
+    search_fields = ["location__name", "description"]
+    ordering = ["location", "datefield"]
+
+    @admin.display(description="Related Object")
+    def related_object_link(self, obj):
+        if obj.content_object:
+            # Dynamically fetch the admin URL for the related object's model type
+            try:
+                url = reverse(
+                    f"admin:{obj.content_type.app_label}_{obj.content_type.model}_change",
+                    args=[obj.object_id]
+                )
+                return format_html('<a href="{}">{}</a>', url, obj.content_object)
+            except Exception:
+                # Fallback if the related model isn't registered in the admin
+                return str(obj.content_object)
+        return "-"
+    
+    def get_queryset(self, request):
+            queryset = super().get_queryset(request)
+            # Prefetches the generic foreign key objects in bulk
+            return queryset.prefetch_related('content_object')
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # Limit content_type choices in the admin form
+        if db_field.name == "content_type":
+            kwargs["queryset"] = ContentType.objects.filter(
+                app_label="locations", model__in=["location", "route"]
+            )
+        if db_field.name == "event_type":
+            kwargs["queryset"] = EventType.objects.order_by("category", "code")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 class RouteMapAdmin(admin.ModelAdmin):
     list_display = ["name"]
@@ -305,12 +322,12 @@ class VisitAdmin(admin.ModelAdmin):
 
 admin.site.register(ELR, ELRAdmin)
 admin.site.register(ELRLocation, ELRLocationAdmin)
-admin.site.register(HeritageSite, HeritageSiteAdmin)
 admin.site.register(EventType)
+admin.site.register(HeritageSite, HeritageSiteAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(LocationCategory, LocationCategoryAdmin)
 admin.site.register(LocationCode, LocationCodeAdmin)
-admin.site.register(LocationHistoricEvent)
+admin.site.register(LocationHistoricEvent, LocationHistoricEventAdmin)
 admin.site.register(Route, RouteAdmin)
 admin.site.register(RouteGeoClosed, RouteGeoClosedAdmin)
 admin.site.register(RouteGeoOsm, RouteGeoOsmAdmin)

@@ -10,7 +10,8 @@ requests_cache.install_cache(
     allowable_methods=("GET",),
 )
 
-def get_wikipedia_summary(url, delay=1.0):
+
+def get_wikipedia_summary(url, delay=0.25):
     """
     Fetch and cache the summary paragraph from a Wikipedia page.
     Returns a fallback message if not available.
@@ -25,7 +26,6 @@ def get_wikipedia_summary(url, delay=1.0):
     # Check if URL is cached
     cached = session.cache.contains(url)
     if not cached:
-        print(f"⌛ Waiting {delay:.1f}s before new request to {url} ...")
         time.sleep(delay)
 
     try:
@@ -35,10 +35,10 @@ def get_wikipedia_summary(url, delay=1.0):
         print(f"⚠️ Error fetching {url}: {e}")
         return "No further information available from TPAM or Wikipedia"
 
-    if getattr(response, "from_cache", False):
-        print(f"ℹ️ Loaded from cache: {url}")
-    else:
-        print(f"⬇️ Downloaded: {url}")
+    # if getattr(response, "from_cache", False):
+    #     print(f"ℹ️ Loaded from cache: {url}")
+    # else:
+    #     print(f"⬇️ Downloaded: {url}")
 
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -61,6 +61,8 @@ def get_wikipedia_summary(url, delay=1.0):
         return "No further information available from TPAM or Wikipedia"
 
     # Clean and fix internal links
-    summary_text = summary_text.replace('href="/wiki/', 'href="https://en.wikipedia.org/wiki/')
+    summary_text = summary_text.replace(
+        'href="/wiki/', 'href="https://en.wikipedia.org/wiki/'
+    )
 
     return f"<p>From Wikipedia:</p>{summary_text}"

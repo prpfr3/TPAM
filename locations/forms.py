@@ -121,6 +121,18 @@ class RouteSelectionForm(forms.ModelForm):
 
 
 
+class NarrowTinyMCE(TinyMCE):
+    """
+    Custom TinyMCE widget that renders the editor in a div constrained to 66% width.
+    Useful for inline forms where you want to prevent the editor from stretching too wide.
+    """
+    def render(self, name, value, attrs=None, renderer=None):
+        html = super().render(name, value, attrs, renderer)
+        # Wrap the editor in a div with width constraint
+        wrapper = f'<div style="width: 66%; max-width: 66%;">{html}</div>'
+        return mark_safe(wrapper)
+
+
 class LocationAdminForm(forms.ModelForm):
     latitude = forms.FloatField(required=False)
     longitude = forms.FloatField(required=False)

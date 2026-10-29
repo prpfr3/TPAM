@@ -1,18 +1,12 @@
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.utils.translation import gettext_lazy as _
 from tinymce.widgets import TinyMCE
-from .models import *
 
-
-class EmailPostForm(forms.Form):
-    name = forms.CharField(max_length=25)
-    email = forms.EmailField()
-    to = forms.EmailField()
-    comments = forms.CharField(required=False, widget=forms.Textarea)
-
-
-from django import forms
-from .models import Topic
+from .models import Topic, Post, Reference
+from locos.models import LocoClass
+from companies.models import Company
+from locations.models import Location, Route
 
 
 class PostFilterForm(forms.Form):
@@ -44,18 +38,6 @@ class PostForm(forms.ModelForm):
                     "class": "form-control",
                     "placeholder": "Auto-generated from title",
                 }
-            ),
-        }
-
-
-class ReferenceForm(forms.ModelForm):
-    class Meta:
-        model = Reference
-        fields = ["type", "full_reference"]
-        labels = {"type": "type", "full reference": "Reference"}
-        widgets = {
-            "description": TinyMCE(
-                attrs={"class": "form-control tinymce-editor", "cols": 80, "rows": 30}
             ),
         }
 
@@ -92,16 +74,6 @@ class ReferenceSelectionForm(forms.ModelForm):
         )
 
 
-from django import forms
-from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.contrib import admin
-
-from .models import Reference
-from locos.models import LocoClass
-from companies.models import Company
-from locations.models import Location, Route
-
-
 class ReferenceAdminForm(forms.ModelForm):
 
     lococlasses = forms.ModelMultipleChoiceField(
@@ -131,6 +103,11 @@ class ReferenceAdminForm(forms.ModelForm):
     class Meta:
         model = Reference
         fields = "__all__"
+        widgets = {
+            "description": TinyMCE(
+                attrs={"class": "form-control tinymce-editor", "cols": 80, "rows": 30}
+            ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -144,14 +121,26 @@ class ReferenceAdminForm(forms.ModelForm):
             self.fields["routes"].initial = self.instance.routes_references.all()
 
     def save(self, commit=True):
-        instance = super().save(commit)
+        # 1. Get the instance from the parent save method
+        instance = super().save(commit=False)
 
-        # Update the reverse ManyToMany relations
-        instance.lococlass_references.set(self.cleaned_data["lococlasses"])
-        instance.company_references.set(self.cleaned_data["companies"])
-        instance.locations_references.set(self.cleaned_data["locations"])
-        instance.routes_references.set(self.cleaned_data["routes"])
+        # 2. If we are committing, save the parent instance first to get an ID BEFORE setting M2M relationships
+        if commit:
+            instance.save()
+            # 3. Now that the instance has an ID, we can set M2M relationships
+            instance.lococlass_references.set(self.cleaned_data["lococlasses"])
+            instance.company_references.set(self.cleaned_data["companies"])
+            instance.locations_references.set(self.cleaned_data["locations"])
+            instance.routes_references.set(self.cleaned_data["routes"])
+        else:
+            # 4. If commit=False (common in Admin), Django Admin expects 
+            # a save_m2m() method to be added to the form.
+            def save_m2m():
+                instance.lococlass_references.set(self.cleaned_data["lococlasses"])
+                instance.company_references.set(self.cleaned_data["companies"])
+                instance.locations_references.set(self.cleaned_data["locations"])
+                instance.routes_references.set(self.cleaned_data["routes"])
+            
+            self.save_m2m = save_m2m
 
         return instance
-
-

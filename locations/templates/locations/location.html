@@ -23,7 +23,7 @@
         <ul class="nav nav-tabs" id="myTab" role="tablist">
 
           <li class="nav-item">
-            <a class="nav-link active text-primary bg-white" id="notes-tab" data-bs-toggle="tab" href="#notes" role="tab" aria-controls="notes" aria-selected="false">Location Details</a>
+            <a class="nav-link active text-primary bg-white" id="notes-tab" data-bs-toggle="tab" href="#main" role="tab" aria-controls="notes" aria-selected="false">Location Details</a>
           </li>
 
           {% if location.wikislug %}
@@ -43,13 +43,6 @@
               <a class="nav-link text-white bg-primary" href="{% url 'rtt:location' location.crscode %}">Real Time Train Movements</a>
             </li>
           {% endif %}
-
-          <!-- Removed in favour of table of events currently
-          {% if timeline_json %}
-            <li class="nav-item">
-              <a class="nav-link text-white bg-primary" id="timeline-tab" data-bs-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Timeline</a>
-            </li>
-          {% endif %} -->
           
           {% if references %}
             <li class="nav-item">
@@ -57,11 +50,6 @@
             </li>
           {% endif %}
 
-          {% if location_area_map %}
-            <li class="nav-item">
-              <a class="nav-link text-white bg-primary" id="location-area-map-tab" data-bs-toggle="tab" href="#location_area_map" role="tab" aria-controls="location_area_map" aria-selected="false">Location Area Map</a>
-            </li>
-          {% endif %}
           <!-- target = "_blank" often does not open a new tab, target="frameName" does.
            https://stackoverflow.com/questions/29444051/link-with-target-blank-does-not-open-in-new-tab-in-chrome-->
           {% if map %}
@@ -79,7 +67,7 @@
 
         <!-- Tab content -->
         <div class="tab-content" id="myTabContent">
-          <div class="tab-pane fade show active" id="notes" role="tabpanel" aria-labelledby="notes-tab">
+          <div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
             <table class="border-primary" width="99%" frame="box" id="depot">
             
               <tr>
@@ -98,15 +86,19 @@
                 {% if location.tiploccode %}
                   <tr><td width="35%"><strong>Tiploc Code:</strong></td><td>{{location.tiploccode }}</td></tr>
                 {% endif %}
+
                 {% if location.crscode %}
                   <tr><td width="35%"><strong>CRS code:</strong></td><td>{{location.crscode }}</td></tr>
                 {% endif %}
+                
                 {% if location.geometry %}
                   <tr><td width="35%"><strong>Longitude/Latitude:</strong></td><td>{{location.geometry.x|floatformat:4}} {{location.geometry.y|floatformat:4}}</td></tr>
                 {% endif %}
+                
                 {% if location.easting %}
                   <tr><td width="35%"><strong>Eastings/Northings:</strong></td><td>{{ location.easting|floatformat:0 }} {{ location.northing|floatformat:0 }}</td></tr>
                 {% endif %}
+                
                 <tr><td><strong>Key Dates:</strong></td><td>
                   {% for location_event in location_events %}
                     {{location_event.displaydate}}:  {{location_event.description}}<br>
@@ -134,6 +126,8 @@
               </div>
             {% endif %}
 
+            <img id="NLSLogo" src="https://maps.nls.uk/img/logo.svg" width="100" alt="National Library of Scotland" aria-label="National Library of Scotland main website" />
+
             <div class="container">
               <div class="d-flex justify-content-center">
                 <div class="folium-map-wrapper">
@@ -146,9 +140,6 @@
                   </div>
               </div>
             </div>
-
-
-
           </div>
 
           {% if location.wikislug %}
@@ -158,24 +149,6 @@
               </iframe>
             </div>
           {% endif %}
-
-          {% if location_area_map %}
-            <div class="tab-pane fade"
-                id="location_area_map"
-                role="tabpanel"
-                aria-labelledby="location-area-map-tab">
-
-              <div id="location-area-map-container"></div>
-
-              <script type="text/template" id="location-area-map-template">
-                {{ location_area_map|safe }}
-              </script>
-
-            </div>
-          {% endif %}
-
-
-
 
           {% if timeline_json %}
             <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
@@ -245,24 +218,6 @@
         initialActiveTabLink.classList.remove('text-white', 'bg-primary');
       }
     });
-
-
-document.addEventListener('shown.bs.tab', function (event) {
-  if (event.target.id === 'location-area-map-tab') {
-
-    const container = document.getElementById('location-area-map-container');
-    const template = document.getElementById('location-area-map-template');
-
-    if (container && template && !container.dataset.loaded) {
-      container.innerHTML = template.innerHTML;
-      container.dataset.loaded = "true";
-    }
-  }
-});
-
-
-
-
 </script>
 
 {% endblock %}

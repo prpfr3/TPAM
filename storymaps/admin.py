@@ -18,7 +18,7 @@ class SlideAdmin(admin.ModelAdmin):
 
 
 class TimelineSlidepackAdmin(admin.ModelAdmin):
-    # list_display = ['routemap', 'loc_no', 'label', 'location_fk']
+    # list_display = ['routemap', 'loc_no', 'location_fk']
     raw_id_fields = ("slideheader_fk",)
     autocomplete_fields = ["slide"]
     search_fields = ["slide__text_headline"]

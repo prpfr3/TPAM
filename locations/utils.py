@@ -1,10 +1,44 @@
-from .forms import *
+import folium
+import json
+import logging
+import osm2geojson
+import requests
+
+import concurrent.futures
+from django.utils import timezone
+
+from folium.plugins import FastMarkerCluster, MiniMap
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse, resolve
 from django.views import View
-
+from django.db import connection
+from django.conf import settings
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+from storymaps.views import get_wikipedia_summary
+from shapely.geometry import shape, mapping
+
+from .forms import *
+
+logger = logging.getLogger(__name__)
+
+# locations/converters.py
+
+class WikipediaSlugConverter:
+    # Accept:
+    # - ASCII letters, digits
+    # - underscores, hyphens
+    # - ampersands, parentheses, commas, periods
+    # - percent-encoded sequences (%XX)
+    # - unicode characters (via .+)
+    regex = r"[A-Za-z0-9_\-\&\(\)\.,%]+"
+
+    def to_python(self, value):
+        return value
+
+    def to_url(self, value):
+        return value
 
 
 def is_valid_yyyy_mm_dd(s):
@@ -53,8 +87,6 @@ class RegionSelectView(View):
 
 
 def osm_elr_fetch(elr, bbox):
-    import osm2geojson
-    import requests
 
     overpass_url = "http://overpass-api.de/api/interpreter"
 
@@ -92,51 +124,99 @@ def osm_elr_fetch(elr, bbox):
     # Convert OSM json to Geojson. Warning ! The osm2geojson utility is still under development
     return osm2geojson.json2geojson(data)
 
+def _fetch_wiki_summary(slug: str) -> str:
+    """Helper function to fetch Wikipedia summaries safely."""
+    url = f"https://en.wikipedia.org/wiki/{slug}"
+    try:
+        return get_wikipedia_summary(url)
+    except Exception as e:
+        logger.error("Failed to fetch Wikipedia summary for %s: %s", url, e)
+        return ""
 
-def generate_storymap(headline, text, locations):
-    import json
-    from storymaps.views import get_wikipedia_summary
+def generate_storymap(request, headline: str, text: str, locations: Optional[List[Dict[str, Any]]] = None) -> str:
+    """
+    Generates a JSON storymap dictionary from headline, text, and location data.
+    Uses ThreadPoolExecutor to fetch missing Wikipedia summaries in parallel.
+    """
+    if not locations:
+        locations = []
 
-    # Add the first slide to a dictionary list from the SlideHeader Object
-    header_slide = {
+    # 1. Pre-fetch Wikipedia summaries in parallel for locations missing notes
+    wiki_cache = {}
+    
+    # Use a set to deduplicate requests if multiple locations share the same wikislug
+    slugs_to_fetch = {
+        loc["wikislug"] for loc in locations 
+        if not loc.get("notes") and loc.get("wikislug")
+    }
+
+    if slugs_to_fetch:
+        # max_workers=5 prevents hammering the Wikipedia API and getting rate-limited
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            # Map futures to their respective slugs
+            future_to_slug = {
+                executor.submit(_fetch_wiki_summary, slug): slug 
+                for slug in slugs_to_fetch
+            }
+            
+            # Collect results as they complete
+            for future in concurrent.futures.as_completed(future_to_slug):
+                slug = future_to_slug[future]
+                wiki_cache[slug] = future.result()
+
+    # 2. Initialize the slides list with the header slide
+    slides = [{
         "location_line": "true",
         "type": "overview",
         "media": {"caption": "", "credit": "", "url": ""},
         "text": {"headline": headline, "text": text},
-    }
+    }]
 
-    slide_list = [header_slide]
+    # 3. Build the location slides declaratively
+    for loc in locations:
+        notes = loc.get("notes")
+        wikislug = loc.get("wikislug")
+        media_url = None
+        raw_url = loc.get("media_url")
+    
+        if raw_url:
+            if raw_url.startswith("http://") or raw_url.startswith("https://"):
+                media_url = raw_url
+            else:
+                # 1. Create the local path (e.g., "/media/uploads/image.jpg")
+                local_path = f"{settings.MEDIA_URL}{raw_url.lstrip('/')}"
+                
+                # print(f'{local_path=}')
+                # 2. Convert it to a fully qualified URL (e.g., "https://yoursite.com/media/uploads/image.jpg")
+                media_url = request.build_absolute_uri(local_path)
 
-    for location in locations:
+        # print(raw_url, media_url)
+        
+        # Resolve the text: Use notes if available, otherwise check our prefetched cache
+        slide_text = notes
+        if not slide_text and wikislug:
+            slide_text = wiki_cache.get(wikislug, "")
 
-        slide_dict = {
+        slides.append({
             "background": {"url": ""},
             "location": {
-                "lat": location.get("st_y"),
-                "lon": location.get("st_x"),
+                "lat": loc.get("st_y"),
+                "lon": loc.get("st_x"),
+                "notes": notes,
                 "zoom": "12",
             },
             "media": {
-                "caption": location.get("media_caption"),
-                "credit": location.get("media_credit"),
-                "url": location.get("media_url"),
+                "caption": loc.get("media_caption"),
+                "credit": loc.get("media_credit"),
+                "url": media_url,
             },
-        }
+            "text": {
+                "headline": loc.get("name") or None,
+                "text": slide_text or "",
+            }
+        })
 
-        wikislug = location.get("wikislug", "")
-        slide_dict["text"] = {}
-        slide_dict["text"]["headline"] = location.get("name", "") or None
-        slide_dict["text"]["text"] = location.get("notes") or None
-
-        if wikislug:
-            url = f"https://en.wikipedia.org/wiki/{wikislug}"
-            slide_dict["text"]["text"] = get_wikipedia_summary(url)
-        else:
-            slide_dict["text"]["text"] = ""
-
-        slide_list.append(slide_dict)
-
-    # Create a dictionary in the required JSON format, including the dictionary list of slides
+    # 4. Construct the final dictionary
     storymap_dict = {
         "storymap": {
             "attribution": "Wikipedia / OpenStreetMaps",
@@ -144,18 +224,21 @@ def generate_storymap(headline, text, locations):
             "call_to_action_text": "Up and Down the Line",
             "map_as_image": False,
             "map_subdomains": "",
-            # "map_type": "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
-            "map_type": "osm:standard",
-            "slides": slide_list,
+            "map_type": "osm:standard",# or "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
+            "slides": slides,
             "zoomify": False,
         }
     }
 
-    return json.dumps(storymap_dict)
-
+    # 5. Safely serialize to JSON
+    try:
+        return json.dumps(storymap_dict)
+    except (TypeError, ValueError) as e:
+        logger.error("Failed to serialize storymap to JSON: %s", e)
+        # Return a safe fallback rather than crashing the calling view
+        return json.dumps({"storymap": {"slides": []}})
 
 def execute_sql_nofieldnames(sql, parameters):
-    from django.db import connection
 
     try:
         with connection.cursor() as cursor:
@@ -169,7 +252,6 @@ def execute_sql_nofieldnames(sql, parameters):
 
 
 def execute_sql(sql, parameters):
-    from django.db import connection
 
     try:
         with connection.cursor() as cursor:
@@ -199,6 +281,8 @@ def format_tags_as_list(tags_dict):
 
 
 def fetch_route_locations(route):
+    """
+    """
     routemaps = route.wikipedia_routemaps.all()
 
     if not routemaps:
@@ -209,6 +293,7 @@ def fetch_route_locations(route):
         a."id", a."wikiname", a."wikislug", a."name",
         ST_Y(ST_CENTROID(a.geometry)),
         ST_X(ST_CENTROID(a.geometry)),
+        a."notes",
         a."media_url"
     FROM "locations_location" AS a
     INNER JOIN "locations_routelocation" AS b
@@ -225,92 +310,52 @@ def fetch_route_locations(route):
     return results or None  # Return all collected results or None if no results
 
 
-def routes_mapdata_extract(routes):
-    elrs = []
-    route_locations = []
 
-    for route in routes:
-        route_locations.extend(fetch_route_locations(route) or [])
-        elrs.extend(
-            elr.geojson
-            for elr in route.elrs.all()
-            if elr.geojson and elr.geojson.get("features")
-        )
-
-    return elrs or None, route_locations or None
-
-
-def folium_map_location(latitude, longitude, tooltip_text, height=600, width=1100):
-    import folium
-    from folium.plugins import MiniMap
-
-    m = folium.Map(
-        location=[latitude, longitude],
-        zoom_start=17,
-        prefer_canvas=True,
-        height=height,
-        width=width,
-        tiles="OpenStreetMap",  # base layer
-    )
-
-    # Create the NLS layer but don’t activate it yet
-    nls_layer = folium.TileLayer(
-        tiles="https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
-        attr='<a href="https://maps.nls.uk/">OS 25 1892–1914 maps – National Library of Scotland</a>',
-        name="NLS 25-inch (1892–1914)",
-        min_zoom=2,
-        max_zoom=19,
-        show=False,
-        overlay=True,
-        control=True,
-        opacity=0.7,
-    )
-
-    nls_layer.add_to(m)  # must come before LayerControl()
-
-    # Marker
-    folium.Marker([latitude, longitude], tooltip=tooltip_text).add_to(m)
-
-    # LayerControl must be added after *all* layers are defined
-    folium.LayerControl(collapsed=False).add_to(m)
-
-    # Optional: MiniMap
-    minimap = MiniMap()
-    m.add_child(minimap)
-
-    # Render
-    figure = folium.Figure()
-    m.add_to(figure)
-    figure.render()
-    return figure._repr_html_()
-
-
-def create_folium_map(elrs, locations, height=650, width=1100, timeline=False):
-    """
-    Create a Folium map with optional timeline support.
-
-    Args:
-        elrs: list of GeoJSONs for ELR lines.
-        locations: list of locations with st_x, st_y, name, media_url, opened, closed, wikislug.
-        height, width: map size.
-        timeline: bool, if True, create a timeline map.
-
-    Returns:
-        HTML string of the map.
-    """
-    import folium
-    from datetime import datetime
-    from folium.plugins import Timeline, TimelineSlider, MarkerCluster, MiniMap
-    from django.urls import reverse
-    from django.utils import timezone
+def create_folium_map(elrs, locations, base_location=None, height=650, width=1100, timeline=False):
 
     current_date = f"{timezone.now().date().isoformat()}T00:00:00Z"
     bounding_box = None
-    timeline_features = []
 
-    # -------------------------------
-    # Helper functions
-    # -------------------------------
+    m = folium.Map(
+        zoom_start=13,
+        location=[51.5072, -0.1276],
+        prefer_canvas=True,  # Draws markers on a single canvas instead of individual SVG elements
+        height=height,
+        width=width,
+        tiles=None,
+    )
+
+    # Base Tile Layers
+    folium.TileLayer("OpenStreetMap", name="OpenStreetMap", overlay=False).add_to(m)
+
+    # folium.TileLayer(
+    #     "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
+    #     attr="National Library of Scotland",
+    #     name="NLS 25inch",
+    #     overlay=True,
+    #     show=False,
+    # ).add_to(m)
+
+
+    # # OpenRailwayMap standard layer
+    # folium.TileLayer(
+    #     tiles="https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png",
+    #     attr=(
+    #         'Data <a href="https://www.openstreetmap.org/copyright">'
+    #         '&copy; OpenStreetMap contributors</a>, Style: '
+    #         '<a href="https://creativecommons.org/licenses/by-sa/2.0/">'
+    #         'CC-BY-SA 2.0</a> '
+    #         '<a href="https://www.openrailwaymap.org/">OpenRailwayMap</a>'
+    #     ),
+    #     name="OpenRailwayMap - Standard",
+    #     min_zoom=2,
+    #     max_zoom=19,
+    #     overlay=True,
+    #     show=True,
+    #     control=True
+    # ).add_to(m)
+
+
     def format_date(date_str, fmt="%d-%m-%Y"):
         if not date_str:
             return ""
@@ -318,6 +363,16 @@ def create_folium_map(elrs, locations, height=650, width=1100, timeline=False):
             return datetime.strptime(date_str, "%Y-%m-%d").strftime(fmt)
         except Exception:
             return ""
+
+    def extend_bounding_box(bbox, coords):
+        if bbox is None:
+            return [coords, coords]
+        (min_lat, min_lon), (max_lat, max_lon) = bbox
+        lat, lon = coords
+        return [
+            (min(min_lat, lat), min(min_lon, lon)),
+            (max(max_lat, lat), max(max_lon, lon)),
+        ]
 
     def timeline_dates(opened, closed, current_date=current_date):
         start = f"{opened}T00:00:00Z" if opened else None
@@ -330,7 +385,7 @@ def create_folium_map(elrs, locations, height=650, width=1100, timeline=False):
 
         if loc.get("wikislug"):
             try:
-                url = reverse("locations:location", args=[loc["id"]])
+                url = reverse("locations:location_by_slug", args=[loc["wikislug"]])
                 popup_name = f'<a href="{url}" target="_blank">{display_name}</a>'
             except Exception:
                 popup_name = display_name
@@ -342,191 +397,175 @@ def create_folium_map(elrs, locations, height=650, width=1100, timeline=False):
             if loc.get("media_url")
             else ""
         )
+
         opened_html = (
             f"<br>Opened {format_date(loc.get('opened'))}" if loc.get("opened") else ""
         )
         closed_html = (
             f"<br>Closed {format_date(loc.get('closed'))}" if loc.get("closed") else ""
         )
-        popup_html = f"<div style='font-size:20px'>{img_html}<span>{popup_name}{opened_html}{closed_html}</span></div>"
+        popup_html = f"<div style='font-size:20px'>{img_html}<span>{popup_name}{opened_html}{closed_html}</span><div style='width: 500px; max-height: 500px; overflow-y: auto; text-align: justify; line-height: 1.5; padding: 8px; word-wrap: break-word; white-space: normal;'>{loc.get('notes', '')}</div></div>"
 
-        # Return popup HTML, tooltip text, and timeline ISO dates
+        tooltip_html = (
+            f"<div style='width: 250px; max-height: 1000px; word-wrap: break-word; white-space: normal; font-size: 24px;'>"
+            f"<strong>{popup_name}</strong>"
+            f"<div style='margin-top: 4px;'>{loc.get('notes', '')}</div>"
+            f"</div>"
+        )
+
+        # Return popup HTML, formatted tooltip HTML, and timeline ISO dates
         start_date, end_date = timeline_dates(loc.get("opened"), loc.get("closed"))
-        return popup_html, display_name, start_date, end_date
 
-    def add_timeline(m, features):
-        locations_geojson = {"type": "FeatureCollection", "features": features}
-        style = """
-            background-color: white;
-            border: 1px solid black;
-            border-radius: 3px;
-            box-shadow: 3px;
-            font-size: 20px;
-            padding: 5px;
+        if not loc.get("opened"):
+            start_date = None
+        if not loc.get("closed"):
+            end_date = None
+
+        return popup_html, tooltip_html, display_name, start_date, end_date
+
+    def simplify_geojson_data(geojson_dict, tolerance=0.0005):
         """
-        tl = Timeline(
-            locations_geojson,
-            period="P1Y",
-            add_last_point=True,
-            auto_play=False,
-            loop=False,
-            max_speed=1,
-            loop_button=True,
-            date_options="YYYY-MM-DD",
-            time_slider_drag_update=True,
-            duration="P1M",
-            name="Timeline Layer",
-        )
+        Tolerance of 0.0005 is ~55 meters.
+        For rail lines, this usually cuts point count by 70-90%.
+        """
+        if "features" not in geojson_dict:
+            return geojson_dict
 
-        folium.GeoJsonPopup(
-            fields=["popup"], aliases=[""], localize=True, style=style
-        ).add_to(tl)
+        for feature in geojson_dict["features"]:
+            # Convert to Shapely object
+            # geom = shape(feature["geometry"])
+            # Simplify: preserve_topology=True keeps lines from self-intersecting
+            # simplified_geom = geom.simplify(tolerance, preserve_topology=True)
+            # Convert back to GeoJSON dict
+            # feature["geometry"] = mapping(simplified_geom)
 
-        folium.GeoJsonTooltip(
-            fields=["name"],
-            aliases=[""],
-            labels=True,
-            localize=True,
-            sticky=False,
-            style=style,
-        ).add_to(tl)
+            # OPTIMIZATION: Reduce the number of properties to just name and ref
+            props = feature.get("properties", {})
+            feature["properties"] = {
+                "name": props.get("name") or props.get("ref") or "Unknown",
+                "ref": props.get("ref", ""),
+            }
+        return geojson_dict
 
-        timeline_layer = folium.FeatureGroup(name="Timeline Layer", show=True)
-        tl.add_to(timeline_layer)
-        timeline_layer.add_to(m)
-        
-        TimelineSlider(
-            auto_play=False,
-            show_ticks=True,
-            date_options="YYYY",
-            enable_keyboard_controls=True,
-            playback_duration=30000,
-            show=False,
-        ).add_timelines(tl).add_to(m)
+    def truncate_coords(obj, precision=5):
+        """
+        Recursively round all coordinates in a GeoJSON-like dictionary.
+        """
+        if isinstance(obj, float):
+            return round(obj, precision)
+        elif isinstance(obj, dict):
+            return {k: truncate_coords(v, precision) for k, v in obj.items()}
+        elif isinstance(obj, (list, tuple)):
+            return [truncate_coords(x, precision) for x in obj]
+        return obj
 
-    def extend_bounding_box(bbox, coords):
-        if bbox is None:
-            return [coords, coords]
-        (min_lat, min_lon), (max_lat, max_lon) = bbox
-        lat, lon = coords
-        return [
-            (min(min_lat, lat), min(min_lon, lon)),
-            (max(max_lat, lat), max(max_lon, lon)),
-        ]
+    # from .utils_unused import load_elr_layer
+    # load_elr_layer(m)  # Load the pre-built ELR layer from cache and add to the map
 
-    # -------------------------------
-    # Base map and tiles
-    # -------------------------------
-    m = folium.Map(
-        zoom_start=13,
-        location=[51.5072, -0.1276],
-        prefer_canvas=True,
-        height=height,
-        width=width,
-        tiles=None,
-    )
-
-    folium.TileLayer("OpenStreetMap", name="OpenStreetMap", overlay=True).add_to(m)
-    folium.TileLayer(
-        "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
-        attr='<a href="https://maps.nls.uk/">OS 25 1892-1914 maps Reproduced with the permission of the National Library of Scotland</a>',
-        name="NLS 25inch",
-        min_zoom=2,
-        max_zoom=19,
-        overlay=True,
-        show=False,
-    ).add_to(m)
-
-    # -------------------------------
-    # Process ELRs
-    # -------------------------------
     if elrs:
+        all_features = []
+
         for elr in elrs:
-            for feature in elr.get("features", []):
-                props = feature.get("properties", {})
-                props.update(props.pop("tags", {}))
-                props.pop("nodes", None)
-                opened = props.get("opened")
-                closed = props.get("closed")
-                props["start"], props["end"] = timeline_dates(opened, closed)
-                props["name"] = props.get("name") or props.get("ref") or "No Name"
+            geojson_data = None
+            if isinstance(elr, dict):
+                if elr.get("features"):
+                    geojson_data = elr
+                elif isinstance(elr.get("geojson"), dict):
+                    geojson_data = elr["geojson"]
 
-            folium.GeoJson(
-                elr,
-                tooltip=folium.GeoJsonTooltip(fields=["name"], labels=False),
-                popup=folium.GeoJsonPopup(fields=["name"], labels=False),
-                style_function=lambda x: {
-                    "color": (
-                        "#78491c" if x["properties"].get("ref") == "NSM" else "#c94f1a"
-                    ),
-                    **(
-                        {"dashArray": "30 15"}
-                        if x["properties"].get("ref") == "NSM"
-                        else {}
-                    ),
-                },
-                highlight_function=lambda x: {"weight": 6},
-                name="Route",
-                smooth_factor=2,
-                show=True,
-            ).add_to(m)
-
-    # -------------------------------
-    # Process locations
-    # -------------------------------
-    if locations:
-        marker_cluster = (
-            None
-            if timeline
-            else MarkerCluster(name="Locations", show=True).add_to(m)
-        )
-        for loc in locations:
-            st_x, st_y = loc.get("st_x"), loc.get("st_y")
-            if st_x is None or st_y is None:
+            if not geojson_data:
                 continue
 
-            coords = (st_y, st_x)
+            try:
+                simplified = simplify_geojson_data(geojson_data, tolerance=0.00001) # tolerance not used in current implementation but kept for future use
+                final_data = truncate_coords(simplified, precision=6)
+                all_features.extend(final_data.get("features", []))
+            except Exception as e:
+                logger.error("Error processing ELR payload: %s", e, exc_info=True)
+
+        if all_features:
+            combined_geojson = {"type": "FeatureCollection", "features": all_features}
+
+            folium.GeoJson(
+                combined_geojson,
+                # The smoothing factor can be adjusted to control the level of simplification applied to the geometry. A higher value results in smoother lines, while a lower value retains more detail. That said on this code it appears to make no difference to the output so it is set to 1.0 for now.
+                smooth_factor=1.0,
+                style_function=lambda x: {
+                    "color": "#c94f1a",
+                    "weight": 3,
+                    "opacity": 0.7,
+                },
+                highlight_function=lambda x: {"weight": 6, "color": "yellow"},
+                name="Railway Network",
+            ).add_to(m)
+
+    if base_location and base_location.get("st_x") and base_location.get("st_y"):
+        base_coords = (base_location["st_y"], base_location["st_x"])
+        bounding_box = extend_bounding_box(bounding_box, base_coords)
+        popup_html, tooltip_html, _, _, _ = build_location_popup(base_location)
+
+        folium.Marker(
+            location=base_coords,
+            icon=folium.Icon(color="red", icon="info-sign"),
+            tooltip=folium.Tooltip(
+                tooltip_html,
+                sticky=False,
+                direction="right",
+            ),
+            popup=folium.Popup(popup_html, max_width=2650),
+        ).add_to(m)
+
+    if locations:
+        # 1. Build point_data with popup and tooltip included
+        point_data = []
+        for loc in locations:
+            if not loc.get("st_x"):
+                continue
+
+            coords = (loc["st_y"], loc["st_x"])
             bounding_box = extend_bounding_box(bounding_box, coords)
 
-            popup_html, tooltip_name, start_date, end_date = build_location_popup(loc)
+            popup_html, tooltip_html, _, start_date, end_date = build_location_popup(loc)
+            point_data.append(
+                [
+                    truncate_coords(loc["st_y"]),  # row[0] - lat
+                    truncate_coords(loc["st_x"]),  # row[1] - lng
+                    popup_html,  # row[2] - popup
+                    tooltip_html,  # row[3] - tooltip
+                ]
+            )
 
-            if not timeline:
-                folium.Marker(
-                    location=coords,
-                    popup=folium.Popup(popup_html, max_width=2650),
-                    tooltip=folium.Tooltip(tooltip_name),
-                ).add_to(marker_cluster)
+        # 2. Callback now reads popup/tooltip from row data
+        callback = """
+            function (row) {
+                var marker = L.circleMarker([row[0], row[1]], {
+                    radius: 6,
+                    fillColor: "#78491c",
+                    color: "white",
+                    weight: 1,
+                    fillOpacity: 0.8
+                });
 
-            if (
-                timeline
-                and is_valid_yyyy_mm_dd(loc.get("opened"))
-                and is_valid_yyyy_mm_dd(loc.get("closed"))
-            ):
-                timeline_features.append(
-                    {
-                        "type": "Feature",
-                        "geometry": {"type": "Point", "coordinates": [st_x, st_y]},
-                        "properties": {
-                            "name": tooltip_name,
-                            "wikislug": loc.get("wikislug"),
-                            "opened": loc.get("opened"),
-                            "closed": loc.get("closed"),
-                            "start": start_date,
-                            "end": end_date,
-                            "popup": popup_html,
-                        },
-                    }
-                )
+                if (row[2]) {
+                    marker.bindPopup(row[2], {maxWidth: 2650});
+                }
 
-    # -------------------------------
-    # Fit map and finalize
-    # -------------------------------
+                if (row[3]) {
+                marker.bindTooltip(row[3], {
+                    direction: 'right', // Opens to the right of the marker point
+                    offset: [15, -10],  // Adjusts position: [pixels right, pixels up]
+                    sticky: false       // Keeps it anchored relative to the marker, not mouse pointer
+                });
+            }
+
+                return marker;
+            };
+        """
+
+        m.add_child(FastMarkerCluster(point_data, name="Locations", callback=callback))
+
     if bounding_box:
         m.fit_bounds(bounding_box)
 
-    if timeline:
-        add_timeline(m, timeline_features)
-
     folium.LayerControl().add_to(m)
-    MiniMap(position="topright").add_to(m)
     return m._repr_html_()

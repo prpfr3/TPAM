@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.contrib.gis.db.models.functions import Centroid, AsGeoJSON
 from django.contrib.gis.measure import D
+from django.conf import settings
 
 from notes.models import Reference
 from mainmenu.views import pagination
@@ -24,6 +25,28 @@ from django.contrib.contenttypes.models import ContentType
 route_content_type = ContentType.objects.get_for_model(Route)
 location_content_type = ContentType.objects.get_for_model(Location)
 
+
+# CODE FOR ORM IN FOLIUM MAPS
+# import requests
+# from django.http import HttpResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from django.core.cache import cache
+
+# @csrf_exempt
+# def orm_tile(request, z, x, y):
+#     cache_key = f"orm_tile_{z}_{x}_{y}"
+#     cached = cache.get(cache_key)
+#     if cached:
+#         return HttpResponse(cached, content_type="image/png")
+
+#     url = f"https://a.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png"
+#     r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+
+#     if r.status_code == 200:
+#         cache.set(cache_key, r.content, timeout=60 * 60 * 24)  # cache for 24 hours
+#         return HttpResponse(r.content, content_type="image/png")
+
+#     return HttpResponse(status=r.status_code)
 
 def index(request):
     return render(request, "locations/index.html")
@@ -74,7 +97,8 @@ def locations(request):
         "errors": errors,
         "queryset": queryset,
         "object_type": "Locations",
-        "url_name": "locations:location",
+        "url_name": "locations:location_by_slug",
+        "url_arg": "slug",
     }
     return render(request, "locations/lists.html", context)
 
@@ -92,18 +116,21 @@ def routes_timeline(request):
     if route_events.exists():
         events_json = events_timeline(route_events)
 
-    print(events_json)
-
     return render(
         request, "locations/routes_timeline.html", {"timeline_json": events_json}
     )
 
 
 def location(request, location_id):
+    location = get_object_or_404(Location, id=location_id)
+    return redirect("locations:location_by_slug", slug=location.slug, permanent=True)
+
+
+def location_by_slug(request, slug):
     location = (
         Location.objects.annotate(centroid=Centroid("geometry"))
         .annotate(centroid_json=AsGeoJSON("centroid"))
-        .get(id=location_id)
+        .get(slug=slug)
     )
     categories = location.categories.all()
     posts = location.posts.all()
@@ -123,8 +150,8 @@ def location(request, location_id):
 
     try:
         if location.centroid_json:
-            c = json.loads(location.centroid_json)
-            coords = c.get("coordinates")
+            centroid = json.loads(location.centroid_json)
+            coords = centroid.get("coordinates")
 
             if (
                 isinstance(coords, (list, tuple))
@@ -136,11 +163,8 @@ def location(request, location_id):
     except (json.JSONDecodeError, TypeError, ValueError):
         pass
 
-    location_map_html = folium_map_location(y, x, None) if has_coords else None
-
-    location_area_map_html = location_area(id=location_id) if has_coords else None
-
     if has_coords:
+        location_map_html = build_location_map(id=location.id)
         nls_url = (
             f"https://maps.nls.uk/geo/explore/print/"
             f"#zoom=17&lat={y}&lon={x}&layers=168&b=5"
@@ -153,6 +177,7 @@ def location(request, location_id):
     else:
         nls_url = None
         nls_url_1944_1973 = None
+        location_map_html = None
 
     context = {
         "posts": posts,
@@ -161,7 +186,6 @@ def location(request, location_id):
         "timeline_json": events_json,
         "categories": categories,
         "map": location_map_html,
-        "location_area_map": location_area_map_html,
         "title": location.name,
         "nls_url": nls_url,
         "nls_url_1944_1973": nls_url_1944_1973,
@@ -171,13 +195,13 @@ def location(request, location_id):
     return render(request, "locations/location.html", context)
 
 
-def location_area(id):
+def build_location_map(id):
     location = get_object_or_404(Location, id=id)
 
     ref_point = location.geometry.centroid
 
     # -------------------------
-    # Nearby locations (10 km)
+    # Get Nearby locations (10 km)
     # -------------------------
     nearby_locations_qs = (
         Location.objects.annotate(centroid=Centroid("geometry"))
@@ -197,11 +221,25 @@ def location_area(id):
             "opened": s(getattr(loc, "opened", "")),
             "closed": s(getattr(loc, "closed", "")),
             "media_url": getattr(loc, "media_url", None),
+            "notes": s(getattr(loc, "notes", "")),
             "st_x": loc.centroid.x if getattr(loc, "centroid", None) else None,
             "st_y": loc.centroid.y if getattr(loc, "centroid", None) else None,
         }
         for loc in nearby_locations_qs
     ]
+
+    base_location = {
+        "id": location.id,
+        "name": s(location.name),
+        "wikiname": s(getattr(location, "wikiname", "")),
+        "wikislug": s(getattr(location, "wikislug", "")),
+        "opened": s(getattr(location, "opened", "")),
+        "closed": s(getattr(location, "closed", "")),
+        "media_url": getattr(location, "media_url", None),
+        "notes": s(getattr(location, "notes", "")),
+        "st_x": location.geometry.centroid.x if getattr(location, "geometry", None) else None,
+        "st_y": location.geometry.centroid.y if getattr(location, "geometry", None) else None,
+    }
 
     # -------------------------
     # Nearby ELRs by centroid (10 km)
@@ -216,17 +254,17 @@ def location_area(id):
         if isinstance(gj, dict) and gj.get("features"):
             nearby_elrs.append(gj)
 
-    # -------------------------
-    # No results?
-    # -------------------------
-    if not nearby_locations and not nearby_elrs:
-        return HttpResponse("<p>No nearby locations or routes found.</p>")
+    # print(nearby_elrs)
 
     # -------------------------
     # Build Folium map
     # -------------------------
-    html_map = create_folium_map(elrs=nearby_elrs, locations=nearby_locations)
-    return html_map
+    map_html = create_folium_map(
+        elrs=nearby_elrs,
+        locations=nearby_locations,
+        base_location=base_location,
+    )
+    return map_html
 
 
 def routes(request):
@@ -272,7 +310,8 @@ def routes(request):
         "errors": errors,
         "queryset": queryset,
         "object_type": "Routes",
-        "url_name": "locations:route",
+        "url_name": "locations:route_by_slug",
+        "url_arg": "slug",
     }
     return render(request, "locations/lists.html", context)
 
@@ -306,57 +345,46 @@ def route_by_slug(request, slug):
         "references": references,
         "timeline_json": events_json,
     }
-    print(context)
     return render(request, "locations/route.html", context)
 
-
 def route_map(request, slug):
-
-    route = Route.objects.get(slug=slug)
-    elr_list = route.elrs.all or None
-    routes = [route]
-
-    elrs, locations = routes_mapdata_extract(routes)
-    map_html = None
-    if locations or elrs:
-        map_html = create_folium_map(
-            elrs=elrs,
-            locations=locations,
-        )
-
-    context = {
-        "map": map_html,
-        "route": route,
-        "elrs": elr_list,
-        "title": route.name,
-    }
-
-    return render(request, "locations/folium_map.html", context)
-
+    return _route_map_common(request, slug, timeline=False)
 
 def route_timeline(request, slug):
+    return _route_map_common(request, slug, timeline=True)
+
+def _route_map_common(request, slug, timeline=False):
 
     route = Route.objects.get(slug=slug)
-    elrs = route.elrs.all
-    routes = [route]
 
-    elrs, locations = routes_mapdata_extract(routes)
+    locations = fetch_route_locations(route) or []
+
+    elrs = list(
+        route.elrs.values("id", "geojson")
+    )
+
+    elrs = [
+        elr
+        for elr in elrs
+        if elr["geojson"] and elr["geojson"].get("features")
+    ]
+
     map_html = None
     if locations or elrs:
         map_html = create_folium_map(
             elrs=elrs,
             locations=locations,
-            timeline=True,
+            timeline=timeline,
         )
 
     context = {
         "map": map_html,
         "route": route,
-        "elrs": elrs,
+        "elrs": route.elrs.all(),
         "title": route.name,
     }
-    return render(request, "locations/folium_map.html", context)
 
+    return render(request, "locations/folium_map.html", context)
 
 def events_timeline(events_in):
     events_out = []
@@ -411,6 +439,134 @@ def route_storymap(request, slug):
                     a."wikiname", 
                     a."wikislug", 
                     a."name",
+                    a."notes",
+                    ST_Y(ST_CENTROID(a.geometry)) AS "st_y",
+                    ST_X(ST_CENTROID(a.geometry)) AS "st_x",
+                    a."media_caption",
+                    a."media_credit",
+                    a."media_url",
+                    b."loc_no",
+                    ROW_NUMBER() OVER (PARTITION BY a."id" ORDER BY b."loc_no") AS rank
+                FROM "locations_location" AS a
+                INNER JOIN "locations_routelocation" AS b
+                    ON a."id" = b."location_fk_id"
+                WHERE a."geometry" IS NOT NULL 
+                    AND b."routemap_id" = %s
+            )
+            SELECT *
+            FROM ranked_locations
+            WHERE rank = 1
+            ORDER BY "loc_no";
+
+        """
+
+        if slide_locations := execute_sql(sql, [routemaps[0].id]):
+            header_title = route.name or None
+
+            # If the route has notes, show these on the first page, otherwise show the wikipage
+            if route.notes:
+                header_text = route.notes
+            elif route.wikipedia_slug is not None:
+                pagename = route.wikipedia_slug.replace("_", " ")
+                wikipage = urllib.parse.unquote(
+                    pagename, encoding="utf-8", errors="replace"
+                )
+                url = f"https://en.wikipedia.org/wiki/{wikipage}"
+                header_text = get_wikipedia_summary(url)
+
+            storymap_json = generate_storymap(request,
+                header_title, header_text, slide_locations
+            )
+
+    return render(request, "locations/storymap.html", {"storymap_json": storymap_json})
+
+    # def route_storymap(request, slug):
+
+    from storymaps.views import get_wikipedia_summary
+
+    storymap_json = None
+    route = Route.objects.get(slug=slug)
+
+    def build_leaflet_route_storymap_payload(
+        header_title, header_text, slide_locations
+    ):
+        header_text = header_text or None
+        first_slide = {
+            "type": "overview",
+            "headline": header_title,
+            "text": header_text,
+            "media_url": None,
+            "media_caption": None,
+            "media_credit": None,
+            "lat": None,
+            "lon": None,
+            "zoom": None,
+        }
+
+        slide_payload = [first_slide]
+        bounds = [None, None, None, None]
+
+        for location in slide_locations:
+            lat = location.get("st_y")
+            lon = location.get("st_x")
+            if lat is not None and lon is not None:
+                if bounds[0] is None or lat < bounds[0]:
+                    bounds[0] = lat
+                if bounds[1] is None or lon < bounds[1]:
+                    bounds[1] = lon
+                if bounds[2] is None or lat > bounds[2]:
+                    bounds[2] = lat
+                if bounds[3] is None or lon > bounds[3]:
+                    bounds[3] = lon
+
+            slide_text = ""
+            wikislug = location.get("wikislug")
+            if wikislug:
+                wikipage = urllib.parse.unquote(
+                    wikislug.replace("_", " "), encoding="utf-8", errors="replace"
+                )
+                slide_text = (
+                    get_wikipedia_summary(f"https://en.wikipedia.org/wiki/{wikipage}")
+                    or ""
+                )
+
+            slide_payload.append(
+                {
+                    "type": "location",
+                    "headline": location.get("name") or location.get("wikiname"),
+                    "text": slide_text,
+                    "media_url": location.get("media_url"),
+                    "media_caption": location.get("media_caption"),
+                    "media_credit": location.get("media_credit"),
+                    "lat": lat,
+                    "lon": lon,
+                    "zoom": 12,
+                }
+            )
+
+        bounds_payload = None
+        if bounds[0] is not None:
+            bounds_payload = [[bounds[0], bounds[1]], [bounds[2], bounds[3]]]
+
+        return {
+            "attribution": "© OpenStreetMap contributors",
+            "tiles": {
+                "url": settings.MAP_TILE_URL,
+                "attribution": settings.MAP_TILE_ATTRIBUTION,
+            },
+            "slides": slide_payload,
+            "bounds": bounds_payload,
+        }
+
+    if routemaps := route.wikipedia_routemaps.all():
+
+        sql = """
+            WITH ranked_locations AS (
+                SELECT 
+                    a."id", 
+                    a."wikiname", 
+                    a."wikislug", 
+                    a."name",
                     ST_Y(ST_CENTROID(a.geometry)) AS "st_y",
                     ST_X(ST_CENTROID(a.geometry)) AS "st_x",
                     a."media_url",
@@ -443,11 +599,19 @@ def route_storymap(request, slug):
                 url = f"https://en.wikipedia.org/wiki/{wikipage}"
                 header_text = get_wikipedia_summary(url)
 
-            storymap_json = generate_storymap(
+            slides_payload = build_leaflet_route_storymap_payload(
                 header_title, header_text, slide_locations
             )
+        else:
+            slides_payload = None
+    else:
+        slides_payload = None
 
-    return render(request, "locations/storymap.html", {"storymap_json": storymap_json})
+    return render(
+        request,
+        "storymaps/newstorymap.html",
+        {"slides_payload": json.dumps(slides_payload) if slides_payload else None},
+    )
 
 
 class ClosedLinesRegionSelectView(RegionSelectView):
@@ -474,20 +638,34 @@ def regional_map(request, geo_area):
     elrs = None
 
     sql = """
-    SELECT 
-        *
-    FROM
-        public."locations_elr" AS a 
-    JOIN
-        (SELECT ST_MakeEnvelope(%s, %s, %s, %s, 4326) AS geometry) AS b
-    ON
-        ST_Within(ST_GeomFromGeoJSON(a.geojson), b.geometry);
-    
+        SELECT *
+        FROM public."locations_elr"
+        WHERE ST_Intersects(
+            ST_GeomFromGeoJSON((geojson->'features'->0->'geometry')::text),
+            ST_MakeEnvelope(%s, %s, %s, %s, 4326)
+        )
     """
-    # elrs = execute_sql(sql, [west, south, east, north])
+
+    elrs = execute_sql(sql, [west, south, east, north])
+
+    for elr in elrs:
+        if isinstance(elr.get("geojson"), str):
+            elr["geojson"] = json.loads(elr["geojson"])
 
     locations = None
 
+    # Use this SQL query to get ALL locations, regardless of whether they are within the bounding box or not
+    sql = """
+    SELECT 
+        a."id", a."wikiname", a."wikislug", a."name",
+        ST_Y(ST_CENTROID(a.geometry)),
+        ST_X(ST_CENTROID(a.geometry)),
+        a."media_url"
+    FROM
+        public."locations_location" AS a
+    """
+
+    # Use this SQL query to get ONLY locations that are within the bounding box defined by the UK area
     sql = """
     SELECT 
         a."id", a."wikiname", a."wikislug", a."name",
@@ -504,8 +682,13 @@ def regional_map(request, geo_area):
 
     locations = execute_sql(sql, [west, south, east, north])
 
+    import timeit
+    start_time = timeit.default_timer()
     if locations or elrs:
         map_html = create_folium_map(elrs, locations, timeline=False)
+
+    end_time = timeit.default_timer()
+    print(f"Time taken to create map: {end_time - start_time}")
 
     title = f"UK {geo_area} Region"
     context = {"map": map_html, "title": title}
@@ -641,7 +824,6 @@ def elr_display_osmdata(request, elr_id):
             # for coordinate_pair in geojson_coordinate_list:
             extracted_coords_list.append(coordinate_pair)
 
-    # print(extracted_coords_list)
 
     # Haversine distance calculation function
     def distance(coord1, coord2):

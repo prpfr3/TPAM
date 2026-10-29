@@ -1,4 +1,3 @@
-from .forms import *
 from django.urls import path, register_converter
 
 # Custom path converter to allow ampersands in slugs

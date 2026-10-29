@@ -1,6 +1,25 @@
 ﻿{% extends "../mainmenu/base.html" %}
+{% load static %}
 
 {% block head %}
+<style>
+  body { font-family: sans-serif; padding: 20px; background-color: #fff; }
+  
+  /* 1. Container and Header Styles */
+  #routemap-container,
+  #routemap-iframe {
+      max-width: 1000px;
+      margin: 20px 0;
+      width: 100%;
+  }
+
+  #routemap-iframe {
+      min-height: 700px;
+      border: 1px solid #ddd;
+  }
+</style>
+
+
 {% endblock head %}
 
 {% block content %}
@@ -31,6 +50,12 @@
             </li>
           {% endif %}
 
+          {% if route.wikipedia_routemaps %}
+            <li class="nav-item">
+              <a class="nav-link text-white bg-primary" id="routemap-tab" data-bs-toggle="tab" href="#routemap" role="tab" aria-controls="routemap" aria-selected="false">Routemap</a>
+            </li>
+          {% endif %}
+
           {% if timeline_json %}
             <li class="nav-item">
               <a class="nav-link text-white bg-primary" id="timeline-tab" data-bs-toggle="tab" href="#timeline" role="tab" aria-controls="timeline" aria-selected="false">Timeline</a>
@@ -44,15 +69,10 @@
           {% endif %}
 
           {% if route.wikipedia_routemaps or elrs %}
-            <li class="nav-item text-white">
+            <li class="nav-item">
               <a class="nav-link text-white bg-primary" href="{% url 'locations:route_map' route.slug %}">Map</a>
+              <!--Alternatively, href="{% url 'locations:route_timeline' route.slug %}">Timeline Map </a>  -->
             </li>
-          {% endif %}
-
-          {% if route.wikipedia_routemaps or elrs %}
-            <!-- <li class="nav-item text-white">
-              <a class="nav-link text-white bg-primary" href="{% url 'locations:route_timeline' route.slug %}">Timeline Map</a>
-            </li> -->
           {% endif %}
         </ul>
 
@@ -109,43 +129,21 @@
             </div>
           {% endif %}
 
-          {% if route.wikipedia_routemaps or elrs %}
-            <div class="tab-pane fade" id="maps" role="tabpanel" aria-labelledby="maps-tab">
+          {% if route.wikipedia_routemaps %}
+            <div class="tab-pane fade" id="routemap" role="tabpanel" aria-labelledby="routemap-tab">
               <div class="container">
-                <div class="row justify-content-center align-items-center">
-                    <div class="col-12">
-                      {% if map %}
-                        {{map|safe}}
-                      <script script>{{map.script.render|safe}}</script>
-                      {% else %}
-                        <h4>No map available for this route</h4>
-                      {% endif %}
-                    </div>
+                <div class="mb-3">
+                  <label for="routemap-select" class="form-label">Choose route map</label>
+                  <select id="routemap-select" class="form-select" aria-label="Select route map">
+                    {% for routemap in route.wikipedia_routemaps.all %}
+                      <option value="{{ routemap.name|escape }}" {% if forloop.first %}selected{% endif %}>{{ routemap.name }}</option>
+                    {% endfor %}
+                  </select>
                 </div>
-            
-                {% if elrs %}
-                  <h2>Engineering Line References covered by this route:-</h2>
-                  {% for elr in elrs %}
-                    <h4>{{elr.itemAltLabel}} {{elr.itemLabel}}</h4>
-                  {% endfor %}
-                {% endif %}
+                <div id="loading-routemap">Fetching map from Wikipedia...</div>
+                <iframe id="routemap-iframe" title="Wikipedia route map"></iframe>
+              </div>
             </div>
-          {% endif %}
-
-          {% if route.wikipedia_routemaps or elrs %}
-            <!-- <div class="tab-pane fade" id="timeline-map" role="tabpanel" aria-labelledby="timeline-map">
-              <div class="container">
-                <div class="row justify-content-center align-items-center">
-                    <div class="col-12">
-                      {% if map %}
-                        {{map|safe}}
-                      <script script>{{map.script.render|safe}}</script>
-                      {% else %}
-                        <h4>No map available for this route</h4>
-                      {% endif %}
-                    </div>
-                </div>
-            </div> -->
           {% endif %}
         </div>
       </div>
@@ -176,6 +174,40 @@
       initialActiveTabLink.classList.add('text-primary', 'bg-white');
       initialActiveTabLink.classList.remove('text-white', 'bg-primary');
     }
+  });
+</script>
+
+<script type="module">
+  import { loadWikipediaRouteMap } from "{% static 'js/wikipedia_routemap.js' %}";
+
+  document.addEventListener('DOMContentLoaded', function () {
+      const select = document.getElementById('routemap-select');
+      const containerId = 'routemap-iframe';
+      const loadingId = 'loading-routemap';
+
+      function loadSelectedRouteMap() {
+          if (!select) return;
+          const templateName = select.value;
+          if (!templateName) return;
+
+          const loadingElement = document.getElementById(loadingId);
+          if (loadingElement) {
+              loadingElement.innerText = 'Fetching map from Wikipedia...';
+              loadingElement.style.display = '';
+          }
+
+          loadWikipediaRouteMap({
+              templateName,
+              containerId,
+              loadingId
+          });
+      }
+
+      if (select) {
+          select.addEventListener('change', loadSelectedRouteMap);
+      }
+
+      loadSelectedRouteMap();
   });
 </script>
 

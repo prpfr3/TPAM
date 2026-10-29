@@ -1,5 +1,4 @@
 {
-    "python.defaultInterpreterPath": "C:\\Users\\paulf\\.virtualenvs\\TPAM-iPgFVTU9\\Scripts\\python.exe",
     "python.terminal.activateEnvInCurrentTerminal": true,
 
 
@@ -19,7 +18,5 @@
     "liveSassCompile.settings.autoprefix": [
         "> 1%",
         "last 2 versions"
-    ]
-
-
+    ],
 }
