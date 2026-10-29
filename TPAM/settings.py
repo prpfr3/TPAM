@@ -140,6 +140,11 @@ USE_L10N = True
 USE_TZ = True
 
 GDAL_INSTALLED = True
+MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+MAP_TILE_ATTRIBUTION = "© OpenStreetMap contributors"
+MAP_TILE_SUBDOMAINS = "abc"
+MAP_TILE_PROVIDER = "osm"
+MAP_TILE_API_KEY = None
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
@@ -340,8 +345,4 @@ else:  # DEVELOPMENT SETTINGS
         }
     }
 
-    MAP_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    MAP_TILE_ATTRIBUTION = "© OpenStreetMap contributors"
-    MAP_TILE_SUBDOMAINS = "abc"
-    MAP_TILE_PROVIDER = "osm"
-    MAP_TILE_API_KEY = None
+
