@@ -216,6 +216,10 @@ def generate_storymap(request, headline: str, text: str, locations: Optional[Lis
             }
         })
 
+    tile_url = request.build_absolute_uri(
+        reverse("storymaps:proxy_tile", args=(0, 0, 0))
+    ).replace("/0/0/0/", "/{z}/{x}/{y}/")
+
     # 4. Construct the final dictionary
     storymap_dict = {
         "storymap": {
@@ -224,7 +228,7 @@ def generate_storymap(request, headline: str, text: str, locations: Optional[Lis
             "call_to_action_text": "Up and Down the Line",
             "map_as_image": False,
             "map_subdomains": "",
-            "map_type": "osm:standard",# or "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
+            "map_type": tile_url,
             "slides": slides,
             "zoomify": False,
         }
