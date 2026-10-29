@@ -278,10 +278,10 @@ def proxy_tile(request, z, x, y):
         .replace("{s}", "a")
     )
 
-    # Build proper headers for OSM compliance
+    # Identify the application and provide a referrer for OSM tile requests.
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Referer": request.build_absolute_uri("/storymaps/"),
+        "User-Agent": "TPAM/1.0 (+https://github.com/prpfr3/TPAM)",
+        "Referer": request.build_absolute_uri("/"),
         "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
         "Accept-Encoding": "gzip, deflate, br",

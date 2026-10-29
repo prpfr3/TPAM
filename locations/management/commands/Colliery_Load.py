@@ -4,7 +4,6 @@ from locations.models import Location, LocationCategory
 
 input_filename = "C:\\Users\\paulf\\OneDrive\\Data\\TPAM\\Somerset_Quarries.csv"
 
-@continue explain this function
 def build_geometry(latitude, longitude, fallback=""):
     lat = (latitude or "").strip()
     lon = (longitude or "").strip()

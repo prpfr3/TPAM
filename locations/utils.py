@@ -325,8 +325,16 @@ def create_folium_map(elrs, locations, base_location=None, height=650, width=110
         tiles=None,
     )
 
-    # Base Tile Layers
-    folium.TileLayer("OpenStreetMap", name="OpenStreetMap", overlay=False).add_to(m)
+    # Route tile requests through the server so OSM receives the required headers.
+    tile_url = reverse("storymaps:proxy_tile", args=(0, 0, 0)).replace(
+        "/0/0/0/", "/{z}/{x}/{y}/"
+    )
+    folium.TileLayer(
+        tiles=tile_url,
+        attr=settings.MAP_TILE_ATTRIBUTION,
+        name="OpenStreetMap",
+        overlay=False,
+    ).add_to(m)
 
     # folium.TileLayer(
     #     "https://mapseries-tilesets.s3.amazonaws.com/25_inch/yorkshire/{z}/{x}/{y}.png",
