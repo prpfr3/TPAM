@@ -23,8 +23,8 @@ cert.*
 *.sqlite
 *.csv
 
-# Exclude media files
-*.jpg
+# Exclude media files (include for now)
+# *.jpg
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
