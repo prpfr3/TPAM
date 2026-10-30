@@ -293,9 +293,9 @@ def proxy_tile(request, z, x, y):
         response = requests.get(tile_url, headers=headers, timeout=15)
 
         if response.status_code == 200:
-            print(
-                f"Tile proxy success: {response.status_code}, content-type: {response.headers.get('content-type')}"
-            )
+            # print(
+            #     f"Tile proxy success: {response.status_code}, content-type: {response.headers.get('content-type')}"
+            # )
             return HttpResponse(
                 response.content,
                 content_type=response.headers.get("content-type", "image/png"),
@@ -304,9 +304,9 @@ def proxy_tile(request, z, x, y):
                 },
             )
         else:
-            print(
-                f"Tile proxy failed: {response.status_code}, response: {response.text[:200]}"
-            )
+            # print(
+            #     f"Tile proxy failed: {response.status_code}, response: {response.text[:200]}"
+            # )
             return HttpResponse(status=response.status_code)
 
     except requests.exceptions.RequestException as e:
